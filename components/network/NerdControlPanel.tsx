@@ -10,6 +10,10 @@ interface NerdControlPanelProps {
   scanProgress: number;
   actions: NetworkAction[];
   settings: NetworkSettings | null;
+  onOpenDevices?: () => void;
+  onOpenQueue?: () => void;
+  onOpenSecurity?: () => void;
+  onOpenScan?: () => void;
 }
 
 export function NerdControlPanel({
@@ -19,6 +23,10 @@ export function NerdControlPanel({
   scanProgress,
   actions,
   settings,
+  onOpenDevices,
+  onOpenQueue,
+  onOpenSecurity,
+  onOpenScan,
 }: NerdControlPanelProps) {
   const onlineDevices = devices.filter((d) => d.status === "online").length;
   const flaggedDevices = devices.filter((d) => d.trustLevel === "new" || d.trustLevel === "watch").length;
@@ -58,6 +66,7 @@ export function NerdControlPanel({
             value={isSimulated ? String(devices.length) : `${onlineDevices}/${devices.length}`}
             color="#00f0ff"
             detail={isSimulated ? "NOT A LIVE COUNT" : networkStatus?.networkName ?? "NETWORK UNKNOWN"}
+            onClick={onOpenDevices}
           />
 
           <div className="flex flex-col items-center justify-between">
@@ -120,17 +129,23 @@ export function NerdControlPanel({
               value={String(flaggedDevices)}
               color={flaggedDevices > 0 ? "#ff7a00" : "#39ff14"}
               detail={`${networkStatus?.unknownDevices ?? 0} UNKNOWN`}
+              onClick={onOpenSecurity}
             />
             <MetricCard
               label="QUEUED ACTIONS"
               value={String(queuedActions)}
               color={queuedActions > 0 ? "#b829ff" : "#00f0ff"}
               detail={adapterMode}
+              onClick={onOpenQueue}
             />
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between rounded-lg border border-gray-700/50 bg-black/40 px-3 py-1.5">
+        <button
+          type="button"
+          onClick={onOpenScan}
+          className="mt-3 flex w-full items-center justify-between rounded-lg border border-gray-700/50 bg-black/40 px-3 py-1.5 text-left"
+        >
           <span className="font-mono text-[8px] font-bold uppercase tracking-wider text-gray-500 sm:text-[9px]">
             ADAPTER STATUS
           </span>
@@ -144,9 +159,9 @@ export function NerdControlPanel({
             {adapterMode} {"//"} {networkStatus?.scanState.toUpperCase() ?? "INITIALIZING"}
           </span>
           <span className="font-mono text-[8px] uppercase tracking-wider text-gray-500">
-            CONNECTED
+            OPEN SCAN
           </span>
-        </div>
+        </button>
       </div>
     </div>
   );
@@ -157,14 +172,16 @@ function MetricCard({
   value,
   color,
   detail,
+  onClick,
 }: {
   label: string;
   value: string;
   color: string;
   detail: string;
+  onClick?: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-gray-700/50 bg-black/40 p-2">
+    <button type="button" onClick={onClick} className="w-full rounded-lg border border-gray-700/50 bg-black/40 p-2 text-left transition-transform duration-150 hover:scale-[1.01]">
       <h3 className="mb-2 font-mono text-[9px] font-bold tracking-wider text-cyan-400 sm:text-[10px]">
         {label}
       </h3>
@@ -177,6 +194,6 @@ function MetricCard({
       <p className="mt-1 truncate font-mono text-[7px] uppercase tracking-wider text-gray-500 sm:text-[8px]">
         {detail}
       </p>
-    </div>
+    </button>
   );
 }

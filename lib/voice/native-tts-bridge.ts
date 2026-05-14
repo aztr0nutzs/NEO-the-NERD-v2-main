@@ -55,7 +55,7 @@ export async function speakWithAndroidNativeTts(options: {
   profile: VoiceProfile
   params: VoiceParams
 }): Promise<NativeTtsSpeakResult> {
-  const availability = await getAndroidNativeTtsAvailability()
+  const availability = await waitForAndroidNativeTtsReady()
   if (!availability.available || !availability.ready) {
     return { ok: false, message: availability.message ?? "Android TTS engine not ready." }
   }
@@ -66,6 +66,20 @@ export async function speakWithAndroidNativeTts(options: {
     pitch: speech.pitch,
     volume: speech.volume,
   })
+}
+
+async function waitForAndroidNativeTtsReady(
+  attempts = 6,
+  intervalMs = 250,
+): Promise<NativeTtsAvailability> {
+  let last: NativeTtsAvailability = await getAndroidNativeTtsAvailability()
+  if (last.available && last.ready) return last
+  for (let i = 1; i < attempts; i += 1) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs))
+    last = await getAndroidNativeTtsAvailability()
+    if (last.available && last.ready) return last
+  }
+  return last
 }
 
 export async function stopAndroidNativeTts(): Promise<boolean> {
