@@ -1,4 +1,5 @@
 import type { AssistantIntent, AssistantPersonalityProfile } from "./types"
+import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
 
 const DEFAULT_REACTION_BIAS: Partial<Record<AssistantIntent, AssistantPersonalityProfile["reactionBias"][AssistantIntent]>> = {
   greet: "calm",
@@ -11,7 +12,7 @@ const DEFAULT_REACTION_BIAS: Partial<Record<AssistantIntent, AssistantPersonalit
   gratitude: "calm",
 }
 
-export const ASSISTANT_PERSONALITY_PROFILES: AssistantPersonalityProfile[] = [
+const BASE_ASSISTANT_PERSONALITY_PROFILES = [
   {
     id: "genius",
     name: "Helpful Genius",
@@ -216,11 +217,37 @@ export const ASSISTANT_PERSONALITY_PROFILES: AssistantPersonalityProfile[] = [
     rhythm: "tactical",
     followUpStyle: "offer-options",
   },
-]
+] satisfies Array<
+  Omit<
+    AssistantPersonalityProfile,
+    "tone" | "responseStyle" | "verbosity" | "humor" | "aggressiveness" | "voiceId"
+  >
+>
+
+export const ASSISTANT_PERSONALITY_PROFILES: AssistantPersonalityProfile[] =
+  BASE_ASSISTANT_PERSONALITY_PROFILES.map(withBehavior)
 
 export function getAssistantPersonalityProfile(id: string): AssistantPersonalityProfile {
   return (
     ASSISTANT_PERSONALITY_PROFILES.find((profile) => profile.id === id) ??
     ASSISTANT_PERSONALITY_PROFILES[0]
   )
+}
+
+function withBehavior(
+  profile: Omit<
+    AssistantPersonalityProfile,
+    "tone" | "responseStyle" | "verbosity" | "humor" | "aggressiveness" | "voiceId"
+  >,
+): AssistantPersonalityProfile {
+  const behavior = getPersonalityProfile(profile.id)
+  return {
+    ...profile,
+    tone: behavior.tone,
+    responseStyle: behavior.responseStyle,
+    verbosity: behavior.verbosity,
+    humor: behavior.humor,
+    aggressiveness: behavior.aggressiveness,
+    voiceId: behavior.voiceId,
+  }
 }

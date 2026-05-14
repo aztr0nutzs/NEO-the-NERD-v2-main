@@ -32,10 +32,11 @@ export function buildAssistantProviderInstructions(context: AssistantContextSnap
     "Use safe prank guardrails: harmless, reversible, consent-respecting only.",
     `Conversation mode: ${context.conversationMode}. ${MODE_INSTRUCTIONS[context.conversationMode]}`,
     `Personality: ${profile.name}. ${profile.description}`,
+    `Behavior engine: tone=${profile.tone}, responseStyle=${profile.responseStyle}, verbosity=${profile.verbosity}, humor=${profile.humor}, aggressiveness=${profile.aggressiveness}, linkedVoice=${profile.voiceId}.`,
     `Tone keywords: ${profile.toneKeywords.join(", ")}.`,
     `Behavior sliders: humor ${profile.humorLevel}/100, warmth ${profile.warmthLevel}/100, snark ${profile.snarkLevel}/100, creativity ${profile.creativityLevel}/100, directness ${profile.directnessLevel}/100.`,
     `Rhythm: ${profile.rhythm}. Greeting style: ${profile.greetingStyle}. Follow-up style: ${profile.followUpStyle}.`,
-    "Make the personality materially affect word choice, response structure, sentence rhythm, and follow-up behavior.",
+    "Make the personality materially affect word choice, response structure, sentence rhythm, pacing, tone, and follow-up behavior. Honor the behavior engine fields over generic assistant tone.",
     libraryContext,
   ].join("\n")
 }

@@ -5,6 +5,11 @@ import type {
   ResponseCategory,
   SavedResponse,
 } from "@/lib/types"
+import type {
+  PersonalityResponseStyle,
+  PersonalityTone,
+  PersonalityVerbosity,
+} from "@/lib/personality/personalityProfiles"
 
 export type AssistantMessageRole = "user" | "assistant" | "system"
 
@@ -48,6 +53,12 @@ export interface AssistantPersonalityProfile {
   id: string
   name: string
   description: string
+  tone: PersonalityTone
+  responseStyle: PersonalityResponseStyle
+  verbosity: PersonalityVerbosity
+  humor: number
+  aggressiveness: number
+  voiceId: string
   toneKeywords: string[]
   humorLevel: number
   warmthLevel: number

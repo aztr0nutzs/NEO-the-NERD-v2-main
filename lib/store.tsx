@@ -43,6 +43,8 @@ import {
   writeStoredState,
 } from "./persistence"
 import { generateAssistantReply } from "@/lib/assistant/assistant-runtime"
+import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
+import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 
 interface AppState {
   screen: ScreenId
@@ -252,7 +254,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [voiceId, setVoiceIdState] = useState<string>(VOICES[0].id)
   const [voiceFavoriteIds, setVoiceFavoriteIds] = useState<string[]>([])
   const [recentVoiceIds, setRecentVoiceIds] = useState<string[]>([])
-  const [personalityId, setPersonalityId] = useState<string>(PERSONALITIES[0].id)
+  const [personalityId, setPersonalityIdState] = useState<string>(PERSONALITIES[0].id)
   const [voiceParams, _setVoiceParams] = useState<VoiceParams>(DEFAULT_VOICE_PARAMS)
   const [conversationMode, setConversationMode] = useState<ConversationMode>(
     "Helpful Assistant",
@@ -313,7 +315,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       stored.personalityId &&
       PERSONALITIES.some((p) => p.id === stored.personalityId)
     ) {
-      setPersonalityId(stored.personalityId)
+      setPersonalityIdState(stored.personalityId)
     }
     if (stored.voiceParams) {
       _setVoiceParams({ ...DEFAULT_VOICE_PARAMS, ...stored.voiceParams })
@@ -368,6 +370,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!VOICES.some((voice) => voice.id === id)) return
     setVoiceIdState(id)
     setRecentVoiceIds((current) => [id, ...current.filter((voiceId) => voiceId !== id)].slice(0, 8))
+  }, [])
+
+  const setPersonalityId = useCallback((id: string) => {
+    if (!PERSONALITIES.some((personality) => personality.id === id)) return
+    const linkedVoiceId = getPersonalityProfile(id).voiceId
+    setPersonalityIdState(id)
+    if (VOICES.some((voice) => voice.id === linkedVoiceId)) {
+      setVoiceIdState(linkedVoiceId)
+      _setVoiceParams(voiceProfileToParams(linkedVoiceId))
+      setRecentVoiceIds((current) => [linkedVoiceId, ...current.filter((voiceId) => voiceId !== linkedVoiceId)].slice(0, 8))
+    }
   }, [])
 
   const playAvatarReaction = useCallback((reactionKey: AvatarReactionKey) => {
