@@ -41,6 +41,7 @@ import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 
 import {
   networkAdapter,
+  resolveNetworkAdapterStatus,
   resolveNetworkUiAdapterStatus,
 } from "@/lib/network/networkDiscoveryAdapter";
 import {
@@ -114,28 +115,36 @@ export function NetworkDiscoveryFeature() {
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
-      const [status, deviceList, router, insights, history, networkSettings, currentAdapterStatus, capabilities, controlMode] = await Promise.all([
-        networkAdapter.getNetworkStatus(),
-        networkAdapter.getDiscoveredDevices(),
-        networkAdapter.getRouterStatus(),
-        networkAdapter.getSecurityInsights(),
-        networkAdapter.getScanHistory(),
-        networkAdapter.getNetworkSettings(),
-        networkAdapter.getAdapterStatus(),
-        networkAdapter.getRouterCapabilities(),
-        networkAdapter.getRouterControlMode(),
-      ]);
+      try {
+        const [status, deviceList, router, insights, history, networkSettings, currentAdapterStatus, capabilities, controlMode] = await Promise.all([
+          networkAdapter.getNetworkStatus(),
+          networkAdapter.getDiscoveredDevices(),
+          networkAdapter.getRouterStatus(),
+          networkAdapter.getSecurityInsights(),
+          networkAdapter.getScanHistory(),
+          networkAdapter.getNetworkSettings(),
+          networkAdapter.getAdapterStatus(),
+          networkAdapter.getRouterCapabilities(),
+          networkAdapter.getRouterControlMode(),
+        ]);
 
-      setNetworkStatus(status);
-      setDevices(deviceList);
-      setRouterStatus(router);
-      setSecurityInsights(insights);
-      setScanHistory(history);
-      setSettings(networkSettings);
-      setAdapterStatus(currentAdapterStatus);
-      setRouterCapabilities(capabilities);
-      setRouterControlMode(controlMode);
-      setSelectedMode(networkSettings.scanMode);
+        setNetworkStatus(status);
+        setDevices(deviceList);
+        setRouterStatus(router);
+        setSecurityInsights(insights);
+        setScanHistory(history);
+        setSettings(networkSettings);
+        setAdapterStatus(currentAdapterStatus);
+        setRouterCapabilities(capabilities);
+        setRouterControlMode(controlMode);
+        setSelectedMode(networkSettings.scanMode);
+      } catch (error) {
+        setAdapterStatus(resolveNetworkAdapterStatus({
+          demoMode: false,
+          nativePluginAvailable: false,
+          fallbackReason: error instanceof Error ? error.message : "Native discovery unavailable",
+        }))
+      }
     };
 
     loadData();
@@ -154,8 +163,8 @@ export function NetworkDiscoveryFeature() {
       if (progress >= 100) {
         clearInterval(interval);
         // Refresh data after scan completes
-        networkAdapter.getNetworkStatus().then(setNetworkStatus);
-        networkAdapter.getAdapterStatus().then(setAdapterStatus);
+        networkAdapter.getNetworkStatus().then(setNetworkStatus).catch(() => undefined);
+        networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
         networkAdapter.getDiscoveredDevices().then((updatedDevices) => {
           setDevices(updatedDevices);
           const hasAttentionDevice = updatedDevices.some(
@@ -166,8 +175,8 @@ export function NetworkDiscoveryFeature() {
           );
           playAvatarReaction(hasAttentionDevice ? "surprised" : "happy");
         });
-        networkAdapter.getScanHistory().then(setScanHistory);
-        networkAdapter.getSecurityInsights().then(setSecurityInsights);
+        networkAdapter.getScanHistory().then(setScanHistory).catch(() => undefined);
+        networkAdapter.getSecurityInsights().then(setSecurityInsights).catch(() => undefined);
       }
     }, 100);
 
@@ -195,6 +204,11 @@ export function NetworkDiscoveryFeature() {
       setAdapterStatus(currentAdapterStatus);
       setScanProgress(0);
     } catch {
+      setAdapterStatus(resolveNetworkAdapterStatus({
+        demoMode: false,
+        nativePluginAvailable: false,
+        fallbackReason: "Live scan unavailable in current runtime.",
+      }))
       setNetworkStatus((current) => current ? { ...current, scanState: "failed" } : current);
       playAvatarReaction("angry");
     }
