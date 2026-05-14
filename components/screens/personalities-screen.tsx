@@ -14,6 +14,8 @@ import { NeonPanel } from "../neon-panel"
 import { PersonalityCard } from "../personality-card"
 import { ControlSlider } from "../control-slider"
 import { getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
+import { generatePersonalityPreviewResponse } from "@/lib/assistant/assistantResponseEngine"
+import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
 import { previewVoice } from "@/lib/voice/voice-runtime"
 import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
@@ -76,19 +78,24 @@ export function PersonalitiesScreen() {
 
   const handleTestPersonality = async () => {
     if (previewState === "speaking") return
-    const voice = getVoiceProfile(voiceId)
+    const behavior = getPersonalityProfile(active.id)
+    const voice = getVoiceProfile(behavior.voiceId)
+    const sampleResponse = generatePersonalityPreviewResponse(active.id)
     if (voice.availability === "unavailable") {
       setPreviewState("error")
       setPreviewMessage("VOICE PREVIEW UNAVAILABLE ON THIS DEVICE")
       return
     }
+    if (voice.id !== voiceId) {
+      setVoiceId(voice.id)
+    }
     setPreviewState("speaking")
-    setPreviewMessage(`SPEAKING AS ${active.name.toUpperCase()}`)
+    setPreviewMessage(`SPEAKING AS ${active.name.toUpperCase()} // ${voice.name.toUpperCase()}`)
     try {
       const result = await previewVoice({
         profile: voice,
-        text: active.sample,
-        params: voiceProfileToParams(voiceId),
+        text: sampleResponse,
+        params: voiceProfileToParams(voice.id),
         mode: "auto",
         onStateChange: (snapshot) => {
           if (snapshot.message) setPreviewMessage(snapshot.message)
@@ -190,7 +197,7 @@ export function PersonalitiesScreen() {
             SAMPLE_LINE
           </p>
           <p className="text-[13px] text-white/90 text-pretty">
-            &ldquo;{active.sample}&rdquo;
+            &ldquo;{generatePersonalityPreviewResponse(active.id)}&rdquo;
           </p>
         </div>
 
@@ -250,6 +257,7 @@ export function PersonalitiesScreen() {
             PREVIEW · {previewing.name.toUpperCase()}
           </p>
           <p className="text-[14px] text-white/95 text-pretty">&quot;{previewing.sample}&quot;</p>
+          <p className="mt-2 text-[13px] text-white/75 text-pretty">&quot;{generatePersonalityPreviewResponse(previewing.id)}&quot;</p>
         </NeonPanel>
       )}
 

@@ -1,5 +1,6 @@
 import type { ChatMessage, SavedResponse } from "@/lib/types"
 import { GAMES, PERSONALITIES } from "@/lib/data"
+import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
 import { VOICE_PROFILES, getVoiceProfile } from "@/lib/voice/voiceProfiles"
 
 const PERSONALITY_VOICE_MATCHES: Record<string, string[]> = {
@@ -33,8 +34,9 @@ const PERSONALITY_RESPONSE_TAGS: Record<string, string[]> = {
 }
 
 export function getRecommendedVoiceProfiles(personalityId: string, limit = 4) {
-  const ids = PERSONALITY_VOICE_MATCHES[personalityId] ?? PERSONALITY_VOICE_MATCHES.genius
-  return ids.map(getVoiceProfile).filter(Boolean).slice(0, limit)
+  const linkedVoiceId = getPersonalityProfile(personalityId).voiceId
+  const ids = [linkedVoiceId, ...(PERSONALITY_VOICE_MATCHES[personalityId] ?? PERSONALITY_VOICE_MATCHES.genius)]
+  return Array.from(new Set(ids)).map(getVoiceProfile).filter(Boolean).slice(0, limit)
 }
 
 export function getRecommendedPersonalityNamesForVoice(voiceId: string) {
@@ -92,7 +94,8 @@ export function getVoiceToneSummary(voiceId: string) {
 }
 
 export function getPersonalityVoiceIds(personalityId: string) {
-  return PERSONALITY_VOICE_MATCHES[personalityId] ?? PERSONALITY_VOICE_MATCHES.genius
+  const linkedVoiceId = getPersonalityProfile(personalityId).voiceId
+  return Array.from(new Set([linkedVoiceId, ...(PERSONALITY_VOICE_MATCHES[personalityId] ?? PERSONALITY_VOICE_MATCHES.genius)]))
 }
 
 export function getPersonalityResponseTags(personalityId: string) {
