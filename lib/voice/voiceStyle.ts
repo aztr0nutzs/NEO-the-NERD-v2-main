@@ -65,8 +65,9 @@ export function buildStyledVoiceSpeech(
   text: string,
   params: VoiceParams,
 ): StyledVoiceSpeech {
-  const spoken =
+  const baseSpoken =
     (text ?? "").trim() || profile.sampleLine || profile.sampleText || "NEO online."
+  const spoken = shapeSpeechTextForProfile(profile, baseSpoken)
 
   const rate = clamp(
     speedSliderToRate(params.speed) + (TONE_RATE_NUDGE[profile.toneProfile] ?? 0),
@@ -81,6 +82,18 @@ export function buildStyledVoiceSpeech(
   const volume = clamp((params.volume ?? 75) / 100, 0, 1)
 
   return { text: spoken, rate: Number(rate.toFixed(2)), pitch: Number(pitch.toFixed(2)), volume: Number(volume.toFixed(2)) }
+}
+
+function shapeSpeechTextForProfile(profile: VoiceProfile, text: string) {
+  const normalized = text.replace(/\s+/g, " ").trim()
+  const id = profile.id
+  if (id === "commander") return normalized.replace(/\. /g, ". ").replace(/\?$/g, ". Confirm.")
+  if (id === "prankster") return normalized.endsWith("!") ? `${normalized} ...probably.` : `${normalized}! ...probably.`
+  if (id === "droid") return `Unit ready. ${normalized}`
+  if (id === "arcade-announcer" || id === "hyperdrive-host") return `${normalized} — bonus round energy engaged!`
+  if (id === "midnight-narrator" || id === "deepcore") return `${normalized} ...and the room went quiet.`
+  if (profile.toneProfile === "calm") return normalized.replace(/!/g, ".").replace(/, /g, ", ... ")
+  return normalized
 }
 
 const TONE_INSTRUCTION: Record<VoiceToneProfile, string> = {

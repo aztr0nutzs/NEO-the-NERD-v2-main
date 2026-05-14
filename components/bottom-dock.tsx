@@ -147,6 +147,12 @@ export function BottomDock() {
               "linear-gradient(to left, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%)",
           }}
         />
+        <p
+          className="pointer-events-none absolute -top-5 right-2 rounded-full px-2 py-0.5 ps-mono text-[9px] tracking-[0.25em] text-white/65 sm:hidden"
+          style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.22)", background: "rgba(0,0,0,0.45)" }}
+        >
+          SWIPE DOCK →
+        </p>
       </div>
     </nav>
   )
