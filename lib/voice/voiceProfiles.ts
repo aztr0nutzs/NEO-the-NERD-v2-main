@@ -1,4 +1,4 @@
-import type { VoiceProfile } from "./types"
+import type { VoiceProfile, VoiceToneProfile } from "./types"
 
 export const VOICE_PROFILES: VoiceProfile[] = [
   profile("neo", "NEO", "Core NEO voices", "Calm, confident futuristic core voice.", "The default NEO companion voice: clear, stable, lightly synthetic, and suitable for most assistant interactions.", ["core", "calm", "futuristic"], ["default chat", "briefings", "navigation"], 3, 4, 2, 3, 5, 50, 50, 75, 60, ["genius", "friendly", "strat"], "NEO online. Tell me the mission.", true, "alloy", "provider-ready", "cyan"),
@@ -21,7 +21,7 @@ export const VOICE_PROFILES: VoiceProfile[] = [
   profile("smooth-operator", "Smooth Operator", "Warm assistants", "Slick, relaxed, confident delivery.", "A cool and polished profile for suave confirmations, social scripts, and composed answers.", ["smooth", "confident", "relaxed"], ["social scripts", "briefings"], 3, 4, 3, 1, 4, 52, 42, 74, 58, ["friendly", "snark"], "Clean signal, clean plan, clean exit.", false, "ash", "provider-ready", "pink"),
   profile("midnight-narrator", "Midnight Narrator", "Narrator / announcer voices", "Late-night cinematic storyteller.", "A dark, smooth narration profile for story openers, dramatic recaps, and moody reads.", ["midnight", "cinematic", "low"], ["stories", "recaps"], 2, 3, 1, 1, 5, 38, 20, 78, 38, ["story", "detective"], "At 02:47, the city started listening.", true, "onyx", "provider-ready", "purple"),
   profile("hyperdrive-host", "Hyperdrive Host", "Energetic / hype voices", "Fast game-show host energy.", "A bright announcer voice for rapid prompts, game intros, and celebratory transitions.", ["host", "fast", "showtime"], ["games", "announcements"], 5, 4, 5, 1, 4, 86, 68, 82, 90, ["gm", "hype"], "Welcome back to questionable decisions at light speed.", true, "coral", "provider-ready", "orange"),
-  profile("velvet-circuit", "Velvet Circuit", "Calm / reflective voices", "Soft synthetic lounge tone.", "A smooth reflective voice for calm planning, nighttime mode, and thoughtful responses.", ["soft", "reflective", "synthetic"], ["reflection", "calm planning"], 2, 5, 1, 3, 5, 42, 38, 72, 35, ["calm", "story"], "Slow the signal down. The answer is still there.", false, "nova", "provider-ready", "cyan"),
+  profile("velvet-circuit", "Velvet Circuit", "Calm / reflective voices", "Soft synthetic lounge tone.", "A smooth reflective voice for calm planning, nighttime mode, and thoughtful responses.", ["soft", "reflective", "synthetic"], ["reflection", "calm planning"], 2, 5, 1, 3, 5, 42, 38, 72, 35, ["calm", "story"], "Slow the signal down. The answer is still there.", false, "shimmer", "provider-ready", "cyan"),
   profile("dry-humor-unit", "Dry Humor Unit", "Comic voices", "Deadpan robot wit.", "A low-emotion comedy voice built for dry punchlines and understated reactions.", ["deadpan", "robot", "dry"], ["dry jokes", "commentary"], 2, 2, 5, 5, 4, 46, 35, 72, 50, ["snark"], "I am thrilled. My circuits are doing a tiny parade.", false, undefined, "profile-only", "green"),
   profile("tactical-guide", "Tactical Guide", "Narrator / announcer voices", "Field-ops instruction voice.", "A direct tactical voice for checklists, safe action steps, and command-style summaries.", ["tactical", "clear", "field"], ["checklists", "plans"], 3, 2, 1, 2, 5, 44, 28, 78, 42, ["strat", "wizard"], "Route selected. Move with intent.", false, "onyx", "provider-ready", "cyan"),
   profile("arcade-announcer", "Arcade Announcer", "Retro / arcade voices", "Cabinet announcer with big score energy.", "A punchy retro announcer for scores, wins, losses, and game starts.", ["announcer", "retro", "score"], ["games", "scoreboards"], 5, 3, 4, 3, 4, 78, 64, 82, 84, ["gm", "hype"], "New challenger. Try not to blink.", true, undefined, "future-provider-target", "orange"),
@@ -35,7 +35,7 @@ export const VOICE_PROFILES: VoiceProfile[] = [
   profile("synth-sage", "Synth Sage", "Calm / reflective voices", "Meditative synthetic wisdom.", "A thoughtful voice for reflective prompts, planning, and gentle advice.", ["sage", "synthetic", "calm"], ["reflection", "advice"], 2, 5, 1, 4, 5, 40, 36, 72, 32, ["calm", "strat"], "A quiet system still knows the route.", false, "sage", "provider-ready", "cyan"),
   profile("riff-reactor", "Riff Reactor", "Comic voices", "Improvisational joke engine.", "A fast riffing voice for jokes, alternate phrasings, and quick playful spins.", ["riff", "comic", "fast"], ["jokes", "rewrites"], 4, 3, 5, 2, 4, 72, 60, 76, 78, ["chaos", "snark"], "Give me a topic and I will make it everybody's problem.", false, undefined, "browser-preview", "pink"),
   profile("drama-module", "Drama Module", "Dramatic / villainous voices", "Over-serious theatrical intensity.", "A dramatic profile for mock monologues, story beats, and harmless melodrama.", ["dramatic", "theater", "intense"], ["stories", "villain lines"], 4, 2, 4, 2, 4, 50, 32, 78, 82, ["story", "gm"], "Behold, the mildly dramatic consequence.", false, undefined, "future-provider-target", "purple"),
-  profile("holo-host", "Holo Host", "Narrator / announcer voices", "Polished holographic presenter.", "A clean presenter voice for feature tours, summaries, and show-and-tell moments.", ["host", "polished", "clear"], ["presentations", "summaries"], 3, 4, 2, 2, 5, 56, 52, 76, 62, ["genius", "friendly"], "Welcome to the command layer. Your options are glowing.", true, "nova", "provider-ready", "cyan"),
+  profile("holo-host", "Holo Host", "Narrator / announcer voices", "Polished holographic presenter.", "A clean presenter voice for feature tours, summaries, and show-and-tell moments.", ["host", "polished", "clear"], ["presentations", "summaries"], 3, 4, 2, 2, 5, 56, 52, 76, 62, ["genius", "friendly"], "Welcome to the command layer. Your options are glowing.", true, "alloy", "provider-ready", "cyan"),
   profile("low-battery-philosopher", "Low Battery Philosopher", "Calm / reflective voices", "Sleepy machine wisdom at 4 percent.", "A slow, amusingly profound profile for reflective lines and quiet jokes.", ["sleepy", "philosophical", "dry"], ["reflection", "quiet jokes"], 1, 4, 4, 4, 3, 32, 24, 68, 22, ["calm", "snark"], "At four percent, every thought becomes poetry.", false, undefined, "browser-preview", "orange"),
   profile("packet-punk", "Packet Punk", "Robotic / synthetic voices", "Network gremlin energy with sharp edges.", "A synthetic network-flavored voice for alerts, scans, and glitchy cyber commentary.", ["network", "punk", "synthetic"], ["network alerts", "scan flavor"], 4, 2, 4, 5, 4, 66, 42, 76, 76, ["chaos", "wizard"], "Packet lost. Attitude retained.", false, undefined, "browser-preview", "green"),
   profile("solar-diplomat", "Solar Diplomat", "Warm assistants", "Graceful, optimistic negotiation voice.", "A warm mediator profile for careful phrasing, social scripts, and polite disagreement.", ["diplomatic", "warm", "polished"], ["social scripts", "messages"], 3, 5, 2, 1, 5, 48, 48, 74, 52, ["friendly", "strat"], "We can say it clearly without starting a fire.", false, "shimmer", "provider-ready", "pink"),
@@ -67,9 +67,17 @@ function profile(
   availability: VoiceProfile["availability"],
   accent: VoiceProfile["accent"],
 ): VoiceProfile {
+  const pitch = sliderToProfilePitch(defaultPitch)
+  const rate = sliderToProfileRate(defaultSpeed)
+  const toneProfile = inferToneProfile(category, toneTags, energyLevel, humorLevel, roboticnessLevel)
   return {
     id,
+    displayName: name,
     name,
+    pitch,
+    rate,
+    toneProfile,
+    sampleText: sampleLine,
     category,
     shortDescription,
     longDescription,
@@ -91,6 +99,37 @@ function profile(
     availability,
     accent,
   }
+}
+
+function sliderToProfilePitch(defaultPitch: number) {
+  return clamp(Number((0.6 + (defaultPitch / 100) * 1.0).toFixed(2)), 0.6, 1.6)
+}
+
+function sliderToProfileRate(defaultSpeed: number) {
+  return clamp(Number((0.7 + (defaultSpeed / 100) * 0.7).toFixed(2)), 0.7, 1.4)
+}
+
+function inferToneProfile(
+  category: VoiceProfile["category"],
+  toneTags: string[],
+  energyLevel: VoiceProfile["energyLevel"],
+  humorLevel: VoiceProfile["humorLevel"],
+  roboticnessLevel: VoiceProfile["roboticnessLevel"],
+): VoiceToneProfile {
+  const text = `${category} ${toneTags.join(" ")}`.toLowerCase()
+  if (text.includes("sarcastic") || text.includes("snark") || text.includes("deadpan") || text.includes("dry")) return "sarcastic"
+  if (text.includes("villain") || text.includes("intense") || text.includes("punk")) return "aggressive"
+  if (text.includes("calm") || text.includes("soft") || text.includes("reflective") || text.includes("sleepy")) return "calm"
+  if (text.includes("retro") || text.includes("arcade") || text.includes("analog") || text.includes("vhs")) return "retro"
+  if (text.includes("robot") || text.includes("synthetic") || text.includes("glitch") || roboticnessLevel >= 4) return "robotic"
+  if (text.includes("dramatic") || text.includes("cinematic") || text.includes("oracle")) return "dramatic"
+  if (energyLevel >= 5 || text.includes("hype") || text.includes("fast") || text.includes("cheer")) return "energetic"
+  if (humorLevel >= 4 || text.includes("comic") || text.includes("playful")) return "playful"
+  return "balanced"
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
 }
 
 export function getVoiceProfile(id: string) {

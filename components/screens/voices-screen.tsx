@@ -110,10 +110,11 @@ export function VoicesScreen() {
     }
     setPreviewId(id)
     setAudioPayload(null)
+    const previewParams = id === voiceId ? voiceParams : voiceProfileToParams(id)
     const result = await previewVoice({
       profile: voice,
-      text: previewText.trim() || voice.sampleLine,
-      params: voiceParams,
+      text: previewText.trim() || voice.sampleText,
+      params: previewParams,
       mode: "auto",
       onStateChange: (snapshot) => {
         setPlayback(snapshot)
@@ -142,7 +143,7 @@ export function VoicesScreen() {
     setGenerating(true)
     setVoiceStatus("GENERATING PREVIEW AUDIO")
     setPlayback({ state: "preparing", source: "provider", voiceId, message: "GENERATING PROVIDER AUDIO" })
-    const result = await generateProviderAudio({ voiceId, text: previewText, params: voiceParams })
+    const result = await generateProviderAudio({ voiceId, text: previewText || profile.sampleText, params: voiceParams })
     if (result.payload) {
       setAudioPayload(result.payload)
       playPayload(result.payload)

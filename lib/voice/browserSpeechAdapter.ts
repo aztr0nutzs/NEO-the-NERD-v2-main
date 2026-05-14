@@ -2,7 +2,8 @@
 
 import type { VoiceParams } from "@/lib/types"
 import type { VoiceProfile } from "./types"
-import { voiceParamsToSpeechOptions, type VoicePlaybackSnapshot } from "./voicePlayback"
+import type { VoicePlaybackSnapshot } from "./voicePlayback"
+import { buildStyledVoiceSpeech } from "./voiceStyle"
 
 type PlaybackListener = (snapshot: VoicePlaybackSnapshot) => void
 
@@ -54,7 +55,7 @@ export async function speakWithBrowserSpeech({
     return false
   }
 
-  const phrase = text.trim() || profile.sampleLine
+  const speech = buildStyledVoiceSpeech(profile, text, params)
   stopBrowserSpeech()
 
   onStateChange?.({
@@ -65,11 +66,10 @@ export async function speakWithBrowserSpeech({
   })
 
   return new Promise<boolean>((resolve) => {
-    const utterance = new SpeechSynthesisUtterance(phrase)
-    const options = voiceParamsToSpeechOptions(params)
-    utterance.rate = options.rate
-    utterance.pitch = options.pitch
-    utterance.volume = options.volume
+    const utterance = new SpeechSynthesisUtterance(speech.text)
+    utterance.rate = speech.rate
+    utterance.pitch = speech.pitch
+    utterance.volume = speech.volume
     utterance.voice = selectBrowserVoice(profile)
 
     utterance.onstart = () => {

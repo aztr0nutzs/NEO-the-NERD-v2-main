@@ -4,8 +4,8 @@ import { getVoiceProfile } from "./voiceProfiles"
 export function voiceProfileToParams(voiceId: string): VoiceParams {
   const profile = getVoiceProfile(voiceId)
   return {
-    speed: profile.defaultSpeed,
-    pitch: profile.defaultPitch,
+    speed: Math.round(((profile.rate - 0.7) / 0.7) * 100),
+    pitch: Math.round(((profile.pitch - 0.6) / 1.0) * 100),
     volume: profile.defaultVolume,
     emotion: profile.recommendedEmotion,
   }

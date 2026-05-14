@@ -423,6 +423,7 @@ async function previewViaNativeAndroidTts(
 
   const result = await speakWithAndroidNativeTts({
     text: request.text.trim() || request.profile.sampleLine,
+    profile: request.profile,
     params: request.params,
   })
 
@@ -558,30 +559,30 @@ export function getProfileTruthLabel(
   if (profile.availability === "unavailable") return "PREVIEW UNAVAILABLE"
 
   if (profile.availability === "provider-ready") {
-    if (capabilities.providerTtsAvailable) return "PROVIDER ACTIVE"
-    if (capabilities.nativeAndroidTtsAvailable) return "PROVIDER READY // ANDROID TTS PREVIEW"
-    if (capabilities.browserSpeechSupported) return "PROVIDER READY // BROWSER PREVIEW"
+    if (capabilities.providerTtsAvailable) return "Provider Voice"
+    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
+    if (capabilities.browserSpeechSupported) return "Browser Speech (Styled)"
     return "PROVIDER READY // NO LOCAL FALLBACK"
   }
 
   if (profile.availability === "browser-preview") {
-    if (capabilities.nativeAndroidTtsAvailable) return "ANDROID TTS PREVIEW"
+    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
     return capabilities.browserSpeechSupported
-      ? "BROWSER SPEECH PREVIEW"
+      ? "Browser Speech (Styled)"
       : "BROWSER PREVIEW UNAVAILABLE"
   }
 
   if (profile.availability === "future-provider-target") {
-    if (capabilities.nativeAndroidTtsAvailable) return "FUTURE PROVIDER TARGET // ANDROID TTS PREVIEW"
+    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
     return capabilities.browserSpeechSupported
-      ? "FUTURE PROVIDER TARGET // BROWSER PREVIEW"
+      ? "Browser Speech (Styled)"
       : "FUTURE PROVIDER TARGET"
   }
 
   if (profile.availability === "profile-only") {
-    if (capabilities.nativeAndroidTtsAvailable) return "PROFILE ONLY // ANDROID TTS PREVIEW"
+    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
     return capabilities.browserSpeechSupported
-      ? "PROFILE ONLY // GENERIC BROWSER PREVIEW"
+      ? "Browser Speech (Styled)"
       : "PROFILE ONLY"
   }
 

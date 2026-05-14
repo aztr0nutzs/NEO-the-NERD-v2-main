@@ -1,5 +1,6 @@
 import type { VoiceParams } from "@/lib/types"
 import { VOICE_PROFILES, getVoiceProfile } from "./voiceProfiles"
+import { buildStyledVoiceSpeech, toneInstructions } from "./voiceStyle"
 
 export interface VoiceProviderConfig {
   providerVoiceId: string
@@ -55,6 +56,10 @@ export function speedToProviderValue(speed: number) {
   return Math.min(4, Math.max(0.25, Number((0.5 + (speed / 100) * 1.5).toFixed(2))))
 }
 
+export function rateToProviderValue(rate: number) {
+  return Math.min(4, Math.max(0.25, Number(rate.toFixed(2))))
+}
+
 export function volumeToPlaybackValue(volume: number) {
   return Math.min(1, Math.max(0, volume / 100))
 }
@@ -66,12 +71,19 @@ export function emotionToInstructions(emotion: number) {
   return "Read clearly with balanced emotion and a polished robot-companion tone."
 }
 
+function providerInstructions(voiceId: string, emotion: number) {
+  const profile = getVoiceProfile(voiceId)
+  return `${toneInstructions(profile)} ${emotionToInstructions(emotion)}`
+}
+
 export async function generateOpenAITts(request: TtsRequest): Promise<TtsResult> {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.")
 
   const config = getVoiceProviderConfig(request.voiceId)
   if (!config?.available) throw new Error("Selected voice is not available for TTS.")
+  const profile = getVoiceProfile(request.voiceId)
+  const speech = buildStyledVoiceSpeech(profile, request.text, request.params)
 
   const response = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
@@ -82,10 +94,10 @@ export async function generateOpenAITts(request: TtsRequest): Promise<TtsResult>
     body: JSON.stringify({
       model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
       voice: config.providerVoiceId,
-      input: request.text.slice(0, 4000),
+      input: speech.text.slice(0, 4000),
       response_format: "mp3",
-      speed: speedToProviderValue(request.params.speed),
-      instructions: emotionToInstructions(request.params.emotion),
+      speed: rateToProviderValue(speech.rate),
+      instructions: providerInstructions(request.voiceId, request.params.emotion),
     }),
   })
 

@@ -18,9 +18,25 @@ export type VoiceAvailability =
   | "future-provider-target"
   | "unavailable"
 
+export type VoiceToneProfile =
+  | "balanced"
+  | "energetic"
+  | "calm"
+  | "robotic"
+  | "aggressive"
+  | "sarcastic"
+  | "dramatic"
+  | "retro"
+  | "playful"
+
 export interface VoiceProfile {
   id: string
+  displayName: string
   name: string
+  pitch: number
+  rate: number
+  toneProfile: VoiceToneProfile
+  sampleText: string
   category: VoiceCategory
   shortDescription: string
   longDescription: string
