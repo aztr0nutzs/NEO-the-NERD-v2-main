@@ -8,7 +8,7 @@
  *   - web dev/server with same-origin `/api/tts`
  *   - hosted web with `NEXT_PUBLIC_NEO_BACKEND_BASE_URL` set
  *   - Capacitor Android with a remote backend configured
- *   - Capacitor Android with no backend            → native Android TTS, then browser fallback if exposed
+ *   - Capacitor Android with no backend            → native Android TTS (with readiness retry), then browser fallback if exposed
  *   - browsers without SpeechSynthesis             → browser path is disabled
  *
  * Blob URLs created from provider audio payloads are tracked and revoked in:
