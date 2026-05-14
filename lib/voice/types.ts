@@ -39,6 +39,7 @@ export interface VoiceProfile {
   sampleText: string
   category: VoiceCategory
   shortDescription: string
+  styleIdentity: string
   longDescription: string
   toneTags: string[]
   idealUseCases: string[]
@@ -53,6 +54,8 @@ export interface VoiceProfile {
   recommendedEmotion: number
   compatiblePersonalities: string[]
   sampleLine: string
+  cadenceHint: string
+  expressivenessLevel: 1 | 2 | 3 | 4 | 5
   featured: boolean
   providerVoiceId?: string
   availability: VoiceAvailability

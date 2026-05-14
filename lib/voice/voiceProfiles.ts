@@ -80,6 +80,7 @@ function profile(
     sampleText: sampleLine,
     category,
     shortDescription,
+    styleIdentity: shortDescription,
     longDescription,
     toneTags,
     idealUseCases,
@@ -94,11 +95,38 @@ function profile(
     recommendedEmotion,
     compatiblePersonalities,
     sampleLine,
+    cadenceHint: inferCadenceHint(toneProfile),
+    expressivenessLevel: inferExpressivenessLevel(energyLevel, humorLevel, toneProfile),
     featured,
     providerVoiceId,
     availability,
     accent,
   }
+}
+
+function inferCadenceHint(toneProfile: VoiceToneProfile) {
+  switch (toneProfile) {
+    case "calm": return "Long pauses, gentle transitions, smoother sentence joins."
+    case "energetic": return "Short beats, brisk pacing, momentum-first phrasing."
+    case "aggressive": return "Clipped commands, firm stops, decisive cadence."
+    case "robotic": return "Metered timing, tighter pauses, precision rhythm."
+    case "dramatic": return "Slow lead-ins, weighted pauses, cinematic rise/fall."
+    case "retro": return "Punchy arcade tempo with concise chunks."
+    case "playful": return "Bouncy pacing, surprise emphasis, playful punctuation."
+    case "sarcastic": return "Dry timing, deliberate beats before punchlines."
+    default: return "Balanced pacing with clear phrase boundaries."
+  }
+}
+
+function inferExpressivenessLevel(
+  energyLevel: VoiceProfile["energyLevel"],
+  humorLevel: VoiceProfile["humorLevel"],
+  toneProfile: VoiceToneProfile,
+): 1 | 2 | 3 | 4 | 5 {
+  const base = Math.min(5, Math.max(1, Math.round((energyLevel + humorLevel) / 2)))
+  if (toneProfile === "dramatic" || toneProfile === "playful" || toneProfile === "energetic") return Math.min(5, (base + 1)) as 1 | 2 | 3 | 4 | 5
+  if (toneProfile === "calm" || toneProfile === "robotic") return Math.max(1, (base - 1)) as 1 | 2 | 3 | 4 | 5
+  return base as 1 | 2 | 3 | 4 | 5
 }
 
 function sliderToProfilePitch(defaultPitch: number) {
@@ -138,3 +166,9 @@ export function getVoiceProfile(id: string) {
 
 export const VOICE_CATEGORIES = Array.from(new Set(VOICE_PROFILES.map((voice) => voice.category)))
 export const VOICE_TONE_TAGS = Array.from(new Set(VOICE_PROFILES.flatMap((voice) => voice.toneTags))).sort()
+
+const duplicateVoiceIds = VOICE_PROFILES.filter((voice, index, list) => list.findIndex((v) => v.id === voice.id) !== index).map((voice) => voice.id)
+const duplicateVoiceNames = VOICE_PROFILES.filter((voice, index, list) => list.findIndex((v) => v.name.toLowerCase() === voice.name.toLowerCase()) !== index).map((voice) => voice.name)
+if (duplicateVoiceIds.length || duplicateVoiceNames.length) {
+  throw new Error(`Duplicate voice profile entries detected. ids=[${duplicateVoiceIds.join(", ")}], names=[${duplicateVoiceNames.join(", ")}]`)
+}
