@@ -22,6 +22,7 @@ import {
   Cpu,
   AlertTriangle,
   ChevronDown,
+  Box,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/lib/store";
@@ -41,6 +42,7 @@ import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 
 import {
   networkAdapter,
+  resolveNetworkAdapterStatus,
   resolveNetworkUiAdapterStatus,
 } from "@/lib/network/networkDiscoveryAdapter";
 import {
@@ -114,28 +116,36 @@ export function NetworkDiscoveryFeature() {
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
-      const [status, deviceList, router, insights, history, networkSettings, currentAdapterStatus, capabilities, controlMode] = await Promise.all([
-        networkAdapter.getNetworkStatus(),
-        networkAdapter.getDiscoveredDevices(),
-        networkAdapter.getRouterStatus(),
-        networkAdapter.getSecurityInsights(),
-        networkAdapter.getScanHistory(),
-        networkAdapter.getNetworkSettings(),
-        networkAdapter.getAdapterStatus(),
-        networkAdapter.getRouterCapabilities(),
-        networkAdapter.getRouterControlMode(),
-      ]);
+      try {
+        const [status, deviceList, router, insights, history, networkSettings, currentAdapterStatus, capabilities, controlMode] = await Promise.all([
+          networkAdapter.getNetworkStatus(),
+          networkAdapter.getDiscoveredDevices(),
+          networkAdapter.getRouterStatus(),
+          networkAdapter.getSecurityInsights(),
+          networkAdapter.getScanHistory(),
+          networkAdapter.getNetworkSettings(),
+          networkAdapter.getAdapterStatus(),
+          networkAdapter.getRouterCapabilities(),
+          networkAdapter.getRouterControlMode(),
+        ]);
 
-      setNetworkStatus(status);
-      setDevices(deviceList);
-      setRouterStatus(router);
-      setSecurityInsights(insights);
-      setScanHistory(history);
-      setSettings(networkSettings);
-      setAdapterStatus(currentAdapterStatus);
-      setRouterCapabilities(capabilities);
-      setRouterControlMode(controlMode);
-      setSelectedMode(networkSettings.scanMode);
+        setNetworkStatus(status);
+        setDevices(deviceList);
+        setRouterStatus(router);
+        setSecurityInsights(insights);
+        setScanHistory(history);
+        setSettings(networkSettings);
+        setAdapterStatus(currentAdapterStatus);
+        setRouterCapabilities(capabilities);
+        setRouterControlMode(controlMode);
+        setSelectedMode(networkSettings.scanMode);
+      } catch (error) {
+        setAdapterStatus(resolveNetworkAdapterStatus({
+          demoMode: false,
+          nativePluginAvailable: false,
+          fallbackReason: error instanceof Error ? error.message : "Native discovery unavailable",
+        }))
+      }
     };
 
     loadData();
@@ -154,8 +164,8 @@ export function NetworkDiscoveryFeature() {
       if (progress >= 100) {
         clearInterval(interval);
         // Refresh data after scan completes
-        networkAdapter.getNetworkStatus().then(setNetworkStatus);
-        networkAdapter.getAdapterStatus().then(setAdapterStatus);
+        networkAdapter.getNetworkStatus().then(setNetworkStatus).catch(() => undefined);
+        networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
         networkAdapter.getDiscoveredDevices().then((updatedDevices) => {
           setDevices(updatedDevices);
           const hasAttentionDevice = updatedDevices.some(
@@ -166,8 +176,8 @@ export function NetworkDiscoveryFeature() {
           );
           playAvatarReaction(hasAttentionDevice ? "surprised" : "happy");
         });
-        networkAdapter.getScanHistory().then(setScanHistory);
-        networkAdapter.getSecurityInsights().then(setSecurityInsights);
+        networkAdapter.getScanHistory().then(setScanHistory).catch(() => undefined);
+        networkAdapter.getSecurityInsights().then(setSecurityInsights).catch(() => undefined);
       }
     }, 100);
 
@@ -195,6 +205,11 @@ export function NetworkDiscoveryFeature() {
       setAdapterStatus(currentAdapterStatus);
       setScanProgress(0);
     } catch {
+      setAdapterStatus(resolveNetworkAdapterStatus({
+        demoMode: false,
+        nativePluginAvailable: false,
+        fallbackReason: "Live scan unavailable in current runtime.",
+      }))
       setNetworkStatus((current) => current ? { ...current, scanState: "failed" } : current);
       playAvatarReaction("angry");
     }
@@ -345,17 +360,28 @@ export function NetworkDiscoveryFeature() {
 
   // Robot interaction
   const handleRobotClick = useCallback(() => {
+    const effectiveAdapterStatus = settings
+      ? resolveNetworkUiAdapterStatus(settings, adapterStatus)
+      : null
+    const adapterHint =
+      effectiveAdapterStatus?.mode === "demo"
+        ? "Simulated network data mode is active."
+        : effectiveAdapterStatus?.label === "LIVE_ANDROID_DISCOVERY"
+          ? "Live Android discovery bridge is active."
+          : effectiveAdapterStatus?.mode === "fallback"
+            ? `Live discovery unavailable: ${effectiveAdapterStatus.message}`
+            : "Discovery runtime status is initializing."
     const messages = [
       "Network module online. Ready to scan your local subnet.",
       "I can help you discover and manage all devices on your network.",
-      "Demo adapter active. Connect native backend for real scanning.",
+      adapterHint,
       `Currently tracking ${devices.length} devices. ${devices.filter(d => d.status === "online").length} are online.`,
       "Tip: Use Deep scan mode for comprehensive port detection.",
     ];
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     setRobotMessage(randomMessage);
     setTimeout(() => setRobotMessage(null), 4000);
-  }, [devices]);
+  }, [adapterStatus, devices, settings]);
 
   // Loading state
   if (!networkStatus || !routerStatus || !settings) {
@@ -453,6 +479,20 @@ export function NetworkDiscoveryFeature() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab("map")}
+            className="flex w-full items-center justify-between rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-left"
+            aria-label="Open 3D network map tab"
+          >
+            <span className="flex items-center gap-2 ps-mono text-[10px] tracking-[0.22em] text-emerald-300">
+              <Box className="h-4 w-4" />
+              3D NETWORK MAP
+            </span>
+            <span className="ps-mono text-[10px] tracking-[0.2em] text-white/75">
+              {activeTab === "map" ? "ACTIVE" : "OPEN MAP"}
+            </span>
+          </button>
           <TabsList className="grid h-auto grid-cols-3 gap-1 rounded-xl border border-cyan-500/20 bg-black/50 p-1 sm:grid-cols-7">
             <TabsTrigger value="map" className="font-mono text-[10px] tracking-[0.2em]">MAP</TabsTrigger>
             <TabsTrigger value="overview" className="font-mono text-[10px] tracking-[0.2em]">SCAN</TabsTrigger>

@@ -637,6 +637,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   private actionHistory: NetworkAction[] = [];
   private settings: NetworkSettings = { ...DEFAULT_NETWORK_SETTINGS, demoMode: false };
   private lastNativeScan: NativeScanResult | null = null;
+  private lastScanFailed = false;
 
   private get bridge(): NativeNetworkDiscoveryBridge | null {
     return getNativeBridge();
@@ -692,7 +693,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
         localIp: nativeContext.localIp ?? "Unavailable",
         subnet: nativeContext.subnet ?? "Unavailable",
         connectionType: nativeContext.connectionType ?? "unknown",
-        scanState: this.isScanning ? "scanning" : "idle",
+        scanState: this.isScanning ? "scanning" : this.lastScanFailed ? "failed" : this.lastNativeScan ? "complete" : "idle",
         lastScanAt: this.lastNativeScan ? new Date().toISOString() : null,
         devicesFound: nativeDevices.length,
         onlineDevices: nativeDevices.filter((device) => device.status === "online").length,
@@ -731,6 +732,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       .then((nativeScan) => {
         if (nativeScan) {
           this.lastNativeScan = nativeScan;
+          this.lastScanFailed = false;
           this.scanProgress = 100;
           this.isScanning = false;
           this.scanStartedAt = Date.now();
@@ -739,6 +741,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       .catch(() => {
         this.scanProgress = 0;
         this.isScanning = false;
+        this.lastScanFailed = true;
       });
 
     if (await isAndroidNativeNetworkPluginAvailable()) return;
@@ -912,13 +915,6 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
 
   private async shouldUseDemo(): Promise<boolean> {
     const settings = await this.demoAdapter.getNetworkSettings();
-    if (settings.demoMode && await this.nativePluginCanOverrideDemo()) {
-      await this.demoAdapter.updateNetworkSettings({ demoMode: false });
-      await this.nativeNetworkAdapter.updateNetworkSettings({ ...settings, demoMode: false });
-      this.activeMode = "native-backend";
-      this.fallbackReason = null;
-      return false;
-    }
     return settings.demoMode;
   }
 
@@ -940,7 +936,7 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
     } catch (error) {
       this.activeMode = "fallback";
       this.fallbackReason = getErrorMessage(error);
-      return fallback(this.demoAdapter);
+      throw error;
     }
   }
 
@@ -1087,9 +1083,7 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   async updateNetworkSettings(settings: Partial<NetworkSettings>): Promise<NetworkSettings> {
-    const nativeAvailable = await this.nativePluginCanOverrideDemo();
-    const nextSettings = nativeAvailable ? { ...settings, demoMode: false } : settings;
-    const updated = await this.demoAdapter.updateNetworkSettings(nextSettings);
+    const updated = await this.demoAdapter.updateNetworkSettings(settings);
 
     if (!updated.demoMode) {
       try {

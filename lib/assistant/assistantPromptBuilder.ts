@@ -33,6 +33,7 @@ export function buildAssistantProviderInstructions(context: AssistantContextSnap
     `Conversation mode: ${context.conversationMode}. ${MODE_INSTRUCTIONS[context.conversationMode]}`,
     `Personality: ${profile.name}. ${profile.description}`,
     `Behavior engine: tone=${profile.tone}, responseStyle=${profile.responseStyle}, verbosity=${profile.verbosity}, humor=${profile.humor}, aggressiveness=${profile.aggressiveness}, linkedVoice=${profile.voiceId}.`,
+    `Response shape: ${profile.preferredResponseShape}. Core identity: ${profile.coreIdentity}.`,
     `Tone keywords: ${profile.toneKeywords.join(", ")}.`,
     `Behavior sliders: humor ${profile.humorLevel}/100, warmth ${profile.warmthLevel}/100, snark ${profile.snarkLevel}/100, creativity ${profile.creativityLevel}/100, directness ${profile.directnessLevel}/100.`,
     `Rhythm: ${profile.rhythm}. Greeting style: ${profile.greetingStyle}. Follow-up style: ${profile.followUpStyle}.`,
