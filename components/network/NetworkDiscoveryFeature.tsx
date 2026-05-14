@@ -22,6 +22,7 @@ import {
   Cpu,
   AlertTriangle,
   ChevronDown,
+  Box,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/lib/store";
@@ -467,6 +468,20 @@ export function NetworkDiscoveryFeature() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <button
+            type="button"
+            onClick={() => setActiveTab("map")}
+            className="flex w-full items-center justify-between rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-left"
+            aria-label="Open 3D network map tab"
+          >
+            <span className="flex items-center gap-2 ps-mono text-[10px] tracking-[0.22em] text-emerald-300">
+              <Box className="h-4 w-4" />
+              3D NETWORK MAP
+            </span>
+            <span className="ps-mono text-[10px] tracking-[0.2em] text-white/75">
+              {activeTab === "map" ? "ACTIVE" : "OPEN MAP"}
+            </span>
+          </button>
           <TabsList className="grid h-auto grid-cols-3 gap-1 rounded-xl border border-cyan-500/20 bg-black/50 p-1 sm:grid-cols-7">
             <TabsTrigger value="map" className="font-mono text-[10px] tracking-[0.2em]">MAP</TabsTrigger>
             <TabsTrigger value="overview" className="font-mono text-[10px] tracking-[0.2em]">SCAN</TabsTrigger>
