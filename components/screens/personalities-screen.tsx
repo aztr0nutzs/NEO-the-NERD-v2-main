@@ -49,6 +49,8 @@ export function PersonalitiesScreen() {
   const voiceMatches = getRecommendedVoiceProfiles(previewing?.id ?? personalityId, 4)
   const active =
     PERSONALITIES.find((p) => p.id === personalityId) ?? PERSONALITIES[0]
+  const activeBehavior = getPersonalityProfile(active.id)
+  const activeLinkedVoice = getVoiceProfile(activeBehavior.voiceId)
 
   // Track whether selection actually changed (vs first mount) so the saved
   // badge only shows after a real user action.
@@ -85,9 +87,6 @@ export function PersonalitiesScreen() {
       setPreviewState("error")
       setPreviewMessage("VOICE PREVIEW UNAVAILABLE ON THIS DEVICE")
       return
-    }
-    if (voice.id !== voiceId) {
-      setVoiceId(voice.id)
     }
     setPreviewState("speaking")
     setPreviewMessage(`SPEAKING AS ${active.name.toUpperCase()} // ${voice.name.toUpperCase()}`)
@@ -188,6 +187,16 @@ export function PersonalitiesScreen() {
             </span>
           ))}
         </div>
+        <div className="mt-3 rounded-lg bg-black/40 px-3 py-2" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
+          <p className="ps-mono text-[9px] tracking-[0.3em] text-white/45">BEHAVIOR_DELTA</p>
+          <p className="mt-1 text-[12px] text-white/85">
+            Tone: <span className="text-white">{activeBehavior.tone}</span> · Style: <span className="text-white">{activeBehavior.responseStyle}</span> · Verbosity: <span className="text-white">{activeBehavior.verbosity}</span>
+          </p>
+          <p className="mt-1 text-[12px] text-white/75">
+            Warmth {Math.round(activeBehavior.warmth * 100)} · Directness {Math.round(activeBehavior.directness * 100)} · Snark {Math.round(activeBehavior.snark * 100)}
+          </p>
+          <p className="mt-1 text-[12px] text-white/75">Linked voice: {activeLinkedVoice.name} (preview uses linked voice; selection does not auto-switch active voice).</p>
+        </div>
 
         <div
           className="mt-3 rounded-lg bg-black/40 px-3 py-2"
@@ -197,7 +206,7 @@ export function PersonalitiesScreen() {
             SAMPLE_LINE
           </p>
           <p className="text-[13px] text-white/90 text-pretty">
-            &ldquo;{generatePersonalityPreviewResponse(active.id)}&rdquo;
+            &ldquo;{activeBehavior.sampleResponseText}&rdquo;
           </p>
         </div>
 
