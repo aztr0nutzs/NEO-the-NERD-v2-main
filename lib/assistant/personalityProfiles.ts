@@ -220,7 +220,7 @@ const BASE_ASSISTANT_PERSONALITY_PROFILES = [
 ] satisfies Array<
   Omit<
     AssistantPersonalityProfile,
-    "tone" | "responseStyle" | "verbosity" | "humor" | "aggressiveness" | "voiceId"
+    "tone" | "responseStyle" | "verbosity" | "humor" | "aggressiveness" | "voiceId" | "coreIdentity" | "preferredResponseShape" | "sampleResponseText" | "recommendedQuickPrompts"
   >
 >
 
@@ -237,7 +237,7 @@ export function getAssistantPersonalityProfile(id: string): AssistantPersonality
 function withBehavior(
   profile: Omit<
     AssistantPersonalityProfile,
-    "tone" | "responseStyle" | "verbosity" | "humor" | "aggressiveness" | "voiceId"
+    "tone" | "responseStyle" | "verbosity" | "humor" | "aggressiveness" | "voiceId" | "coreIdentity" | "preferredResponseShape" | "sampleResponseText" | "recommendedQuickPrompts"
   >,
 ): AssistantPersonalityProfile {
   const behavior = getPersonalityProfile(profile.id)
@@ -249,5 +249,9 @@ function withBehavior(
     humor: behavior.humor,
     aggressiveness: behavior.aggressiveness,
     voiceId: behavior.voiceId,
+    coreIdentity: behavior.coreIdentity,
+    preferredResponseShape: behavior.preferredResponseShape,
+    sampleResponseText: behavior.sampleResponseText,
+    recommendedQuickPrompts: behavior.recommendedQuickPrompts,
   }
 }
