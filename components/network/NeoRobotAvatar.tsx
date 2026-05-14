@@ -20,6 +20,12 @@ export function NeoRobotAvatar({ status, message, onClick }: NeoRobotAvatarProps
   };
 
   const colors = statusColors[status];
+  const circleMask = {
+    maskImage:
+      "radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 58%, rgba(0,0,0,0.88) 72%, rgba(0,0,0,0.18) 88%, rgba(0,0,0,0) 100%)",
+    WebkitMaskImage:
+      "radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 58%, rgba(0,0,0,0.88) 72%, rgba(0,0,0,0.18) 88%, rgba(0,0,0,0) 100%)",
+  };
 
   return (
     <div className="relative">
@@ -53,17 +59,31 @@ export function NeoRobotAvatar({ status, message, onClick }: NeoRobotAvatarProps
           />
         )}
 
-        {/* Robot image */}
-        <div className="relative h-20 w-20 overflow-hidden rounded-full sm:h-24 sm:w-24">
+        {/* Robot video, hard-clipped to the circular avatar frame. */}
+        <div
+          className="
+            relative h-20 w-20 overflow-hidden rounded-full bg-black/20 sm:h-24 sm:w-24
+            [&_video]:h-full [&_video]:w-full [&_video]:origin-center
+            [&_video]:scale-[1.42] [&_video]:object-cover [&_video]:object-center
+            [&_video]:mix-blend-screen [&_video]:contrast-110 [&_video]:saturate-110
+          "
+          style={circleMask}
+        >
           <NeoAvatarVideo
-            className="absolute inset-1"
+            className="absolute inset-0 h-full w-full overflow-hidden rounded-full"
             reactionKey={status === "scanning" ? "thinking" : status === "alert" ? "surprised" : null}
             reactionId={status === "scanning" ? 1 : status === "alert" ? 2 : null}
             ariaLabel="N.E.O. network avatar"
           />
 
-          {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 45%, rgba(0,0,0,0) 48%, rgba(0,0,0,0.26) 74%, rgba(0,0,0,0.82) 100%)",
+            }}
+          />
         </div>
 
         {/* Status indicator */}
@@ -113,8 +133,20 @@ export function NeoRobotBadge({
   };
 
   return (
-    <div className={`relative ${sizeClasses[size]} overflow-hidden rounded-full`}>
-      <NeoAvatarVideo className="absolute inset-0" ariaLabel="N.E.O. network badge avatar" />
+    <div
+      className={`
+        relative ${sizeClasses[size]} overflow-hidden rounded-full bg-black/20
+        [&_video]:h-full [&_video]:w-full [&_video]:scale-[1.42]
+        [&_video]:object-cover [&_video]:object-center [&_video]:mix-blend-screen
+      `}
+      style={{
+        maskImage:
+          "radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 60%, rgba(0,0,0,0.82) 76%, rgba(0,0,0,0) 100%)",
+        WebkitMaskImage:
+          "radial-gradient(circle at 50% 50%, rgba(0,0,0,1) 60%, rgba(0,0,0,0.82) 76%, rgba(0,0,0,0) 100%)",
+      }}
+    >
+      <NeoAvatarVideo className="absolute inset-0 h-full w-full overflow-hidden rounded-full" ariaLabel="N.E.O. network badge avatar" />
       {status === "scanning" && (
         <div className="absolute inset-0 animate-pulse rounded-full ring-2 ring-purple-500/50" />
       )}

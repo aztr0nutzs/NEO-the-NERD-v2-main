@@ -146,7 +146,7 @@ export function resolveNetworkAdapterStatus({
   if (demoMode) {
     return {
       mode: "demo",
-      label: "DEMO_ADAPTER",
+      label: "SIMULATED NETWORK DATA",
       isDemo: true,
       isBackendAvailable: false,
       message: nativePluginAvailable
@@ -187,7 +187,7 @@ export function resolveNetworkAdapterStatus({
 
   return {
     mode: "fallback",
-    label: "DEMO_FALLBACK",
+    label: "SIMULATED NETWORK DATA",
     isDemo: true,
     isBackendAvailable: false,
     message:
@@ -727,14 +727,21 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
     this.scanStartedAt = Date.now();
     this.scanDurationMs = durations[mode];
 
-    const nativeScan = await runNativeSubnetScan({ scanMode: mode });
-    if (nativeScan) {
-      this.lastNativeScan = nativeScan;
-      this.scanProgress = 100;
-      this.isScanning = false;
-      this.scanStartedAt = Date.now();
-      return;
-    }
+    void runNativeSubnetScan({ scanMode: mode })
+      .then((nativeScan) => {
+        if (nativeScan) {
+          this.lastNativeScan = nativeScan;
+          this.scanProgress = 100;
+          this.isScanning = false;
+          this.scanStartedAt = Date.now();
+        }
+      })
+      .catch(() => {
+        this.scanProgress = 0;
+        this.isScanning = false;
+      });
+
+    if (await isAndroidNativeNetworkPluginAvailable()) return;
 
     const result = await (this.bridge?.startNetworkScan?.(mode) ??
       requestBackendJson<{ scanProgress?: number }>("/scan", {
@@ -890,14 +897,28 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
 class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   private activeMode: NetworkAdapterStatus["mode"] = "demo";
   private fallbackReason: string | null = null;
+  private nativeOverrideResolved: boolean | null = null;
 
   constructor(
     private readonly demoAdapter: DemoNetworkAdapter,
     private readonly nativeNetworkAdapter: NativeNetworkAdapter
   ) {}
 
+  private async nativePluginCanOverrideDemo(): Promise<boolean> {
+    if (this.nativeOverrideResolved !== null) return this.nativeOverrideResolved;
+    this.nativeOverrideResolved = await isAndroidNativeNetworkPluginAvailable();
+    return this.nativeOverrideResolved;
+  }
+
   private async shouldUseDemo(): Promise<boolean> {
     const settings = await this.demoAdapter.getNetworkSettings();
+    if (settings.demoMode && await this.nativePluginCanOverrideDemo()) {
+      await this.demoAdapter.updateNetworkSettings({ demoMode: false });
+      await this.nativeNetworkAdapter.updateNetworkSettings({ ...settings, demoMode: false });
+      this.activeMode = "native-backend";
+      this.fallbackReason = null;
+      return false;
+    }
     return settings.demoMode;
   }
 
@@ -1066,7 +1087,9 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   async updateNetworkSettings(settings: Partial<NetworkSettings>): Promise<NetworkSettings> {
-    const updated = await this.demoAdapter.updateNetworkSettings(settings);
+    const nativeAvailable = await this.nativePluginCanOverrideDemo();
+    const nextSettings = nativeAvailable ? { ...settings, demoMode: false } : settings;
+    const updated = await this.demoAdapter.updateNetworkSettings(nextSettings);
 
     if (!updated.demoMode) {
       try {
@@ -1086,6 +1109,7 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   async getNetworkSettings(): Promise<NetworkSettings> {
+    await this.shouldUseDemo();
     return this.demoAdapter.getNetworkSettings();
   }
 

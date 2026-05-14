@@ -23,7 +23,8 @@ export function NerdControlPanel({
   const onlineDevices = devices.filter((d) => d.status === "online").length;
   const flaggedDevices = devices.filter((d) => d.trustLevel === "new" || d.trustLevel === "watch").length;
   const queuedActions = actions.filter((a) => a.status === "queued" || a.status === "running").length;
-  const adapterMode = settings?.demoMode ? "DEMO ADAPTER" : "NATIVE READY";
+  const isSimulated = settings?.demoMode ?? true;
+  const adapterMode = isSimulated ? "SIMULATED NETWORK DATA" : "REAL NETWORK DATA";
   const statusTone = isScanning ? "#b829ff" : flaggedDevices > 0 ? "#ff7a00" : "#39ff14";
 
   return (
@@ -53,10 +54,10 @@ export function NerdControlPanel({
 
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <MetricCard
-            label="ONLINE DEVICES"
-            value={`${onlineDevices}/${devices.length}`}
+            label={isSimulated ? "SIMULATED DEVICES" : "ONLINE DEVICES"}
+            value={isSimulated ? String(devices.length) : `${onlineDevices}/${devices.length}`}
             color="#00f0ff"
-            detail={networkStatus?.networkName ?? "NETWORK UNKNOWN"}
+            detail={isSimulated ? "NOT A LIVE COUNT" : networkStatus?.networkName ?? "NETWORK UNKNOWN"}
           />
 
           <div className="flex flex-col items-center justify-between">
@@ -140,7 +141,7 @@ export function NerdControlPanel({
               textShadow: `0 0 8px ${statusTone}80`,
             }}
           >
-            {adapterMode} {"//"} {networkStatus?.scanState.toUpperCase() ?? "INITIALIZING"} {"//"} LIVE NETWORK CLAIMS DISABLED
+            {adapterMode} {"//"} {networkStatus?.scanState.toUpperCase() ?? "INITIALIZING"}
           </span>
           <span className="font-mono text-[8px] uppercase tracking-wider text-gray-500">
             CONNECTED
