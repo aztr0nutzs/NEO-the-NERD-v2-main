@@ -181,11 +181,11 @@ export function RobotStage({
       >
         {/*
           Reactor portal backing — a deep dark oval that sits behind the
-          avatar video. Combined with the screen-blend + radial mask on the
-          video itself (portalMode), this anchors the robot inside what
-          reads as an intentional reactor chamber instead of a pasted-on
-          black rectangle. The tint picks up the current mood color very
-          subtly so it ties into the rings.
+          avatar video. The avatar itself (variant="stage") is `object-cover`
+          with a feathered edge mask, so its near-black background dissolves
+          into this chamber instead of reading as a pasted-on black rectangle.
+          The tint picks up the current mood color very subtly so it ties
+          into the rings.
         */}
         <div
           aria-hidden="true"
@@ -202,7 +202,7 @@ export function RobotStage({
           active={visible}
           ariaLabel="NEO the Nerd robot companion"
           onReactionComplete={clearAvatarReaction}
-          portalMode
+          variant="stage"
         />
 
         {/* Tap zones — overlay invisible buttons over head/core/hand */}
