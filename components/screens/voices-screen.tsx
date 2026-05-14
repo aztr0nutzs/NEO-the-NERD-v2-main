@@ -74,7 +74,7 @@ export function VoicesScreen() {
   }, [voiceId])
 
   const filteredVoices = useMemo(
-    () => filterVoiceProfiles(VOICE_PROFILES, filters, voiceFavoriteIds),
+    () => filterVoiceProfiles(VOICE_PROFILES, filters, voiceFavoriteIds).filter((voice, index, list) => list.findIndex((item) => item.id === voice.id) === index),
     [filters, voiceFavoriteIds],
   )
   const featuredVoices = useMemo(() => VOICE_PROFILES.filter((voice) => voice.featured), [])
