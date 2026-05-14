@@ -43,8 +43,6 @@ import {
   writeStoredState,
 } from "./persistence"
 import { generateAssistantReply } from "@/lib/assistant/assistant-runtime"
-import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
-import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 
 interface AppState {
   screen: ScreenId
@@ -374,13 +372,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setPersonalityId = useCallback((id: string) => {
     if (!PERSONALITIES.some((personality) => personality.id === id)) return
-    const linkedVoiceId = getPersonalityProfile(id).voiceId
     setPersonalityIdState(id)
-    if (VOICES.some((voice) => voice.id === linkedVoiceId)) {
-      setVoiceIdState(linkedVoiceId)
-      _setVoiceParams(voiceProfileToParams(linkedVoiceId))
-      setRecentVoiceIds((current) => [linkedVoiceId, ...current.filter((voiceId) => voiceId !== linkedVoiceId)].slice(0, 8))
-    }
   }, [])
 
   const playAvatarReaction = useCallback((reactionKey: AvatarReactionKey) => {

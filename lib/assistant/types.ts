@@ -59,6 +59,10 @@ export interface AssistantPersonalityProfile {
   humor: number
   aggressiveness: number
   voiceId: string
+  coreIdentity: string
+  preferredResponseShape: string
+  sampleResponseText: string
+  recommendedQuickPrompts: string[]
   toneKeywords: string[]
   humorLevel: number
   warmthLevel: number
