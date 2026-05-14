@@ -360,17 +360,28 @@ export function NetworkDiscoveryFeature() {
 
   // Robot interaction
   const handleRobotClick = useCallback(() => {
+    const effectiveAdapterStatus = settings
+      ? resolveNetworkUiAdapterStatus(settings, adapterStatus)
+      : null
+    const adapterHint =
+      effectiveAdapterStatus?.mode === "demo"
+        ? "Simulated network data mode is active."
+        : effectiveAdapterStatus?.label === "LIVE_ANDROID_DISCOVERY"
+          ? "Live Android discovery bridge is active."
+          : effectiveAdapterStatus?.mode === "fallback"
+            ? `Live discovery unavailable: ${effectiveAdapterStatus.message}`
+            : "Discovery runtime status is initializing."
     const messages = [
       "Network module online. Ready to scan your local subnet.",
       "I can help you discover and manage all devices on your network.",
-      "Demo adapter active. Connect native backend for real scanning.",
+      adapterHint,
       `Currently tracking ${devices.length} devices. ${devices.filter(d => d.status === "online").length} are online.`,
       "Tip: Use Deep scan mode for comprehensive port detection.",
     ];
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     setRobotMessage(randomMessage);
     setTimeout(() => setRobotMessage(null), 4000);
-  }, [devices]);
+  }, [adapterStatus, devices, settings]);
 
   // Loading state
   if (!networkStatus || !routerStatus || !settings) {
