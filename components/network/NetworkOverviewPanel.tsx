@@ -1,14 +1,27 @@
 "use client";
 
+import { motion, animate, useMotionValue, useTransform } from "framer-motion";
+import { useEffect } from "react";
 import { Wifi, Monitor, AlertTriangle, Eye, Shield } from "lucide-react";
 import type { NetworkStatus } from "@/lib/network/types";
 
 interface NetworkOverviewPanelProps {
   status: NetworkStatus;
   isDemoMode: boolean;
+  scanState?: NetworkStatus["scanState"];
+  onJumpToDevices?: () => void;
+  onJumpToSecurity?: () => void;
+  onJumpToScan?: () => void;
 }
 
-export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPanelProps) {
+export function NetworkOverviewPanel({
+  status,
+  isDemoMode,
+  scanState = "idle",
+  onJumpToDevices,
+  onJumpToSecurity,
+  onJumpToScan,
+}: NetworkOverviewPanelProps) {
   const stats = [
     {
       label: "DEVICES_FOUND",
@@ -17,6 +30,8 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
       color: "text-cyan-400",
       borderColor: "border-cyan-500/50",
       glowColor: "shadow-cyan-500/20",
+      onClick: onJumpToDevices,
+      interactiveLabel: "Open device list",
     },
     {
       label: "ONLINE",
@@ -25,6 +40,8 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
       color: "text-emerald-400",
       borderColor: "border-emerald-500/50",
       glowColor: "shadow-emerald-500/20",
+      onClick: onJumpToDevices,
+      interactiveLabel: "Open device list",
     },
     {
       label: "NEW_UNKNOWN",
@@ -33,6 +50,8 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
       color: "text-yellow-400",
       borderColor: "border-yellow-500/50",
       glowColor: "shadow-yellow-500/20",
+      onClick: onJumpToSecurity,
+      interactiveLabel: "Open security insights",
     },
     {
       label: "FLAGGED",
@@ -41,6 +60,8 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
       color: "text-pink-400",
       borderColor: "border-pink-500/50",
       glowColor: "shadow-pink-500/20",
+      onClick: onJumpToSecurity,
+      interactiveLabel: "Open flagged insights",
     },
   ];
 
@@ -70,15 +91,31 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
+            <motion.button
               key={stat.label}
+              type="button"
+              onClick={stat.onClick}
+              disabled={!stat.onClick}
+              title={stat.interactiveLabel}
+              whileHover={stat.onClick ? { y: -2, scale: 1.01 } : undefined}
+              whileTap={stat.onClick ? { scale: 0.98 } : undefined}
               className={`
                 relative overflow-hidden rounded-lg border bg-black/60
-                p-4 backdrop-blur-sm transition-all duration-300
-                hover:scale-[1.02] hover:shadow-lg
+                p-4 text-left backdrop-blur-sm transition-all duration-300
+                ${stat.onClick ? "cursor-pointer hover:shadow-lg" : "cursor-default"}
                 ${stat.borderColor} ${stat.glowColor}
               `}
             >
+              {scanState === "scanning" && (
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-20"
+                  style={{
+                    background:
+                      "linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.35) 45%, transparent 70%)",
+                    animation: "scanSweep 1.6s linear infinite",
+                  }}
+                />
+              )}
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-5">
                 <div
@@ -95,11 +132,9 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
                   <p className="mb-1 font-mono text-[10px] tracking-widest text-gray-500">
                     {stat.label}
                   </p>
-                  <p className={`text-3xl font-black italic ${stat.color}`}>
-                    {stat.value}
-                  </p>
+                  <CountValue value={stat.value} className={`text-3xl font-black italic ${stat.color}`} />
                 </div>
-                <Icon className={`h-8 w-8 opacity-40 ${stat.color}`} />
+                <Icon className={`h-8 w-8 opacity-40 ${stat.color} ${stat.label === "FLAGGED" && stat.value > 0 ? "animate-pulse" : ""}`} />
               </div>
 
               {/* Corner Accent */}
@@ -110,10 +145,25 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
                   opacity: 0.1,
                 }}
               />
-            </div>
+            </motion.button>
           );
         })}
       </div>
+
+      <motion.button
+        type="button"
+        onClick={onJumpToScan}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className="w-full rounded-lg border border-purple-500/35 bg-purple-500/10 px-3 py-2 text-left"
+      >
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[10px] tracking-[0.25em] text-purple-300">SCAN HUD</span>
+          <span className="font-mono text-[10px] tracking-[0.2em] text-white/75">
+            {scanState === "scanning" ? "SCANNING ACTIVE" : "OPEN SCAN CONTROLS"}
+          </span>
+        </div>
+      </motion.button>
 
       {/* Demo Mode Notice */}
       {isDemoMode && (
@@ -126,4 +176,14 @@ export function NetworkOverviewPanel({ status, isDemoMode }: NetworkOverviewPane
       )}
     </div>
   );
+}
+
+function CountValue({ value, className }: { value: number; className: string }) {
+  const motionValue = useMotionValue(value);
+  const rounded = useTransform(motionValue, (latest) => Math.round(latest));
+  useEffect(() => {
+    const controls = animate(motionValue, value, { duration: 0.4, ease: "easeOut" });
+    return () => controls.stop();
+  }, [motionValue, value]);
+  return <motion.p className={className}>{rounded}</motion.p>;
 }
