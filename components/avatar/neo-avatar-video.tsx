@@ -17,6 +17,27 @@ export interface NeoAvatarVideoHandle {
   playReaction: (key: Exclude<AvatarClipKey, "idle">) => void
 }
 
+/**
+ * Avatar presentation variants. The avatar MP4s have *opaque, near-black*
+ * backgrounds (sampled #010101–#070707) and a brighter reflective floor along
+ * the bottom edge — they are NOT alpha video. `mix-blend-mode: screen` was
+ * tried previously and is the wrong tool: the robot's own body is dark, so
+ * screen-blend dissolves the robot itself, not just the background (this is
+ * what made the Network circle show through to the page background).
+ *
+ * Instead every variant composites honestly:
+ *   - `object-cover` so the robot fills the frame with no letterbox bars
+ *   - tuned `object-position` + scale to frame the robot and crop the bright
+ *     floor strip out of view
+ *   - a feathered `mask-image` (CSS masks, `-webkit-mask-image` — reliable on
+ *     Android WebView) that fades the rectangular video edge into transparency
+ *   - `overflow-hidden` + `rounded-full` for the circular surfaces, so the
+ *     rectangle is physically clipped to the circle
+ * The near-black video background then sits invisibly on the app's near-black
+ * stage/circle backing, with no hard box edge.
+ */
+export type AvatarVariant = "stage" | "circle" | "bare"
+
 interface NeoAvatarVideoProps {
   className?: string
   baseKey?: Extract<AvatarClipKey, "idle">
@@ -27,16 +48,52 @@ interface NeoAvatarVideoProps {
   ariaLabel?: string
   onReactionComplete?: () => void
   /**
-   * When true, render the inner <video> with `mix-blend-mode: screen` and a
-   * radial mask. This dissolves the MP4's opaque black background so the clip
-   * integrates into a stage instead of reading as a square video box.
-   * Off by default — circle-cropped surfaces (orb) don't need it.
+   * Compositing variant. `stage` = large main robot stage, `circle` = circular
+   * surfaces (Network avatar, persistent orb, badge), `bare` = unmasked raw.
    */
-  portalMode?: boolean
+  variant?: AvatarVariant
 }
 
-const PORTAL_MASK =
-  "radial-gradient(ellipse 58% 74% at 50% 49%, rgba(0,0,0,1) 48%, rgba(0,0,0,0.92) 64%, rgba(0,0,0,0.36) 84%, rgba(0,0,0,0) 100%)"
+// Feathered elliptical mask for the large stage: fully opaque through the
+// robot, dissolving the rectangular MP4 edge into the surrounding reactor.
+const STAGE_MASK =
+  "radial-gradient(ellipse 94% 96% at 50% 46%, #000 0%, #000 62%, rgba(0,0,0,0.55) 82%, rgba(0,0,0,0) 100%)"
+
+// Soft inner-edge mask for circular surfaces — softens the hard circular clip
+// so it never reads as a stark cut, while staying opaque across the robot.
+const CIRCLE_MASK =
+  "radial-gradient(circle at 50% 50%, #000 0%, #000 82%, rgba(0,0,0,0.4) 93%, rgba(0,0,0,0) 100%)"
+
+interface VariantConfig {
+  wrapper: string
+  wrapperStyle?: React.CSSProperties
+  video: string
+  videoStyle?: React.CSSProperties
+}
+
+const VARIANT_CONFIG: Record<AvatarVariant, VariantConfig> = {
+  stage: {
+    wrapper: "relative isolate overflow-hidden bg-[#05060a]",
+    wrapperStyle: { maskImage: STAGE_MASK, WebkitMaskImage: STAGE_MASK },
+    video: "h-full w-full object-cover",
+    // Bias the crop upward so the head keeps headroom and the bright reflective
+    // floor at the bottom of the clip is pushed out of frame, while still
+    // showing the robot down past the glowing chest core.
+    videoStyle: { objectPosition: "50% 24%", transform: "scale(1.02)" },
+  },
+  circle: {
+    wrapper: "relative isolate overflow-hidden rounded-full bg-[#05060a]",
+    wrapperStyle: { maskImage: CIRCLE_MASK, WebkitMaskImage: CIRCLE_MASK },
+    video: "h-full w-full object-cover",
+    // Frame the head + glowing chest core inside the circle; scale up so the
+    // robot fills the circular viewport edge-to-edge with no inner gap.
+    videoStyle: { objectPosition: "50% 22%", transform: "scale(1.14)" },
+  },
+  bare: {
+    wrapper: "",
+    video: "h-full w-full object-contain",
+  },
+}
 
 export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoProps>(
   function NeoAvatarVideo(
@@ -49,7 +106,7 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
       active = true,
       ariaLabel = "NEO the Nerd avatar",
       onReactionComplete,
-      portalMode = false,
+      variant = "bare",
     },
     ref,
   ) {
@@ -61,6 +118,7 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
     const [onscreen, setOnscreen] = useState(true)
     const currentEntry = AVATAR_MEDIA[currentKey]
     const shouldPlay = active && pageVisible && onscreen && !reducedMotion
+    const config = VARIANT_CONFIG[variant]
 
     const playReaction = useCallback(
       (key: Exclude<AvatarClipKey, "idle">) => {
@@ -120,12 +178,21 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
     useEffect(() => {
       // Final unmount safety: detach the source so the underlying media
       // element does not hold a decoded buffer pinned after React removes it.
+      //
+      // The src detach is guarded by `isConnected`: React's StrictMode (dev)
+      // and the AppShell screen-swap <AnimatePresence> both run effect cleanup
+      // while the element is still mounted/connected. Stripping `src` then —
+      // React won't re-apply it without a re-render — left the element source-
+      // less (this is what made the Network avatar render an empty circle).
+      // On a real unmount the node is already detached, so it's safe to strip.
       const mountedVideo = videoRef.current
       return () => {
         if (!mountedVideo) return
         mountedVideo.pause()
-        mountedVideo.removeAttribute("src")
-        mountedVideo.load()
+        if (!mountedVideo.isConnected) {
+          mountedVideo.removeAttribute("src")
+          mountedVideo.load()
+        }
       }
     }, [])
 
@@ -144,57 +211,41 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
     return (
       <div
         ref={rootRef}
-        className={`${className ?? ""}${
-          portalMode
-            ? " relative isolate overflow-hidden rounded-[48%_48%_44%_44%/40%_40%_62%_62%]"
-            : ""
-        }`}
-        style={
-          portalMode
-            ? {
-                // Apply the feather to the presentation window itself, not
-                // only to the <video>. Android WebView can be inconsistent
-                // with video-element masks; masking/clipping the wrapper plus
-                // a stage-colored edge wash guarantees the rectangular MP4
-                // corners do not survive as a visible black box.
-                maskImage: PORTAL_MASK,
-                WebkitMaskImage: PORTAL_MASK,
-              }
-            : undefined
-        }
+        className={`${className ?? ""} ${config.wrapper}`.trim()}
+        style={config.wrapperStyle}
       >
-        {portalMode && (
-          <>
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-0 rounded-[48%_48%_44%_44%/40%_40%_62%_62%]"
-              style={{
-                background:
-                  "radial-gradient(ellipse 70% 82% at 50% 52%, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.88) 54%, rgba(0,0,0,0.20) 82%, rgba(0,0,0,0) 100%)",
-              }}
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-20 rounded-[48%_48%_44%_44%/40%_40%_62%_62%]"
-              style={{
-                background:
-                  "radial-gradient(ellipse 66% 80% at 50% 52%, rgba(0,0,0,0) 58%, rgba(0,0,0,0.30) 76%, rgba(0,0,0,0.88) 100%)",
-              }}
-            />
-          </>
+        {variant === "stage" && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10"
+            style={{
+              // Premium edge depth: a soft dark vignette that sits above the
+              // video so the robot reads as recessed into the reactor chamber.
+              background:
+                "radial-gradient(ellipse 70% 80% at 50% 46%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.34) 80%, rgba(0,0,0,0.7) 100%)",
+            }}
+          />
+        )}
+        {variant === "circle" && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-10 rounded-full"
+            style={{
+              // Inner edge highlight + floor shadow so the circular viewport
+              // looks like an intentional lens, not a flat crop.
+              boxShadow:
+                "inset 0 0 14px rgba(0,0,0,0.7), inset 0 2px 10px rgba(0,0,0,0.55)",
+              background:
+                "radial-gradient(circle at 50% 38%, rgba(0,0,0,0) 52%, rgba(0,0,0,0.32) 82%, rgba(0,0,0,0.7) 100%)",
+            }}
+          />
         )}
         <video
           key={currentEntry.key}
           ref={videoRef}
           src={currentEntry.src}
-          className={`${portalMode ? "relative z-10 h-full w-full object-contain mix-blend-screen contrast-110 saturate-110" : "h-full w-full object-contain"}`}
-          style={
-            portalMode
-              ? {
-                  transform: "scale(1.03)",
-                }
-              : undefined
-          }
+          className={config.video}
+          style={config.videoStyle}
           autoPlay
           muted
           playsInline

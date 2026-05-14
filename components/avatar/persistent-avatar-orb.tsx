@@ -45,7 +45,8 @@ export function PersistentAvatarOrb() {
         }}
       />
       <NeoAvatarVideo
-        className="absolute inset-2 overflow-hidden rounded-full"
+        className="absolute inset-2"
+        variant="circle"
         reactionKey={avatarReaction?.key ?? null}
         reactionId={avatarReaction?.id ?? null}
         reducedMotion={reducedMotion}
