@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(git rm *)",
+      "Bash(git status *)",
+      "Bash(grep -v \"^.*\\\\.tsx:.*//.*set\")"
+    ]
+  }
+}

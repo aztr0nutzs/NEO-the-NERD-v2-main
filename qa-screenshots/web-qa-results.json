@@ -1,0 +1,169 @@
+{
+  "screens": [
+    {
+      "label": "Robot",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-01-main.png"
+    },
+    {
+      "label": "Chat",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-02-chat.png"
+    },
+    {
+      "label": "Voices",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-03-voices.png"
+    },
+    {
+      "label": "Person.",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-04-personalities.png"
+    },
+    {
+      "label": "Games",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-05-games.png"
+    },
+    {
+      "label": "Ctrl",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-06-controls.png"
+    },
+    {
+      "label": "Library",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-07-library.png"
+    },
+    {
+      "label": "Set",
+      "status": "PASS",
+      "screenshot": "qa-screenshots\\web-08-settings.png"
+    }
+  ],
+  "controls": [
+    {
+      "name": "Main core tap",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Main quick command",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Chat send",
+      "status": "PASS",
+      "detail": "Assistant response displayed"
+    },
+    {
+      "name": "Voice generation control",
+      "status": "PASS",
+      "detail": "TTS: BALLAD"
+    },
+    {
+      "name": "Personality preview/select",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Permission states",
+      "status": "PASS",
+      "detail": "Permission rows visible"
+    },
+    {
+      "name": "Library add/edit/copy/favorite/delete/persist",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Library duplicate handling",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Library export button",
+      "status": "PASS",
+      "detail": "neo-the-nerd-response-vault.json"
+    },
+    {
+      "name": "Settings persistence",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "games": [
+    {
+      "title": "TIC_TAC_TOE",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "ROCK_PAPER_SCISSORS",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "MEMORY_MATCH",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "REACTION_TAP",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "GUESS_THE_NUMBER",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "TRIVIA_DUEL",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "WORD_SCRAMBLE",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "EMOJI_DECODE",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "RAPID_FIRE",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    },
+    {
+      "title": "WOULD_YOU_RATHER",
+      "status": "PASS",
+      "detail": "Launched and primary interaction attempted"
+    }
+  ],
+  "persistence": [
+    {
+      "name": "Response library persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "Settings reload persistence",
+      "status": "PASS"
+    }
+  ],
+  "issues": [
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console: Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+    "console: Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ]
+}

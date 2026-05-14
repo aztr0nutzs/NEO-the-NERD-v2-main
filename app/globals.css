@@ -1,0 +1,293 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* NEO dark cyber palette */
+  --background: #000000;
+  --foreground: #e8faff;
+  --card: #07070b;
+  --card-foreground: #e8faff;
+  --popover: #07070b;
+  --popover-foreground: #e8faff;
+
+  --primary: #00f0ff;            /* neon cyan */
+  --primary-foreground: #000000;
+  --secondary: #b829ff;          /* neon purple */
+  --secondary-foreground: #ffffff;
+  --muted: #0e0e14;
+  --muted-foreground: #8a93a6;
+  --accent: #ff2d9c;             /* hot pink */
+  --accent-foreground: #ffffff;
+  --destructive: #ff3b3b;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 240, 255, 0.18);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #00f0ff;
+
+  /* Custom NEO brand tokens */
+  --neon-cyan: #00f0ff;
+  --neon-purple: #b829ff;
+  --neon-pink: #ff2d9c;
+  --neon-green: #39ff14;
+  --neon-orange: #ff7a00;
+  --neon-blue: #2ea3ff;
+
+  --chart-1: var(--neon-cyan);
+  --chart-2: var(--neon-purple);
+  --chart-3: var(--neon-pink);
+  --chart-4: var(--neon-green);
+  --chart-5: var(--neon-orange);
+
+  --radius: 14px;
+
+  --sidebar: #050507;
+  --sidebar-foreground: #e8faff;
+  --sidebar-primary: var(--neon-cyan);
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: var(--neon-pink);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(0, 240, 255, 0.18);
+  --sidebar-ring: var(--neon-cyan);
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #e8faff;
+  --card: #07070b;
+  --card-foreground: #e8faff;
+  --popover: #07070b;
+  --popover-foreground: #e8faff;
+  --primary: #00f0ff;
+  --primary-foreground: #000000;
+  --secondary: #b829ff;
+  --secondary-foreground: #ffffff;
+  --muted: #0e0e14;
+  --muted-foreground: #8a93a6;
+  --accent: #ff2d9c;
+  --accent-foreground: #ffffff;
+  --destructive: #ff3b3b;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 240, 255, 0.18);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #00f0ff;
+}
+
+@theme inline {
+  --font-sans: var(--font-oxanium), 'Oxanium', system-ui, sans-serif;
+  --font-mono: var(--font-source-code-pro), 'Source Code Pro', ui-monospace, SFMono-Regular, Consolas, monospace;
+  --font-serif: var(--font-source-serif-4), 'Source Serif 4', Georgia, serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-purple: var(--neon-purple);
+  --color-neon-pink: var(--neon-pink);
+  --color-neon-green: var(--neon-green);
+  --color-neon-orange: var(--neon-orange);
+  --color-neon-blue: var(--neon-blue);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 3px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply bg-background text-foreground;
+    background-color: #000;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /*
+    Body intentionally has NO background paint. The NEO background art
+    (NeoBackgroundScene) is a fixed z-0 background layer; any background-color or
+    background-image on <body> would paint on top of negative z-index
+    descendants and hide the supplied background art.
+  */
+  body {
+    background: transparent;
+    color: var(--foreground);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* === NEO utility layer === */
+@layer utilities {
+  .ps-mesh {
+    background-image:
+      linear-gradient(rgba(0, 240, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .ps-mesh-fine {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+  .ps-scanlines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.025) 0,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+  .ps-glass {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+      rgba(8, 8, 14, 0.7);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+  }
+  .ps-glow-cyan {
+    box-shadow:
+      0 0 0 1px rgba(0, 240, 255, 0.35) inset,
+      0 0 18px rgba(0, 240, 255, 0.35),
+      0 0 60px rgba(0, 240, 255, 0.15);
+  }
+  .ps-glow-purple {
+    box-shadow:
+      0 0 0 1px rgba(184, 41, 255, 0.45) inset,
+      0 0 18px rgba(184, 41, 255, 0.4),
+      0 0 60px rgba(184, 41, 255, 0.18);
+  }
+  .ps-glow-pink {
+    box-shadow:
+      0 0 0 1px rgba(255, 45, 156, 0.45) inset,
+      0 0 18px rgba(255, 45, 156, 0.4),
+      0 0 60px rgba(255, 45, 156, 0.18);
+  }
+  .ps-glow-green {
+    box-shadow:
+      0 0 0 1px rgba(57, 255, 20, 0.4) inset,
+      0 0 16px rgba(57, 255, 20, 0.4),
+      0 0 50px rgba(57, 255, 20, 0.15);
+  }
+  .ps-text-cyan {
+    color: #00f0ff;
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6), 0 0 22px rgba(0, 240, 255, 0.35);
+  }
+  .ps-text-pink {
+    color: #ff2d9c;
+    text-shadow: 0 0 8px rgba(255, 45, 156, 0.6), 0 0 22px rgba(255, 45, 156, 0.35);
+  }
+  .ps-text-purple {
+    color: #b829ff;
+    text-shadow: 0 0 8px rgba(184, 41, 255, 0.6), 0 0 22px rgba(184, 41, 255, 0.35);
+  }
+  .ps-text-green {
+    color: #39ff14;
+    text-shadow: 0 0 8px rgba(57, 255, 20, 0.55), 0 0 22px rgba(57, 255, 20, 0.3);
+  }
+  .ps-text-orange {
+    color: #ff7a00;
+    text-shadow: 0 0 8px rgba(255, 122, 0, 0.55), 0 0 22px rgba(255, 122, 0, 0.3);
+  }
+  .ps-heading {
+    font-family: var(--font-sans);
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .ps-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ps-corner {
+    position: relative;
+  }
+  .ps-corner::before,
+  .ps-corner::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: rgba(0, 240, 255, 0.7);
+    border-style: solid;
+    pointer-events: none;
+  }
+  .ps-corner::before {
+    top: -1px; left: -1px;
+    border-width: 1px 0 0 1px;
+  }
+  .ps-corner::after {
+    bottom: -1px; right: -1px;
+    border-width: 0 1px 1px 0;
+  }
+  .ps-no-scrollbar::-webkit-scrollbar { display: none; }
+  .ps-no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@keyframes ps-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes ps-spin-rev {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+@keyframes ps-pulse-ring {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+}
+@keyframes ps-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+@keyframes ps-flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.55; }
+}
+@keyframes neo-robot-sprite {
+  from { background-position: 0 0; }
+  to { background-position: 100% 0; }
+}
+
+.animate-ps-spin-slow { animation: ps-spin-slow 24s linear infinite; }
+.animate-ps-spin-rev { animation: ps-spin-rev 32s linear infinite; }
+.animate-ps-pulse-ring { animation: ps-pulse-ring 2.4s ease-in-out infinite; }
+.animate-ps-scan { animation: ps-scan 4s linear infinite; }
+.animate-ps-flicker { animation: ps-flicker 4s linear infinite; }
