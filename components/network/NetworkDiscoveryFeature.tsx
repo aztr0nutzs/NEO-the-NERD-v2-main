@@ -469,12 +469,23 @@ export function NetworkDiscoveryFeature() {
             scanProgress={scanProgress}
             actions={actions}
             settings={effectivePanelSettings}
+            onOpenDevices={() => setActiveTab("devices")}
+            onOpenQueue={() => setActiveTab("overview")}
+            onOpenSecurity={() => setActiveTab("security")}
+            onOpenScan={() => setActiveTab("overview")}
           />
         </section>
 
         {/* Overview Stats */}
         <section className="mb-6">
-          <NetworkOverviewPanel status={networkStatus} isDemoMode={isDemoMode} />
+          <NetworkOverviewPanel
+            status={networkStatus}
+            isDemoMode={isDemoMode}
+            scanState={networkStatus.scanState}
+            onJumpToDevices={() => setActiveTab("devices")}
+            onJumpToSecurity={() => setActiveTab("security")}
+            onJumpToScan={() => setActiveTab("overview")}
+          />
         </section>
 
         {/* Main Content Tabs */}
