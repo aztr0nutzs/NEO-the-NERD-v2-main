@@ -54,6 +54,7 @@ import {
   STORAGE_SCHEMA_VERSION,
   writeStoredState,
 } from "./persistence"
+import { DEFAULT_ENTITLEMENT_STATE } from "./entitlements/tiers"
 import { generateAssistantReply } from "@/lib/assistant/assistant-runtime"
 import { buildNetworkAssistantContext } from "@/lib/network/networkAssistantContext"
 
@@ -187,6 +188,7 @@ const DEFAULT_SETTINGS: AssistantSettings = {
     monitoringOptIn: false,
     initialScanRequested: false,
   },
+  entitlement: { ...DEFAULT_ENTITLEMENT_STATE },
 }
 
 const DEFAULT_NETWORK_MONITOR_STATE: NetworkMonitorState = {
@@ -401,6 +403,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         onboarding: {
           ...DEFAULT_SETTINGS.onboarding,
           ...(stored.settings.onboarding ?? {}),
+        },
+        entitlement: {
+          ...DEFAULT_SETTINGS.entitlement,
+          ...(stored.settings.entitlement ?? {}),
         },
       })
     }
@@ -852,6 +858,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             onboarding: {
               ...DEFAULT_SETTINGS.onboarding,
               ...(parsed.settings?.onboarding ?? {}),
+            },
+            entitlement: {
+              ...DEFAULT_SETTINGS.entitlement,
+              ...(parsed.settings?.entitlement ?? {}),
             },
           },
           voiceParams: { ...DEFAULT_VOICE_PARAMS, ...parsed.voiceParams },

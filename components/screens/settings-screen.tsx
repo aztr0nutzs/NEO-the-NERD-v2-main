@@ -24,6 +24,7 @@ import { NeonPanel } from "../neon-panel"
 import { VOICES, PERSONALITIES } from "@/lib/data"
 import { NeoFeatureShowcase } from "../info/neo-feature-showcase"
 import { OnboardingWizard } from "../onboarding/onboarding-wizard"
+import { NetworkExportPanel } from "../exports/network-export-panel"
 
 type Accent = "cyan" | "purple" | "pink" | "green" | "orange"
 
@@ -310,6 +311,29 @@ export function SettingsScreen() {
             }
           }}
         />
+      </SettingsSection>
+
+      <NetworkExportPanel />
+
+      <SettingsSection
+        title="Subscription"
+        icon={Shield}
+        accent="orange"
+        description={`Current plan: ${settings.entitlement.planLabel}`}
+      >
+        <div
+          className="rounded-lg bg-black/55 p-3"
+          style={{ boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.35)" }}
+        >
+          <p className="ps-mono text-[10px] tracking-[0.25em] ps-text-orange">
+            PLAN // {settings.entitlement.planLabel.toUpperCase()}
+          </p>
+          <p className="mt-1 text-[11px] leading-snug text-white/75">
+            Every feature shipping in this build is part of the Free core.
+            Items marked PLUS in the export panel are future monetization
+            candidates only — they are not paywalled today.
+          </p>
+        </div>
       </SettingsSection>
 
       <SettingsSection
