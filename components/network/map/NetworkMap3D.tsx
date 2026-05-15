@@ -74,7 +74,12 @@ export function NetworkMap3D({
   const deviceStateSignature = useMemo(
     () =>
       devices
-        .map((device) => `${device.id}:${device.status}:${device.trustLevel}:${device.deviceType}`)
+        .map(
+          (device) =>
+            `${device.id}:${device.name}:${device.status}:${device.trustLevel}:${device.deviceType}:${
+              device.room ?? ""
+            }:${device.ownerLabel ?? ""}:${device.manuallyVerified ? "verified" : "unverified"}`
+        )
         .join("|"),
     [devices]
   );

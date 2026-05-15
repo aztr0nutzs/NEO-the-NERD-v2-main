@@ -99,7 +99,9 @@ export function DeviceListPanel({
         device.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         device.ipAddress.includes(searchQuery) ||
         device.macAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        device.vendor.toLowerCase().includes(searchQuery.toLowerCase());
+        device.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (device.room ?? "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (device.ownerLabel ?? "").toLowerCase().includes(searchQuery.toLowerCase());
 
       // Category filter
       let matchesFilter = true;
@@ -273,7 +275,7 @@ export function DeviceListPanel({
                       </div>
 
                       <p className="truncate font-mono text-xs text-gray-500">
-                        {device.ipAddress} • {device.vendor}
+                        {device.ipAddress} • {device.ownerLabel || device.vendor}
                       </p>
 
                       <div className="mt-1.5 flex items-center gap-2">
@@ -291,7 +293,7 @@ export function DeviceListPanel({
                           `}
                         >
                           <TrustIcon className="h-2.5 w-2.5" />
-                          {device.trustLevel}
+                          {device.requestedBlockState ? "block requested" : device.trustLevel}
                         </span>
 
                         {/* Latency */}
@@ -303,6 +305,16 @@ export function DeviceListPanel({
                         <span className="font-mono text-[9px] uppercase text-cyan-500/80">
                           {device.confidence} / {device.lastScanSource}
                         </span>
+                        {device.room && (
+                          <span className="font-mono text-[9px] uppercase text-purple-400/80">
+                            {device.room}
+                          </span>
+                        )}
+                        {!device.manuallyVerified && (
+                          <span className="font-mono text-[9px] uppercase text-yellow-400/80">
+                            unverified
+                          </span>
+                        )}
                       </div>
                     </div>
 

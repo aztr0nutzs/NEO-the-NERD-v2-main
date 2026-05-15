@@ -20,6 +20,9 @@ export function NetworkNodeTooltip({ node, device }: NetworkNodeTooltipProps) {
           <TooltipRow label="TYPE" value={node.deviceType} />
           <TooltipRow label="STATUS" value={node.status} />
           <TooltipRow label="TRUST" value={node.trustLevel} />
+          <TooltipRow label="IDENTITY" value={node.manuallyVerified ? "verified" : "unverified"} />
+          {node.room && <TooltipRow label="ROOM" value={node.room} />}
+          {node.ownerLabel && <TooltipRow label="OWNER" value={node.ownerLabel} />}
           {device && <TooltipRow label="CONF" value={device.confidence} />}
           {device && <TooltipRow label="SRC" value={device.lastScanSource} />}
         </div>

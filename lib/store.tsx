@@ -2,12 +2,14 @@
 
 import {
   createContext,
+  type Dispatch,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type SetStateAction,
 } from "react"
 import type {
   AccentColor,
@@ -26,6 +28,7 @@ import type {
   ScreenId,
   VoiceParams,
 } from "./types"
+import type { DeviceIdentityRecord } from "./network/types"
 import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
 import {
   duplicateResponse,
@@ -106,6 +109,8 @@ interface AppState {
   exportSettings: () => void
   importSettings: (json: string) => Promise<boolean>
   resetApp: () => Promise<void>
+  networkDeviceIdentities: DeviceIdentityRecord[]
+  setNetworkDeviceIdentities: Dispatch<SetStateAction<DeviceIdentityRecord[]>>
 
   notificationOpen: boolean
   setNotificationOpen: (o: boolean) => void
@@ -269,6 +274,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState<boolean>(true)
   const [acceptedGameInvite, setAcceptedGameInvite] = useState<string | null>(null)
+  const [networkDeviceIdentities, setNetworkDeviceIdentities] = useState<DeviceIdentityRecord[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -287,11 +293,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       robotSource,
       responses,
       messages: nextSettings.memoryEnabled ? messages : [],
+      networkDeviceIdentities,
     }),
     [
       accentColor,
       conversationMode,
       messages,
+      networkDeviceIdentities,
       personalityId,
       recentVoiceIds,
       responses,
@@ -331,6 +339,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (stored.responses?.length) setResponses(stored.responses)
     if (stored.settings?.memoryEnabled !== false && stored.messages?.length) {
       setMessages(stored.messages)
+    }
+    if (stored.networkDeviceIdentities?.length) {
+      setNetworkDeviceIdentities(stored.networkDeviceIdentities)
     }
   }, [])
 
@@ -740,6 +751,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           voiceFavoriteIds: parsed.voiceFavoriteIds ?? voiceFavoriteIds,
           recentVoiceIds: parsed.recentVoiceIds ?? recentVoiceIds,
           responses: parsed.responses ?? responses,
+          networkDeviceIdentities: parsed.networkDeviceIdentities ?? networkDeviceIdentities,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -750,7 +762,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return false
       }
     },
-    [applyPersistedState, buildPersistedState, messages, recentVoiceIds, responses, voiceFavoriteIds],
+    [
+      applyPersistedState,
+      buildPersistedState,
+      messages,
+      networkDeviceIdentities,
+      recentVoiceIds,
+      responses,
+      voiceFavoriteIds,
+    ],
   )
 
   const resetApp = useCallback(async () => {
@@ -771,6 +791,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRobotSource("image")
     setNotificationOpen(true)
     setAcceptedGameInvite(null)
+    setNetworkDeviceIdentities([])
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -792,13 +813,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       accentColor, setAccentColor,
       robotSource, setRobotSource,
       exportSettings, importSettings, resetApp,
+      networkDeviceIdentities, setNetworkDeviceIdentities,
       notificationOpen, setNotificationOpen,
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
     }),
     [
       screen, mood, avatarReaction, voiceId, voiceFavoriteIds, recentVoiceIds, personalityId, voiceParams, conversationMode,
       messages, chatSendState, responses, settings, accentColor, robotSource,
-      capabilityPlatform, networkConnected, notificationOpen, acceptedGameInvite,
+      capabilityPlatform, networkConnected, notificationOpen, acceptedGameInvite, networkDeviceIdentities,
       sendMessage, clearMessages, toggleFavorite, deleteResponse, restoreResponse, restoreAllArchived, addResponse,
       updateResponse, duplicateSavedResponse, togglePinnedResponse, useResponseInChat,
       exportResponses, importResponses,

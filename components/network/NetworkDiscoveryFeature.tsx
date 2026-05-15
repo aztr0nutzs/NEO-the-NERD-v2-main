@@ -38,6 +38,7 @@ import { NetworkSettingsPanel } from "./NetworkSettingsPanel";
 import { NetworkActionQueue } from "./NetworkActionQueue";
 import { NerdControlPanel } from "./NerdControlPanel";
 import { NeoRobotAvatar } from "./NeoRobotAvatar";
+import { DeviceIdentityReviewQueue } from "./DeviceIdentityReviewQueue";
 import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 
 import {
@@ -46,15 +47,16 @@ import {
   resolveNetworkUiAdapterStatus,
 } from "@/lib/network/networkDiscoveryAdapter";
 import {
-  trustDevice,
-  watchDevice,
-  blockDevice,
   wakeDevice,
-  addDeviceNote,
   rebootRouter,
   toggleGuestNetwork,
   toggleQoS,
 } from "@/lib/network/networkActions";
+import {
+  mergeDeviceIdentities,
+  projectIdentityOntoDevices,
+  updateDeviceIdentity,
+} from "@/lib/network/deviceIdentity";
 
 import type {
   NetworkStatus,
@@ -68,6 +70,7 @@ import type {
   ScanMode,
   RouterCapability,
   RouterControlMode,
+  DeviceIdentityUpdate,
 } from "@/lib/network/types";
 
 const NetworkMap3D = dynamic(
@@ -84,7 +87,7 @@ const NetworkMap3D = dynamic(
 );
 
 export function NetworkDiscoveryFeature() {
-  const { playAvatarReaction } = useApp();
+  const { playAvatarReaction, networkDeviceIdentities, setNetworkDeviceIdentities } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
   const [devices, setDevices] = useState<DiscoveredDevice[]>([]);
@@ -106,6 +109,42 @@ export function NetworkDiscoveryFeature() {
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [robotMessage, setRobotMessage] = useState<string | null>(null);
   const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
+  const identityRecordsRef = useRef(networkDeviceIdentities);
+
+  useEffect(() => {
+    identityRecordsRef.current = networkDeviceIdentities;
+    setDevices((current) => projectIdentityOntoDevices(networkDeviceIdentities, current));
+    setSelectedDevice((current) => {
+      if (!current) return current;
+      return projectIdentityOntoDevices(networkDeviceIdentities, [current])[0] ?? current;
+    });
+  }, [networkDeviceIdentities]);
+
+  const mergeIdentitiesForDevices = useCallback(
+    (incomingDevices: DiscoveredDevice[]) => {
+      const merged = mergeDeviceIdentities(identityRecordsRef.current, incomingDevices);
+      identityRecordsRef.current = merged.identities;
+      setNetworkDeviceIdentities(merged.identities);
+      return merged.devices;
+    },
+    [setNetworkDeviceIdentities]
+  );
+
+  const commitIdentityUpdate = useCallback(
+    (device: DiscoveredDevice, patch: DeviceIdentityUpdate) => {
+      const nextIdentities = updateDeviceIdentity(identityRecordsRef.current, device, patch);
+      identityRecordsRef.current = nextIdentities;
+      setNetworkDeviceIdentities(nextIdentities);
+      const project = (currentDevices: DiscoveredDevice[]) =>
+        projectIdentityOntoDevices(nextIdentities, currentDevices);
+      setDevices((current) => project(current));
+      setSelectedDevice((current) => {
+        if (!current) return current;
+        return project([current])[0] ?? current;
+      });
+    },
+    [setNetworkDeviceIdentities]
+  );
 
   // Robot status based on app state
   const robotStatus = networkStatus?.scanState === "scanning" 
@@ -130,8 +169,10 @@ export function NetworkDiscoveryFeature() {
           networkAdapter.getRouterControlMode(),
         ]);
 
+        const identityDevices = mergeIdentitiesForDevices(deviceList);
+
         setNetworkStatus(status);
-        setDevices(deviceList);
+        setDevices(identityDevices);
         setRouterStatus(router);
         setSecurityInsights(insights);
         setScanHistory(history);
@@ -140,7 +181,7 @@ export function NetworkDiscoveryFeature() {
         setRouterCapabilities(capabilities);
         setRouterControlMode(controlMode);
         setSelectedMode(networkSettings.scanMode);
-        previousDevicesRef.current = deviceList;
+        previousDevicesRef.current = identityDevices;
       } catch (error) {
         setAdapterStatus(resolveNetworkAdapterStatus({
           demoMode: false,
@@ -151,7 +192,7 @@ export function NetworkDiscoveryFeature() {
     };
 
     loadData();
-  }, []);
+  }, [mergeIdentitiesForDevices]);
 
   // Scan progress polling
   useEffect(() => {
@@ -168,7 +209,8 @@ export function NetworkDiscoveryFeature() {
         // Refresh data after scan completes
         networkAdapter.getNetworkStatus().then(setNetworkStatus).catch(() => undefined);
         networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
-        networkAdapter.getDiscoveredDevices().then((updatedDevices) => {
+        networkAdapter.getDiscoveredDevices().then((rawUpdatedDevices) => {
+          const updatedDevices = mergeIdentitiesForDevices(rawUpdatedDevices);
           const previousDevices = previousDevicesRef.current;
           const previousIds = new Set(previousDevices.map((device) => device.id));
           const previousOnlineIds = new Set(
@@ -201,7 +243,13 @@ export function NetworkDiscoveryFeature() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [networkStatus?.scanState, playAvatarReaction, settings?.notifyNewDevices, settings?.notifyOfflineDevices]);
+  }, [
+    mergeIdentitiesForDevices,
+    networkStatus?.scanState,
+    playAvatarReaction,
+    settings?.notifyNewDevices,
+    settings?.notifyOfflineDevices,
+  ]);
 
   // Action polling
   useEffect(() => {
@@ -280,14 +328,14 @@ export function NetworkDiscoveryFeature() {
       device: DiscoveredDevice
     ) => {
       try {
-        if (!settings?.allowControlActions && (action === "block" || action === "wake")) {
+        if (!settings?.allowControlActions && action === "wake") {
           setRobotMessage("Control actions are disabled in Network settings.");
           setTimeout(() => setRobotMessage(null), 4000);
           playAvatarReaction("surprised");
           return;
         }
 
-        if (settings?.safeMode && (action === "block" || action === "wake")) {
+        if (settings?.safeMode && action === "wake") {
           setRobotMessage("Safe mode is active. Disable Safe Mode or enable an external connector before this control action.");
           setTimeout(() => setRobotMessage(null), 5000);
           playAvatarReaction("surprised");
@@ -296,17 +344,37 @@ export function NetworkDiscoveryFeature() {
 
         switch (action) {
           case "trust":
-            await trustDevice(device);
+            commitIdentityUpdate(device, {
+              trustedState: "trusted",
+              watchState: false,
+              requestedBlockState: false,
+              dismissedForNow: false,
+              manuallyVerified: true,
+            });
             playAvatarReaction("happy");
             break;
           case "watch":
-            await watchDevice(device);
+            commitIdentityUpdate(device, {
+              trustedState: "watch",
+              watchState: true,
+              requestedBlockState: false,
+              dismissedForNow: false,
+              manuallyVerified: true,
+            });
             playAvatarReaction("surprised");
             break;
           case "block":
-            await blockDevice(device);
-            playAvatarReaction("angry");
-            break;
+            commitIdentityUpdate(device, {
+              trustedState: "requested-block",
+              watchState: true,
+              requestedBlockState: true,
+              dismissedForNow: false,
+              manuallyVerified: true,
+            });
+            setRobotMessage("Block request recorded. This build does not execute real device blocking without a connector.");
+            setTimeout(() => setRobotMessage(null), 5500);
+            playAvatarReaction("surprised");
+            return;
           case "wake":
             await wakeDevice(device);
             playAvatarReaction("happy");
@@ -317,7 +385,7 @@ export function NetworkDiscoveryFeature() {
       }
 
       // Refresh devices
-      const updatedDevices = await networkAdapter.getDiscoveredDevices();
+      const updatedDevices = mergeIdentitiesForDevices(await networkAdapter.getDiscoveredDevices());
       setDevices(updatedDevices);
 
       // Update selected device
@@ -326,21 +394,18 @@ export function NetworkDiscoveryFeature() {
         if (updated) setSelectedDevice(updated);
       }
     },
-    [playAvatarReaction, settings]
+    [commitIdentityUpdate, mergeIdentitiesForDevices, playAvatarReaction, settings]
   );
 
   const handleSaveNote = useCallback(async (device: DiscoveredDevice, note: string) => {
-    try {
-      await addDeviceNote(device, note);
-      playAvatarReaction("happy");
-      const updatedDevices = await networkAdapter.getDiscoveredDevices();
-      setDevices(updatedDevices);
-      const updated = updatedDevices.find((d) => d.id === device.id);
-      if (updated) setSelectedDevice(updated);
-    } catch {
-      playAvatarReaction("angry");
-    }
-  }, [playAvatarReaction]);
+    commitIdentityUpdate(device, { notes: note, manuallyVerified: true });
+    playAvatarReaction("happy");
+  }, [commitIdentityUpdate, playAvatarReaction]);
+
+  const handleDismissDeviceIdentity = useCallback((device: DiscoveredDevice) => {
+    commitIdentityUpdate(device, { dismissedForNow: true });
+    playAvatarReaction("happy");
+  }, [commitIdentityUpdate, playAvatarReaction]);
 
   const handleRouterAction = useCallback(
     async (action: "refresh" | "reboot" | "toggleGuest" | "toggleQoS", value?: boolean) => {
@@ -463,6 +528,7 @@ export function NetworkDiscoveryFeature() {
   const isDemoMode = settings.demoMode || effectiveAdapterStatus.isDemo;
   const effectivePanelSettings =
     effectiveAdapterStatus.mode === "fallback" ? { ...settings, demoMode: true } : settings;
+  const newIdentityDevices = devices.filter((device) => device.isNewIdentity && !device.dismissedForNow);
 
   return (
     <div>
@@ -540,6 +606,17 @@ export function NetworkDiscoveryFeature() {
           />
         </section>
 
+        <DeviceIdentityReviewQueue
+          devices={newIdentityDevices}
+          onReview={(device) => {
+            handleSelectDevice(device);
+            setActiveTab("devices");
+          }}
+          onTrust={(device) => handleDeviceAction("trust", device)}
+          onWatch={(device) => handleDeviceAction("watch", device)}
+          onDismiss={handleDismissDeviceIdentity}
+        />
+
         {/* Overview Stats */}
         <section className="mb-6">
           <NetworkOverviewPanel
@@ -600,6 +677,8 @@ export function NetworkDiscoveryFeature() {
                   onBlock={(d) => handleDeviceAction("block", d)}
                   onWake={(d) => handleDeviceAction("wake", d)}
                   onSaveNote={handleSaveNote}
+                  onUpdateIdentity={commitIdentityUpdate}
+                  onDismiss={handleDismissDeviceIdentity}
                   isDemoMode={isDemoMode}
                 />
               </div>
@@ -671,6 +750,8 @@ export function NetworkDiscoveryFeature() {
                     onBlock={(d) => handleDeviceAction("block", d)}
                     onWake={(d) => handleDeviceAction("wake", d)}
                     onSaveNote={handleSaveNote}
+                    onUpdateIdentity={commitIdentityUpdate}
+                    onDismiss={handleDismissDeviceIdentity}
                     isDemoMode={isDemoMode}
                   />
                 </div>

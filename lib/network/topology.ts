@@ -108,6 +108,10 @@ export function buildTopologyGraphFromDevices(
       services: [...device.services],
       vendor: device.vendor,
       iconKey: DEVICE_ICON_KEYS[device.deviceType],
+      identityConfidence: device.identityConfidence,
+      ownerLabel: device.ownerLabel,
+      room: device.room,
+      manuallyVerified: device.manuallyVerified,
     };
   });
   const generatedPositions = generateOrbitalTopologyLayout(nodesWithoutPositions);

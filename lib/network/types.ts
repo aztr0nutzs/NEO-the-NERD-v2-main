@@ -22,6 +22,17 @@ export type DeviceStatus = "online" | "offline" | "unknown";
 
 export type TrustLevel = "trusted" | "new" | "watch" | "blocked";
 
+export type DeviceIdentityTrustState =
+  | "new"
+  | "trusted"
+  | "watch"
+  | "requested-block"
+  | "dismissed";
+
+export type DeviceIdentityMatchType = "mac" | "ip-hostname" | "ip" | "device-id";
+
+export type DeviceIdentityConfidence = "weak" | "medium" | "high";
+
 export type ActionType =
   | "scan"
   | "identify"
@@ -99,7 +110,82 @@ export interface DiscoveredDevice {
   confidence: DiscoveryConfidence;
   dataLimited: boolean;
   lastScanSource: DiscoverySource;
+  identityKey?: string;
+  identityMatchType?: DeviceIdentityMatchType;
+  identityMatchConfidence?: DeviceIdentityConfidence;
+  customName?: string;
+  room?: string;
+  ownerLabel?: string;
+  trustedState?: DeviceIdentityTrustState;
+  watchState?: boolean;
+  requestedBlockState?: boolean;
+  identityFirstSeenAt?: string;
+  identityLastSeenAt?: string;
+  seenCount?: number;
+  identityNotes?: string;
+  identityConfidence?: DeviceIdentityConfidence;
+  manuallyVerified?: boolean;
+  lastChangedAt?: string;
+  lastChangedFields?: string[];
+  rawName?: string;
+  rawHostname?: string;
+  rawIpAddress?: string;
+  rawMacAddress?: string;
+  rawVendor?: string;
+  isNewIdentity?: boolean;
+  dismissedForNow?: boolean;
 }
+
+export interface DeviceIdentitySnapshot {
+  name: string;
+  hostname: string;
+  ipAddress: string;
+  macAddress: string;
+  vendor: string;
+  deviceType: DeviceType;
+  discoverySources: DiscoverySource[];
+  confidence: DiscoveryConfidence;
+  lastScanSource: DiscoverySource;
+  capturedAt: string;
+}
+
+export interface DeviceIdentityRecord {
+  stableKey: string;
+  matchKeys: string[];
+  matchKeyType: DeviceIdentityMatchType;
+  rawDeviceIds: string[];
+  customName: string;
+  room: string;
+  ownerLabel: string;
+  trustedState: DeviceIdentityTrustState;
+  watchState: boolean;
+  requestedBlockState: boolean;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  seenCount: number;
+  notes: string;
+  identityConfidence: DeviceIdentityConfidence;
+  manuallyVerified: boolean;
+  dismissedForNow: boolean;
+  lastChangedAt: string;
+  lastChangedFields: string[];
+  rawIdentitySnapshot: DeviceIdentitySnapshot;
+}
+
+export type DeviceIdentityUpdate = Partial<
+  Pick<
+    DeviceIdentityRecord,
+    | "customName"
+    | "room"
+    | "ownerLabel"
+    | "trustedState"
+    | "watchState"
+    | "requestedBlockState"
+    | "notes"
+    | "manuallyVerified"
+    | "dismissedForNow"
+  >
+>;
 
 export interface NetworkTopologyPosition {
   x: number;
@@ -124,6 +210,10 @@ export interface NetworkTopologyNode {
   services?: string[];
   vendor?: string;
   iconKey?: string;
+  identityConfidence?: DeviceIdentityConfidence;
+  ownerLabel?: string;
+  room?: string;
+  manuallyVerified?: boolean;
 }
 
 export interface NetworkTopologyEdge {

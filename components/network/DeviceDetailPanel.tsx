@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   Smartphone,
@@ -23,8 +23,11 @@ import {
   Activity,
   AlertCircle,
   CheckCircle,
+  User,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -37,7 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { DiscoveredDevice, DeviceType, TrustLevel, NetworkAction } from "@/lib/network/types";
+import type { DiscoveredDevice, DeviceIdentityUpdate, DeviceType, TrustLevel } from "@/lib/network/types";
 
 interface DeviceDetailPanelProps {
   device: DiscoveredDevice | null;
@@ -47,6 +50,8 @@ interface DeviceDetailPanelProps {
   onBlock: (device: DiscoveredDevice) => void;
   onWake: (device: DiscoveredDevice) => void;
   onSaveNote: (device: DiscoveredDevice, note: string) => void;
+  onUpdateIdentity: (device: DiscoveredDevice, patch: DeviceIdentityUpdate) => void;
+  onDismiss: (device: DiscoveredDevice) => void;
   isDemoMode: boolean;
 }
 
@@ -99,11 +104,26 @@ export function DeviceDetailPanel({
   onBlock,
   onWake,
   onSaveNote,
+  onUpdateIdentity,
+  onDismiss,
   isDemoMode,
 }: DeviceDetailPanelProps) {
   const [noteText, setNoteText] = useState(device?.notes || "");
   const [hasUnsavedNote, setHasUnsavedNote] = useState(false);
+  const [customName, setCustomName] = useState(device?.customName || "");
+  const [room, setRoom] = useState(device?.room || "");
+  const [ownerLabel, setOwnerLabel] = useState(device?.ownerLabel || "");
+  const [hasUnsavedIdentity, setHasUnsavedIdentity] = useState(false);
   const [confirmAction, setConfirmAction] = useState<"block" | null>(null);
+
+  useEffect(() => {
+    setNoteText(device?.notes || "");
+    setHasUnsavedNote(false);
+    setCustomName(device?.customName || "");
+    setRoom(device?.room || "");
+    setOwnerLabel(device?.ownerLabel || "");
+    setHasUnsavedIdentity(false);
+  }, [device]);
 
   if (!device) {
     return (
@@ -129,6 +149,17 @@ export function DeviceDetailPanel({
   const handleNoteChange = (value: string) => {
     setNoteText(value);
     setHasUnsavedNote(value !== device.notes);
+  };
+
+  const handleSaveIdentity = () => {
+    onUpdateIdentity(device, {
+      customName: customName.trim(),
+      room: room.trim(),
+      ownerLabel: ownerLabel.trim(),
+      manuallyVerified: true,
+      dismissedForNow: false,
+    });
+    setHasUnsavedIdentity(false);
   };
 
   const handleSaveNote = () => {
@@ -239,6 +270,101 @@ export function DeviceDetailPanel({
               )}
             </div>
 
+            <div className="space-y-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-mono text-xs text-cyan-300">USER_DEFINED_IDENTITY</p>
+                {hasUnsavedIdentity && (
+                  <span className="font-mono text-[10px] text-orange-400">UNSAVED</span>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <LabeledInput
+                  icon={Edit3}
+                  label="CUSTOM_NAME"
+                  value={customName}
+                  placeholder={device.rawName ?? device.name}
+                  onChange={(value) => {
+                    setCustomName(value);
+                    setHasUnsavedIdentity(
+                      value !== (device.customName ?? "") ||
+                        room !== (device.room ?? "") ||
+                        ownerLabel !== (device.ownerLabel ?? "")
+                    );
+                  }}
+                />
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <LabeledInput
+                    icon={MapPin}
+                    label="ROOM_LOCATION"
+                    value={room}
+                    placeholder="Unassigned"
+                    onChange={(value) => {
+                      setRoom(value);
+                      setHasUnsavedIdentity(
+                        customName !== (device.customName ?? "") ||
+                          value !== (device.room ?? "") ||
+                          ownerLabel !== (device.ownerLabel ?? "")
+                      );
+                    }}
+                  />
+                  <LabeledInput
+                    icon={User}
+                    label="OWNER_LABEL"
+                    value={ownerLabel}
+                    placeholder="Unassigned"
+                    onChange={(value) => {
+                      setOwnerLabel(value);
+                      setHasUnsavedIdentity(
+                        customName !== (device.customName ?? "") ||
+                          room !== (device.room ?? "") ||
+                          value !== (device.ownerLabel ?? "")
+                      );
+                    }}
+                  />
+                </div>
+              </div>
+              {hasUnsavedIdentity && (
+                <Button
+                  onClick={handleSaveIdentity}
+                  size="sm"
+                  className="w-full border border-cyan-500/50 bg-cyan-500/20 font-mono text-xs uppercase text-cyan-300 hover:bg-cyan-500/30"
+                >
+                  <Edit3 className="mr-2 h-3 w-3" />
+                  SAVE_IDENTITY
+                </Button>
+              )}
+            </div>
+
+            <div className="space-y-2 rounded-lg border border-gray-800 bg-gray-900/30 p-3">
+              <p className="font-mono text-xs text-gray-400">RAW_DISCOVERED_IDENTITY</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <IdentityDatum label="RAW_NAME" value={device.rawName ?? device.name} />
+                <IdentityDatum label="HOSTNAME" value={device.rawHostname ?? device.hostname} />
+                <IdentityDatum label="RAW_IP" value={device.rawIpAddress ?? device.ipAddress} />
+                <IdentityDatum label="RAW_MAC" value={device.rawMacAddress ?? device.macAddress} />
+                <IdentityDatum label="RAW_VENDOR" value={device.rawVendor ?? device.vendor} />
+                <IdentityDatum label="MATCH" value={`${device.identityMatchType ?? "device-id"} / ${device.identityMatchConfidence ?? "weak"}`} />
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded-lg border border-purple-500/20 bg-purple-500/5 p-3">
+              <p className="font-mono text-xs text-purple-300">TRUST_AND_IDENTITY_STATE</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <IdentityDatum label="TRUST_STATE" value={device.trustedState ?? device.trustLevel} />
+                <IdentityDatum label="WATCH_STATE" value={device.watchState ? "YES" : "NO"} />
+                <IdentityDatum label="BLOCK_REQUEST" value={device.requestedBlockState ? "REQUESTED" : "NONE"} />
+                <IdentityDatum label="VERIFIED" value={device.manuallyVerified ? "YES" : "NO"} />
+                <IdentityDatum label="IDENTITY_CONF" value={device.identityConfidence ?? "weak"} />
+                <IdentityDatum label="LAST_CHANGED" value={device.lastChangedAt ? formatDate(device.lastChangedAt) : "Unavailable"} />
+                <div className="col-span-2">
+                  <IdentityDatum
+                    label="CHANGED_FIELDS"
+                    value={device.lastChangedFields?.length ? device.lastChangedFields.join(", ") : "Unavailable"}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Timestamps */}
             <div className="space-y-2 rounded-lg border border-gray-800 bg-gray-900/30 p-3">
               <div className="flex items-center gap-2">
@@ -248,11 +374,15 @@ export function DeviceDetailPanel({
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <p className="font-mono text-[10px] text-gray-500">FIRST_SEEN</p>
-                  <p className="font-mono text-gray-300">{formatDate(device.firstSeen)}</p>
+                  <p className="font-mono text-gray-300">{formatDate(device.identityFirstSeenAt ?? device.firstSeen)}</p>
                 </div>
                 <div>
                   <p className="font-mono text-[10px] text-gray-500">LAST_SEEN</p>
-                  <p className="font-mono text-gray-300">{formatDate(device.lastSeen)}</p>
+                  <p className="font-mono text-gray-300">{formatDate(device.identityLastSeenAt ?? device.lastSeen)}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="font-mono text-[10px] text-gray-500">SEEN_COUNT</p>
+                  <p className="font-mono text-gray-300">{device.seenCount ?? 1}</p>
                 </div>
               </div>
             </div>
@@ -368,12 +498,20 @@ export function DeviceDetailPanel({
                   colorClass="border-orange-500/50 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20"
                 />
               )}
-              {device.trustLevel !== "blocked" && (
+              {!device.requestedBlockState && (
                 <ActionButton
                   icon={Ban}
-                  label="BLOCK"
+                  label="REQUEST BLOCK"
                   onClick={() => setConfirmAction("block")}
                   colorClass="border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20"
+                />
+              )}
+              {device.trustedState === "new" && (
+                <ActionButton
+                  icon={X}
+                  label="DISMISS"
+                  onClick={() => onDismiss(device)}
+                  colorClass="border-gray-600 bg-gray-900/40 text-gray-400 hover:bg-gray-800"
                 />
               )}
               {device.status === "offline" &&
@@ -395,13 +533,14 @@ export function DeviceDetailPanel({
         <AlertDialogContent className="border-red-500/30 bg-gray-950">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-mono text-red-400">
-              CONFIRM_BLOCK_DEVICE
+              REQUEST_DEVICE_BLOCK
             </AlertDialogTitle>
             <AlertDialogDescription className="font-mono text-gray-400">
-              This will add {device.name} ({device.ipAddress}) to the block list.
+              This records a requested block for {device.name} ({device.ipAddress}). This build does
+              not execute real device blocking unless a connector-backed control path is added.
               {isDemoMode && (
                 <span className="mt-2 block text-orange-400">
-                  Demo mode: Action will be simulated.
+                  Demo mode does not change router firewall rules.
                 </span>
               )}
             </AlertDialogDescription>
@@ -414,7 +553,7 @@ export function DeviceDetailPanel({
               onClick={handleBlockConfirm}
               className="border-red-500/50 bg-red-500/20 font-mono text-red-400 hover:bg-red-500/30"
             >
-              CONFIRM_BLOCK
+              RECORD_REQUEST
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -442,6 +581,44 @@ function InfoCard({
       </div>
       <p className={`truncate font-mono text-xs font-bold ${color}`}>{value}</p>
     </div>
+  );
+}
+
+function IdentityDatum({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="font-mono text-[10px] text-gray-500">{label}</p>
+      <p className="truncate font-mono text-gray-300">{value || "Unavailable"}</p>
+    </div>
+  );
+}
+
+function LabeledInput({
+  icon: Icon,
+  label,
+  value,
+  placeholder,
+  onChange,
+}: {
+  icon: typeof Edit3;
+  label: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-1">
+      <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-gray-500">
+        <Icon className="h-3 w-3 text-cyan-300" />
+        {label}
+      </span>
+      <Input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="h-9 border-gray-700 bg-gray-950/60 font-mono text-xs text-gray-200 placeholder:text-gray-600 focus:border-cyan-500/50"
+      />
+    </label>
   );
 }
 

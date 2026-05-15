@@ -41,6 +41,10 @@ export function NetworkMapSelectionOverlay({
           <p className="text-cyan-400/80">
             {displayDevice.confidence} confidence / {displayDevice.lastScanSource}
           </p>
+          <p className="text-purple-300/80">
+            {(displayDevice.manuallyVerified ? "verified" : "unverified")} identity
+            {displayDevice.room ? ` / ${displayDevice.room}` : ""}
+          </p>
         </div>
       ) : (
         <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500">

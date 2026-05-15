@@ -1,3 +1,5 @@
+import type { DeviceIdentityRecord } from "./network/types"
+
 export type AssistantMood =
   | "idle"
   | "listening"
@@ -117,6 +119,7 @@ export interface PersistedAppState {
   robotSource: RobotSource
   responses: SavedResponse[]
   messages: ChatMessage[]
+  networkDeviceIdentities?: DeviceIdentityRecord[]
 }
 
 export type ConversationMode =
