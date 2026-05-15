@@ -103,6 +103,7 @@ function multiCsv(report: NetworkReport): string {
       "unknownDevices",
       "flaggedDevices",
       "lastScanAt",
+      "latestSpeedTest",
     ],
     [
       {
@@ -117,6 +118,7 @@ function multiCsv(report: NetworkReport): string {
         unknownDevices: report.summary.unknownDevices,
         flaggedDevices: report.summary.flaggedDevices,
         lastScanAt: report.summary.lastScanAt ?? "",
+        latestSpeedTest: report.summary.latestSpeedTest ?? "",
       },
     ],
   )
@@ -175,6 +177,7 @@ function renderTextReport(report: NetworkReport, aiSummary?: string): string {
     `Gateway IP:   ${s.gatewayIp || "—"}`,
     `Local IP:     ${s.localIp || "—"}`,
     `Last scan:    ${s.lastScanAt ?? "—"}`,
+    `Speed test:   ${s.latestSpeedTest ?? "—"}`,
     "",
     "── Summary ────────────────────────────────────────────",
     `  Devices found:     ${s.devicesFound}`,

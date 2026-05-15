@@ -829,6 +829,25 @@ export function NetworkDiscoveryFeature() {
     try {
       const diagnostics = await runNetworkDiagnostics(networkStatus);
       setLatestDiagnostics(diagnostics);
+      const throughputProbe = diagnostics.find((probe) => probe.key === "throughput");
+      if (throughputProbe) {
+        appendEvents([
+          {
+            id: `event-speed-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            type: throughputProbe.status === "passed" ? "scan_completed" : "scan_failed",
+            severity: throughputProbe.status === "passed" ? "info" : "medium",
+            title:
+              throughputProbe.status === "passed"
+                ? `Speed test completed: ${throughputProbe.value ?? "result available"}`
+                : "Speed test failed",
+            detail: {
+              provider: throughputProbe.provider ?? "unknown",
+              probe: throughputProbe.detail,
+            },
+          },
+        ]);
+      }
       const previousSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
       const snapshot = calculateNetworkHealth({
         status: networkStatus,
