@@ -1,4 +1,4 @@
-import type { ScanMode } from "./types";
+import type { DiscoveryConfidence, DiscoverySource, ScanMode } from "./types";
 
 export interface NativeLocalNetworkContext {
   localIp: string | null;
@@ -21,6 +21,9 @@ export interface NativeHostRecord {
   services: string[];
   latencyMs?: number;
   dataLimited: boolean;
+  discoverySources: DiscoverySource[];
+  confidence: DiscoveryConfidence;
+  lastScanSource: DiscoverySource;
 }
 
 export interface NativeScanResult {

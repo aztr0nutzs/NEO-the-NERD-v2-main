@@ -257,6 +257,28 @@ export function DeviceDetailPanel({
               </div>
             </div>
 
+            <div className="space-y-2 rounded-lg border border-gray-800 bg-gray-900/30 p-3">
+              <p className="font-mono text-xs text-gray-400">DISCOVERY_PROVENANCE</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p className="font-mono text-[10px] text-gray-500">CONFIDENCE</p>
+                  <p className="font-mono text-gray-200">{device.confidence.toUpperCase()}</p>
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] text-gray-500">LAST_SOURCE</p>
+                  <p className="font-mono text-gray-200">{device.lastScanSource.toUpperCase()}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="font-mono text-[10px] text-gray-500">SOURCES</p>
+                  <p className="font-mono text-gray-300">{device.discoverySources.join(", ").toUpperCase()}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="font-mono text-[10px] text-gray-500">DATA_LIMITED</p>
+                  <p className="font-mono text-gray-300">{device.dataLimited ? "YES" : "NO"}</p>
+                </div>
+              </div>
+            </div>
+
             {/* Open Ports */}
             {device.openPorts.length > 0 && (
               <div className="space-y-2 rounded-lg border border-gray-800 bg-gray-900/30 p-3">

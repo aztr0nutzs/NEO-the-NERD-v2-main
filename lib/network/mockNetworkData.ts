@@ -49,6 +49,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     services: ["HTTP", "HTTPS", "DNS"],
     notes: "Primary network gateway - demo device",
     latencyMs: 1,
+    discoverySources: ["gateway", "arp", "tcp-probe"],
+    confidence: "high",
+    dataLimited: false,
+    lastScanSource: "tcp-probe",
   },
   {
     id: "device-002",
@@ -67,6 +71,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     notes: "N.E.O. command device - demo",
     signalStrength: -45,
     latencyMs: 5,
+    discoverySources: ["arp"],
+    confidence: "medium",
+    dataLimited: false,
+    lastScanSource: "arp",
   },
   {
     id: "device-003",
@@ -84,6 +92,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     services: ["SSH", "RDP"],
     notes: "Primary workstation - demo device",
     latencyMs: 3,
+    discoverySources: ["arp", "tcp-probe", "hostname"],
+    confidence: "high",
+    dataLimited: false,
+    lastScanSource: "hostname",
   },
   {
     id: "device-004",
@@ -101,6 +113,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     services: ["WebOS", "DLNA"],
     notes: "Smart TV - monitoring for unusual activity - demo",
     latencyMs: 8,
+    discoverySources: ["arp", "tcp-probe"],
+    confidence: "high",
+    dataLimited: false,
+    lastScanSource: "tcp-probe",
   },
   {
     id: "device-005",
@@ -119,6 +135,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     notes: "",
     signalStrength: -70,
     latencyMs: 15,
+    discoverySources: ["arp", "tcp-probe"],
+    confidence: "medium",
+    dataLimited: false,
+    lastScanSource: "tcp-probe",
   },
   {
     id: "device-006",
@@ -136,6 +156,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     services: ["IPP", "JetDirect"],
     notes: "Office printer - currently powered off - demo",
     latencyMs: undefined,
+    discoverySources: ["arp"],
+    confidence: "low",
+    dataLimited: true,
+    lastScanSource: "arp",
   },
   {
     id: "device-007",
@@ -153,6 +177,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     services: ["PSN"],
     notes: "Gaming console - demo device",
     latencyMs: 4,
+    discoverySources: ["arp", "tcp-probe"],
+    confidence: "high",
+    dataLimited: false,
+    lastScanSource: "tcp-probe",
   },
   {
     id: "device-008",
@@ -171,6 +199,10 @@ export const MOCK_DEVICES: DiscoveredDevice[] = [
     notes: "Smart plug - IoT device on watch list - demo",
     signalStrength: -55,
     latencyMs: 10,
+    discoverySources: ["arp", "tcp-probe"],
+    confidence: "medium",
+    dataLimited: false,
+    lastScanSource: "tcp-probe",
   },
 ];
 
