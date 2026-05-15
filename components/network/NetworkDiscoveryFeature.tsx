@@ -43,6 +43,7 @@ import { NetworkTimelinePanel } from "./NetworkTimelinePanel";
 import { NetworkAlertsPanel } from "./NetworkAlertsPanel";
 import { NetworkHealthPanel } from "./NetworkHealthPanel";
 import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
+import { NetworkExportPanel } from "@/components/exports/network-export-panel";
 
 import {
   networkAdapter,
@@ -1183,10 +1184,11 @@ export function NetworkDiscoveryFeature() {
 
           {/* History Tab */}
           <TabsContent value="history" className="space-y-4">
-            <div className="mx-auto max-w-4xl">
+            <div className="mx-auto max-w-4xl space-y-4">
               <div className="h-[500px]">
                 <ScanHistoryPanel history={scanHistory} />
               </div>
+              <NetworkExportPanel />
             </div>
           </TabsContent>
 

@@ -8,6 +8,7 @@ import type {
   NetworkSettings,
   ScanComparisonSummary,
 } from "./network/types"
+import type { EntitlementState } from "./entitlements/tiers"
 
 export type AssistantMood =
   | "idle"
@@ -114,6 +115,7 @@ export interface AssistantSettings {
   debugMode: boolean
   permissions: Record<CapabilityId, CapabilityState>
   onboarding: OnboardingState
+  entitlement: EntitlementState
 }
 
 export interface OnboardingState {
