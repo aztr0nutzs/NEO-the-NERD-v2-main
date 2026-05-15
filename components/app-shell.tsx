@@ -1,7 +1,7 @@
 "use client"
 
 import { AnimatePresence, motion } from "framer-motion"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useApp } from "@/lib/store"
 import { AssistantStatusBar } from "./assistant-status-bar"
 import { BottomDock } from "./bottom-dock"
@@ -17,6 +17,7 @@ import { SettingsScreen } from "./screens/settings-screen"
 import { NeoBackgroundScene } from "./background/neo-background-scene"
 import { BootSequenceOverlay } from "./boot/boot-sequence-overlay"
 import { PersistentAvatarOrb } from "./avatar/persistent-avatar-orb"
+import { OnboardingWizard } from "./onboarding/onboarding-wizard"
 
 const SCREEN_MAP = {
   main: MainScreen,
@@ -31,7 +32,7 @@ const SCREEN_MAP = {
 } as const
 
 export function AppShell() {
-  const { screen, playAvatarReaction } = useApp()
+  const { screen, playAvatarReaction, settings } = useApp()
   const Active = SCREEN_MAP[screen]
   const showPersistentOrb = screen !== "main" && screen !== "network"
   // Once the boot video finishes (or fails), unmount the overlay entirely.
@@ -42,6 +43,24 @@ export function AppShell() {
     playAvatarReaction("wakeup")
     setBootMounted(false)
   }, [playAvatarReaction])
+
+  // Onboarding only shows once boot is offscreen so the cinematic intro plays
+  // first. A failsafe timer also fires so that a failed boot (e.g. video error
+  // on a headless device) does not block the wizard indefinitely.
+  const [bootSettled, setBootSettled] = useState(false)
+  useEffect(() => {
+    if (!bootMounted) {
+      setBootSettled(true)
+      return
+    }
+    const timer = window.setTimeout(() => setBootSettled(true), 40_000)
+    return () => window.clearTimeout(timer)
+  }, [bootMounted])
+  const showOnboarding = bootSettled && !settings.onboarding.completed
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false)
+  const handleOnboardingClose = useCallback(() => {
+    setOnboardingDismissed(true)
+  }, [])
 
   return (
     <div className="relative isolate min-h-[100dvh] w-full overflow-x-hidden bg-transparent">
@@ -79,6 +98,10 @@ export function AppShell() {
 
       <BottomDock />
       {bootMounted && <BootSequenceOverlay onBootComplete={handleBootComplete} />}
+      <OnboardingWizard
+        open={showOnboarding && !onboardingDismissed}
+        onClose={handleOnboardingClose}
+      />
     </div>
   )
 }

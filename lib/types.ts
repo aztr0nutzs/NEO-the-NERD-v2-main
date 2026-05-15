@@ -113,6 +113,15 @@ export interface AssistantSettings {
   backgroundService: boolean
   debugMode: boolean
   permissions: Record<CapabilityId, CapabilityState>
+  onboarding: OnboardingState
+}
+
+export interface OnboardingState {
+  completed: boolean
+  skipped: boolean
+  completedAt?: string
+  monitoringOptIn: boolean
+  initialScanRequested: boolean
 }
 
 export interface PersistedAppState {

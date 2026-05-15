@@ -23,6 +23,7 @@ import { SettingsSection, Toggle, SegmentedSelect } from "../settings-section"
 import { NeonPanel } from "../neon-panel"
 import { VOICES, PERSONALITIES } from "@/lib/data"
 import { NeoFeatureShowcase } from "../info/neo-feature-showcase"
+import { OnboardingWizard } from "../onboarding/onboarding-wizard"
 
 type Accent = "cyan" | "purple" | "pink" | "green" | "orange"
 
@@ -55,6 +56,7 @@ export function SettingsScreen() {
   } = useApp()
   const importRef = useRef<HTMLInputElement>(null)
   const [showFeatureShowcase, setShowFeatureShowcase] = useState(false)
+  const [showOnboardingReplay, setShowOnboardingReplay] = useState(false)
   const backendRuntime = useBackendRuntime()
 
   return (
@@ -312,7 +314,7 @@ export function SettingsScreen() {
 
       <SettingsSection
         title="About N.E.O."
-        description="Feature showcase posters"
+        description="Feature showcase + first-run tour"
         icon={Info}
         accent="cyan"
       >
@@ -321,6 +323,23 @@ export function SettingsScreen() {
           label="OPEN FEATURE SHOWCASE"
           color="#00f0ff"
           onClick={() => setShowFeatureShowcase(true)}
+        />
+        <ActionRow
+          icon={<RotateCcw className="h-4 w-4" />}
+          label="REPLAY FIRST-RUN SETUP"
+          color="#b829ff"
+          onClick={() => setShowOnboardingReplay(true)}
+        />
+        <Row
+          label="ONBOARDING"
+          value={
+            settings.onboarding.completed
+              ? settings.onboarding.skipped
+                ? "SKIPPED"
+                : "COMPLETED"
+              : "PENDING"
+          }
+          color={settings.onboarding.completed ? "#39ff14" : "#ff7a00"}
         />
       </SettingsSection>
 
@@ -351,6 +370,10 @@ export function SettingsScreen() {
       <NeoFeatureShowcase
         open={showFeatureShowcase}
         onOpenChange={setShowFeatureShowcase}
+      />
+      <OnboardingWizard
+        open={showOnboardingReplay}
+        onClose={() => setShowOnboardingReplay(false)}
       />
     </div>
   )
