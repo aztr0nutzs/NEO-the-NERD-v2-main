@@ -40,6 +40,7 @@ import { NerdControlPanel } from "./NerdControlPanel";
 import { NeoRobotAvatar } from "./NeoRobotAvatar";
 import { DeviceIdentityReviewQueue } from "./DeviceIdentityReviewQueue";
 import { NetworkTimelinePanel } from "./NetworkTimelinePanel";
+import { NetworkAlertsPanel } from "./NetworkAlertsPanel";
 import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 
 import {
@@ -67,6 +68,12 @@ import {
   createScanFailedEvent,
   createScanStartedEvent,
 } from "@/lib/network/networkEvents";
+import {
+  buildAlertsForScanEvents,
+  getNetworkNotificationCapability,
+  materializeNetworkAlerts,
+} from "@/lib/network/networkNotifications";
+import { computeNextAutoScanAt, shouldRunAutoScan } from "@/lib/network/networkMonitoring";
 
 import type {
   NetworkStatus,
@@ -105,6 +112,12 @@ export function NetworkDiscoveryFeature() {
     setNetworkEvents,
     lastNetworkScanDelta,
     setLastNetworkScanDelta,
+    persistedNetworkSettings,
+    setPersistedNetworkSettings,
+    networkMonitorState,
+    setNetworkMonitorState,
+    networkAlerts,
+    setNetworkAlerts,
   } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
@@ -132,10 +145,20 @@ export function NetworkDiscoveryFeature() {
   const currentScanIdRef = useRef<string | null>(null);
   const previousNetworkStatusRef = useRef<NetworkStatus | null>(null);
   const previousRouterStatusRef = useRef<RouterStatus | null>(null);
+  const settingsRef = useRef<NetworkSettings | null>(null);
+  const persistedNetworkSettingsRef = useRef(persistedNetworkSettings);
 
   useEffect(() => {
     networkEventsRef.current = networkEvents;
   }, [networkEvents]);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  useEffect(() => {
+    persistedNetworkSettingsRef.current = persistedNetworkSettings;
+  }, [persistedNetworkSettings]);
 
   const appendEvents = useCallback(
     (eventsToAdd: Parameters<typeof appendNetworkEvents>[1]) => {
@@ -145,6 +168,20 @@ export function NetworkDiscoveryFeature() {
       setNetworkEvents(nextEvents);
     },
     [setNetworkEvents]
+  );
+
+  const appendAlerts = useCallback(
+    async (alertsToAdd: Parameters<typeof materializeNetworkAlerts>[0]) => {
+      if (!alertsToAdd.length) return;
+      const materialized = await materializeNetworkAlerts(alertsToAdd);
+      setNetworkAlerts((current) => [...materialized, ...current].slice(0, 100));
+      const latest = materialized[0];
+      if (latest) {
+        setRobotMessage(latest.message);
+        setTimeout(() => setRobotMessage(null), 5000);
+      }
+    },
+    [setNetworkAlerts]
   );
 
   useEffect(() => {
@@ -208,6 +245,10 @@ export function NetworkDiscoveryFeature() {
           networkAdapter.getRouterControlMode(),
         ]);
 
+        const restoredSettings = persistedNetworkSettingsRef.current
+          ? await networkAdapter.updateNetworkSettings(persistedNetworkSettingsRef.current)
+          : networkSettings;
+        const notificationCapability = await getNetworkNotificationCapability();
         const identityDevices = mergeIdentitiesForDevices(deviceList);
 
         setNetworkStatus(status);
@@ -215,11 +256,23 @@ export function NetworkDiscoveryFeature() {
         setRouterStatus(router);
         setSecurityInsights(insights);
         setScanHistory(history);
-        setSettings(networkSettings);
+        setSettings(restoredSettings);
+        setPersistedNetworkSettings(restoredSettings);
         setAdapterStatus(currentAdapterStatus);
         setRouterCapabilities(capabilities);
         setRouterControlMode(controlMode);
-        setSelectedMode(networkSettings.scanMode);
+        setSelectedMode(restoredSettings.scanMode);
+        setNetworkMonitorState((current) => ({
+          ...current,
+          enabled: restoredSettings.autoScanEnabled,
+          nextRunAt:
+            restoredSettings.autoScanEnabled && !current.nextRunAt
+              ? computeNextAutoScanAt(restoredSettings)
+              : current.nextRunAt,
+          schedulerStatus: restoredSettings.autoScanEnabled ? "scheduled" : "idle",
+          backgroundCapability: "in-app-only",
+          notificationCapability,
+        }));
         previousDevicesRef.current = identityDevices;
         previousNetworkStatusRef.current = status;
         previousRouterStatusRef.current = router;
@@ -233,7 +286,11 @@ export function NetworkDiscoveryFeature() {
     };
 
     loadData();
-  }, [mergeIdentitiesForDevices]);
+  }, [
+    mergeIdentitiesForDevices,
+    setNetworkMonitorState,
+    setPersistedNetworkSettings,
+  ]);
 
   // Scan progress polling
   useEffect(() => {
@@ -275,6 +332,25 @@ export function NetworkDiscoveryFeature() {
           setDevices(updatedDevices);
           setLastNetworkScanDelta(comparison.summary);
           appendEvents(comparison.events);
+          const activeSettings = settingsRef.current;
+          if (activeSettings) {
+            appendAlerts(
+              buildAlertsForScanEvents({
+                events: comparison.events,
+                devices: updatedDevices,
+                settings: activeSettings,
+                summary: comparison.summary,
+              })
+            ).catch(() => undefined);
+          }
+          setNetworkMonitorState((current) => ({
+            ...current,
+            enabled: Boolean(activeSettings?.autoScanEnabled),
+            lastCompletedAt: new Date().toISOString(),
+            schedulerStatus: activeSettings?.autoScanEnabled ? "scheduled" : "idle",
+            nextRunAt: activeSettings?.autoScanEnabled ? computeNextAutoScanAt(activeSettings) : null,
+            lastIssue: null,
+          }));
           const hasAttentionDevice = updatedDevices.some(
             (device) =>
               device.trustLevel === "new" ||
@@ -305,7 +381,9 @@ export function NetworkDiscoveryFeature() {
     mergeIdentitiesForDevices,
     networkStatus?.scanState,
     appendEvents,
+    appendAlerts,
     playAvatarReaction,
+    setNetworkMonitorState,
     setLastNetworkScanDelta,
     settings?.notifyNewDevices,
     settings?.notifyOfflineDevices,
@@ -328,6 +406,13 @@ export function NetworkDiscoveryFeature() {
       const scanId = `scan-${Date.now()}`;
       currentScanIdRef.current = scanId;
       appendEvents([createScanStartedEvent(scanId, selectedMode)]);
+      setNetworkMonitorState((current) => ({
+        ...current,
+        enabled: Boolean(settingsRef.current?.autoScanEnabled),
+        lastRunAt: new Date().toISOString(),
+        schedulerStatus: "running",
+        lastIssue: null,
+      }));
       await networkAdapter.startNetworkScan(selectedMode);
       const status = await networkAdapter.getNetworkStatus();
       const currentAdapterStatus = await networkAdapter.getAdapterStatus();
@@ -336,7 +421,24 @@ export function NetworkDiscoveryFeature() {
       setScanProgress(0);
     } catch {
       const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
-      appendEvents([createScanFailedEvent(scanId, selectedMode, "Live scan unavailable in current runtime.")]);
+      const failedEvent = createScanFailedEvent(scanId, selectedMode, "Live scan unavailable in current runtime.");
+      appendEvents([failedEvent]);
+      appendAlerts([
+        {
+          id: `alert-${failedEvent.id}`,
+          eventId: failedEvent.id,
+          timestamp: failedEvent.timestamp,
+          title: "Monitoring issue",
+          message: failedEvent.title,
+          severity: "high",
+          status: "unread",
+        },
+      ]).catch(() => undefined);
+      setNetworkMonitorState((current) => ({
+        ...current,
+        schedulerStatus: "error",
+        lastIssue: "Live scan unavailable in current runtime.",
+      }));
       setAdapterStatus(resolveNetworkAdapterStatus({
         demoMode: false,
         nativePluginAvailable: false,
@@ -345,23 +447,56 @@ export function NetworkDiscoveryFeature() {
       setNetworkStatus((current) => current ? { ...current, scanState: "failed" } : current);
       playAvatarReaction("angry");
     }
-  }, [appendEvents, playAvatarReaction, selectedMode]);
+  }, [appendAlerts, appendEvents, playAvatarReaction, selectedMode, setNetworkMonitorState]);
 
   useEffect(() => {
-    if (!settings?.autoScanEnabled || networkStatus?.scanState === "scanning") return;
+    if (!settings) return;
 
-    const intervalMs = Math.max(1, settings.autoScanIntervalMinutes) * 60_000;
-    const interval = window.setInterval(() => {
+    if (!settings.autoScanEnabled) {
+      setNetworkMonitorState((current) => ({
+        ...current,
+        enabled: false,
+        nextRunAt: null,
+        schedulerStatus: "idle",
+      }));
+      return;
+    }
+
+    setNetworkMonitorState((current) => ({
+      ...current,
+      enabled: true,
+      nextRunAt:
+        current.nextRunAt ??
+        computeNextAutoScanAt(settings),
+      schedulerStatus: networkStatus?.scanState === "scanning" ? "running" : "scheduled",
+      backgroundCapability: "in-app-only",
+    }));
+
+    const tick = window.setInterval(() => {
+      const activeSettings = settingsRef.current;
+      if (!activeSettings?.autoScanEnabled) return;
       if (networkAdapter.getIsScanning()) return;
+      if (
+        !shouldRunAutoScan({
+          settings: activeSettings,
+          monitorState: { nextRunAt: networkMonitorState.nextRunAt },
+          isScanning: false,
+        })
+      ) {
+        return;
+      }
       handleStartScan().catch(() => undefined);
-    }, intervalMs);
+    }, 5_000);
 
-    return () => window.clearInterval(interval);
+    return () => window.clearInterval(tick);
   }, [
     handleStartScan,
+    networkMonitorState.nextRunAt,
     networkStatus?.scanState,
+    settings,
     settings?.autoScanEnabled,
     settings?.autoScanIntervalMinutes,
+    setNetworkMonitorState,
   ]);
 
   const handleStopScan = useCallback(async () => {
@@ -530,7 +665,17 @@ export function NetworkDiscoveryFeature() {
     try {
       const updated = await networkAdapter.updateNetworkSettings(newSettings);
       const currentAdapterStatus = await networkAdapter.getAdapterStatus();
+      const notificationCapability = await getNetworkNotificationCapability();
       setSettings(updated);
+      setPersistedNetworkSettings(updated);
+      setNetworkMonitorState((current) => ({
+        ...current,
+        enabled: updated.autoScanEnabled,
+        notificationCapability,
+        backgroundCapability: "in-app-only",
+        schedulerStatus: updated.autoScanEnabled ? "scheduled" : "idle",
+        nextRunAt: updated.autoScanEnabled ? computeNextAutoScanAt(updated) : null,
+      }));
       setAdapterStatus(currentAdapterStatus);
       playAvatarReaction("happy");
       if (newSettings.scanMode) {
@@ -539,7 +684,15 @@ export function NetworkDiscoveryFeature() {
     } catch {
       playAvatarReaction("angry");
     }
-  }, [playAvatarReaction]);
+  }, [playAvatarReaction, setNetworkMonitorState, setPersistedNetworkSettings]);
+
+  const handleMarkAllAlertsRead = useCallback(() => {
+    setNetworkAlerts((current) => current.map((alert) => ({ ...alert, status: "read" })));
+  }, [setNetworkAlerts]);
+
+  const handleClearReadAlerts = useCallback(() => {
+    setNetworkAlerts((current) => current.filter((alert) => alert.status === "unread"));
+  }, [setNetworkAlerts]);
 
   const handleViewDeviceFromInsight = useCallback(
     (deviceId: string) => {
@@ -680,6 +833,13 @@ export function NetworkDiscoveryFeature() {
           onTrust={(device) => handleDeviceAction("trust", device)}
           onWatch={(device) => handleDeviceAction("watch", device)}
           onDismiss={handleDismissDeviceIdentity}
+        />
+
+        <NetworkAlertsPanel
+          alerts={networkAlerts}
+          monitorState={networkMonitorState}
+          onMarkAllRead={handleMarkAllAlertsRead}
+          onClearRead={handleClearReadAlerts}
         />
 
         {/* Overview Stats */}
@@ -897,6 +1057,7 @@ export function NetworkDiscoveryFeature() {
                   settings={settings}
                   onUpdateSettings={handleUpdateSettings}
                   adapterStatus={effectiveAdapterStatus}
+                  monitorState={networkMonitorState}
                 />
               </div>
             </div>

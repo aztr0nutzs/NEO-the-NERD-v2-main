@@ -29,7 +29,13 @@ import type {
   VoiceParams,
 } from "./types"
 import type { DeviceIdentityRecord } from "./network/types"
-import type { NetworkEvent, ScanComparisonSummary } from "./network/types"
+import type {
+  NetworkAlert,
+  NetworkEvent,
+  NetworkMonitorState,
+  NetworkSettings,
+  ScanComparisonSummary,
+} from "./network/types"
 import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
 import {
   duplicateResponse,
@@ -116,6 +122,12 @@ interface AppState {
   setNetworkEvents: Dispatch<SetStateAction<NetworkEvent[]>>
   lastNetworkScanDelta: ScanComparisonSummary | null
   setLastNetworkScanDelta: Dispatch<SetStateAction<ScanComparisonSummary | null>>
+  persistedNetworkSettings: NetworkSettings | null
+  setPersistedNetworkSettings: Dispatch<SetStateAction<NetworkSettings | null>>
+  networkMonitorState: NetworkMonitorState
+  setNetworkMonitorState: Dispatch<SetStateAction<NetworkMonitorState>>
+  networkAlerts: NetworkAlert[]
+  setNetworkAlerts: Dispatch<SetStateAction<NetworkAlert[]>>
 
   notificationOpen: boolean
   setNotificationOpen: (o: boolean) => void
@@ -162,6 +174,17 @@ const DEFAULT_SETTINGS: AssistantSettings = {
     bluetooth: "unavailable",
     network: "unknown",
   },
+}
+
+const DEFAULT_NETWORK_MONITOR_STATE: NetworkMonitorState = {
+  enabled: false,
+  nextRunAt: null,
+  lastRunAt: null,
+  lastCompletedAt: null,
+  lastIssue: null,
+  schedulerStatus: "idle",
+  backgroundCapability: "in-app-only",
+  notificationCapability: "unsupported-platform",
 }
 
 const CHECKING_PERMISSIONS: Record<CapabilityId, CapabilityState> = {
@@ -283,6 +306,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [networkEvents, setNetworkEvents] = useState<NetworkEvent[]>([])
   const [lastNetworkScanDelta, setLastNetworkScanDelta] =
     useState<ScanComparisonSummary | null>(null)
+  const [persistedNetworkSettings, setPersistedNetworkSettings] =
+    useState<NetworkSettings | null>(null)
+  const [networkMonitorState, setNetworkMonitorState] =
+    useState<NetworkMonitorState>(DEFAULT_NETWORK_MONITOR_STATE)
+  const [networkAlerts, setNetworkAlerts] = useState<NetworkAlert[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -304,6 +332,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkDeviceIdentities,
       networkEvents,
       lastNetworkScanDelta,
+      networkSettings: persistedNetworkSettings ?? undefined,
+      networkMonitorState,
+      networkAlerts,
     }),
     [
       accentColor,
@@ -312,6 +343,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkDeviceIdentities,
       networkEvents,
       lastNetworkScanDelta,
+      persistedNetworkSettings,
+      networkMonitorState,
+      networkAlerts,
       personalityId,
       recentVoiceIds,
       responses,
@@ -357,6 +391,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     if (stored.networkEvents?.length) setNetworkEvents(stored.networkEvents)
     if (stored.lastNetworkScanDelta) setLastNetworkScanDelta(stored.lastNetworkScanDelta)
+    if (stored.networkSettings) setPersistedNetworkSettings(stored.networkSettings)
+    if (stored.networkMonitorState) {
+      setNetworkMonitorState({ ...DEFAULT_NETWORK_MONITOR_STATE, ...stored.networkMonitorState })
+    }
+    if (stored.networkAlerts?.length) setNetworkAlerts(stored.networkAlerts)
   }, [])
 
   useEffect(() => {
@@ -768,6 +807,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           networkDeviceIdentities: parsed.networkDeviceIdentities ?? networkDeviceIdentities,
           networkEvents: parsed.networkEvents ?? networkEvents,
           lastNetworkScanDelta: parsed.lastNetworkScanDelta ?? lastNetworkScanDelta,
+          networkSettings: parsed.networkSettings ?? persistedNetworkSettings ?? undefined,
+          networkMonitorState: parsed.networkMonitorState ?? networkMonitorState,
+          networkAlerts: parsed.networkAlerts ?? networkAlerts,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -785,6 +827,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkDeviceIdentities,
       networkEvents,
       lastNetworkScanDelta,
+      persistedNetworkSettings,
+      networkMonitorState,
+      networkAlerts,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -812,6 +857,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setNetworkDeviceIdentities([])
     setNetworkEvents([])
     setLastNetworkScanDelta(null)
+    setPersistedNetworkSettings(null)
+    setNetworkMonitorState(DEFAULT_NETWORK_MONITOR_STATE)
+    setNetworkAlerts([])
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -836,6 +884,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkDeviceIdentities, setNetworkDeviceIdentities,
       networkEvents, setNetworkEvents,
       lastNetworkScanDelta, setLastNetworkScanDelta,
+      persistedNetworkSettings, setPersistedNetworkSettings,
+      networkMonitorState, setNetworkMonitorState,
+      networkAlerts, setNetworkAlerts,
       notificationOpen, setNotificationOpen,
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
     }),
@@ -849,6 +900,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkDeviceIdentities,
       networkEvents,
       lastNetworkScanDelta,
+      persistedNetworkSettings,
+      networkMonitorState,
+      networkAlerts,
       sendMessage, clearMessages, toggleFavorite, deleteResponse, restoreResponse, restoreAllArchived, addResponse,
       updateResponse, duplicateSavedResponse, togglePinnedResponse, useResponseInChat,
       exportResponses, importResponses,

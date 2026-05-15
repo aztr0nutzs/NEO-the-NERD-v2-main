@@ -173,6 +173,38 @@ export interface ScanComparisonSummary {
   trustChangedDeviceIds: string[];
 }
 
+export type NetworkAlertStatus = "unread" | "read";
+
+export type NetworkNotificationCapability =
+  | "available"
+  | "permission-required"
+  | "unavailable"
+  | "unsupported-platform";
+
+export interface NetworkAlert {
+  id: string;
+  timestamp: string;
+  eventId: string;
+  title: string;
+  message: string;
+  severity: InsightSeverity;
+  status: NetworkAlertStatus;
+  relatedDeviceId?: string;
+  notificationStatus: "sent" | "in-app-only" | "failed";
+  notificationReason?: string;
+}
+
+export interface NetworkMonitorState {
+  enabled: boolean;
+  nextRunAt: string | null;
+  lastRunAt: string | null;
+  lastCompletedAt: string | null;
+  lastIssue: string | null;
+  schedulerStatus: "idle" | "scheduled" | "running" | "paused" | "error";
+  backgroundCapability: "in-app-only" | "workmanager-unavailable";
+  notificationCapability: NetworkNotificationCapability;
+}
+
 export interface DeviceIdentitySnapshot {
   name: string;
   hostname: string;

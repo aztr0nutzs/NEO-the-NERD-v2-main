@@ -23,11 +23,13 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { NetworkAdapterStatus, NetworkSettings, ScanMode } from "@/lib/network/types";
+import type { NetworkMonitorState } from "@/lib/network/types";
 
 interface NetworkSettingsPanelProps {
   settings: NetworkSettings;
   onUpdateSettings: (settings: Partial<NetworkSettings>) => void;
   adapterStatus?: NetworkAdapterStatus | null;
+  monitorState?: NetworkMonitorState;
 }
 
 const SCAN_MODES: { value: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
@@ -48,6 +50,7 @@ export function NetworkSettingsPanel({
   settings,
   onUpdateSettings,
   adapterStatus,
+  monitorState,
 }: NetworkSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col rounded-lg border border-gray-500/30 bg-black/60 backdrop-blur-sm">
@@ -125,7 +128,7 @@ export function NetworkSettingsPanel({
             <div className="space-y-4">
               <SettingToggle
                 label="ENABLE_AUTO_SCAN"
-                description="Active in this screen while Network remains open"
+                description="Active in-app scheduler; persists next run while N.E.O. is open or restarted"
                 checked={settings.autoScanEnabled}
                 onCheckedChange={(checked) => onUpdateSettings({ autoScanEnabled: checked })}
               />
@@ -151,7 +154,8 @@ export function NetworkSettingsPanel({
                     </SelectContent>
                   </Select>
                   <p className="mt-1 font-mono text-[10px] text-gray-500">
-                    Runs the selected scan mode on this interval while the Network module is mounted.
+                    Next run: {monitorState?.nextRunAt ? new Date(monitorState.nextRunAt).toLocaleString() : "pending scheduler update"}.
+                    Android closed-app WorkManager scans are not active in this build.
                   </p>
                 </div>
               )}
@@ -163,16 +167,20 @@ export function NetworkSettingsPanel({
             <div className="space-y-3">
               <SettingToggle
                 label="NEW_DEVICE_ALERTS"
-                description="Active as in-app N.E.O. status messages after scans; OS push notifications are planned"
+                description="Active: in-app alert center plus local notification when platform permission is available"
                 checked={settings.notifyNewDevices}
                 onCheckedChange={(checked) => onUpdateSettings({ notifyNewDevices: checked })}
               />
               <SettingToggle
                 label="OFFLINE_DEVICE_ALERTS"
-                description="Active as in-app N.E.O. status messages after scans; OS push notifications are planned"
+                description="Active for trusted devices: alert center plus local notification when available"
                 checked={settings.notifyOfflineDevices}
                 onCheckedChange={(checked) => onUpdateSettings({ notifyOfflineDevices: checked })}
               />
+              <p className="font-mono text-[10px] text-gray-500">
+                Notification path: {monitorState?.notificationCapability ?? "checking"}. If unavailable,
+                alerts remain visible in-app.
+              </p>
             </div>
           </SettingGroup>
 
