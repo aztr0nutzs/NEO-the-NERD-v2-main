@@ -189,9 +189,19 @@ export function RobotStage({
         */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full"
+          className="pointer-events-none absolute left-1/2 top-1/2 h-[103%] w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-[48%]"
           style={{
-            background: `radial-gradient(ellipse 74% 86% at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.94) 40%, rgba(0,0,0,0.78) 62%, ${moodColor}33 76%, rgba(0,0,0,0.08) 92%, rgba(0,0,0,0) 100%)`,
+            background: `radial-gradient(ellipse 50% 62% at 50% 42%, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.96) 45%, ${moodColor}24 62%, rgba(0,0,0,0.72) 78%, rgba(0,0,0,0) 100%)`,
+            boxShadow: `inset 0 0 ${size * 0.12}px rgba(0,0,0,0.92), inset 0 0 ${size * 0.08}px ${moodColor}26, 0 0 ${size * 0.13}px ${moodColor}24`,
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-[49%] h-[94%] w-[77%] -translate-x-1/2 -translate-y-1/2 rounded-[50%]"
+          style={{
+            border: `1px solid ${moodColor}44`,
+            background: `radial-gradient(ellipse 60% 82% at 50% 48%, rgba(0,0,0,0) 52%, ${moodColor}18 74%, rgba(0,0,0,0.66) 100%)`,
+            filter: "blur(0.2px)",
           }}
         />
         <NeoAvatarVideo

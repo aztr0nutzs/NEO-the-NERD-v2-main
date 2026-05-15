@@ -17,19 +17,19 @@ export function voiceProfileToParams(voiceId: string): VoiceParams {
  * "PROVIDER MAPPED" (instead of "PROVIDER READY") avoids implying the live
  * provider can serve this voice right now. Actual readiness depends on a
  * configured backend + API key and is composed dynamically by
- * `getProfileTruthLabel` in `voice-runtime.ts`, which upgrades the badge to
- * "PROVIDER ACTIVE" only when the runtime probe confirms it.
+ * `getProfileTruthLabel` in `voice-runtime.ts`, which upgrades the runtime
+ * truth label to "Provider Distinct Voice" only when the provider path is active.
  */
 export function availabilityLabel(availability: string) {
   switch (availability) {
     case "provider-ready":
-      return "PROVIDER MAPPED"
+      return "PROVIDER DISTINCT VOICE"
     case "browser-preview":
       return "BROWSER PREVIEW"
     case "future-provider-target":
       return "FUTURE PROVIDER TARGET"
     case "profile-only":
-      return "PROFILE ONLY"
+      return "PROFILE-ONLY / NO UNIQUE TIMBRE"
     default:
       return "UNAVAILABLE"
   }

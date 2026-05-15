@@ -1,26 +1,26 @@
 # NEO the N.E.R.D. - Final Production Readiness Verification
 
-**Date:** 2026-05-13  
-**Scope:** final verification of native network integration, runtime truth, build reproducibility, npm audit status, repo hygiene, and production build quality.  
-**UI policy:** no visual redesign or UI simplification performed during this pass.
+**Date:** 2026-05-15  
+**Scope:** targeted correction pass for avatar-stage compositing, voice uniqueness truth, Network setting wiring, scan-mode copy, cleanup hygiene, lint/typecheck/build, and stale readiness documentation.  
+**UI policy:** no existing NEO screen, asset system, Network module, 3D map, Voice Library, Personality system, Response Vault, game system, boot video, or cyberpunk identity was removed or flattened.
 
 ## A. Final Score
 
-**91 / 100 - internal testing ready, not yet public beta ready.**
+**90 / 100 - internal testing ready, Android device acceptance still pending.**
 
-The project is close to the requested 92-94 range, but it does not legitimately clear 92 because Android native network runtime execution could not be verified on an installed app. The debug APK builds and the plugin is registered, but no ADB device/emulator is attached in this environment, so `getLocalNetworkContext()`, `scanLocalSubnet(...)`, and `getGatewayInfo()` remain device-runtime unverified.
+The score remains capped because Android native network and Android native TTS runtime behavior still require an installed-device pass. This correction pass closes the remaining overclaims in source/UI copy and adds native TTS voice enumeration support, but it does not fabricate device acceptance.
 
 ## B. Category Scores
 
 | Category | Score | Evidence |
 |---|---:|---|
-| UI / Visual polish | 94 | No visual changes in this pass. Existing neon/cyberpunk layout, dock, avatar, backgrounds, Network screen, and 3D map were preserved. |
+| UI / Visual polish | 94 | Main avatar stage compositing was tightened with a stronger elliptical mask/portal rim while preserving robot scale and cyberpunk layout. |
 | Runtime architecture | 93 | Static/hosted runtime split remains in `lib/runtime/*`; local fallback avoids impossible `/api` calls inside Capacitor static builds. |
 | Android reliability | 89 | `npx cap sync android` and `./gradlew.bat assembleDebug --no-daemon` passed. Native method runtime calls are not verified because no ADB device is attached. |
 | AI / chat | 94 | `generateAssistantReply()` is the single runtime path. Chat message text now uses `text: reply.text`; raw fallback diagnostics are not appended. AI status remains visible in Chat. |
-| Voice / TTS | 92 | Provider path is gated by backend/provider availability; static Android does not assume a local Next API server. Browser speech/local labels remain truthful. |
+| Voice / TTS | 91 | Provider path is gated by backend/provider availability; Android native TTS now enumerates/selects engine voices when available, but UI truthfully distinguishes provider distinct voices from styled Android TTS and profile-only presets. |
 | Response Vault | 93 | Existing DRAFT/restore/library behavior compiles and remains unchanged in this pass. |
-| Network discovery / control | 90 | Plugin registration, TS plugin name, and demo/native truth logic are verified by source. Android subnet scan execution is still device-runtime unverified. |
+| Network discovery / control | 90 | Scan copy now matches bounded local ARP/hostname/TCP-probe behavior. Auto-scan/interval and safety toggles have active behavior; alerts are labeled as in-app messages, not OS push. Android subnet scan execution is still device-runtime unverified. |
 | 3D map | 93 | Network screen and map components compile in production; canvas path remains present. No UI or map code was modified in this pass. |
 | Build / security | 96 | Clean install, typecheck, lint, build, audit, Capacitor sync, and Android debug assemble passed. `next/font/google` is absent from app font setup. |
 | QA confidence | 86 | Command receipts are strong. Interactive browser/device smoke is incomplete: production server returned HTTP 200, but Playwright smoke could not run without adding a test dependency, and Android runtime has no attached device. |
@@ -42,7 +42,7 @@ The project is close to the requested 92-94 range, but it does not legitimately 
 | Voice/TTS truth | **Closed at architecture level** | Provider TTS depends on backend/provider config; static/native no-backend path reports local/browser fallback instead of assuming a bundled Next server. |
 | Build reproducibility | **Closed** | `app/layout.tsx` uses `next/font/local`; committed WOFF2 assets exist under `app/fonts/`; app source has no `next/font/google`, `fonts.googleapis`, or `fonts.gstatic` references outside font licensing docs. |
 | Security audit | **Closed** | `npm audit --json` reports 0 vulnerabilities. |
-| Repo hygiene | **Closed** | Duplicate root `nerd_info{1,2,3}.png` removed after README repointed to canonical `public/images/neo/info/` assets. Legacy `new_neo/network-discovery-module/` removed. |
+| Repo hygiene | **Closed** | Generated `.next/` and `out/` are ignored and removed from distributed source. `out/` remains a transient Capacitor sync product created by `npm run build`. |
 | Full quality commands | **Closed** | `npm ci`, `npm audit --json`, `npm run typecheck`, `npm run lint`, `npm run build`, `npx cap sync android`, and Android `assembleDebug` all passed. |
 | Major screen smoke | **Partial** | Production server returned HTTP 200. Component/build coverage includes Main, Chat, Voices, Library, Network, Settings, and map modules. Interactive Playwright smoke was attempted but could not run without adding a local test dependency; no UI code was changed to accommodate testing. |
 
@@ -106,7 +106,7 @@ npm run lint
 PASS
 ```
 
-### Production Build
+### Production Build / Capacitor Web Assets
 
 ```text
 npm run build
@@ -116,7 +116,7 @@ npm run build
 ▲ Next.js 16.2.6 (Turbopack)
 ✓ Compiled successfully in 7.5s
 ✓ Generating static pages using 7 workers (6/6) in 888ms
-Prepared Capacitor web assets in out/.
+Prepared Capacitor web assets in out/. The folder is generated, ignored, and may be removed after `npx cap sync android` copies it into Android assets.
 ```
 
 ### Build Portability / Fonts

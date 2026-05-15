@@ -171,7 +171,7 @@ export function VoicesScreen() {
           <span className="text-white/80">LIBRARY</span>
         </h2>
         <p className="mt-1 text-[12px] text-white/55 text-pretty">
-          {VOICE_PROFILES.length} profiles loaded. Provider-ready voices can generate audio; profile-only voices are design presets.
+          {VOICE_PROFILES.length} profiles loaded. Provider distinct voices use mapped provider engines; Android previews are styled TTS unless a provider path is active.
         </p>
       </header>
 
@@ -300,6 +300,12 @@ export function VoicesScreen() {
             speed, pitch, and volume drive the active preview engine where supported. Emotion is provider-style metadata
             {providerTtsAvailable ? " applied by provider TTS." : "; provider TTS not active."}
           </p>
+          {capabilities.nativeAndroidTtsAvailable && (
+            <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
+              ANDROID ENGINE VOICES: {capabilities.nativeAndroidVoiceCount || "UNKNOWN"}
+              {capabilities.selectedAndroidVoiceName ? ` // SELECTED: ${capabilities.selectedAndroidVoiceName}` : " // NO DISTINCT ENGINE VOICE SELECTED"}
+            </p>
+          )}
         </div>
       </NeonPanel>
 
@@ -487,6 +493,17 @@ function VoiceDetailPanel({
               {provider.providerReady ? `PROVIDER ${provider.providerVoiceId}` : availabilityLabel(voice.availability)}
             </p>
           </div>
+        </div>
+
+        <div className="mt-4 rounded-lg bg-black/40 p-3" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
+          <p className="ps-mono text-[9px] uppercase tracking-[0.24em] text-white/45">Uniqueness model</p>
+          <p className="mt-1 text-xs text-white/70">
+            {provider.providerReady
+              ? "Provider Distinct Voice: this profile maps to a provider voice ID when backend TTS is configured."
+              : voice.availability === "profile-only"
+                ? "Profile-only / no unique engine timbre: style metadata changes phrasing, pitch, rate, and cadence only."
+                : "Styled Android TTS / browser preview: local engines may style pitch and rate; provider timbre is not active for this profile."}
+          </p>
         </div>
 
         <div className="mt-4 rounded-lg bg-black/40 p-3" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>

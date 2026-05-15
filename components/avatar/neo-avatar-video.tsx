@@ -57,7 +57,7 @@ interface NeoAvatarVideoProps {
 // Feathered elliptical mask for the large stage: fully opaque through the
 // robot, dissolving the rectangular MP4 edge into the surrounding reactor.
 const STAGE_MASK =
-  "radial-gradient(ellipse 92% 95% at 50% 44%, #000 0%, #000 58%, rgba(0,0,0,0.7) 76%, rgba(0,0,0,0.2) 88%, rgba(0,0,0,0) 100%)"
+  "radial-gradient(ellipse 74% 91% at 50% 43%, #000 0%, #000 54%, rgba(0,0,0,0.86) 66%, rgba(0,0,0,0.46) 79%, rgba(0,0,0,0.12) 90%, rgba(0,0,0,0) 100%)"
 
 // Soft inner-edge mask for circular surfaces — softens the hard circular clip
 // so it never reads as a stark cut, while staying opaque across the robot.
@@ -73,13 +73,17 @@ interface VariantConfig {
 
 const VARIANT_CONFIG: Record<AvatarVariant, VariantConfig> = {
   stage: {
-    wrapper: "relative isolate overflow-hidden bg-[#05060a]",
-    wrapperStyle: { maskImage: STAGE_MASK, WebkitMaskImage: STAGE_MASK },
+    wrapper: "relative isolate overflow-hidden rounded-[48%_48%_44%_44%/52%_52%_46%_46%] bg-transparent",
+    wrapperStyle: {
+      clipPath: "ellipse(47% 50% at 50% 48%)",
+      maskImage: STAGE_MASK,
+      WebkitMaskImage: STAGE_MASK,
+    },
     video: "h-full w-full object-cover",
     // Bias the crop upward so the head keeps headroom and the bright reflective
     // floor at the bottom of the clip is pushed out of frame, while still
     // showing the robot down past the glowing chest core.
-    videoStyle: { objectPosition: "50% 20%", transform: "scale(1.08)" },
+    videoStyle: { objectPosition: "50% 18%", transform: "scale(1.14)" },
   },
   circle: {
     wrapper: "relative isolate overflow-hidden rounded-full bg-[#05060a]",
@@ -222,7 +226,7 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
               // Premium edge depth: a soft dark vignette that sits above the
               // video so the robot reads as recessed into the reactor chamber.
               background:
-                "radial-gradient(ellipse 70% 80% at 50% 46%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.34) 80%, rgba(0,0,0,0.7) 100%)",
+                "radial-gradient(ellipse 54% 72% at 50% 42%, rgba(0,0,0,0) 48%, rgba(0,0,0,0.26) 68%, rgba(0,0,0,0.72) 91%, rgba(0,0,0,0.92) 100%)",
             }}
           />
         )}

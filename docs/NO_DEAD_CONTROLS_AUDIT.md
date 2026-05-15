@@ -73,7 +73,10 @@ For every primary screen we asked:
 | Network | Dock entry + Main shortcut card | Recently added in another PR. Network is now in dock position 3 and on the Main screen. | No change in this PR. | `components/bottom-dock.tsx`, `components/screens/main-screen.tsx` |
 | Network | Tabs (MAP / SCAN / DEVICES / ROUTER / SECURITY / HISTORY / CONFIG) | Default `"map"`; each tab renders a real panel. | No change. | `components/network/NetworkDiscoveryFeature.tsx` |
 | Network | Router toggles (Firewall read-only, Guest network, QoS) | Read-only displays are properly read-only; toggles use `canToggle*` to conditionally wire onToggle. | No change. | `components/network/RouterControlPanel.tsx` |
-| Network | Network settings toggles (Auto-scan, Alerts, Safe mode, Allow control actions, Demo mode) | All wired to `onUpdateSettings`. | No change. | `components/network/NetworkSettingsPanel.tsx` |
+| Network | Auto-scan + interval | Previously persisted only. | Now active while the Network module is mounted: runs the selected scan mode on the selected interval. | `components/network/NetworkDiscoveryFeature.tsx`, `components/network/NetworkSettingsPanel.tsx` |
+| Network | New/offline device alerts | Previously persisted only and looked like OS notifications. | Now truthfully labeled as in-app N.E.O. status messages after scans; OS push notifications remain planned. | `components/network/NetworkDiscoveryFeature.tsx`, `components/network/NetworkSettingsPanel.tsx` |
+| Network | Safe mode + Allow control actions | Previously persisted only. | Now gate block/wake/router actions. Discovery remains usable; control attempts produce an in-app status message when disabled. | `components/network/NetworkDiscoveryFeature.tsx`, `components/network/NetworkSettingsPanel.tsx` |
+| Network | Demo mode | Persists and switches between demo/fallback/live adapter paths. | No change. | `components/network/NetworkSettingsPanel.tsx`, `lib/network/networkDiscoveryAdapter.ts` |
 | Network | Device detail actions (Trust, Watch, Block, Wake) | Real handlers from parent; Block opens confirmation dialog. | No change. | `components/network/DeviceDetailPanel.tsx` |
 
 ## Numbers

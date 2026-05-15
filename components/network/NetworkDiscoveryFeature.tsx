@@ -14,7 +14,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import {
   Radar,
@@ -105,6 +105,7 @@ export function NetworkDiscoveryFeature() {
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<string[]>([]);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [robotMessage, setRobotMessage] = useState<string | null>(null);
+  const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
 
   // Robot status based on app state
   const robotStatus = networkStatus?.scanState === "scanning" 
@@ -139,6 +140,7 @@ export function NetworkDiscoveryFeature() {
         setRouterCapabilities(capabilities);
         setRouterControlMode(controlMode);
         setSelectedMode(networkSettings.scanMode);
+        previousDevicesRef.current = deviceList;
       } catch (error) {
         setAdapterStatus(resolveNetworkAdapterStatus({
           demoMode: false,
@@ -167,6 +169,16 @@ export function NetworkDiscoveryFeature() {
         networkAdapter.getNetworkStatus().then(setNetworkStatus).catch(() => undefined);
         networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
         networkAdapter.getDiscoveredDevices().then((updatedDevices) => {
+          const previousDevices = previousDevicesRef.current;
+          const previousIds = new Set(previousDevices.map((device) => device.id));
+          const previousOnlineIds = new Set(
+            previousDevices.filter((device) => device.status === "online").map((device) => device.id)
+          );
+          const newDevices = updatedDevices.filter((device) => !previousIds.has(device.id));
+          const offlineDevices = updatedDevices.filter(
+            (device) => device.status === "offline" && previousOnlineIds.has(device.id)
+          );
+          previousDevicesRef.current = updatedDevices;
           setDevices(updatedDevices);
           const hasAttentionDevice = updatedDevices.some(
             (device) =>
@@ -174,6 +186,13 @@ export function NetworkDiscoveryFeature() {
               device.trustLevel === "watch" ||
               device.deviceType === "unknown"
           );
+          if (settings?.notifyNewDevices && newDevices.length > 0) {
+            setRobotMessage(`${newDevices.length} new network device${newDevices.length === 1 ? "" : "s"} detected.`);
+            setTimeout(() => setRobotMessage(null), 4500);
+          } else if (settings?.notifyOfflineDevices && offlineDevices.length > 0) {
+            setRobotMessage(`${offlineDevices.length} device${offlineDevices.length === 1 ? "" : "s"} went offline.`);
+            setTimeout(() => setRobotMessage(null), 4500);
+          }
           playAvatarReaction(hasAttentionDevice ? "surprised" : "happy");
         });
         networkAdapter.getScanHistory().then(setScanHistory).catch(() => undefined);
@@ -182,7 +201,7 @@ export function NetworkDiscoveryFeature() {
     }, 100);
 
     return () => clearInterval(interval);
-  }, [networkStatus?.scanState, playAvatarReaction]);
+  }, [networkStatus?.scanState, playAvatarReaction, settings?.notifyNewDevices, settings?.notifyOfflineDevices]);
 
   // Action polling
   useEffect(() => {
@@ -215,6 +234,23 @@ export function NetworkDiscoveryFeature() {
     }
   }, [playAvatarReaction, selectedMode]);
 
+  useEffect(() => {
+    if (!settings?.autoScanEnabled || networkStatus?.scanState === "scanning") return;
+
+    const intervalMs = Math.max(1, settings.autoScanIntervalMinutes) * 60_000;
+    const interval = window.setInterval(() => {
+      if (networkAdapter.getIsScanning()) return;
+      handleStartScan().catch(() => undefined);
+    }, intervalMs);
+
+    return () => window.clearInterval(interval);
+  }, [
+    handleStartScan,
+    networkStatus?.scanState,
+    settings?.autoScanEnabled,
+    settings?.autoScanIntervalMinutes,
+  ]);
+
   const handleStopScan = useCallback(async () => {
     await networkAdapter.stopNetworkScan();
     const status = await networkAdapter.getNetworkStatus();
@@ -244,6 +280,20 @@ export function NetworkDiscoveryFeature() {
       device: DiscoveredDevice
     ) => {
       try {
+        if (!settings?.allowControlActions && (action === "block" || action === "wake")) {
+          setRobotMessage("Control actions are disabled in Network settings.");
+          setTimeout(() => setRobotMessage(null), 4000);
+          playAvatarReaction("surprised");
+          return;
+        }
+
+        if (settings?.safeMode && (action === "block" || action === "wake")) {
+          setRobotMessage("Safe mode is active. Disable Safe Mode or enable an external connector before this control action.");
+          setTimeout(() => setRobotMessage(null), 5000);
+          playAvatarReaction("surprised");
+          return;
+        }
+
         switch (action) {
           case "trust":
             await trustDevice(device);
@@ -276,7 +326,7 @@ export function NetworkDiscoveryFeature() {
         if (updated) setSelectedDevice(updated);
       }
     },
-    [playAvatarReaction]
+    [playAvatarReaction, settings]
   );
 
   const handleSaveNote = useCallback(async (device: DiscoveredDevice, note: string) => {
@@ -295,6 +345,20 @@ export function NetworkDiscoveryFeature() {
   const handleRouterAction = useCallback(
     async (action: "refresh" | "reboot" | "toggleGuest" | "toggleQoS", value?: boolean) => {
       try {
+        if (action !== "refresh" && !settings?.allowControlActions) {
+          setRobotMessage("Router control actions are disabled in Network settings.");
+          setTimeout(() => setRobotMessage(null), 4000);
+          playAvatarReaction("surprised");
+          return;
+        }
+
+        if (action !== "refresh" && settings?.safeMode) {
+          setRobotMessage("Safe mode is active. Router control remains read-only in this build.");
+          setTimeout(() => setRobotMessage(null), 5000);
+          playAvatarReaction("surprised");
+          return;
+        }
+
         switch (action) {
           case "refresh": {
             const router = await networkAdapter.getRouterStatus();
@@ -329,7 +393,7 @@ export function NetworkDiscoveryFeature() {
         playAvatarReaction("angry");
       }
     },
-    [playAvatarReaction]
+    [playAvatarReaction, settings]
   );
 
   const handleUpdateSettings = useCallback(async (newSettings: Partial<NetworkSettings>) => {

@@ -38,7 +38,9 @@ import {
 import { getBackendConfig } from "@/lib/runtime/backend-config"
 import {
   getAndroidNativeTtsAvailability,
+  getAndroidNativeVoices,
   isAndroidNativeTtsRuntime,
+  selectAndroidNativeVoiceName,
   speakWithAndroidNativeTts,
   stopAndroidNativeTts,
 } from "./native-tts-bridge"
@@ -56,6 +58,10 @@ export interface VoiceRuntimeCapabilities {
   providerTtsAvailable: boolean
   /** Local Android TextToSpeech plugin is registered and engine-ready. */
   nativeAndroidTtsAvailable: boolean
+  /** Number of selectable Android engine voices exposed by the installed TTS engine. */
+  nativeAndroidVoiceCount: number
+  /** Selected Android engine voice for the current profile, if one can be safely selected. */
+  selectedAndroidVoiceName: string | null
   /** A backend URL is resolvable (same-origin or remote). */
   remoteBackendConfigured: boolean
   /** Best preview path for the *currently selected* voice profile. */
@@ -111,10 +117,11 @@ export function getVoiceProfileCapabilities(profile: VoiceProfile) {
 export async function getVoiceRuntimeCapabilities(
   profile?: VoiceProfile,
 ): Promise<VoiceRuntimeCapabilities> {
-  const [config, health, nativeTts] = await Promise.all([
+  const [config, health, nativeTts, nativeVoices] = await Promise.all([
     getBackendConfig().catch(() => null),
     checkBackendAvailability().catch(() => null),
     getAndroidNativeTtsAvailability().catch(() => ({ available: false, ready: false, platform: "unknown" })),
+    getAndroidNativeVoices().catch(() => []),
   ])
   const browserSpeechSupported = isBrowserSpeechSupported()
   const nativeAndroidTtsAvailable = Boolean(nativeTts.available && nativeTts.ready)
@@ -124,6 +131,8 @@ export async function getVoiceRuntimeCapabilities(
       health?.state === "available" &&
       health.providerStatus?.providerConfigured,
   )
+  const selectedAndroidVoiceName =
+    nativeAndroidTtsAvailable && profile ? await selectAndroidNativeVoiceName(profile) : null
 
   let currentPreviewMode: VoicePreviewMode = "unavailable"
   if (profile) {
@@ -148,6 +157,8 @@ export async function getVoiceRuntimeCapabilities(
     browserSpeechSupported,
     providerTtsAvailable,
     nativeAndroidTtsAvailable,
+    nativeAndroidVoiceCount: nativeVoices.length,
+    selectedAndroidVoiceName,
     remoteBackendConfigured,
     currentPreviewMode,
   }
@@ -181,6 +192,8 @@ export function getCachedVoiceRuntimeCapabilities(
     browserSpeechSupported,
     providerTtsAvailable,
     nativeAndroidTtsAvailable,
+    nativeAndroidVoiceCount: 0,
+    selectedAndroidVoiceName: null,
     remoteBackendConfigured,
     currentPreviewMode,
   }
@@ -559,31 +572,35 @@ export function getProfileTruthLabel(
   if (profile.availability === "unavailable") return "PREVIEW UNAVAILABLE"
 
   if (profile.availability === "provider-ready") {
-    if (capabilities.providerTtsAvailable) return "Provider Voice"
-    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
+    if (capabilities.providerTtsAvailable) return "Provider Distinct Voice"
+    if (capabilities.nativeAndroidTtsAvailable) {
+      return capabilities.selectedAndroidVoiceName
+        ? `Styled Android TTS (${capabilities.selectedAndroidVoiceName})`
+        : "Styled Android TTS"
+    }
     if (capabilities.browserSpeechSupported) return "Browser Speech (Styled)"
     return "PROVIDER READY // NO LOCAL FALLBACK"
   }
 
   if (profile.availability === "browser-preview") {
-    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
+    if (capabilities.nativeAndroidTtsAvailable) return "Styled Android TTS"
     return capabilities.browserSpeechSupported
       ? "Browser Speech (Styled)"
       : "BROWSER PREVIEW UNAVAILABLE"
   }
 
   if (profile.availability === "future-provider-target") {
-    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
+    if (capabilities.nativeAndroidTtsAvailable) return "Styled Android TTS"
     return capabilities.browserSpeechSupported
       ? "Browser Speech (Styled)"
       : "FUTURE PROVIDER TARGET"
   }
 
   if (profile.availability === "profile-only") {
-    if (capabilities.nativeAndroidTtsAvailable) return "Android TTS (Styled)"
+    if (capabilities.nativeAndroidTtsAvailable) return "Styled Android TTS"
     return capabilities.browserSpeechSupported
       ? "Browser Speech (Styled)"
-      : "PROFILE ONLY"
+      : "Profile-only / no unique engine timbre"
   }
 
   return "PREVIEW UNAVAILABLE"

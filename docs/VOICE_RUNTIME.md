@@ -29,18 +29,21 @@ lib/voice/
   ttsProviderAdapter.ts     Compatibility shim re-exporting voice-runtime.
   voicePreviewAdapter.ts    Compatibility shim re-exporting voice-runtime.
   voicePlayback.ts          Shared playback snapshot types + param mappers.
-  voiceProfiles.ts          The 41 voice profile catalog.
+  voiceProfiles.ts          The 40 voice profile catalog.
   voicePresets.ts           availabilityLabel + voiceProfileToParams.
 ```
 
 ## Capability model
 
 ```ts
-type VoicePreviewMode = "browser-speech" | "provider-tts" | "unavailable"
+type VoicePreviewMode = "browser-speech" | "native-android" | "provider-tts" | "unavailable"
 
 interface VoiceRuntimeCapabilities {
   browserSpeechSupported: boolean    // SpeechSynthesis present in this WebView
   providerTtsAvailable: boolean      // backend reachable AND provider key set
+  nativeAndroidTtsAvailable: boolean // Android TextToSpeech plugin is ready
+  nativeAndroidVoiceCount: number    // selectable engine voices reported by Android, if any
+  selectedAndroidVoiceName: string | null // chosen local engine voice, when safely selectable
   remoteBackendConfigured: boolean   // BackendMode === "remote" | "same-origin"
   currentPreviewMode: VoicePreviewMode  // best path for the active profile
 }
@@ -66,12 +69,17 @@ first paint.
               - On payload         → playProviderAudio() (manages blob URL),
                                       return { mode:"provider-tts", ok:true, payload }
               - On error           → return { mode:"provider-tts", ok:false, error }
-3. If mode === "browser-speech", OR (mode === "auto" AND currentPreviewMode === "browser-speech"):
+3. If mode === "native-android", OR (mode === "auto" AND currentPreviewMode === "native-android"):
+       a. If Android TextToSpeech is not ready
+              → return { mode:"unavailable", ok:false, error:"…not ready." }
+       b. Stop browser/provider playback, select a safe local Android engine voice if the engine reports one,
+          then speak through the Capacitor `NeoTts` plugin with styled text, rate, pitch, and volume.
+4. If mode === "browser-speech", OR (mode === "auto" AND currentPreviewMode === "browser-speech"):
        a. If !browserSpeechSupported
               → return { mode:"unavailable", ok:false, error:"…not supported." }
        b. teardownProviderAudio() (revoke any active blob URL)
        c. speakWithBrowserSpeech(...); return { mode:"browser-speech", ok }
-4. Otherwise return { mode:"unavailable", ok:false, error:"Neither path available." }
+5. Otherwise return { mode:"unavailable", ok:false, error:"Neither path available." }
 ```
 
 `stopVoicePreview()` cancels both the browser speech utterance and the managed
@@ -88,21 +96,24 @@ payload via a managed `<audio>` element. The blob URL it creates is owned by
 the runtime and revoked on `ended`, `error`, the next play, or
 `stopVoicePreview()`.
 
-## Provider vs browser-speech truth table
+## Voice uniqueness truth table
 
-| Runtime | `NEXT_PUBLIC_NEO_BACKEND_BASE_URL` | Server `OPENAI_API_KEY` | Profile availability | `currentPreviewMode` | "GENERATE PROVIDER AUDIO" button |
+| Runtime | `NEXT_PUBLIC_NEO_BACKEND_BASE_URL` | Server `OPENAI_API_KEY` | Profile availability | `currentPreviewMode` | Truth label |
 |---|---|---|---|---|---|
-| `next dev` | unset | set | `provider-ready` | `provider-tts` | enabled |
-| `next dev` | unset | unset | `provider-ready` | `browser-speech` | disabled ("PROVIDER AUDIO UNAVAILABLE") |
-| `next dev` | unset | any | `browser-preview` | `browser-speech` | disabled |
-| `next dev` | unset | any | `profile-only` | `browser-speech` | disabled |
-| `next dev` | unset | any | `future-provider-target` | `browser-speech` | disabled |
-| `next dev` | unset | any | `unavailable` | `unavailable` | disabled |
-| Capacitor Android | unset | n/a | `provider-ready` | `browser-speech` (if WebView supports) else `unavailable` | disabled |
-| Capacitor Android | valid hosted URL | set | `provider-ready` | `provider-tts` | enabled |
-| Capacitor Android | invalid URL | any | any | `browser-speech` (if supported) else `unavailable` | disabled, status shows "BACKEND UNREACHABLE" |
-| Capacitor Android | any | any | any | falls through to browser path / unavailable | depends on browser support |
-| Any | any | any | unsupported WebView (no SpeechSynthesis) + non-provider profile | `unavailable` | disabled |
+| `next dev` | unset | set | `provider-ready` | `provider-tts` | `Provider Distinct Voice` |
+| `next dev` | unset | unset | `provider-ready` | `browser-speech` | `Browser Speech (Styled)` |
+| `next dev` | unset | any | `browser-preview` | `browser-speech` | `Browser Speech (Styled)` |
+| `next dev` | unset | any | `profile-only` | `browser-speech` | `Profile-only / no unique engine timbre` when no local preview path exists; otherwise styled preview only |
+| Capacitor Android | unset | n/a | any non-unavailable profile | `native-android` when plugin is ready | `Styled Android TTS`, with selected engine voice name shown if Android exposes one |
+| Capacitor Android | valid hosted URL | set | `provider-ready` | `provider-tts` | `Provider Distinct Voice` |
+| Capacitor Android | invalid URL | any | any non-unavailable profile | `native-android` if ready, otherwise browser/unavailable | `Styled Android TTS` or truthful unavailable state |
+| Any | any | any | unsupported WebView + no native/provider path | `unavailable` | `PREVIEW UNAVAILABLE` |
+
+The model intentionally separates:
+
+- `Provider Distinct Voice`: a provider-ready profile with an active backend/provider path and a mapped provider voice ID.
+- `Styled Android TTS`: Android system TextToSpeech using styled text, pitch, rate, volume, and, when safely available, a selected local engine voice. This is not claimed as a unique NEO timbre per profile.
+- `Profile-only / no unique engine timbre`: design presets that shape metadata/cadence but do not have a distinct provider engine voice.
 
 ## User-facing label corrections
 
@@ -112,7 +123,7 @@ the runtime and revoked on `ended`, `error`, the next play, or
 | Controls → VOICE ENGINE | `LOCAL MOCK` (Phase 1) | Same as above |
 | Voice Library → "GENERATE PROVIDER AUDIO" button | Always enabled, errored at click time | Disabled with label `PROVIDER AUDIO UNAVAILABLE` when `providerTtsAvailable === false`. Tooltip explains. |
 | Voice Library → status footer | "Emotion is provider/style metadata." | "Emotion is provider-style metadata applied by provider TTS." / "Emotion is provider-style metadata; provider TTS not active." — toggles on `providerTtsAvailable`. |
-| Voice Library → per-profile truth label (`getProfileTruthLabel`) | Always emitted `PROVIDER READY // BROWSER PREVIEW` even when provider unreachable | Now emits `PROVIDER ACTIVE` only when truly active; otherwise `PROVIDER READY // BROWSER PREVIEW` for fallback or `PROVIDER READY // NO LOCAL FALLBACK` when even browser speech is unavailable. |
+| Voice Library → per-profile truth label (`getProfileTruthLabel`) | Overstated provider readiness or implied native uniqueness | Now emits `Provider Distinct Voice`, `Styled Android TTS`, `Browser Speech (Styled)`, or `Profile-only / no unique engine timbre` based on the actual runtime path. |
 | Response Vault → "Generate audio" affordance | Errored at click when provider unconfigured | Disabled / status shows truthful reason BEFORE the click. |
 | Voice Library initial status | `TTS READY WHEN SERVER PROVIDER IS CONFIGURED` (always misleading on Android) | `VOICE PREVIEW READY` — neutral; specific status appears after first preview. |
 
@@ -172,5 +183,5 @@ read from the same `BackendHealthSnapshot`.
 4. CORS on the backend must allow the Capacitor origin (`capacitor://localhost`).
 
 After install, the Voice Library button will read `GENERATE PROVIDER AUDIO`
-and the per-profile truth label will read `PROVIDER ACTIVE` for
-provider-ready voices.
+and the per-profile truth label will read `Provider Distinct Voice` for
+provider-ready voices when the backend/provider path is actually active.

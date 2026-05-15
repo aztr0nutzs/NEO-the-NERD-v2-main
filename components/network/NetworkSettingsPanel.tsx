@@ -31,15 +31,9 @@ interface NetworkSettingsPanelProps {
 }
 
 const SCAN_MODES: { value: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
-<<<<<<< ours
-  { value: "quick", label: "QUICK", icon: Zap, description: "Fast ARP sweep only" },
-  { value: "balanced", label: "BALANCED", icon: Scale, description: "ARP + host checks (current build)" },
-  { value: "deep", label: "DEEP", icon: Search, description: "Extended bounded port probe (current build)" },
-=======
   { value: "quick", label: "QUICK", icon: Zap, description: "Context + gateway probe + shallow bounded host probe" },
   { value: "balanced", label: "BALANCED", icon: Scale, description: "Quick + broader host cap + hostname + ARP/MAC + bounded ports" },
   { value: "deep", label: "DEEP", icon: Search, description: "Balanced + expanded bounded ports + richer service inference" },
->>>>>>> theirs
 ];
 
 const INTERVAL_OPTIONS = [
@@ -131,7 +125,7 @@ export function NetworkSettingsPanel({
             <div className="space-y-4">
               <SettingToggle
                 label="ENABLE_AUTO_SCAN"
-                description="Planned automation — not active in this build yet"
+                description="Active in this screen while Network remains open"
                 checked={settings.autoScanEnabled}
                 onCheckedChange={(checked) => onUpdateSettings({ autoScanEnabled: checked })}
               />
@@ -156,6 +150,9 @@ export function NetworkSettingsPanel({
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="mt-1 font-mono text-[10px] text-gray-500">
+                    Runs the selected scan mode on this interval while the Network module is mounted.
+                  </p>
                 </div>
               )}
             </div>
@@ -166,13 +163,13 @@ export function NetworkSettingsPanel({
             <div className="space-y-3">
               <SettingToggle
                 label="NEW_DEVICE_ALERTS"
-                description="Alert when new devices join network"
+                description="Active as in-app N.E.O. status messages after scans; OS push notifications are planned"
                 checked={settings.notifyNewDevices}
                 onCheckedChange={(checked) => onUpdateSettings({ notifyNewDevices: checked })}
               />
               <SettingToggle
                 label="OFFLINE_DEVICE_ALERTS"
-                description="Alert when trusted devices go offline"
+                description="Active as in-app N.E.O. status messages after scans; OS push notifications are planned"
                 checked={settings.notifyOfflineDevices}
                 onCheckedChange={(checked) => onUpdateSettings({ notifyOfflineDevices: checked })}
               />
@@ -184,13 +181,13 @@ export function NetworkSettingsPanel({
             <div className="space-y-3">
               <SettingToggle
                 label="SAFE_MODE"
-                description="Require confirmation for risky actions"
+                description="Active: suppresses destructive block/wake/router actions unless explicit controls are enabled"
                 checked={settings.safeMode}
                 onCheckedChange={(checked) => onUpdateSettings({ safeMode: checked })}
               />
               <SettingToggle
                 label="ALLOW_CONTROL_ACTIONS"
-                description="Enable device block/wake/router control"
+                description="Active: disabled blocks control actions and leaves discovery read-only"
                 checked={settings.allowControlActions}
                 onCheckedChange={(checked) => onUpdateSettings({ allowControlActions: checked })}
               />

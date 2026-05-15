@@ -35,9 +35,13 @@ Methods:
    - `dataLimited`
 
 ## Scan modes (bounded behavior)
-- `quick`: defaults around 64 hosts, short per-port timeout.
-- `balanced`: defaults around 128 hosts, medium timeout.
-- `deep`: defaults up to 254 hosts, longer timeout.
+- `quick`: local context + gateway + shallow bounded host probe (`48` default hosts, `80/443`, short timeout).
+- `balanced`: quick-style discovery with broader host cap, hostname lookup, ARP/MAC cache read, and bounded ports (`80/443/53/22/445/8080`).
+- `deep`: balanced behavior with expanded bounded ports and longer timeout (`80/443/53/22/445/8080/8443/139`).
+
+Current Android native implementation does **not** run mDNS, SSDP, UPnP, SNMP,
+or a full unbounded port scan. UI copy must describe the bounded ARP/hostname/
+TCP-probe behavior above.
 
 All modes:
 - remain subnet-local only

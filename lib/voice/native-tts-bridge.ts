@@ -15,6 +15,15 @@ export interface NativeTtsAvailability {
 export interface NativeTtsSpeakResult {
   ok: boolean
   message?: string
+  voiceName?: string | null
+}
+
+export interface AndroidNativeVoice {
+  name: string
+  locale: string
+  quality?: number
+  latency?: number
+  networkConnectionRequired?: boolean
 }
 
 interface NativeTtsPlugin {
@@ -24,7 +33,13 @@ interface NativeTtsPlugin {
     rate: number
     pitch: number
     volume: number
+    voiceName?: string
   }): Promise<NativeTtsSpeakResult>
+  getVoices(): Promise<{
+    available: boolean
+    voices: AndroidNativeVoice[]
+    message?: string
+  }>
   stop(): Promise<NativeTtsSpeakResult>
 }
 
@@ -60,12 +75,53 @@ export async function speakWithAndroidNativeTts(options: {
     return { ok: false, message: availability.message ?? "Android TTS engine not ready." }
   }
   const speech = buildStyledVoiceSpeech(options.profile, options.text, options.params)
+  const voiceName = await selectAndroidNativeVoiceName(options.profile)
   return neoTts.speak({
     text: speech.text,
     rate: speech.rate,
     pitch: speech.pitch,
     volume: speech.volume,
+    ...(voiceName ? { voiceName } : {}),
   })
+}
+
+let cachedAndroidVoices: AndroidNativeVoice[] | null = null
+
+export async function getAndroidNativeVoices(): Promise<AndroidNativeVoice[]> {
+  if (!isAndroidNativeTtsRuntime()) return []
+  if (cachedAndroidVoices) return cachedAndroidVoices
+  try {
+    const result = await neoTts.getVoices()
+    cachedAndroidVoices = Array.isArray(result.voices) ? result.voices : []
+    return cachedAndroidVoices
+  } catch {
+    cachedAndroidVoices = []
+    return cachedAndroidVoices
+  }
+}
+
+export async function selectAndroidNativeVoiceName(profile: VoiceProfile): Promise<string | null> {
+  const voices = await getAndroidNativeVoices()
+  const localVoices = voices
+    .filter((voice) => !voice.networkConnectionRequired)
+    .filter((voice) => voice.locale?.toLowerCase().startsWith("en"))
+    .sort((a, b) => {
+      const quality = (b.quality ?? 0) - (a.quality ?? 0)
+      if (quality !== 0) return quality
+      return a.name.localeCompare(b.name)
+    })
+
+  if (!localVoices.length) return null
+  const index = Math.abs(hashString(profile.id)) % localVoices.length
+  return localVoices[index]?.name ?? null
+}
+
+function hashString(value: string) {
+  let hash = 0
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0
+  }
+  return hash
 }
 
 async function waitForAndroidNativeTtsReady(
