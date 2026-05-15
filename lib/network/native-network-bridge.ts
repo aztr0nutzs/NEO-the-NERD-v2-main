@@ -4,12 +4,15 @@ import type {
   NativeLocalNetworkContext,
   NativeScanOptions,
   NativeScanResult,
+  NativeBackgroundMonitoringStatus,
 } from "./native-network-types";
 
 type NeoNetworkPlugin = {
   getLocalNetworkContext(): Promise<NativeLocalNetworkContext>;
   scanLocalSubnet(options: NativeScanOptions): Promise<NativeScanResult>;
   getGatewayInfo(): Promise<NativeGatewayInfo>;
+  configureBackgroundMonitoring(options: { enabled: boolean; intervalMinutes: number; notifyOnChanges: boolean }): Promise<Record<string, unknown>>;
+  getBackgroundMonitoringStatus(): Promise<NativeBackgroundMonitoringStatus>;
 };
 
 const neoNetwork = registerPlugin<NeoNetworkPlugin>("NeoNetwork");
@@ -97,4 +100,19 @@ export async function getGatewayInfo(): Promise<NativeGatewayInfo | null> {
     });
     throw error;
   }
+}
+
+export async function configureAndroidBackgroundMonitoring(options: {
+  enabled: boolean;
+  intervalMinutes: number;
+  notifyOnChanges: boolean;
+}): Promise<boolean> {
+  if (!isAndroidNativeNetworkAvailable()) return false;
+  await neoNetwork.configureBackgroundMonitoring(options);
+  return true;
+}
+
+export async function getAndroidBackgroundMonitoringStatus(): Promise<NativeBackgroundMonitoringStatus | null> {
+  if (!isAndroidNativeNetworkAvailable()) return null;
+  return neoNetwork.getBackgroundMonitoringStatus();
 }
