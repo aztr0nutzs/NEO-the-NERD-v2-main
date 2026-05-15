@@ -1,5 +1,6 @@
 import type { ResponseCategory, SavedResponse } from "@/lib/types"
 import { detectAssistantIntent } from "./assistantIntent"
+import { answerNetworkQuestion } from "@/lib/network/networkAssistantContext"
 import {
   emotionToMood,
   emotionToReactionClip,
@@ -26,6 +27,13 @@ const INTENT_CATEGORY: Record<AssistantIntent, ResponseCategory> = {
   gratitude: "System",
   frustration: "Advice",
   unknown: "Helpful",
+  "explain-network": "Helpful",
+  "summarize-changes": "Helpful",
+  "suspicious-device": "Advice",
+  "diagnose-slow-network": "Advice",
+  "scan-status": "Helpful",
+  "device-identity-question": "Helpful",
+  "monitoring-status": "Helpful",
 }
 
 export function generateAssistantResponseDraft(
@@ -39,8 +47,13 @@ export function generateAssistantResponseDraft(
     personality: context.activePersonality,
   })
 
-  const libraryMatch = pickLibraryMatch(context.responseLibraryMatches, memory.recentAssistantPhrases)
-  const content = libraryMatch
+  const networkContent = context.networkContext ? answerNetworkQuestion(context.networkContext) : null
+  const libraryMatch = networkContent
+    ? undefined
+    : pickLibraryMatch(context.responseLibraryMatches, memory.recentAssistantPhrases)
+  const content = networkContent
+    ? networkContent
+    : libraryMatch
     ? shapeWithPersonality(libraryMatch.body, context.activePersonality, intent, true)
     : createLocalResponse(context, intent)
 
@@ -313,6 +326,20 @@ function suggestedActionsForIntent(intent: AssistantIntent) {
       return ["Open Games", "Start trivia", "Start reaction tap"]
     case "tech-question":
       return ["Collect error text", "List recent changes", "Try minimal reproduction"]
+    case "explain-network":
+      return ["Open Network", "Run diagnostics", "Open timeline"]
+    case "summarize-changes":
+      return ["Open timeline", "Inspect new device", "Run scan"]
+    case "suspicious-device":
+      return ["Show unknown devices", "Label a device", "Open device details"]
+    case "diagnose-slow-network":
+      return ["Run diagnostics", "Open health panel", "Review alerts"]
+    case "scan-status":
+      return ["Run scan", "Open scan history", "Open timeline"]
+    case "device-identity-question":
+      return ["Open device details", "Label a device", "Mark watch"]
+    case "monitoring-status":
+      return ["Open settings", "Review alerts", "Run scan"]
     case "prank-request":
       return ["Keep it harmless", "Make it reversible", "Avoid impersonation"]
     case "joke-request":

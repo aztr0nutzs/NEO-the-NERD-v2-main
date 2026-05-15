@@ -5,6 +5,34 @@ const INTENT_PATTERNS: Array<{
   patterns: RegExp[]
 }> = [
   {
+    intent: "summarize-changes",
+    patterns: [/\b(what changed|changed today|changes|what happened|last scan|during the last scan|went offline|offline devices?)\b/i],
+  },
+  {
+    intent: "suspicious-device",
+    patterns: [/\b(unknown devices?|devices.*unknown|which devices are unknown|suspicious|untrusted|new device|review first)\b/i],
+  },
+  {
+    intent: "diagnose-slow-network",
+    patterns: [/\b(slow network|wifi slow|lag|latency|degraded|health score|why.*health|diagnose.*network)\b/i],
+  },
+  {
+    intent: "scan-status",
+    patterns: [/\b(scan status|is scanning|scan running|scan results)\b/i],
+  },
+  {
+    intent: "device-identity-question",
+    patterns: [/\b(what is this device|which device|identify device|device identity|label a device)\b/i],
+  },
+  {
+    intent: "monitoring-status",
+    patterns: [/\b(auto scan|autoscan|monitoring|network alerts|next run)\b/i],
+  },
+  {
+    intent: "explain-network",
+    patterns: [/\b(explain my network|network health|my network|router|wifi|network okay)\b/i],
+  },
+  {
     intent: "greet",
     patterns: [/\b(hi|hello|hey|yo|good morning|good afternoon|good evening)\b/i],
   },

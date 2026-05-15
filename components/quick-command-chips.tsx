@@ -9,6 +9,7 @@ import {
   Mic2,
   Sparkles,
   Sunrise,
+  Wifi,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -25,6 +26,7 @@ const CHIPS: Chip[] = [
   { label: "Play a game", icon: Gamepad2, accent: "#ff7a00" },
   { label: "Prank idea", icon: Sparkles, accent: "#ff2d9c" },
   { label: "Daily briefing", icon: Sunrise, accent: "#39ff14" },
+  { label: "Explain my network", icon: Wifi, accent: "#39ff14" },
   { label: "Surprise me", icon: Dices, accent: "#00f0ff" },
 ]
 

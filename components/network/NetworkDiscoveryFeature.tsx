@@ -128,6 +128,7 @@ export function NetworkDiscoveryFeature() {
     setNetworkAlerts,
     networkHealthSnapshots,
     setNetworkHealthSnapshots,
+    setNetworkAssistantSnapshot,
   } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
@@ -167,6 +168,23 @@ export function NetworkDiscoveryFeature() {
   useEffect(() => {
     settingsRef.current = settings;
   }, [settings]);
+
+  useEffect(() => {
+    setNetworkAssistantSnapshot({
+      status: networkStatus,
+      devices,
+      routerStatus,
+      routerCapabilities,
+      routerControlMode,
+    });
+  }, [
+    devices,
+    networkStatus,
+    routerCapabilities,
+    routerControlMode,
+    routerStatus,
+    setNetworkAssistantSnapshot,
+  ]);
 
   useEffect(() => {
     persistedNetworkSettingsRef.current = persistedNetworkSettings;

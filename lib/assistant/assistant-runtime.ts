@@ -31,6 +31,7 @@ import type {
   ResponseCategory,
   SavedResponse,
 } from "@/lib/types"
+import type { NetworkAssistantContext } from "@/lib/network/types"
 import type { AssistantEmotionState, AssistantIntent } from "./types"
 import type { AssistantChatApiResponse } from "./providerTypes"
 import { runAssistantLocally } from "./assistantLocalRuntime"
@@ -59,6 +60,7 @@ export interface AssistantReplyInput {
   personalityId: string
   conversationMode: ConversationMode
   responseLibraryContext?: SavedResponse[]
+  networkContext?: NetworkAssistantContext | null
 }
 
 export interface AssistantReplyResult {
@@ -171,6 +173,7 @@ export async function generateAssistantReply(
     personalityId: input.personalityId,
     conversationMode: input.conversationMode,
     responseLibraryContext: input.responseLibraryContext,
+    networkContext: input.networkContext ?? null,
   }
 
   if (!safeInput.userMessage) {
@@ -231,6 +234,7 @@ export async function generateAssistantReply(
       personalityId: safeInput.personalityId,
       conversationMode: safeInput.conversationMode,
       responseLibraryContext: safeInput.responseLibraryContext,
+      networkContext: safeInput.networkContext,
     })
   } catch (error) {
     return localReply(safeInput, {

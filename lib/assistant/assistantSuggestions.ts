@@ -26,6 +26,13 @@ const MODE_SUGGESTIONS: Record<ConversationMode, string[]> = {
   "Chill Mode": ["Slow this down", "Talk me through it", "Make a calm plan"],
 }
 
+const NETWORK_SUGGESTIONS = [
+  "Explain my network",
+  "What changed?",
+  "Show unknown devices",
+  "Why is health degraded?",
+]
+
 export function getAssistantPromptSuggestions({
   personalityId,
   conversationMode,
@@ -44,7 +51,14 @@ export function getAssistantPromptSuggestions({
   const responseTagSuggestions = getPersonalityResponseTags(profile.id).slice(0, 2).map((tag) => `Use ${tag} tone`)
   const voiceSuggestion = voiceId ? [`Match ${getVoiceToneSummary(voiceId).split(" // ")[0]}`] : []
 
-  return uniqueShortSuggestions([...contextual, ...voiceSuggestion, ...responseTagSuggestions, ...profileSuggestions, ...modeSuggestions]).slice(0, 6)
+  return uniqueShortSuggestions([
+    ...contextual,
+    ...NETWORK_SUGGESTIONS,
+    ...voiceSuggestion,
+    ...responseTagSuggestions,
+    ...profileSuggestions,
+    ...modeSuggestions,
+  ]).slice(0, 6)
 }
 
 function contextualSuggestions(message?: ChatMessage) {

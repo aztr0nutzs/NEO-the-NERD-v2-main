@@ -15,6 +15,13 @@ const INTENT_EMOTION: Record<AssistantIntent, AssistantEmotionState> = {
   "continue-conversation": "focused",
   gratitude: "calm",
   frustration: "concerned",
+  "explain-network": "focused",
+  "summarize-changes": "focused",
+  "suspicious-device": "concerned",
+  "diagnose-slow-network": "concerned",
+  "scan-status": "focused",
+  "device-identity-question": "curious",
+  "monitoring-status": "focused",
   unknown: "curious",
 }
 

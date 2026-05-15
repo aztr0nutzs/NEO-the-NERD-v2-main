@@ -10,6 +10,7 @@ import type {
   PersonalityTone,
   PersonalityVerbosity,
 } from "@/lib/personality/personalityProfiles"
+import type { NetworkAssistantContext } from "@/lib/network/types"
 
 export type AssistantMessageRole = "user" | "assistant" | "system"
 
@@ -26,6 +27,13 @@ export type AssistantIntent =
   | "continue-conversation"
   | "gratitude"
   | "frustration"
+  | "explain-network"
+  | "summarize-changes"
+  | "suspicious-device"
+  | "diagnose-slow-network"
+  | "scan-status"
+  | "device-identity-question"
+  | "monitoring-status"
   | "unknown"
 
 export type AssistantEmotionState =
@@ -86,6 +94,7 @@ export interface AssistantContextSnapshot {
   lastAssistantTopic?: string
   appStateHints?: string[]
   responseLibraryMatches?: SavedResponse[]
+  networkContext?: NetworkAssistantContext | null
 }
 
 export interface AssistantMemorySnapshot {

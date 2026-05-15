@@ -217,6 +217,57 @@ export interface NetworkHealthSnapshot {
   source: "scan" | "diagnostic" | "manual";
 }
 
+export type NetworkAssistantIntent =
+  | "explain-network"
+  | "summarize-changes"
+  | "suspicious-device"
+  | "diagnose-slow-network"
+  | "scan-status"
+  | "device-identity-question"
+  | "monitoring-status";
+
+export interface NetworkAssistantContext {
+  generatedAt: string;
+  intent: NetworkAssistantIntent;
+  status: {
+    networkName: string;
+    gatewayIp: string;
+    localIp: string;
+    scanState: ScanState;
+    devicesFound: number;
+    onlineDevices: number;
+    unknownDevices: number;
+    flaggedDevices: number;
+    lastScanAt: string | null;
+  } | null;
+  latestScan: ScanComparisonSummary | null;
+  health: Pick<NetworkHealthSnapshot, "score" | "grade" | "headline" | "trend"> & {
+    topFactors: string[];
+    diagnostics: string[];
+  } | null;
+  unknownDevices: Array<Pick<DiscoveredDevice, "id" | "name" | "ipAddress" | "deviceType" | "trustLevel">>;
+  watchDevices: Array<Pick<DiscoveredDevice, "id" | "name" | "ipAddress" | "deviceType" | "trustLevel">>;
+  offlineDevices: Array<Pick<DiscoveredDevice, "id" | "name" | "ipAddress" | "deviceType" | "trustLevel">>;
+  recentEvents: Array<Pick<NetworkEvent, "id" | "timestamp" | "type" | "severity" | "title" | "relatedDeviceId">>;
+  alerts: Array<Pick<NetworkAlert, "id" | "timestamp" | "title" | "severity" | "status" | "relatedDeviceId">>;
+  router: {
+    name: string;
+    gatewayIp: string;
+    controlMode: RouterControlMode;
+    readOnlyMode: boolean;
+    capabilities: Array<Pick<RouterCapability, "key" | "label" | "status" | "supported">>;
+  } | null;
+  monitoring: Pick<NetworkMonitorState, "enabled" | "nextRunAt" | "schedulerStatus" | "backgroundCapability" | "notificationCapability">;
+}
+
+export interface NetworkAssistantSnapshot {
+  status: NetworkStatus | null;
+  devices: DiscoveredDevice[];
+  routerStatus: RouterStatus | null;
+  routerCapabilities: RouterCapability[];
+  routerControlMode: RouterControlMode;
+}
+
 export interface NetworkAlert {
   id: string;
   timestamp: string;

@@ -25,6 +25,12 @@ export function buildAssistantProviderInstructions(context: AssistantContextSnap
         ),
       ].join("\n")
     : "No relevant saved response vault entries were found."
+  const networkContext = context.networkContext
+    ? [
+        "Grounded Network context is available. Use only these facts for network answers; do not invent devices, events, speed tests, or router capabilities.",
+        JSON.stringify(context.networkContext),
+      ].join("\n")
+    : "No grounded Network context was provided. Do not claim live network knowledge."
 
   return [
     "You are NEO the N.E.R.D., a futuristic robot companion inside a cyberpunk NEO control app.",
@@ -39,6 +45,7 @@ export function buildAssistantProviderInstructions(context: AssistantContextSnap
     `Rhythm: ${profile.rhythm}. Greeting style: ${profile.greetingStyle}. Follow-up style: ${profile.followUpStyle}.`,
     "Make the personality materially affect word choice, response structure, sentence rhythm, pacing, tone, and follow-up behavior. Honor the behavior engine fields over generic assistant tone.",
     libraryContext,
+    networkContext,
   ].join("\n")
 }
 

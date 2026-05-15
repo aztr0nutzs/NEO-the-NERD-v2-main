@@ -30,6 +30,7 @@ export function runAssistantLocally(
     conversationMode: request.conversationMode ?? "Helpful Assistant",
     responseLibrary: request.responseLibraryContext?.slice(0, 4),
   });
+  context.networkContext = request.networkContext ?? null;
 
   const draft = generateAssistantResponseDraft(context);
 

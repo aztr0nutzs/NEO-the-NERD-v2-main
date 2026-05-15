@@ -1,6 +1,7 @@
 import type {
   DeviceIdentityRecord,
   NetworkAlert,
+  NetworkAssistantSnapshot,
   NetworkEvent,
   NetworkHealthSnapshot,
   NetworkMonitorState,
@@ -134,6 +135,7 @@ export interface PersistedAppState {
   networkMonitorState?: NetworkMonitorState
   networkAlerts?: NetworkAlert[]
   networkHealthSnapshots?: NetworkHealthSnapshot[]
+  networkAssistantSnapshot?: NetworkAssistantSnapshot | null
 }
 
 export type ConversationMode =

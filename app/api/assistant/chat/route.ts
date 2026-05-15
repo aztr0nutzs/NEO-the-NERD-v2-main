@@ -36,6 +36,7 @@ export async function POST(request: Request) {
     conversationMode: body.conversationMode,
     responseLibrary: body.responseLibraryContext?.slice(0, 4),
   })
+  context.networkContext = body.networkContext ?? null
   const localDraft = generateAssistantResponseDraft(context)
   const provider = createAssistantProvider()
   const status = provider.providerStatus()

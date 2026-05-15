@@ -1,6 +1,7 @@
 import type { ChatMessage, ConversationMode, ResponseCategory, SavedResponse } from "@/lib/types"
 import type { AssistantEmotionState, AssistantIntent } from "./types"
 import type { AssistantMood, AvatarReactionKey } from "@/lib/types"
+import type { NetworkAssistantContext } from "@/lib/network/types"
 
 export interface AssistantProviderChatMessage {
   role: "user" | "assistant" | "system"
@@ -13,6 +14,7 @@ export interface AssistantProviderRequest {
   personalityId: string
   conversationMode: ConversationMode
   responseLibraryContext?: SavedResponse[]
+  networkContext?: NetworkAssistantContext | null
 }
 
 export interface AssistantProviderPrompt {
@@ -48,6 +50,7 @@ export interface AssistantChatApiRequest {
   personalityId?: string
   conversationMode?: ConversationMode
   responseLibraryContext?: SavedResponse[]
+  networkContext?: NetworkAssistantContext | null
 }
 
 export interface AssistantChatApiResponse {

@@ -27,6 +27,7 @@ const RESPONSE_TEMPLATES: Record<string, string> = {
   "Play a game": "Pick your weapon: Tic Tac Toe or Rock Paper Scissors. I'm warmed up.",
   "Prank idea": "Reroute the doorbell to giggle for 3 seconds. Harmless. Mostly. Possibly.",
   "Daily briefing": "Briefing skeleton online. Persistent task feed and notification awareness are planned — for now, fire a prompt or pick a chip and I'll roll.",
+  "Explain my network": "Network context is ready in Chat. I can summarize health, unknown devices, recent changes, and the last scan from real app data.",
   "Surprise me": "Random thought: if batteries dream, do they dream of full charge?",
 }
 
@@ -61,6 +62,7 @@ export function MainScreen() {
     if (label === "Start chat") setTimeout(() => setScreen("chat"), 600)
     if (label === "Change voice") setTimeout(() => setScreen("voices"), 600)
     if (label === "Play a game") setTimeout(() => setScreen("games"), 600)
+    if (label === "Explain my network") setTimeout(() => setScreen("chat"), 600)
   }
 
   const handleTalk = () => {
