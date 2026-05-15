@@ -771,7 +771,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRobotSource("image")
     setNotificationOpen(true)
     setAcceptedGameInvite(null)
-  }, [])
+  }, [setPersonalityId])
 
   const value = useMemo<AppState>(
     () => ({
@@ -804,7 +804,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       exportResponses, importResponses,
       updateSettings, setVoiceId, setVoiceParams, toggleVoiceFavorite, acceptGameInvite, dismissGameInvite,
       refreshCapabilities, requestPermission,
-      exportSettings, importSettings, resetApp, playAvatarReaction, clearAvatarReaction,
+      exportSettings, importSettings, resetApp, playAvatarReaction, clearAvatarReaction, setPersonalityId,
     ],
   )
 

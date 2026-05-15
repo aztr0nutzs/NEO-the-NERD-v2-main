@@ -57,7 +57,7 @@ interface NeoAvatarVideoProps {
 // Feathered elliptical mask for the large stage: fully opaque through the
 // robot, dissolving the rectangular MP4 edge into the surrounding reactor.
 const STAGE_MASK =
-  "radial-gradient(ellipse 94% 96% at 50% 46%, #000 0%, #000 62%, rgba(0,0,0,0.55) 82%, rgba(0,0,0,0) 100%)"
+  "radial-gradient(ellipse 92% 95% at 50% 44%, #000 0%, #000 58%, rgba(0,0,0,0.7) 76%, rgba(0,0,0,0.2) 88%, rgba(0,0,0,0) 100%)"
 
 // Soft inner-edge mask for circular surfaces — softens the hard circular clip
 // so it never reads as a stark cut, while staying opaque across the robot.
@@ -79,7 +79,7 @@ const VARIANT_CONFIG: Record<AvatarVariant, VariantConfig> = {
     // Bias the crop upward so the head keeps headroom and the bright reflective
     // floor at the bottom of the clip is pushed out of frame, while still
     // showing the robot down past the glowing chest core.
-    videoStyle: { objectPosition: "50% 24%", transform: "scale(1.02)" },
+    videoStyle: { objectPosition: "50% 20%", transform: "scale(1.08)" },
   },
   circle: {
     wrapper: "relative isolate overflow-hidden rounded-full bg-[#05060a]",
