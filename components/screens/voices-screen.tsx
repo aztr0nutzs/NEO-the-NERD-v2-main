@@ -27,6 +27,7 @@ import {
 import { DEFAULT_VOICE_FILTERS, categoryBreakdown, filterVoiceProfiles } from "@/lib/voice/voiceFilters"
 import { VOICE_CATEGORIES, VOICE_PROFILES, VOICE_TONE_TAGS, getVoiceProfile } from "@/lib/voice/voiceProfiles"
 import { availabilityLabel, voiceProfileToParams } from "@/lib/voice/voicePresets"
+import { getUniquenessSummary, runtimeTimbreLabel } from "@/lib/voice/voiceUniqueness"
 import type { VoiceFilterState, VoiceProfile } from "@/lib/voice/types"
 import { IDLE_PLAYBACK_SNAPSHOT, type VoicePlaybackSnapshot } from "@/lib/voice/voicePlayback"
 import { getRecommendedPersonalityNamesForVoice, getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
@@ -84,6 +85,7 @@ export function VoicesScreen() {
   )
   const recommendedVoices = useMemo(() => getRecommendedVoiceProfiles(personalityId, 6), [personalityId])
   const breakdown = useMemo(() => categoryBreakdown(VOICE_PROFILES), [])
+  const uniqueness = useMemo(() => getUniquenessSummary(getVoiceProfile(voiceId), capabilities), [voiceId, capabilities])
 
   const playPayload = (payload: { audioBase64: string; fileName: string; mimeType: string }) => {
     playProviderAudio({
@@ -129,14 +131,14 @@ export function VoicesScreen() {
     const profile = getVoiceProfile(voiceId)
     const profileCaps = getProviderVoiceCapabilities(voiceId)
     if (!profileCaps.providerReady) {
-      setVoiceStatus(`${availabilityLabel(profile.availability)} // PROVIDER AUDIO NOT AVAILABLE FOR THIS PROFILE`)
+      setVoiceStatus(`${availabilityLabel(profile.availability)} · PROVIDER AUDIO NOT AVAILABLE FOR THIS PROFILE`)
       return
     }
     if (!providerTtsAvailable) {
       setVoiceStatus(
         capabilities.remoteBackendConfigured
-          ? "PROVIDER UNREACHABLE OR NOT CONFIGURED // CHECK BACKEND"
-          : "REMOTE BACKEND NOT CONFIGURED // SET NEXT_PUBLIC_NEO_BACKEND_BASE_URL",
+          ? "PROVIDER UNREACHABLE OR NOT CONFIGURED · CHECK BACKEND"
+          : "REMOTE BACKEND NOT CONFIGURED · SET NEXT_PUBLIC_NEO_BACKEND_BASE_URL",
       )
       return
     }
@@ -164,7 +166,7 @@ export function VoicesScreen() {
     <div className="space-y-3">
       <header className="px-1">
         <p className="ps-mono text-[10px] tracking-[0.4em] text-white/50">
-          NEO // VOICE_DECK
+          NEO · VOICE_DECK
         </p>
         <h2 className="ps-heading text-2xl">
           <span className="ps-text-pink">VOICE</span>{" "}
@@ -296,17 +298,26 @@ export function VoicesScreen() {
           <p className="mt-2 ps-mono text-[10px] tracking-[0.2em] text-white/50">{voiceStatus}</p>
           <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
             {getProfileTruthLabel(getVoiceProfile(voiceId), capabilities)}
-            {" // "}
+            {" · "}
             speed, pitch, and volume drive the active preview engine where supported. Emotion is provider-style metadata
             {providerTtsAvailable ? " applied by provider TTS." : "; provider TTS not active."}
           </p>
           {capabilities.nativeAndroidTtsAvailable && (
             <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
               ANDROID ENGINE VOICES: {capabilities.nativeAndroidVoiceCount || "UNKNOWN"}
-              {capabilities.selectedAndroidVoiceName ? ` // SELECTED: ${capabilities.selectedAndroidVoiceName}` : " // NO DISTINCT ENGINE VOICE SELECTED"}
+              {capabilities.selectedAndroidVoiceName ? ` · SELECTED: ${capabilities.selectedAndroidVoiceName}` : " · NO DISTINCT ENGINE VOICE SELECTED"}
             </p>
           )}
         </div>
+      </NeonPanel>
+
+
+      <NeonPanel accent="green" glow="soft" className="p-3">
+        <p className="ps-mono text-[10px] tracking-[0.3em] text-[#39ff14] mb-2">VOICE UNIQUENESS MODEL</p>
+        <p className="text-xs text-white/80">{runtimeTimbreLabel(uniqueness.runtimeSource)} · {uniqueness.whatChanges}</p>
+        <p className="mt-1 ps-mono text-[10px] tracking-[0.2em] text-white/55">
+          DISTINCT={uniqueness.isDistinctTimbre ? "YES" : "NO"} · FULLY_REALIZED={uniqueness.isFullyRealized ? "YES" : "NO"} · ENGINE={uniqueness.resolvedEngine.toUpperCase()}
+        </p>
       </NeonPanel>
 
       <NeonPanel accent="purple" glow="soft" className="p-3">
@@ -352,7 +363,7 @@ export function VoicesScreen() {
           ))}
         </div>
         <p className="mt-2 ps-mono text-[10px] uppercase tracking-[0.24em] text-white/45">
-          {filteredVoices.length} MATCHING // {voiceFavoriteIds.length} FAVORITES // ACTIVE: {getVoiceProfile(voiceId).name}
+          {filteredVoices.length} MATCHING · {voiceFavoriteIds.length} FAVORITES · ACTIVE: {getVoiceProfile(voiceId).name}
         </p>
       </NeonPanel>
 
