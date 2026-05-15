@@ -50,6 +50,19 @@ export type ActionStatus = "queued" | "running" | "success" | "failed";
 
 export type InsightSeverity = "info" | "low" | "medium" | "high";
 
+export type NetworkEventType =
+  | "scan_started"
+  | "scan_completed"
+  | "device_first_seen"
+  | "device_returned"
+  | "device_went_offline"
+  | "device_trust_changed"
+  | "device_renamed"
+  | "device_flagged"
+  | "router_status_changed"
+  | "scan_failed"
+  | "network_context_changed";
+
 export type ScanMode = "quick" | "balanced" | "deep";
 
 export type DiscoverySource = "arp" | "tcp-probe" | "gateway" | "hostname" | "mdns" | "ssdp";
@@ -134,6 +147,30 @@ export interface DiscoveredDevice {
   rawVendor?: string;
   isNewIdentity?: boolean;
   dismissedForNow?: boolean;
+}
+
+export interface NetworkEvent {
+  id: string;
+  timestamp: string;
+  type: NetworkEventType;
+  severity: InsightSeverity;
+  relatedDeviceId?: string;
+  relatedRouterId?: string;
+  title: string;
+  detail: Record<string, string | number | boolean | string[] | null>;
+  sourceScanId?: string;
+}
+
+export interface ScanComparisonSummary {
+  scanId: string;
+  generatedAt: string;
+  newDeviceIds: string[];
+  offlineDeviceIds: string[];
+  returnedDeviceIds: string[];
+  changedDeviceIds: string[];
+  labelChangedDeviceIds: string[];
+  statusChangedDeviceIds: string[];
+  trustChangedDeviceIds: string[];
 }
 
 export interface DeviceIdentitySnapshot {

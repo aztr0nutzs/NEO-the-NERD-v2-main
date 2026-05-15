@@ -25,6 +25,7 @@ import {
   CheckCircle,
   User,
   MapPin,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { DiscoveredDevice, DeviceIdentityUpdate, DeviceType, TrustLevel } from "@/lib/network/types";
+import type {
+  DiscoveredDevice,
+  DeviceIdentityUpdate,
+  DeviceType,
+  NetworkEvent,
+  TrustLevel,
+} from "@/lib/network/types";
 
 interface DeviceDetailPanelProps {
   device: DiscoveredDevice | null;
@@ -52,6 +59,7 @@ interface DeviceDetailPanelProps {
   onSaveNote: (device: DiscoveredDevice, note: string) => void;
   onUpdateIdentity: (device: DiscoveredDevice, patch: DeviceIdentityUpdate) => void;
   onDismiss: (device: DiscoveredDevice) => void;
+  events?: NetworkEvent[];
   isDemoMode: boolean;
 }
 
@@ -106,6 +114,7 @@ export function DeviceDetailPanel({
   onSaveNote,
   onUpdateIdentity,
   onDismiss,
+  events = [],
   isDemoMode,
 }: DeviceDetailPanelProps) {
   const [noteText, setNoteText] = useState(device?.notes || "");
@@ -140,6 +149,9 @@ export function DeviceDetailPanel({
   const DeviceIcon = DEVICE_ICONS[device.deviceType];
   const trustConfig = TRUST_CONFIG[device.trustLevel];
   const isOnline = device.status === "online";
+  const deviceEvents = events
+    .filter((event) => event.relatedDeviceId === device.id)
+    .slice(0, 8);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -363,6 +375,39 @@ export function DeviceDetailPanel({
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-2 rounded-lg border border-gray-800 bg-gray-900/30 p-3">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-purple-300" />
+                <p className="font-mono text-xs text-gray-400">DEVICE_EVENT_HISTORY</p>
+              </div>
+              {deviceEvents.length === 0 ? (
+                <p className="font-mono text-[10px] uppercase tracking-wider text-gray-600">
+                  NO_RECORDED_DEVICE_EVENTS
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {deviceEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      className="rounded border border-gray-800 bg-black/30 p-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate font-mono text-[11px] font-bold text-gray-200">
+                          {event.title}
+                        </p>
+                        <span className="font-mono text-[9px] uppercase text-gray-500">
+                          {event.severity}
+                        </span>
+                      </div>
+                      <p className="mt-1 font-mono text-[9px] uppercase tracking-wider text-gray-600">
+                        {formatDate(event.timestamp)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Timestamps */}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Radar, Square, Clock, Zap, Scale, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { NetworkStatus, ScanMode } from "@/lib/network/types";
+import type { NetworkStatus, ScanComparisonSummary, ScanMode } from "@/lib/network/types";
 
 interface NetworkScanPanelProps {
   status: NetworkStatus;
@@ -13,6 +13,7 @@ interface NetworkScanPanelProps {
   onStartScan: () => void;
   onStopScan: () => void;
   isDemoMode: boolean;
+  lastScanDelta?: ScanComparisonSummary | null;
 }
 
 const SCAN_MODES: { mode: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
@@ -44,6 +45,7 @@ export function NetworkScanPanel({
   onStartScan,
   onStopScan,
   isDemoMode,
+  lastScanDelta,
 }: NetworkScanPanelProps) {
   const isScanning = status.scanState === "scanning";
 
@@ -151,12 +153,40 @@ export function NetworkScanPanel({
         )}
       </div>
 
+      {lastScanDelta && !isScanning && (
+        <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-purple-300">
+              LAST_SCAN_DELTA
+            </p>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-gray-500">
+              {new Date(lastScanDelta.generatedAt).toLocaleTimeString()}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            <DeltaBadge label="NEW" value={lastScanDelta.newDeviceIds.length} />
+            <DeltaBadge label="OFFLINE" value={lastScanDelta.offlineDeviceIds.length} />
+            <DeltaBadge label="RETURNED" value={lastScanDelta.returnedDeviceIds.length} />
+            <DeltaBadge label="CHANGED" value={lastScanDelta.changedDeviceIds.length} />
+          </div>
+        </div>
+      )}
+
       {/* Demo Notice */}
       {isDemoMode && (
         <p className="font-mono text-[10px] text-gray-500">
           {"//"} Demo mode: Scan simulates discovery. Connect native backend for real network scanning.
         </p>
       )}
+    </div>
+  );
+}
+
+function DeltaBadge({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded bg-black/35 p-2 text-center">
+      <p className="font-mono text-sm font-bold text-purple-200">{value}</p>
+      <p className="font-mono text-[8px] text-gray-500">{label}</p>
     </div>
   );
 }

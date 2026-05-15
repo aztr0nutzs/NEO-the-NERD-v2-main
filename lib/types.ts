@@ -1,4 +1,4 @@
-import type { DeviceIdentityRecord } from "./network/types"
+import type { DeviceIdentityRecord, NetworkEvent, ScanComparisonSummary } from "./network/types"
 
 export type AssistantMood =
   | "idle"
@@ -120,6 +120,8 @@ export interface PersistedAppState {
   responses: SavedResponse[]
   messages: ChatMessage[]
   networkDeviceIdentities?: DeviceIdentityRecord[]
+  networkEvents?: NetworkEvent[]
+  lastNetworkScanDelta?: ScanComparisonSummary | null
 }
 
 export type ConversationMode =

@@ -39,6 +39,7 @@ import { NetworkActionQueue } from "./NetworkActionQueue";
 import { NerdControlPanel } from "./NerdControlPanel";
 import { NeoRobotAvatar } from "./NeoRobotAvatar";
 import { DeviceIdentityReviewQueue } from "./DeviceIdentityReviewQueue";
+import { NetworkTimelinePanel } from "./NetworkTimelinePanel";
 import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 
 import {
@@ -57,6 +58,15 @@ import {
   projectIdentityOntoDevices,
   updateDeviceIdentity,
 } from "@/lib/network/deviceIdentity";
+import {
+  appendNetworkEvents,
+  compareNetworkContext,
+  compareRouterStatus,
+  compareScanDevices,
+  createDeviceIdentityEvents,
+  createScanFailedEvent,
+  createScanStartedEvent,
+} from "@/lib/network/networkEvents";
 
 import type {
   NetworkStatus,
@@ -87,7 +97,15 @@ const NetworkMap3D = dynamic(
 );
 
 export function NetworkDiscoveryFeature() {
-  const { playAvatarReaction, networkDeviceIdentities, setNetworkDeviceIdentities } = useApp();
+  const {
+    playAvatarReaction,
+    networkDeviceIdentities,
+    setNetworkDeviceIdentities,
+    networkEvents,
+    setNetworkEvents,
+    lastNetworkScanDelta,
+    setLastNetworkScanDelta,
+  } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
   const [devices, setDevices] = useState<DiscoveredDevice[]>([]);
@@ -110,6 +128,24 @@ export function NetworkDiscoveryFeature() {
   const [robotMessage, setRobotMessage] = useState<string | null>(null);
   const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
   const identityRecordsRef = useRef(networkDeviceIdentities);
+  const networkEventsRef = useRef(networkEvents);
+  const currentScanIdRef = useRef<string | null>(null);
+  const previousNetworkStatusRef = useRef<NetworkStatus | null>(null);
+  const previousRouterStatusRef = useRef<RouterStatus | null>(null);
+
+  useEffect(() => {
+    networkEventsRef.current = networkEvents;
+  }, [networkEvents]);
+
+  const appendEvents = useCallback(
+    (eventsToAdd: Parameters<typeof appendNetworkEvents>[1]) => {
+      if (!eventsToAdd.length) return;
+      const nextEvents = appendNetworkEvents(networkEventsRef.current, eventsToAdd);
+      networkEventsRef.current = nextEvents;
+      setNetworkEvents(nextEvents);
+    },
+    [setNetworkEvents]
+  );
 
   useEffect(() => {
     identityRecordsRef.current = networkDeviceIdentities;
@@ -132,18 +168,21 @@ export function NetworkDiscoveryFeature() {
 
   const commitIdentityUpdate = useCallback(
     (device: DiscoveredDevice, patch: DeviceIdentityUpdate) => {
+      const beforeDevice = projectIdentityOntoDevices(identityRecordsRef.current, [device])[0] ?? device;
       const nextIdentities = updateDeviceIdentity(identityRecordsRef.current, device, patch);
       identityRecordsRef.current = nextIdentities;
       setNetworkDeviceIdentities(nextIdentities);
       const project = (currentDevices: DiscoveredDevice[]) =>
         projectIdentityOntoDevices(nextIdentities, currentDevices);
+      const afterDevice = project([device])[0] ?? device;
+      appendEvents(createDeviceIdentityEvents({ before: beforeDevice, after: afterDevice }));
       setDevices((current) => project(current));
       setSelectedDevice((current) => {
         if (!current) return current;
         return project([current])[0] ?? current;
       });
     },
-    [setNetworkDeviceIdentities]
+    [appendEvents, setNetworkDeviceIdentities]
   );
 
   // Robot status based on app state
@@ -182,6 +221,8 @@ export function NetworkDiscoveryFeature() {
         setRouterControlMode(controlMode);
         setSelectedMode(networkSettings.scanMode);
         previousDevicesRef.current = identityDevices;
+        previousNetworkStatusRef.current = status;
+        previousRouterStatusRef.current = router;
       } catch (error) {
         setAdapterStatus(resolveNetworkAdapterStatus({
           demoMode: false,
@@ -207,11 +248,21 @@ export function NetworkDiscoveryFeature() {
       if (progress >= 100) {
         clearInterval(interval);
         // Refresh data after scan completes
-        networkAdapter.getNetworkStatus().then(setNetworkStatus).catch(() => undefined);
+        networkAdapter.getNetworkStatus().then((status) => {
+          appendEvents(compareNetworkContext(previousNetworkStatusRef.current, status));
+          previousNetworkStatusRef.current = status;
+          setNetworkStatus(status);
+        }).catch(() => undefined);
         networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
         networkAdapter.getDiscoveredDevices().then((rawUpdatedDevices) => {
           const updatedDevices = mergeIdentitiesForDevices(rawUpdatedDevices);
+          const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
           const previousDevices = previousDevicesRef.current;
+          const comparison = compareScanDevices({
+            previousDevices,
+            currentDevices: updatedDevices,
+            scanId,
+          });
           const previousIds = new Set(previousDevices.map((device) => device.id));
           const previousOnlineIds = new Set(
             previousDevices.filter((device) => device.status === "online").map((device) => device.id)
@@ -222,6 +273,8 @@ export function NetworkDiscoveryFeature() {
           );
           previousDevicesRef.current = updatedDevices;
           setDevices(updatedDevices);
+          setLastNetworkScanDelta(comparison.summary);
+          appendEvents(comparison.events);
           const hasAttentionDevice = updatedDevices.some(
             (device) =>
               device.trustLevel === "new" ||
@@ -239,6 +292,11 @@ export function NetworkDiscoveryFeature() {
         });
         networkAdapter.getScanHistory().then(setScanHistory).catch(() => undefined);
         networkAdapter.getSecurityInsights().then(setSecurityInsights).catch(() => undefined);
+        networkAdapter.getRouterStatus().then((router) => {
+          appendEvents(compareRouterStatus(previousRouterStatusRef.current, router));
+          previousRouterStatusRef.current = router;
+          setRouterStatus(router);
+        }).catch(() => undefined);
       }
     }, 100);
 
@@ -246,7 +304,9 @@ export function NetworkDiscoveryFeature() {
   }, [
     mergeIdentitiesForDevices,
     networkStatus?.scanState,
+    appendEvents,
     playAvatarReaction,
+    setLastNetworkScanDelta,
     settings?.notifyNewDevices,
     settings?.notifyOfflineDevices,
   ]);
@@ -265,6 +325,9 @@ export function NetworkDiscoveryFeature() {
   const handleStartScan = useCallback(async () => {
     try {
       playAvatarReaction("thinking");
+      const scanId = `scan-${Date.now()}`;
+      currentScanIdRef.current = scanId;
+      appendEvents([createScanStartedEvent(scanId, selectedMode)]);
       await networkAdapter.startNetworkScan(selectedMode);
       const status = await networkAdapter.getNetworkStatus();
       const currentAdapterStatus = await networkAdapter.getAdapterStatus();
@@ -272,6 +335,8 @@ export function NetworkDiscoveryFeature() {
       setAdapterStatus(currentAdapterStatus);
       setScanProgress(0);
     } catch {
+      const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
+      appendEvents([createScanFailedEvent(scanId, selectedMode, "Live scan unavailable in current runtime.")]);
       setAdapterStatus(resolveNetworkAdapterStatus({
         demoMode: false,
         nativePluginAvailable: false,
@@ -280,7 +345,7 @@ export function NetworkDiscoveryFeature() {
       setNetworkStatus((current) => current ? { ...current, scanState: "failed" } : current);
       playAvatarReaction("angry");
     }
-  }, [playAvatarReaction, selectedMode]);
+  }, [appendEvents, playAvatarReaction, selectedMode]);
 
   useEffect(() => {
     if (!settings?.autoScanEnabled || networkStatus?.scanState === "scanning") return;
@@ -645,10 +710,11 @@ export function NetworkDiscoveryFeature() {
               {activeTab === "map" ? "ACTIVE" : "OPEN MAP"}
             </span>
           </button>
-          <TabsList className="grid h-auto grid-cols-3 gap-1 rounded-xl border border-cyan-500/20 bg-black/50 p-1 sm:grid-cols-7">
+          <TabsList className="grid h-auto grid-cols-3 gap-1 rounded-xl border border-cyan-500/20 bg-black/50 p-1 sm:grid-cols-8">
             <TabsTrigger value="map" className="font-mono text-[10px] tracking-[0.2em]">MAP</TabsTrigger>
             <TabsTrigger value="overview" className="font-mono text-[10px] tracking-[0.2em]">SCAN</TabsTrigger>
             <TabsTrigger value="devices" className="font-mono text-[10px] tracking-[0.2em]">DEVICES</TabsTrigger>
+            <TabsTrigger value="timeline" className="font-mono text-[10px] tracking-[0.2em]">TIMELINE</TabsTrigger>
             <TabsTrigger value="router" className="font-mono text-[10px] tracking-[0.2em]">ROUTER</TabsTrigger>
             <TabsTrigger value="security" className="font-mono text-[10px] tracking-[0.2em]">SECURITY</TabsTrigger>
             <TabsTrigger value="history" className="font-mono text-[10px] tracking-[0.2em]">HISTORY</TabsTrigger>
@@ -679,6 +745,7 @@ export function NetworkDiscoveryFeature() {
                   onSaveNote={handleSaveNote}
                   onUpdateIdentity={commitIdentityUpdate}
                   onDismiss={handleDismissDeviceIdentity}
+                  events={networkEvents}
                   isDemoMode={isDemoMode}
                 />
               </div>
@@ -697,6 +764,7 @@ export function NetworkDiscoveryFeature() {
                   onStartScan={handleStartScan}
                   onStopScan={handleStopScan}
                   isDemoMode={isDemoMode}
+                  lastScanDelta={lastNetworkScanDelta}
                 />
                 <div className="h-[400px]">
                   <SecurityInsightsPanel
@@ -752,10 +820,27 @@ export function NetworkDiscoveryFeature() {
                     onSaveNote={handleSaveNote}
                     onUpdateIdentity={commitIdentityUpdate}
                     onDismiss={handleDismissDeviceIdentity}
+                    events={networkEvents}
                     isDemoMode={isDemoMode}
                   />
                 </div>
               </div>
+            </div>
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-4">
+            <div className="h-[650px]">
+              <NetworkTimelinePanel
+                events={networkEvents}
+                devices={devices}
+                lastScanDelta={lastNetworkScanDelta}
+                onSelectDevice={(device) => {
+                  handleSelectDevice(device);
+                  setActiveTab("devices");
+                }}
+                onOpenMap={() => setActiveTab("map")}
+              />
             </div>
           </TabsContent>
 
