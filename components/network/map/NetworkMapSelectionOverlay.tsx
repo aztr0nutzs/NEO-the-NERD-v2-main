@@ -38,6 +38,9 @@ export function NetworkMapSelectionOverlay({
           <p className="text-gray-500">
             {displayDevice.deviceType} / {displayDevice.status} / {displayDevice.trustLevel}
           </p>
+          <p className="text-cyan-400/80">
+            {displayDevice.confidence} confidence / {displayDevice.lastScanSource}
+          </p>
         </div>
       ) : (
         <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500">

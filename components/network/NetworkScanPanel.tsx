@@ -26,13 +26,13 @@ const SCAN_MODES: { mode: ScanMode; label: string; icon: typeof Zap; description
     mode: "balanced",
     label: "BALANCED",
     icon: Scale,
-    description: "Quick + hostname + ARP/MAC + bounded ports",
+    description: "Quick + ARP/MAC + hostname + SSDP + bounded ports",
   },
   {
     mode: "deep",
     label: "DEEP",
     icon: Search,
-    description: "Balanced + expanded bounded port/service pass",
+    description: "Balanced + larger cap + expanded bounded ports",
   },
 ];
 
@@ -122,8 +122,8 @@ export function NetworkScanPanel({
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" />
             <span className="animate-pulse">
               {selectedMode === "quick" && "Resolving local context + gateway + shallow host probe..."}
-              {selectedMode === "balanced" && "Running balanced host discovery (hostname + ARP/MAC + bounded ports)..."}
-              {selectedMode === "deep" && "Running deep bounded port/service inference pass..."}
+              {selectedMode === "balanced" && "Running ARP/MAC, hostname, SSDP, and bounded port probes..."}
+              {selectedMode === "deep" && "Running expanded local host cap, timeout, and bounded port/service inference..."}
             </span>
           </div>
         </div>

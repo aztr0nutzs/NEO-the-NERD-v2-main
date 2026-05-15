@@ -32,8 +32,8 @@ interface NetworkSettingsPanelProps {
 
 const SCAN_MODES: { value: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
   { value: "quick", label: "QUICK", icon: Zap, description: "Context + gateway probe + shallow bounded host probe" },
-  { value: "balanced", label: "BALANCED", icon: Scale, description: "Quick + broader host cap + hostname + ARP/MAC + bounded ports" },
-  { value: "deep", label: "DEEP", icon: Search, description: "Balanced + expanded bounded ports + richer service inference" },
+  { value: "balanced", label: "BALANCED", icon: Scale, description: "Quick + ARP/MAC + hostname + SSDP + bounded ports" },
+  { value: "deep", label: "DEEP", icon: Search, description: "Balanced + larger host cap, longer timeout, expanded bounded ports" },
 ];
 
 const INTERVAL_OPTIONS = [

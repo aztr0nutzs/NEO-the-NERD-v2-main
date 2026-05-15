@@ -300,6 +300,9 @@ export function DeviceListPanel({
                             {device.latencyMs}ms
                           </span>
                         )}
+                        <span className="font-mono text-[9px] uppercase text-cyan-500/80">
+                          {device.confidence} / {device.lastScanSource}
+                        </span>
                       </div>
                     </div>
 

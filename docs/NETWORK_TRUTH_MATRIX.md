@@ -2,7 +2,7 @@
 
 | Runtime | Native plugin available | Demo mode | Adapter label | Data source | Scan behavior |
 |---|---:|---:|---|---|---|
-| Android | yes | OFF | LIVE_ANDROID_DISCOVERY | NeoNetwork plugin (`getLocalNetworkContext`, `scanLocalSubnet`, `getGatewayInfo`) | Real native bounded subnet scan; progress/state from native path |
+| Android | yes | OFF | LIVE_ANDROID_DISCOVERY | NeoNetwork plugin (`getLocalNetworkContext`, `scanLocalSubnet`, `getGatewayInfo`) | Real native bounded local scan. Quick = context/gateway/shallow TCP probe. Balanced = Quick + ARP/MAC + hostname + SSDP + bounded ports. Deep = Balanced + larger caps/longer timeout/expanded bounded ports. |
 | Android | yes | ON | SIMULATED NETWORK DATA / DEMO ADAPTER | Mock/demo adapter only | Simulated scan explicitly labeled demo |
 | Android | no | OFF | SIMULATED NETWORK DATA (fallback reason shown) | None live; no silent live simulation | Live attempt fails to fallback state; UI shows limited/unavailable |
 | Web/browser | no | ON or fallback | SIMULATED NETWORK DATA / DEMO ADAPTER | Mock/demo adapter | Simulated scan explicitly labeled demo |
