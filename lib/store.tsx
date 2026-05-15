@@ -181,6 +181,12 @@ const DEFAULT_SETTINGS: AssistantSettings = {
     bluetooth: "unavailable",
     network: "unknown",
   },
+  onboarding: {
+    completed: false,
+    skipped: false,
+    monitoringOptIn: false,
+    initialScanRequested: false,
+  },
 }
 
 const DEFAULT_NETWORK_MONITOR_STATE: NetworkMonitorState = {
@@ -392,6 +398,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         ...DEFAULT_SETTINGS,
         ...stored.settings,
         permissions: normalizePermissions(stored.settings.permissions),
+        onboarding: {
+          ...DEFAULT_SETTINGS.onboarding,
+          ...(stored.settings.onboarding ?? {}),
+        },
       })
     }
     if (stored.accentColor) setAccentColor(stored.accentColor)
@@ -839,6 +849,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ...DEFAULT_SETTINGS,
             ...parsed.settings,
             permissions: normalizePermissions(parsed.settings?.permissions),
+            onboarding: {
+              ...DEFAULT_SETTINGS.onboarding,
+              ...(parsed.settings?.onboarding ?? {}),
+            },
           },
           voiceParams: { ...DEFAULT_VOICE_PARAMS, ...parsed.voiceParams },
           voiceFavoriteIds: parsed.voiceFavoriteIds ?? voiceFavoriteIds,
