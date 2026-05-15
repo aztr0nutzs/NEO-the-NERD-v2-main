@@ -7,6 +7,8 @@ import type * as THREE from "three";
 import type {
   DiscoveredDevice,
   NetworkMapLabelMode,
+  NetworkMapNodeOperationalState,
+  NetworkMapOverlayMode,
   NetworkTopologyNode,
   ScanState,
 } from "@/lib/network/types";
@@ -19,6 +21,8 @@ interface RouterCoreNode3DProps {
   isHovered: boolean;
   isDimmed: boolean;
   labelMode: NetworkMapLabelMode;
+  overlayMode: NetworkMapOverlayMode;
+  nodeState: NetworkMapNodeOperationalState | null;
   scanState: ScanState;
   reducedMotion: boolean;
   isSceneActive: boolean;
@@ -33,6 +37,7 @@ export function RouterCoreNode3D({
   isHovered,
   isDimmed,
   labelMode,
+  nodeState,
   scanState,
   reducedMotion,
   isSceneActive,
@@ -107,7 +112,7 @@ export function RouterCoreNode3D({
       </mesh>
       <mesh ref={pulseRef}>
         <sphereGeometry args={[0.72, 32, 16]} />
-        <meshBasicMaterial color="#22d3ee" opacity={isDimmed ? 0.04 : 0.12} transparent wireframe />
+        <meshBasicMaterial color={nodeState?.overlayColor ?? "#22d3ee"} opacity={isDimmed ? 0.04 : 0.12} transparent wireframe />
       </mesh>
 
       <group ref={coreRef}>
@@ -186,7 +191,7 @@ export function RouterCoreNode3D({
       >
         {getRouterLabel({ device, labelMode, node })}
       </Text>
-      {(isHovered || isSelected) && <NetworkNodeTooltip node={node} device={device} />}
+      {(isHovered || isSelected) && <NetworkNodeTooltip node={node} device={device} nodeState={nodeState} />}
     </group>
   );
 }

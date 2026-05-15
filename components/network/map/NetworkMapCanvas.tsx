@@ -5,6 +5,8 @@ import { Canvas } from "@react-three/fiber";
 import type {
   DiscoveredDevice,
   NetworkMapLabelMode,
+  NetworkMapNodeOperationalState,
+  NetworkMapOverlayMode,
   NetworkMapViewMode,
   NetworkTopologyGraph,
   ScanState,
@@ -28,6 +30,8 @@ interface NetworkMapCanvasProps {
   showLinks: boolean;
   showParticles: boolean;
   viewMode: NetworkMapViewMode;
+  overlayMode: NetworkMapOverlayMode;
+  nodeStates: Map<string, NetworkMapNodeOperationalState>;
   isRenderingActive: boolean;
   onNodeHover: (deviceId: string | null) => void;
   onNodeSelect: (deviceId: string) => void;
@@ -49,6 +53,8 @@ export const NetworkMapCanvas = forwardRef<NetworkMapControlsHandle, NetworkMapC
       showLinks,
       showParticles,
       viewMode,
+      overlayMode,
+      nodeStates,
       isRenderingActive,
       onNodeHover,
       onNodeSelect,
@@ -79,6 +85,8 @@ export const NetworkMapCanvas = forwardRef<NetworkMapControlsHandle, NetworkMapC
             scanState={scanState}
             showLinks={showLinks}
             showParticles={showParticles}
+            overlayMode={overlayMode}
+            nodeStates={nodeStates}
             isSceneActive={isRenderingActive}
             onNodeHover={onNodeHover}
             onNodeSelect={onNodeSelect}

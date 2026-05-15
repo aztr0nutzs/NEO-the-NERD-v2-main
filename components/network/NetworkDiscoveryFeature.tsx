@@ -129,6 +129,8 @@ export function NetworkDiscoveryFeature() {
     networkHealthSnapshots,
     setNetworkHealthSnapshots,
     setNetworkAssistantSnapshot,
+    sendMessage,
+    setScreen,
   } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
@@ -667,6 +669,32 @@ export function NetworkDiscoveryFeature() {
     playAvatarReaction("happy");
   }, [commitIdentityUpdate, playAvatarReaction]);
 
+  const handleMapRenameDevice = useCallback(
+    (device: DiscoveredDevice, customName: string) => {
+      commitIdentityUpdate(device, { customName, manuallyVerified: true });
+      playAvatarReaction("happy");
+    },
+    [commitIdentityUpdate, playAvatarReaction]
+  );
+
+  const handleMapViewTimeline = useCallback(
+    (device: DiscoveredDevice) => {
+      handleSelectDevice(device);
+      setActiveTab("timeline");
+    },
+    [handleSelectDevice]
+  );
+
+  const handleMapAskNeo = useCallback(
+    (device: DiscoveredDevice) => {
+      void sendMessage(
+        `What should I know about this network device: ${device.name} at ${device.ipAddress}? Use the current Network data only.`
+      );
+      setScreen("chat");
+    },
+    [sendMessage, setScreen]
+  );
+
   const handleRouterAction = useCallback(
     async (action: "refresh" | "reboot" | "toggleGuest" | "toggleQoS", value?: boolean) => {
       try {
@@ -994,7 +1022,16 @@ export function NetworkDiscoveryFeature() {
                 visibleDeviceIds={visibleDeviceIds}
                 scanProgress={scanProgress}
                 scanState={networkStatus.scanState}
+                events={networkEvents}
+                alerts={networkAlerts}
+                lastScanDelta={lastNetworkScanDelta}
                 onSelectDevice={handleSelectDevice}
+                onOpenDetails={handleSelectDevice}
+                onTrustDevice={(device) => handleDeviceAction("trust", device)}
+                onWatchDevice={(device) => handleDeviceAction("watch", device)}
+                onRenameDevice={handleMapRenameDevice}
+                onViewTimeline={handleMapViewTimeline}
+                onAskNeo={handleMapAskNeo}
               />
             )}
             {activeTab === "map" && selectedDevice && (

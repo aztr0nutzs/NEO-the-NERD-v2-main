@@ -84,9 +84,46 @@ export type NetworkTopologyMode = "demo" | "estimated" | "backend-confirmed";
 
 export type NetworkAdapterMode = "demo" | "native-backend" | "fallback";
 
-export type NetworkMapViewMode = "orbital-3d" | "top-down" | "focus-selected" | "alerts-only";
+export type NetworkMapViewMode =
+  | "orbital-3d"
+  | "top-down"
+  | "focus-selected"
+  | "alerts-only"
+  | "recent-changes";
 
 export type NetworkMapLabelMode = "off" | "name" | "ip" | "vendor" | "status";
+
+export type NetworkMapOverlayMode =
+  | "operational"
+  | "alert-severity"
+  | "trust-state"
+  | "last-seen"
+  | "latency"
+  | "discovery-confidence";
+
+export type NetworkMapFocusMode =
+  | "all"
+  | "unknown"
+  | "flagged"
+  | "offline-trusted"
+  | "changed";
+
+export interface NetworkMapNodeOperationalState {
+  deviceId: string;
+  isNew: boolean;
+  isReturned: boolean;
+  isTrustedOffline: boolean;
+  isWatchOrFlagged: boolean;
+  hasRecentAlert: boolean;
+  changedSinceLastScan: boolean;
+  alertSeverity: InsightSeverity | null;
+  freshness: "fresh" | "recent" | "stale" | "unknown";
+  latencyGrade: "good" | "watch" | "degraded" | "unknown";
+  discoveryConfidence: DiscoveryConfidence;
+  overlayColor: string;
+  overlayLabel: string;
+  reasons: string[];
+}
 
 export interface NetworkStatus {
   networkName: string;

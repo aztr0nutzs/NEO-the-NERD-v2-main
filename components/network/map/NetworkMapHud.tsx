@@ -3,7 +3,9 @@
 import { GitBranch, SlidersHorizontal } from "lucide-react";
 import type {
   NetworkMapFilterState,
+  NetworkMapFocusMode,
   NetworkMapLabelMode,
+  NetworkMapOverlayMode,
   NetworkMapViewMode,
   NetworkTopologyGraph,
 } from "@/lib/network/types";
@@ -15,7 +17,9 @@ interface NetworkMapHudProps {
   autoRotate: boolean;
   filters: NetworkMapFilterState;
   hasSelectedDevice: boolean;
+  focusMode: NetworkMapFocusMode;
   labelMode: NetworkMapLabelMode;
+  overlayMode: NetworkMapOverlayMode;
   reducedMotion: boolean;
   showLinks: boolean;
   showParticles: boolean;
@@ -23,9 +27,11 @@ interface NetworkMapHudProps {
   viewMode: NetworkMapViewMode;
   onAutoRotateChange: (value: boolean) => void;
   onFiltersChange: (filters: NetworkMapFilterState) => void;
+  onFocusModeChange: (mode: NetworkMapFocusMode) => void;
   onFitAll: () => void;
   onFocusSelected: () => void;
   onLabelModeChange: (mode: NetworkMapLabelMode) => void;
+  onOverlayModeChange: (mode: NetworkMapOverlayMode) => void;
   onReducedMotionChange: (value: boolean) => void;
   onResetCamera: () => void;
   onShowLinksChange: (value: boolean) => void;

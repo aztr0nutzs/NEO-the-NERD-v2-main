@@ -3,7 +3,13 @@
 import { useRef } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import type * as THREE from "three";
-import type { DiscoveredDevice, NetworkMapLabelMode, NetworkTopologyNode } from "@/lib/network/types";
+import type {
+  DiscoveredDevice,
+  NetworkMapLabelMode,
+  NetworkMapNodeOperationalState,
+  NetworkMapOverlayMode,
+  NetworkTopologyNode,
+} from "@/lib/network/types";
 import { MapDeviceIcon } from "./MapDeviceIcon";
 import { NetworkNodeTooltip } from "./NetworkNodeTooltip";
 import { NodeStatusAura } from "./NodeStatusAura";
@@ -18,6 +24,8 @@ interface DeviceNode3DProps {
   discoveryBoost: number;
   isAttentionNode: boolean;
   labelMode: NetworkMapLabelMode;
+  overlayMode: NetworkMapOverlayMode;
+  nodeState: NetworkMapNodeOperationalState | null;
   reducedMotion: boolean;
   isSceneActive: boolean;
   onHover: (deviceId: string | null) => void;
@@ -47,6 +55,8 @@ export function DeviceNode3D({
   discoveryBoost,
   isAttentionNode,
   labelMode,
+  overlayMode,
+  nodeState,
   reducedMotion,
   isSceneActive,
   onHover,
@@ -54,7 +64,10 @@ export function DeviceNode3D({
 }: DeviceNode3DProps) {
   const nodeRef = useRef<THREE.Group>(null);
   const position = node.position ?? { x: 0, y: 0, z: 0 };
-  const color = node.deviceType === "unknown" ? "#a855f7" : TRUST_COLORS[node.trustLevel];
+  const color =
+    overlayMode === "operational" && node.deviceType === "unknown"
+      ? "#a855f7"
+      : nodeState?.overlayColor ?? TRUST_COLORS[node.trustLevel];
   const opacity = STATUS_OPACITY[node.status] * (isDimmed ? 0.32 : 1) * revealFactor;
   const highlightScale =
     (isSelected ? 1.28 : isHovered ? 1.14 : 1) *
@@ -97,8 +110,19 @@ export function DeviceNode3D({
         color={color}
         radius={isSelected ? 0.78 : node.isFlagged ? 0.58 : 0.48}
         intensity={revealFactor + discoveryBoost}
+        nodeState={nodeState}
         reducedMotion={reducedMotion}
       />
+      {nodeState && (
+        <OperationalRings
+          color={nodeState.overlayColor}
+          isAlert={nodeState.hasRecentAlert}
+          isNew={nodeState.isNew}
+          isReturned={nodeState.isReturned}
+          isTrustedOffline={nodeState.isTrustedOffline}
+          reducedMotion={reducedMotion}
+        />
+      )}
       {(isSelected || isHovered || discoveryBoost > 0) && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[isAttentionNode ? 0.78 : 0.66, 0.016, 8, 72]} />
@@ -116,7 +140,60 @@ export function DeviceNode3D({
         node={node}
         color={node.status === "offline" ? "#94a3b8" : "#f8fafc"}
       />
-      {(isHovered || isSelected) && <NetworkNodeTooltip node={node} device={device} />}
+      {(isHovered || isSelected) && <NetworkNodeTooltip node={node} device={device} nodeState={nodeState} />}
+    </group>
+  );
+}
+
+function OperationalRings({
+  color,
+  isAlert,
+  isNew,
+  isReturned,
+  isTrustedOffline,
+  reducedMotion,
+}: {
+  color: string;
+  isAlert: boolean;
+  isNew: boolean;
+  isReturned: boolean;
+  isTrustedOffline: boolean;
+  reducedMotion: boolean;
+}) {
+  const rippleRef = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    if (reducedMotion) return;
+    const elapsed = clock.getElapsedTime();
+
+    if (rippleRef.current) {
+      const rate = isAlert ? 0.85 : isNew ? 1.1 : 1.6;
+      const cycle = (elapsed % rate) / rate;
+      rippleRef.current.scale.setScalar(1 + cycle * (isAlert ? 0.9 : 0.55));
+      const material = rippleRef.current.material as THREE.MeshBasicMaterial;
+      material.opacity = Math.max(0, (isAlert ? 0.38 : 0.24) * (1 - cycle));
+    }
+
+    if (glowRef.current) {
+      glowRef.current.rotation.z = elapsed * (isReturned ? 1.2 : 0.55);
+    }
+  });
+
+  if (!isAlert && !isNew && !isReturned && !isTrustedOffline) return null;
+
+  return (
+    <group>
+      <mesh ref={rippleRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.86, 0.014, 8, 80]} />
+        <meshBasicMaterial color={color} opacity={0.24} transparent />
+      </mesh>
+      {(isReturned || isTrustedOffline) && (
+        <mesh ref={glowRef} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.72, 0.01, 8, 72]} />
+          <meshBasicMaterial color={isTrustedOffline ? "#f43f5e" : "#39ff14"} opacity={0.28} transparent />
+        </mesh>
+      )}
     </group>
   );
 }

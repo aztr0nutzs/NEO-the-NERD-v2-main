@@ -1,14 +1,15 @@
 "use client";
 
 import { Html } from "@react-three/drei";
-import type { DiscoveredDevice, NetworkTopologyNode } from "@/lib/network/types";
+import type { DiscoveredDevice, NetworkMapNodeOperationalState, NetworkTopologyNode } from "@/lib/network/types";
 
 interface NetworkNodeTooltipProps {
   node: NetworkTopologyNode;
   device: DiscoveredDevice | null;
+  nodeState?: NetworkMapNodeOperationalState | null;
 }
 
-export function NetworkNodeTooltip({ node, device }: NetworkNodeTooltipProps) {
+export function NetworkNodeTooltip({ node, device, nodeState }: NetworkNodeTooltipProps) {
   return (
     <Html center distanceFactor={8} position={[0, 0.95, 0]} zIndexRange={[60, 20]}>
       <div className="pointer-events-none min-w-[190px] rounded-lg border border-cyan-400/40 bg-black/90 p-3 shadow-[0_0_28px_rgba(34,211,238,0.22)] backdrop-blur-md">
@@ -25,6 +26,8 @@ export function NetworkNodeTooltip({ node, device }: NetworkNodeTooltipProps) {
           {node.ownerLabel && <TooltipRow label="OWNER" value={node.ownerLabel} />}
           {device && <TooltipRow label="CONF" value={device.confidence} />}
           {device && <TooltipRow label="SRC" value={device.lastScanSource} />}
+          {nodeState && <TooltipRow label="OVERLAY" value={nodeState.overlayLabel} />}
+          {nodeState?.reasons[0] && <TooltipRow label="WHY" value={nodeState.reasons[0]} />}
         </div>
       </div>
     </Html>

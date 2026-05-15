@@ -12,9 +12,11 @@ export function NetworkMapLegend() {
         <LegendRow color="bg-yellow-300" label="New" value="Recently discovered" />
         <LegendRow color="bg-orange-400" label="Watch" value="Needs attention" />
         <LegendRow color="bg-rose-400" label="Blocked" value="Restricted or warning state" />
+        <LegendRow color="bg-fuchsia-400" label="Alert" value="Unread alert or recent high-severity event" />
+        <LegendRow color="bg-lime-300" label="Returned" value="Device came back online in recent history" />
         <LegendRow color="bg-slate-500" label="Dim link" value="Offline, filtered, weak, or unknown" />
         <p className="pt-1 font-mono text-[9px] leading-relaxed text-orange-300">
-          Demo / estimated topology shows logical relationships, not confirmed physical cabling.
+          Demo / estimated topology shows logical relationships, not confirmed physical cabling. Overlay colors describe device state, not physical placement.
         </p>
       </div>
     </section>

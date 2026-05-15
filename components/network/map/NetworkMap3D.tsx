@@ -3,14 +3,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box, Radar } from "lucide-react";
 import { networkAdapter } from "@/lib/network/networkDiscoveryAdapter";
+import { buildMapOperationalState, getFocusedDeviceIds } from "@/lib/network/mapOperationalState";
 import { useApp } from "@/lib/store";
 import type {
   DiscoveredDevice,
+  NetworkAlert,
+  NetworkEvent,
+  NetworkMapFocusMode,
   NetworkMapFilterState,
   NetworkMapLabelMode,
+  NetworkMapOverlayMode,
   NetworkMapViewMode,
   NetworkTopologyGraph,
   ScanState,
+  ScanComparisonSummary,
 } from "@/lib/network/types";
 import { NetworkMapCanvas } from "./NetworkMapCanvas";
 import type { NetworkMapControlsHandle } from "./NetworkMapCameraRig";
@@ -25,7 +31,16 @@ interface NetworkMap3DProps {
   visibleDeviceIds: string[];
   scanProgress: number;
   scanState: ScanState;
+  events: NetworkEvent[];
+  alerts: NetworkAlert[];
+  lastScanDelta: ScanComparisonSummary | null;
   onSelectDevice: (device: DiscoveredDevice) => void;
+  onOpenDetails: (device: DiscoveredDevice) => void;
+  onTrustDevice: (device: DiscoveredDevice) => void;
+  onWatchDevice: (device: DiscoveredDevice) => void;
+  onRenameDevice: (device: DiscoveredDevice, customName: string) => void;
+  onViewTimeline: (device: DiscoveredDevice) => void;
+  onAskNeo: (device: DiscoveredDevice) => void;
 }
 
 export function NetworkMap3D({
@@ -34,7 +49,16 @@ export function NetworkMap3D({
   visibleDeviceIds,
   scanProgress,
   scanState,
+  events,
+  alerts,
+  lastScanDelta,
   onSelectDevice,
+  onOpenDetails,
+  onTrustDevice,
+  onWatchDevice,
+  onRenameDevice,
+  onViewTimeline,
+  onAskNeo,
 }: NetworkMap3DProps) {
   const { settings } = useApp();
   const [topologyGraph, setTopologyGraph] = useState<NetworkTopologyGraph | null>(null);
@@ -54,6 +78,8 @@ export function NetworkMap3D({
   const [showLinks, setShowLinks] = useState(true);
   const [showParticles, setShowParticles] = useState(true);
   const [viewMode, setViewMode] = useState<NetworkMapViewMode>("orbital-3d");
+  const [overlayMode, setOverlayMode] = useState<NetworkMapOverlayMode>("operational");
+  const [focusMode, setFocusMode] = useState<NetworkMapFocusMode>("all");
   const panelRef = useRef<HTMLDivElement | null>(null);
   const reducedMotion = hudReducedMotion || osReducedMotion || settings.reducedMotion;
   const [filters, setFilters] = useState<NetworkMapFilterState>({
@@ -84,6 +110,21 @@ export function NetworkMap3D({
     [devices]
   );
   const hoveredDevice = hoveredDeviceId ? deviceById.get(hoveredDeviceId) ?? null : null;
+  const nodeStates = useMemo(
+    () =>
+      buildMapOperationalState({
+        devices,
+        events,
+        alerts,
+        lastScanDelta,
+        overlayMode,
+      }),
+    [alerts, devices, events, lastScanDelta, overlayMode]
+  );
+  const focusedDeviceIds = useMemo(
+    () => getFocusedDeviceIds(devices, nodeStates, focusMode),
+    [devices, focusMode, nodeStates]
+  );
   const handleNodeHover = useCallback((deviceId: string | null) => {
     setHoveredDeviceId((current) => (current === deviceId ? current : deviceId));
   }, []);
@@ -91,14 +132,17 @@ export function NetworkMap3D({
     () => {
       const matchingIds = devices
         .filter((device) => {
+          const state = nodeStates.get(device.id);
           if (visibleDeviceIds.length > 0 && !visibleDeviceIds.includes(device.id)) return false;
+          if (focusMode !== "all" && focusedDeviceIds.length === 0) return false;
+          if (focusMode !== "all" && !focusedDeviceIds.includes(device.id)) {
+            return false;
+          }
           if (viewMode === "alerts-only") {
-            return (
-              device.trustLevel === "new" ||
-              device.trustLevel === "watch" ||
-              device.trustLevel === "blocked" ||
-              device.deviceType === "unknown"
-            );
+            return Boolean(state?.hasRecentAlert || state?.isWatchOrFlagged || state?.isNew || device.deviceType === "unknown");
+          }
+          if (viewMode === "recent-changes") {
+            return Boolean(state?.changedSinceLastScan || state?.isReturned || state?.isNew || state?.hasRecentAlert);
           }
           if (filters.showOnlyFlagged) {
             return (
@@ -120,7 +164,7 @@ export function NetworkMap3D({
 
       return matchingIds.length > 0 ? matchingIds : ["__none__"];
     },
-    [devices, filters, viewMode, visibleDeviceIds]
+    [devices, filters, focusedDeviceIds, focusMode, nodeStates, viewMode, visibleDeviceIds]
   );
 
   useEffect(() => {
@@ -272,9 +316,17 @@ export function NetworkMap3D({
               <NetworkMapSelectionOverlay
                 selectedDevice={selectedDevice}
                 hoveredDevice={hoveredDevice}
+                selectedState={selectedDevice ? nodeStates.get(selectedDevice.id) ?? null : null}
+                hoveredState={hoveredDevice ? nodeStates.get(hoveredDevice.id) ?? null : null}
                 onFitAll={() => controlsRef.current?.fitAllNodes()}
                 onResetCamera={() => controlsRef.current?.resetCamera()}
                 onFocusSelected={() => controlsRef.current?.focusSelectedNode()}
+                onOpenDetails={onOpenDetails}
+                onTrustDevice={onTrustDevice}
+                onWatchDevice={onWatchDevice}
+                onRenameDevice={onRenameDevice}
+                onViewTimeline={onViewTimeline}
+                onAskNeo={onAskNeo}
               />
               <NetworkMapCanvas
                 ref={controlsRef}
@@ -291,6 +343,8 @@ export function NetworkMap3D({
                 showLinks={showLinks}
                 showParticles={showParticles}
                 viewMode={viewMode}
+                overlayMode={overlayMode}
+                nodeStates={nodeStates}
                 // Render only when the tab is visible AND the panel is on
                 // screen AND no reduced-motion source has been triggered.
                 // Pointer/touch state changes still trigger renders via R3F's
@@ -328,6 +382,8 @@ export function NetworkMap3D({
           filters={filters}
           hasSelectedDevice={selectedDevice !== null}
           labelMode={labelMode}
+          focusMode={focusMode}
+          overlayMode={overlayMode}
           reducedMotion={reducedMotion}
           showLinks={showLinks}
           showParticles={showParticles}
@@ -338,6 +394,13 @@ export function NetworkMap3D({
           onFitAll={() => controlsRef.current?.fitAllNodes()}
           onFocusSelected={() => controlsRef.current?.focusSelectedNode()}
           onLabelModeChange={setLabelMode}
+          onFocusModeChange={(mode) => {
+            setFocusMode(mode);
+            if (mode === "changed") {
+              setViewMode("recent-changes");
+            }
+          }}
+          onOverlayModeChange={setOverlayMode}
           onReducedMotionChange={setHudReducedMotion}
           onResetCamera={() => controlsRef.current?.resetCamera()}
           onShowLinksChange={setShowLinks}

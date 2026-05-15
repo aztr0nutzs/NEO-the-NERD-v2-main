@@ -3,13 +3,14 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type * as THREE from "three";
-import type { NetworkTopologyNode } from "@/lib/network/types";
+import type { NetworkMapNodeOperationalState, NetworkTopologyNode } from "@/lib/network/types";
 
 interface NodeStatusAuraProps {
   node: NetworkTopologyNode;
   color: string;
   radius?: number;
   intensity?: number;
+  nodeState?: NetworkMapNodeOperationalState | null;
   reducedMotion?: boolean;
 }
 
@@ -18,6 +19,7 @@ export function NodeStatusAura({
   color,
   radius = 0.52,
   intensity = 1,
+  nodeState,
   reducedMotion = false,
 }: NodeStatusAuraProps) {
   const outerRingRef = useRef<THREE.Mesh>(null);
@@ -39,7 +41,9 @@ export function NodeStatusAura({
     }
   });
 
-  const opacity = (node.status === "offline" ? 0.1 : node.isFlagged ? 0.32 : 0.18) * intensity;
+  const operationalBoost =
+    nodeState?.hasRecentAlert || nodeState?.isNew || nodeState?.isReturned || nodeState?.isTrustedOffline ? 0.18 : 0;
+  const opacity = ((node.status === "offline" ? 0.1 : node.isFlagged ? 0.32 : 0.18) + operationalBoost) * intensity;
 
   return (
     <group>
@@ -48,11 +52,11 @@ export function NodeStatusAura({
         <meshBasicMaterial color={color} opacity={opacity} transparent />
       </mesh>
 
-      {(node.trustLevel === "watch" || node.trustLevel === "blocked" || node.isNew) && (
+      {(node.trustLevel === "watch" || node.trustLevel === "blocked" || node.isNew || nodeState?.hasRecentAlert) && (
         <mesh ref={scanRingRef} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[radius * 1.34, 0.012, 8, 64]} />
           <meshBasicMaterial
-            color={node.trustLevel === "blocked" ? "#f43f5e" : node.isNew ? "#facc15" : "#fb923c"}
+            color={nodeState?.hasRecentAlert ? nodeState.overlayColor : node.trustLevel === "blocked" ? "#f43f5e" : node.isNew ? "#facc15" : "#fb923c"}
             opacity={node.status === "offline" ? 0.08 : 0.34}
             transparent
           />

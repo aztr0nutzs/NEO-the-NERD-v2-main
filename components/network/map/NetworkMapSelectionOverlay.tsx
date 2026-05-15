@@ -1,25 +1,43 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Crosshair, MousePointer2 } from "lucide-react";
-import type { DiscoveredDevice } from "@/lib/network/types";
+import { Bot, Crosshair, Edit3, Eye, FileText, History, MousePointer2, ShieldCheck } from "lucide-react";
+import type { DiscoveredDevice, NetworkMapNodeOperationalState } from "@/lib/network/types";
 
 interface NetworkMapSelectionOverlayProps {
   selectedDevice: DiscoveredDevice | null;
   hoveredDevice: DiscoveredDevice | null;
+  selectedState: NetworkMapNodeOperationalState | null;
+  hoveredState: NetworkMapNodeOperationalState | null;
   onFocusSelected: () => void;
   onResetCamera: () => void;
   onFitAll: () => void;
+  onOpenDetails: (device: DiscoveredDevice) => void;
+  onTrustDevice: (device: DiscoveredDevice) => void;
+  onWatchDevice: (device: DiscoveredDevice) => void;
+  onRenameDevice: (device: DiscoveredDevice, customName: string) => void;
+  onViewTimeline: (device: DiscoveredDevice) => void;
+  onAskNeo: (device: DiscoveredDevice) => void;
 }
 
 export function NetworkMapSelectionOverlay({
   selectedDevice,
   hoveredDevice,
+  selectedState,
+  hoveredState,
   onFocusSelected,
   onResetCamera,
   onFitAll,
+  onOpenDetails,
+  onTrustDevice,
+  onWatchDevice,
+  onRenameDevice,
+  onViewTimeline,
+  onAskNeo,
 }: NetworkMapSelectionOverlayProps) {
   const displayDevice = hoveredDevice ?? selectedDevice;
+  const displayState = hoveredState ?? selectedState;
+  const actionDevice = selectedDevice ?? hoveredDevice;
 
   return (
     <div className="pointer-events-auto absolute left-3 top-3 z-20 w-[min(280px,calc(100%-24px))] rounded-lg border border-cyan-500/25 bg-black/75 p-3 backdrop-blur-md">
@@ -45,6 +63,12 @@ export function NetworkMapSelectionOverlay({
             {(displayDevice.manuallyVerified ? "verified" : "unverified")} identity
             {displayDevice.room ? ` / ${displayDevice.room}` : ""}
           </p>
+          {displayState && (
+            <p className="text-orange-300/85">
+              {displayState.overlayLabel}
+              {displayState.reasons[0] ? ` / ${displayState.reasons[0]}` : ""}
+            </p>
+          )}
         </div>
       ) : (
         <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500">
@@ -62,6 +86,33 @@ export function NetworkMapSelectionOverlay({
           icon={<Crosshair className="h-3 w-3" />}
         />
       </div>
+      {actionDevice && (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <ControlButton label="DETAILS" icon={<FileText className="h-3 w-3" />} onClick={() => onOpenDetails(actionDevice)} />
+          <ControlButton
+            label="RENAME"
+            icon={<Edit3 className="h-3 w-3" />}
+            onClick={() => {
+              const nextName = window.prompt("Rename device", actionDevice.customName ?? actionDevice.name);
+              if (nextName?.trim()) onRenameDevice(actionDevice, nextName.trim());
+            }}
+          />
+          <ControlButton
+            label="TRUST"
+            icon={<ShieldCheck className="h-3 w-3" />}
+            onClick={() => onTrustDevice(actionDevice)}
+            disabled={actionDevice.trustLevel === "trusted"}
+          />
+          <ControlButton
+            label="WATCH"
+            icon={<Eye className="h-3 w-3" />}
+            onClick={() => onWatchDevice(actionDevice)}
+            disabled={actionDevice.trustLevel === "watch"}
+          />
+          <ControlButton label="TIMELINE" icon={<History className="h-3 w-3" />} onClick={() => onViewTimeline(actionDevice)} />
+          <ControlButton label="ASK_NEO" icon={<Bot className="h-3 w-3" />} onClick={() => onAskNeo(actionDevice)} />
+        </div>
+      )}
     </div>
   );
 }

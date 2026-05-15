@@ -4,6 +4,8 @@ import { useMemo } from "react";
 import type {
   DiscoveredDevice,
   NetworkMapLabelMode,
+  NetworkMapNodeOperationalState,
+  NetworkMapOverlayMode,
   NetworkTopologyGraph,
   ScanState,
 } from "@/lib/network/types";
@@ -28,6 +30,8 @@ interface NetworkMapSceneProps {
   scanState: ScanState;
   showLinks: boolean;
   showParticles: boolean;
+  overlayMode: NetworkMapOverlayMode;
+  nodeStates: Map<string, NetworkMapNodeOperationalState>;
   isSceneActive: boolean;
   onNodeHover: (deviceId: string | null) => void;
   onNodeSelect: (deviceId: string) => void;
@@ -45,6 +49,8 @@ export function NetworkMapScene({
   scanState,
   showLinks,
   showParticles,
+  overlayMode,
+  nodeStates,
   isSceneActive,
   onNodeHover,
   onNodeSelect,
@@ -118,6 +124,8 @@ export function NetworkMapScene({
                 isHovered={hoveredDeviceId === node.deviceId}
                 isDimmed={visibleDeviceIdSet.size > 0 && !visibleDeviceIdSet.has(node.deviceId)}
                 labelMode={labelMode}
+                overlayMode={overlayMode}
+                nodeState={nodeStates.get(node.deviceId) ?? null}
                 onHover={onNodeHover}
                 onSelect={onNodeSelect}
                 scanState={scanState}
@@ -135,6 +143,8 @@ export function NetworkMapScene({
                 discoveryBoost={discoveryBoost}
                 isAttentionNode={isAttentionNode}
                 labelMode={labelMode}
+                overlayMode={overlayMode}
+                nodeState={nodeStates.get(node.deviceId) ?? null}
                 reducedMotion={reducedMotion}
                 isSceneActive={isSceneActive}
                 onHover={onNodeHover}

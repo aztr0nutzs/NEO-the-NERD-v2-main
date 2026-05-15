@@ -2,11 +2,18 @@
 
 import type { ReactNode } from "react";
 import { Crosshair, Maximize2, RotateCcw } from "lucide-react";
-import type { NetworkMapLabelMode, NetworkMapViewMode } from "@/lib/network/types";
+import type {
+  NetworkMapFocusMode,
+  NetworkMapLabelMode,
+  NetworkMapOverlayMode,
+  NetworkMapViewMode,
+} from "@/lib/network/types";
 
 interface NetworkMapControlsProps {
   autoRotate: boolean;
+  focusMode: NetworkMapFocusMode;
   labelMode: NetworkMapLabelMode;
+  overlayMode: NetworkMapOverlayMode;
   reducedMotion: boolean;
   showLinks: boolean;
   showParticles: boolean;
@@ -15,7 +22,9 @@ interface NetworkMapControlsProps {
   onAutoRotateChange: (value: boolean) => void;
   onFitAll: () => void;
   onFocusSelected: () => void;
+  onFocusModeChange: (mode: NetworkMapFocusMode) => void;
   onLabelModeChange: (mode: NetworkMapLabelMode) => void;
+  onOverlayModeChange: (mode: NetworkMapOverlayMode) => void;
   onReducedMotionChange: (value: boolean) => void;
   onResetCamera: () => void;
   onShowLinksChange: (value: boolean) => void;
@@ -28,6 +37,7 @@ const VIEW_MODES: Array<{ label: string; value: NetworkMapViewMode }> = [
   { label: "Top-Down", value: "top-down" },
   { label: "Focus", value: "focus-selected" },
   { label: "Alerts", value: "alerts-only" },
+  { label: "Changes", value: "recent-changes" },
 ];
 
 const LABEL_MODES: Array<{ label: string; value: NetworkMapLabelMode }> = [
@@ -38,9 +48,28 @@ const LABEL_MODES: Array<{ label: string; value: NetworkMapLabelMode }> = [
   { label: "Status", value: "status" },
 ];
 
+const OVERLAY_MODES: Array<{ label: string; value: NetworkMapOverlayMode }> = [
+  { label: "Ops", value: "operational" },
+  { label: "Alerts", value: "alert-severity" },
+  { label: "Trust", value: "trust-state" },
+  { label: "Seen", value: "last-seen" },
+  { label: "Latency", value: "latency" },
+  { label: "Conf", value: "discovery-confidence" },
+];
+
+const FOCUS_MODES: Array<{ label: string; value: NetworkMapFocusMode }> = [
+  { label: "All", value: "all" },
+  { label: "Unknown", value: "unknown" },
+  { label: "Flagged", value: "flagged" },
+  { label: "Offline", value: "offline-trusted" },
+  { label: "Changed", value: "changed" },
+];
+
 export function NetworkMapControls({
   autoRotate,
+  focusMode,
   labelMode,
+  overlayMode,
   reducedMotion,
   showLinks,
   showParticles,
@@ -49,7 +78,9 @@ export function NetworkMapControls({
   onAutoRotateChange,
   onFitAll,
   onFocusSelected,
+  onFocusModeChange,
   onLabelModeChange,
+  onOverlayModeChange,
   onReducedMotionChange,
   onResetCamera,
   onShowLinksChange,
@@ -66,6 +97,34 @@ export function NetworkMapControls({
               active={viewMode === mode.value}
               label={mode.label}
               onClick={() => onViewModeChange(mode.value)}
+            />
+          ))}
+        </div>
+      </ControlSection>
+
+      <ControlSection title="HEALTH_OVERLAY">
+        <div className="grid grid-cols-3 gap-1">
+          {OVERLAY_MODES.map((mode) => (
+            <SegmentButton
+              key={mode.value}
+              active={overlayMode === mode.value}
+              compact
+              label={mode.label}
+              onClick={() => onOverlayModeChange(mode.value)}
+            />
+          ))}
+        </div>
+      </ControlSection>
+
+      <ControlSection title="FOCUS">
+        <div className="grid grid-cols-5 gap-1">
+          {FOCUS_MODES.map((mode) => (
+            <SegmentButton
+              key={mode.value}
+              active={focusMode === mode.value}
+              compact
+              label={mode.label}
+              onClick={() => onFocusModeChange(mode.value)}
             />
           ))}
         </div>
