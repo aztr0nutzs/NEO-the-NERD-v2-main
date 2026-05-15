@@ -16,7 +16,7 @@ import { ControlSlider } from "../control-slider"
 import { getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
 import { generatePersonalityPreviewResponse } from "@/lib/assistant/assistantResponseEngine"
 import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
-import { previewVoice } from "@/lib/voice/voice-runtime"
+import { getCachedVoiceRuntimeCapabilities, getProfileTruthLabel, previewVoice } from "@/lib/voice/voice-runtime"
 import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
 
@@ -51,6 +51,9 @@ export function PersonalitiesScreen() {
     PERSONALITIES.find((p) => p.id === personalityId) ?? PERSONALITIES[0]
   const activeBehavior = getPersonalityProfile(active.id)
   const activeLinkedVoice = getVoiceProfile(activeBehavior.voiceId)
+  const activeUserVoice = getVoiceProfile(voiceId)
+  const previewVoiceProfile = activeLinkedVoice
+  const previewTruth = getProfileTruthLabel(previewVoiceProfile, getCachedVoiceRuntimeCapabilities(previewVoiceProfile))
 
   // Track whether selection actually changed (vs first mount) so the saved
   // badge only shows after a real user action.

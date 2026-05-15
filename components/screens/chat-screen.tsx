@@ -11,6 +11,9 @@ import type { ConversationMode } from "@/lib/types"
 import type { ResponseCategory, LibraryResponseCategory } from "@/lib/types"
 import { getAssistantPromptSuggestions } from "@/lib/assistant/assistantSuggestions"
 import { getRecommendedGameInvites, getRecommendedResponses, getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
+import { previewVoice } from "@/lib/voice/voice-runtime"
+import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
+import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 
 const MODES: { id: ConversationMode; accent: string }[] = [
   { id: "Helpful Assistant", accent: "#00f0ff" },
@@ -205,6 +208,18 @@ export function ChatScreen() {
     })
   }, [chatSendState, messages.length, settings.autoScroll])
 
+
+  const speakChatMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return
+    const profile = getVoiceProfile(voiceId)
+    await previewVoice({
+      profile,
+      text,
+      params: voiceProfileToParams(voiceId),
+      mode: "auto",
+    })
+  }, [voiceId])
+
   const handleSend = (override?: string) => {
     const text = override ?? input
     if (!text.trim()) return
@@ -281,6 +296,11 @@ export function ChatScreen() {
             <MessageBubble
               key={m.id}
               msg={m}
+              onPlay={(msg) => {
+                if (msg.role === "assistant") {
+                  speakChatMessage(msg.text).catch(() => {})
+                }
+              }}
               onCopy={(msg) => {
                 if (typeof navigator !== "undefined" && navigator.clipboard) {
                   navigator.clipboard.writeText(msg.text).catch(() => {})
