@@ -40,6 +40,7 @@ export function MainScreen() {
     acceptGameInvite,
     dismissGameInvite,
     playAvatarReaction,
+    networkHealthSnapshots,
   } = useApp()
 
   const voice = VOICES.find((v) => v.id === voiceId)
@@ -48,6 +49,9 @@ export function MainScreen() {
     "Boot sequence complete. NEO online. Tap my chest to greet, my head to switch personality, or hit a quick command below.",
   )
   const moodColor = MOOD_COLORS.idle
+  const latestNetworkHealth = [...networkHealthSnapshots].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+  )[0]
 
   const handleChip = (label: string) => {
     setMood("speaking")
@@ -264,7 +268,9 @@ export function MainScreen() {
                 NEURAL_MAP // 3D NETWORK TOPOLOGY
               </p>
               <p className="ps-mono mt-0.5 text-[12px] tracking-[0.18em] text-white/85">
-                Open the live device map &amp; router scanner
+                {latestNetworkHealth
+                  ? `Health ${latestNetworkHealth.score}/100 · ${latestNetworkHealth.grade}`
+                  : "Open the live device map & router scanner"}
               </p>
             </div>
             <ChevronRight

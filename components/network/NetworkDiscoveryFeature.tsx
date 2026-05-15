@@ -41,6 +41,7 @@ import { NeoRobotAvatar } from "./NeoRobotAvatar";
 import { DeviceIdentityReviewQueue } from "./DeviceIdentityReviewQueue";
 import { NetworkTimelinePanel } from "./NetworkTimelinePanel";
 import { NetworkAlertsPanel } from "./NetworkAlertsPanel";
+import { NetworkHealthPanel } from "./NetworkHealthPanel";
 import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 
 import {
@@ -74,6 +75,12 @@ import {
   materializeNetworkAlerts,
 } from "@/lib/network/networkNotifications";
 import { computeNextAutoScanAt, shouldRunAutoScan } from "@/lib/network/networkMonitoring";
+import {
+  calculateNetworkHealth,
+  retainHealthSnapshots,
+  runNetworkDiagnostics,
+  selectLatestHealthSnapshot,
+} from "@/lib/network/networkDiagnostics";
 
 import type {
   NetworkStatus,
@@ -88,6 +95,7 @@ import type {
   RouterCapability,
   RouterControlMode,
   DeviceIdentityUpdate,
+  DiagnosticProbeResult,
 } from "@/lib/network/types";
 
 const NetworkMap3D = dynamic(
@@ -118,6 +126,8 @@ export function NetworkDiscoveryFeature() {
     setNetworkMonitorState,
     networkAlerts,
     setNetworkAlerts,
+    networkHealthSnapshots,
+    setNetworkHealthSnapshots,
   } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
@@ -139,6 +149,8 @@ export function NetworkDiscoveryFeature() {
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<string[]>([]);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [robotMessage, setRobotMessage] = useState<string | null>(null);
+  const [diagnosticsRunning, setDiagnosticsRunning] = useState(false);
+  const [latestDiagnostics, setLatestDiagnostics] = useState<DiagnosticProbeResult[]>([]);
   const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
   const identityRecordsRef = useRef(networkDeviceIdentities);
   const networkEventsRef = useRef(networkEvents);
@@ -351,6 +363,31 @@ export function NetworkDiscoveryFeature() {
             nextRunAt: activeSettings?.autoScanEnabled ? computeNextAutoScanAt(activeSettings) : null,
             lastIssue: null,
           }));
+          const previousHealth = selectLatestHealthSnapshot(networkHealthSnapshots);
+          const healthSnapshot = calculateNetworkHealth({
+            status: networkStatus ?? {
+              networkName: "Unknown",
+              gatewayIp: "",
+              localIp: "",
+              subnet: "",
+              connectionType: "unknown",
+              scanState: "complete",
+              lastScanAt: null,
+              devicesFound: updatedDevices.length,
+              onlineDevices: updatedDevices.filter((device) => device.status === "online").length,
+              unknownDevices: updatedDevices.filter((device) => device.deviceType === "unknown").length,
+              flaggedDevices: updatedDevices.filter((device) => device.trustLevel !== "trusted").length,
+            },
+            routerStatus: previousRouterStatusRef.current,
+            devices: updatedDevices,
+            events: appendNetworkEvents(networkEventsRef.current, comparison.events),
+            alerts: networkAlerts,
+            lastScanDelta: comparison.summary,
+            diagnostics: latestDiagnostics,
+            previousSnapshot: previousHealth,
+            source: "scan",
+          });
+          setNetworkHealthSnapshots((current) => retainHealthSnapshots([healthSnapshot, ...current]));
           const hasAttentionDevice = updatedDevices.some(
             (device) =>
               device.trustLevel === "new" ||
@@ -387,6 +424,11 @@ export function NetworkDiscoveryFeature() {
     setLastNetworkScanDelta,
     settings?.notifyNewDevices,
     settings?.notifyOfflineDevices,
+    networkHealthSnapshots,
+    networkAlerts,
+    latestDiagnostics,
+    networkStatus,
+    setNetworkHealthSnapshots,
   ]);
 
   // Action polling
@@ -694,6 +736,40 @@ export function NetworkDiscoveryFeature() {
     setNetworkAlerts((current) => current.filter((alert) => alert.status === "unread"));
   }, [setNetworkAlerts]);
 
+  const handleRunDiagnostics = useCallback(async () => {
+    if (!networkStatus) return;
+    setDiagnosticsRunning(true);
+    try {
+      const diagnostics = await runNetworkDiagnostics(networkStatus);
+      setLatestDiagnostics(diagnostics);
+      const previousSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
+      const snapshot = calculateNetworkHealth({
+        status: networkStatus,
+        routerStatus,
+        devices,
+        events: networkEventsRef.current,
+        alerts: networkAlerts,
+        lastScanDelta: lastNetworkScanDelta,
+        diagnostics,
+        previousSnapshot,
+        source: "diagnostic",
+      });
+      setNetworkHealthSnapshots((current) => retainHealthSnapshots([snapshot, ...current]));
+      setRobotMessage(`${snapshot.grade} network health: ${snapshot.score}/100.`);
+      setTimeout(() => setRobotMessage(null), 4500);
+    } finally {
+      setDiagnosticsRunning(false);
+    }
+  }, [
+    devices,
+    lastNetworkScanDelta,
+    networkAlerts,
+    networkHealthSnapshots,
+    networkStatus,
+    routerStatus,
+    setNetworkHealthSnapshots,
+  ]);
+
   const handleViewDeviceFromInsight = useCallback(
     (deviceId: string) => {
       const device = devices.find((d) => d.id === deviceId);
@@ -747,6 +823,7 @@ export function NetworkDiscoveryFeature() {
   const effectivePanelSettings =
     effectiveAdapterStatus.mode === "fallback" ? { ...settings, demoMode: true } : settings;
   const newIdentityDevices = devices.filter((device) => device.isNewIdentity && !device.dismissedForNow);
+  const latestHealthSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
 
   return (
     <div>
@@ -842,6 +919,14 @@ export function NetworkDiscoveryFeature() {
           onClearRead={handleClearReadAlerts}
         />
 
+        <NetworkHealthPanel
+          snapshot={latestHealthSnapshot}
+          lastScanDelta={lastNetworkScanDelta}
+          diagnosticsRunning={diagnosticsRunning}
+          onRunDiagnostics={handleRunDiagnostics}
+          onOpenTimeline={() => setActiveTab("timeline")}
+        />
+
         {/* Overview Stats */}
         <section className="mb-6">
           <NetworkOverviewPanel
@@ -851,6 +936,7 @@ export function NetworkDiscoveryFeature() {
             onJumpToDevices={() => setActiveTab("devices")}
             onJumpToSecurity={() => setActiveTab("security")}
             onJumpToScan={() => setActiveTab("overview")}
+            healthSnapshot={latestHealthSnapshot}
           />
         </section>
 

@@ -3,7 +3,7 @@
 import { motion, animate, useMotionValue, useTransform } from "framer-motion";
 import { useEffect } from "react";
 import { Wifi, Monitor, AlertTriangle, Eye, Shield } from "lucide-react";
-import type { NetworkStatus } from "@/lib/network/types";
+import type { NetworkHealthSnapshot, NetworkStatus } from "@/lib/network/types";
 
 interface NetworkOverviewPanelProps {
   status: NetworkStatus;
@@ -12,6 +12,7 @@ interface NetworkOverviewPanelProps {
   onJumpToDevices?: () => void;
   onJumpToSecurity?: () => void;
   onJumpToScan?: () => void;
+  healthSnapshot?: NetworkHealthSnapshot | null;
 }
 
 export function NetworkOverviewPanel({
@@ -21,6 +22,7 @@ export function NetworkOverviewPanel({
   onJumpToDevices,
   onJumpToSecurity,
   onJumpToScan,
+  healthSnapshot,
 }: NetworkOverviewPanelProps) {
   const stats = [
     {
@@ -164,6 +166,23 @@ export function NetworkOverviewPanel({
           </span>
         </div>
       </motion.button>
+
+      {healthSnapshot && (
+        <button
+          type="button"
+          onClick={onJumpToScan}
+          className="w-full rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-left"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-emerald-300">
+              HEALTH // {healthSnapshot.grade.toUpperCase()}
+            </span>
+            <span className="font-mono text-[10px] tracking-[0.2em] text-white/80">
+              {healthSnapshot.score}/100 · {healthSnapshot.trend.toUpperCase()}
+            </span>
+          </div>
+        </button>
+      )}
 
       {/* Demo Mode Notice */}
       {isDemoMode && (

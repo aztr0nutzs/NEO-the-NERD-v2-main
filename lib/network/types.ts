@@ -181,6 +181,42 @@ export type NetworkNotificationCapability =
   | "unavailable"
   | "unsupported-platform";
 
+export type NetworkHealthGrade = "Excellent" | "Good" | "Watch" | "Degraded" | "Critical";
+
+export type DiagnosticProbeStatus = "passed" | "failed" | "unavailable" | "not-run";
+
+export interface DiagnosticProbeResult {
+  key: "gateway" | "internet" | "dns" | "jitter" | "packet-loss" | "throughput";
+  label: string;
+  status: DiagnosticProbeStatus;
+  latencyMs?: number;
+  value?: string;
+  samples?: number[];
+  detail: string;
+  measuredAt: string;
+  provider?: string;
+}
+
+export interface NetworkHealthFactor {
+  id: string;
+  label: string;
+  impact: number;
+  severity: InsightSeverity;
+  detail: string;
+}
+
+export interface NetworkHealthSnapshot {
+  id: string;
+  timestamp: string;
+  score: number;
+  grade: NetworkHealthGrade;
+  headline: string;
+  factors: NetworkHealthFactor[];
+  diagnostics: DiagnosticProbeResult[];
+  trend: "improving" | "stable" | "declining" | "unknown";
+  source: "scan" | "diagnostic" | "manual";
+}
+
 export interface NetworkAlert {
   id: string;
   timestamp: string;
