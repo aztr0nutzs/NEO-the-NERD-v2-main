@@ -46,6 +46,33 @@ export type VoiceTimbreSource =
   | "styled-variant"
   | "profile-only"
 
+/**
+ * Capability-driven hints for picking a real Android engine voice. Authored
+ * per profile; the runtime scores actual device voices against these to pick
+ * a deterministic-but-appropriate native voice. No field is required.
+ */
+export interface NativeVoicePreference {
+  /** Ordered list of locale tags to prefer (e.g. ["en-US", "en-GB"]). */
+  localePreference?: string[]
+  /** True if the profile prefers an offline-capable engine voice. */
+  preferOffline?: boolean
+  /** True if the profile prefers a higher-quality engine voice. */
+  preferHighQuality?: boolean
+  /** True if the profile prefers a lower-latency engine voice. */
+  preferLowLatency?: boolean
+  /** Substrings to prefer in voice.name (e.g. ["x-iom"] for masc-sounding). */
+  preferNameHints?: string[]
+  /** Substrings to avoid in voice.name. */
+  avoidNameHints?: string[]
+  /**
+   * Pool key for deterministic slotting. Profiles sharing the same pool key
+   * spread across distinct device voices when more than one is acceptable.
+   */
+  distinctFromPoolKey?: string
+}
+
+export type NativeVoiceResolution = "explicit" | "heuristic" | "unavailable"
+
 export type VoiceCadenceProfile =
   | "steady"
   | "brisk"
@@ -101,8 +128,31 @@ export interface VoiceProfile {
   stylePrompt?: string
   /** Optional: provider-side emotional/delivery instructions appended to the prompt. */
   emotionalInstructions?: string
-  /** Optional: targeted Android native voice id (used when capable). */
+  /**
+   * Optional hard-pinned Android engine voice name (e.g. "en-us-x-sfg-local").
+   *
+   * Reserved for cases where a specific Android engine voice is known to be
+   * installed across the deployment fleet. Not authored on any profile today
+   * because Android engine voice inventory varies per device — see
+   * `nativeVoicePreference` for the portable, capability-driven path.
+   */
   nativeVoiceId?: string
+  /**
+   * Optional capability-driven hints for Android engine voice resolution.
+   * Used by `resolveBestNativeVoiceForProfile()` when no `nativeVoiceId` is
+   * pinned. Lets profiles ask for a quality/locale/offline shape without
+   * pretending a specific engine voice always exists.
+   */
+  nativeVoicePreference?: NativeVoicePreference
+  /**
+   * Reported by the runtime after attempting to map this profile to a real
+   * device voice. "explicit" = `nativeVoiceId` was found and selected;
+   * "heuristic" = `nativeVoicePreference` led to a scored selection;
+   * "unavailable" = no acceptable native voice exists on the device.
+   *
+   * This is NOT authored — it's runtime-resolved per call.
+   */
+  nativeVoiceResolution?: NativeVoiceResolution
   /** Optional: pacing/cadence shape applied on top of slider rate. */
   cadenceProfile?: VoiceCadenceProfile
   /** Optional: 1..5 commanding presence/authority intensity for delivery. */

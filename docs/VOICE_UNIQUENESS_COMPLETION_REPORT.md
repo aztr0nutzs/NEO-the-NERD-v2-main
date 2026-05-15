@@ -170,6 +170,42 @@ Already wired in the prior pass and unchanged:
 - Chat assistant message bubble speaks via the same runtime.
 - Response Vault speak path is also runtime-driven.
 
+## Native voice strategy (finalized)
+
+`nativeVoiceId` is no longer a vague half-used field. The final shape is:
+
+- **`nativeVoiceId?: string`** — reserved. Pin only when a specific Android
+  engine voice (e.g. `en-us-x-sfg-local`) is known to exist across the fleet.
+  No profile pins one today (device inventory varies).
+- **`nativeVoicePreference?: NativeVoicePreference`** — authored on every
+  profile. Capability-driven hints (`localePreference`, `preferOffline`,
+  `preferHighQuality`, `preferLowLatency`, `preferNameHints`, `avoidNameHints`,
+  `distinctFromPoolKey`).
+- **`nativeVoiceResolution`** — runtime-only output of
+  `resolveBestNativeVoiceForProfile()`, never authored.
+
+The resolver in [`lib/voice/native-tts-bridge.ts`](../lib/voice/native-tts-bridge.ts)
+scores every device voice with `scoreNativeVoiceCandidate`, keeps the top-K,
+and deterministically slots sibling profiles (those sharing a
+`distinctFromPoolKey`) across the pool. When only one practical voice exists
+on a device, the runtime still labels playback as Styled Android TTS — never
+"Android Device Voice" — so the UI never overclaims distinct timbre.
+
+See `docs/VOICE_RUNTIME_FINAL_QA.md` for the full strategy, fallback matrix,
+and Android listening test plan.
+
+## Card badge truth model (finalized)
+
+- **Authored badge** (always shown): `UNIQUE TIMBRE` / `STYLED VARIANT` /
+  `DEVICE VOICE` / `PROFILE ONLY` / `UNAVAILABLE`.
+- **Runtime indicator** (shown when card receives `capabilities` prop):
+  `LIVE` / `LIMITED` / `FALLBACK` / `OFFLINE`. Powered by the same
+  `getVoiceUniquenessCategory()` used by the detail panel — card and detail
+  never disagree.
+
+The voice-rail strips (recently used, recommended, featured) intentionally
+omit the runtime indicator to stay compact.
+
 ## Runtime / device-dependent limitations
 
 - **Provider distinctness** requires `OPENAI_API_KEY` server-side and a
@@ -182,9 +218,13 @@ Already wired in the prior pass and unchanged:
   one engine voice (or zero), every profile reduces to "Styled Android TTS".
 - **Browser fallback** depends on the WebView shipping SpeechSynthesis.
   Some Android WebViews do not.
-- `nativeVoiceId` is reserved on the type but not yet authored per profile.
-- Capacitor sync requires Node >=22 (Capacitor CLI). The Windows env used to
-  develop this pass may not match; see Verification below.
+- `nativeVoiceId` is intentionally not authored on any profile yet; the
+  portable, capability-driven `nativeVoicePreference` path is preferred.
+
+## Related docs
+
+- `docs/VOICE_RUNTIME_FINAL_QA.md` — final QA report, fallback matrix, and
+  Android listening test plan.
 
 ## Verification command receipts
 

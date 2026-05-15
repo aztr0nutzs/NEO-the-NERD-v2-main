@@ -4,8 +4,11 @@ import { motion } from "framer-motion"
 import { Check, Info, Play, Star } from "lucide-react"
 import type { VoiceProfile } from "@/lib/voice/types"
 import { availabilityLabel } from "@/lib/voice/voicePresets"
+import type { VoiceRuntimeCapabilities } from "@/lib/voice/voice-runtime"
+import { getVoiceUniquenessCategory } from "@/lib/voice/voiceUniqueness"
 
 type AuthoredBadge = "UNIQUE TIMBRE" | "STYLED VARIANT" | "DEVICE VOICE" | "PROFILE ONLY" | "UNAVAILABLE"
+type RuntimeIndicator = "LIVE" | "FALLBACK" | "LIMITED" | "OFFLINE"
 
 function authoredBadge(voice: VoiceProfile): AuthoredBadge {
   if (voice.availability === "unavailable") return "UNAVAILABLE"
@@ -25,6 +28,26 @@ const BADGE_COLOR: Record<AuthoredBadge, string> = {
   UNAVAILABLE: "#ff2d9c",
 }
 
+const INDICATOR_COLOR: Record<RuntimeIndicator, string> = {
+  LIVE: "#39ff14",
+  FALLBACK: "#ff7a00",
+  LIMITED: "#ffd700",
+  OFFLINE: "#ff2d9c",
+}
+
+function runtimeIndicator(voice: VoiceProfile, capabilities?: VoiceRuntimeCapabilities | null): RuntimeIndicator | null {
+  if (!capabilities) return null
+  if (voice.availability === "unavailable") return "OFFLINE"
+  const category = getVoiceUniquenessCategory(voice, capabilities)
+  if (category === "unavailable") return "OFFLINE"
+  // Authored intent realized → LIVE; otherwise the runtime is delivering a
+  // lower category than authored → FALLBACK (engine swap) or LIMITED (engine
+  // is correct but can't reach distinct timbre).
+  if (voice.timbreSource === category) return "LIVE"
+  if (voice.timbreSource === "provider-distinct" && category === "styled-variant" && capabilities.providerTtsAvailable) return "LIMITED"
+  return "FALLBACK"
+}
+
 const ACCENT_HEX: Record<VoiceProfile["accent"], string> = {
   cyan: "#00f0ff",
   purple: "#b829ff",
@@ -37,6 +60,7 @@ interface Props {
   voice: VoiceProfile
   selected?: boolean
   favorite?: boolean
+  capabilities?: VoiceRuntimeCapabilities | null
   onSelect?: (id: string) => void
   onPreview?: (id: string) => void
   onDetails?: (voice: VoiceProfile) => void
@@ -47,6 +71,7 @@ export function VoiceCard({
   voice,
   selected,
   favorite,
+  capabilities,
   onSelect,
   onPreview,
   onDetails,
@@ -101,18 +126,31 @@ export function VoiceCard({
           {(() => {
             const badge = authoredBadge(voice)
             const badgeColor = BADGE_COLOR[badge]
+            const indicator = runtimeIndicator(voice, capabilities)
+            const indicatorColor = indicator ? INDICATOR_COLOR[indicator] : null
             return (
-              <span
-                className="mt-1.5 inline-block rounded-full px-2 py-0.5 ps-mono text-[9px] tracking-[0.22em]"
-                style={{
-                  color: badgeColor,
-                  background: `${badgeColor}1A`,
-                  boxShadow: `inset 0 0 0 1px ${badgeColor}66`,
-                }}
-                title={voice.uniquenessExplanation}
-              >
-                {badge}
-              </span>
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <span
+                  className="inline-block rounded-full px-2 py-0.5 ps-mono text-[9px] tracking-[0.22em]"
+                  style={{
+                    color: badgeColor,
+                    background: `${badgeColor}1A`,
+                    boxShadow: `inset 0 0 0 1px ${badgeColor}66`,
+                  }}
+                  title={voice.uniquenessExplanation}
+                >
+                  {badge}
+                </span>
+                {indicator && indicatorColor && (
+                  <span
+                    className="ps-mono text-[8px] tracking-[0.2em]"
+                    style={{ color: indicatorColor, textShadow: `0 0 4px ${indicatorColor}` }}
+                    title={`Runtime: ${indicator.toLowerCase()}`}
+                  >
+                    · {indicator}
+                  </span>
+                )}
+              </div>
             )
           })()}
         </div>

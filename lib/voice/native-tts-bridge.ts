@@ -2,7 +2,8 @@
 
 import { Capacitor, registerPlugin } from "@capacitor/core"
 import type { VoiceParams } from "@/lib/types"
-import type { VoiceProfile } from "./types"
+import type { NativeVoiceResolution, VoiceProfile } from "./types"
+import { VOICE_PROFILES } from "./voiceProfiles"
 import { buildStyledVoiceSpeech } from "./voiceStyle"
 
 export interface NativeTtsAvailability {
@@ -100,28 +101,147 @@ export async function getAndroidNativeVoices(): Promise<AndroidNativeVoice[]> {
   }
 }
 
-export async function selectAndroidNativeVoiceName(profile: VoiceProfile): Promise<string | null> {
-  const voices = await getAndroidNativeVoices()
-  const localVoices = voices
-    .filter((voice) => !voice.networkConnectionRequired)
-    .filter((voice) => voice.locale?.toLowerCase().startsWith("en"))
-    .sort((a, b) => {
-      const quality = (b.quality ?? 0) - (a.quality ?? 0)
-      if (quality !== 0) return quality
-      return a.name.localeCompare(b.name)
-    })
-
-  if (!localVoices.length) return null
-  const index = Math.abs(hashString(profile.id)) % localVoices.length
-  return localVoices[index]?.name ?? null
+export interface NativeVoiceResolutionResult {
+  voiceName: string | null
+  resolution: NativeVoiceResolution
+  candidateCount: number
+  poolSize: number
+  reason: string
 }
 
-function hashString(value: string) {
-  let hash = 0
-  for (let i = 0; i < value.length; i += 1) {
-    hash = (hash * 31 + value.charCodeAt(i)) | 0
+/**
+ * Score a candidate Android engine voice against a profile's authored
+ * preference. Higher score wins. Exported for tests/debug.
+ */
+export function scoreNativeVoiceCandidate(profile: VoiceProfile, voice: AndroidNativeVoice): number {
+  const pref = profile.nativeVoicePreference
+  let score = 0
+
+  const locale = (voice.locale ?? "").toLowerCase()
+  const wantedLocales = (pref?.localePreference ?? ["en-US", "en-GB", "en"]).map((l) => l.toLowerCase())
+  const localeIndex = wantedLocales.findIndex((tag) =>
+    locale === tag || locale.startsWith(`${tag}-`) || locale.startsWith(tag),
+  )
+  if (localeIndex >= 0) score += 50 - localeIndex * 10
+  else if (locale.startsWith("en")) score += 10
+
+  const offlineWanted = pref?.preferOffline !== false
+  if (offlineWanted) {
+    if (voice.networkConnectionRequired === false) score += 30
+    else if (voice.networkConnectionRequired === true) score -= 20
   }
-  return hash
+
+  const quality = voice.quality ?? 0
+  if (pref?.preferHighQuality) score += Math.min(40, quality)
+  else score += Math.min(20, Math.floor(quality / 2))
+
+  if (pref?.preferLowLatency) {
+    const latency = voice.latency ?? 200
+    score += Math.max(0, 30 - Math.min(30, latency / 10))
+  }
+
+  const lowerName = voice.name.toLowerCase()
+  for (const hint of pref?.preferNameHints ?? []) {
+    if (lowerName.includes(hint.toLowerCase())) score += 25
+  }
+  for (const hint of pref?.avoidNameHints ?? []) {
+    if (lowerName.includes(hint.toLowerCase())) score -= 35
+  }
+  return score
+}
+
+/**
+ * Resolve the best available native voice for a profile. The strategy is:
+ *
+ *   1. If `nativeVoiceId` is pinned AND that voice exists on the device, use
+ *      it ("explicit").
+ *   2. Otherwise score every device voice with `scoreNativeVoiceCandidate`,
+ *      take the top-K candidates, then deterministically slot the profile
+ *      among siblings sharing the same `distinctFromPoolKey` so several
+ *      styled variants of one provider base don't all collapse to the same
+ *      device voice ("heuristic").
+ *   3. If no acceptable voice exists, return null with "unavailable".
+ *
+ * Result is honest: when only one practical voice exists the caller still
+ * gets `resolution: "heuristic"` but the runtime layer labels the playback
+ * as a styled fallback (not a distinct device voice).
+ */
+export async function resolveBestNativeVoiceForProfile(
+  profile: VoiceProfile,
+): Promise<NativeVoiceResolutionResult> {
+  const voices = await getAndroidNativeVoices()
+  if (!voices.length) {
+    return { voiceName: null, resolution: "unavailable", candidateCount: 0, poolSize: 0, reason: "No native voices reported by engine." }
+  }
+
+  if (profile.nativeVoiceId) {
+    const pinned = voices.find((v) => v.name === profile.nativeVoiceId)
+    if (pinned) {
+      return {
+        voiceName: pinned.name,
+        resolution: "explicit",
+        candidateCount: voices.length,
+        poolSize: 1,
+        reason: `Pinned nativeVoiceId "${pinned.name}" is installed on device.`,
+      }
+    }
+  }
+
+  // Score candidates and keep those above a positive baseline.
+  const scored = voices
+    .map((v) => ({ voice: v, score: scoreNativeVoiceCandidate(profile, v) }))
+    .filter((c) => c.score > 0)
+    .sort((a, b) => b.score - a.score || a.voice.name.localeCompare(b.voice.name))
+
+  if (!scored.length) {
+    return {
+      voiceName: null,
+      resolution: "unavailable",
+      candidateCount: voices.length,
+      poolSize: 0,
+      reason: "No native voice passed the scoring threshold for this profile.",
+    }
+  }
+
+  const TOP_K = 4
+  const pool = scored.slice(0, Math.min(TOP_K, scored.length)).map((c) => c.voice)
+
+  // Pool slotting: spread sibling profiles across the pool deterministically.
+  const poolKey = profile.nativeVoicePreference?.distinctFromPoolKey ?? `id:${profile.id}`
+  const siblings = VOICE_PROFILES.filter(
+    (p) => (p.nativeVoicePreference?.distinctFromPoolKey ?? `id:${p.id}`) === poolKey,
+  )
+    .map((p) => p.id)
+    .sort()
+  const siblingIndex = Math.max(0, siblings.indexOf(profile.id))
+  const slot = siblingIndex % pool.length
+  const chosen = pool[slot]
+
+  return {
+    voiceName: chosen.name,
+    resolution: "heuristic",
+    candidateCount: voices.length,
+    poolSize: pool.length,
+    reason: pool.length > 1
+      ? `Selected voice ${slot + 1}/${pool.length} from scored pool for pool "${poolKey}".`
+      : `Only one acceptable native voice on this device — styled fallback applies.`,
+  }
+}
+
+/** Human-readable description of a resolution result (for QA/diagnostics). */
+export function describeNativeVoiceResolution(result: NativeVoiceResolutionResult): string {
+  if (result.resolution === "explicit") return `Explicit pinned voice: ${result.voiceName}.`
+  if (result.resolution === "heuristic") {
+    return result.voiceName
+      ? `Heuristic native pick: ${result.voiceName} (pool ${result.poolSize}/${result.candidateCount}).`
+      : `Heuristic resolution returned no voice (${result.reason}).`
+  }
+  return `Native voice unavailable: ${result.reason}`
+}
+
+export async function selectAndroidNativeVoiceName(profile: VoiceProfile): Promise<string | null> {
+  const result = await resolveBestNativeVoiceForProfile(profile)
+  return result.voiceName
 }
 
 async function waitForAndroidNativeTtsReady(

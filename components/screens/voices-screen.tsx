@@ -392,6 +392,7 @@ export function VoicesScreen() {
               voice={voice}
               selected={voice.id === voiceId}
               favorite={voiceFavoriteIds.includes(voice.id)}
+              capabilities={capabilities}
               onSelect={applyVoice}
               onPreview={handlePreview}
               onDetails={setDetailVoice}

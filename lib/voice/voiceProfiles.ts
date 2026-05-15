@@ -1,4 +1,5 @@
 import type {
+  NativeVoicePreference,
   VoiceCadenceProfile,
   VoiceProfile,
   VoiceTimbreSource,
@@ -310,6 +311,7 @@ function profile(
     toneTags,
   })
   const override = UNIQUENESS_OVERRIDES[id] ?? {}
+  const nativeVoicePreference = synthesizeNativePreference(id, toneProfile, energyLevel, roboticnessLevel, providerVoiceId)
   const stylePrompt = override.stylePrompt ?? synthesizeStylePrompt(name, shortDescription, toneProfile, toneTags)
   const emotionalInstructions = override.emotionalInstructions ?? synthesizeEmotionalInstructions(toneProfile, energyLevel, humorLevel)
   const cadenceProfile = override.cadenceProfile ?? defaultCadence(toneProfile, energyLevel)
@@ -353,7 +355,58 @@ function profile(
     emotionalInstructions,
     cadenceProfile,
     authorityLevel,
+    nativeVoicePreference,
   }
+}
+
+/**
+ * Synthesize a capability-driven native voice preference per profile. We do
+ * NOT pin a specific Android engine voice name (it varies by device); instead
+ * we tell the resolver what kind of voice this profile wants.
+ *
+ * The `distinctFromPoolKey` groups profiles that share the same OpenAI base
+ * voice so that, when several of them fall back to native, the resolver can
+ * deterministically spread them across whatever device voices are available.
+ */
+function synthesizeNativePreference(
+  id: string,
+  tone: VoiceToneProfile,
+  energyLevel: number,
+  roboticnessLevel: number,
+  providerVoiceId: string | undefined,
+): NativeVoicePreference {
+  const pref: NativeVoicePreference = {
+    localePreference: ["en-US", "en-GB", "en"],
+    preferOffline: true,
+    preferLowLatency: true,
+  }
+  // Quality preference: calm/dramatic/robotic voices benefit from network
+  // (higher quality) voices when available; high-energy chaotic voices are
+  // fine with local low-latency ones.
+  if (tone === "calm" || tone === "dramatic" || tone === "robotic") {
+    pref.preferHighQuality = true
+  }
+  if (energyLevel >= 5) {
+    pref.preferHighQuality = false
+  }
+  // Name hints. Android engine voice names typically encode variant: "x-iom",
+  // "x-iol", "x-sfg", "network", "local" etc. These hints are advisory — the
+  // resolver still gracefully picks the best available if hints don't match.
+  if (roboticnessLevel >= 4) {
+    pref.preferNameHints = ["x-iom", "x-sfb", "synth", "neural"]
+  } else if (tone === "calm") {
+    pref.preferNameHints = ["x-sfg", "x-iog", "soft"]
+  } else if (tone === "dramatic" || tone === "aggressive") {
+    pref.preferNameHints = ["x-iom", "x-tpc", "deep"]
+  }
+  // Avoid obvious low-fi variants for cinematic profiles.
+  if (tone === "dramatic") {
+    pref.avoidNameHints = ["compact", "embedded"]
+  }
+  // Pool key — group siblings that share a provider base voice so the
+  // resolver spreads them across distinct device voices when possible.
+  pref.distinctFromPoolKey = providerVoiceId ? `provider:${providerVoiceId}` : `id:${id}`
+  return pref
 }
 
 interface ComputeUniquenessInput {
