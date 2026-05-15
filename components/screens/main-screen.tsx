@@ -129,6 +129,10 @@ export function MainScreen() {
     [lastNetworkScanDelta?.offlineDeviceIds.length, latestNetworkHealth, onlineDeviceCount, topAlert, unknownDevices.length],
   )
   const [missionSummary, setMissionSummary] = useState(deterministicSummary)
+  const latestThroughput = useMemo(
+    () => latestNetworkHealth?.diagnostics.find((probe) => probe.key === "throughput") ?? null,
+    [latestNetworkHealth],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -483,6 +487,11 @@ export function MainScreen() {
                   ? `Health ${latestNetworkHealth.score}/100 · ${latestNetworkHealth.grade}`
                   : "Open the live device map & router scanner"}
               </p>
+              {latestThroughput?.value ? (
+                <p className="ps-mono mt-0.5 text-[10px] tracking-[0.15em] text-emerald-300/80">
+                  {latestThroughput.value}
+                </p>
+              ) : null}
             </div>
             <ChevronRight
               className="h-5 w-5 shrink-0"

@@ -1,6 +1,7 @@
 package com.neothenerd.app;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -16,6 +17,10 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import org.json.JSONArray;
 
@@ -49,6 +54,61 @@ import java.util.concurrent.TimeUnit;
 @CapacitorPlugin(name = "NeoNetwork")
 public class NeoNetworkPlugin extends Plugin {
   private static final String TAG = "NeoNetworkPlugin";
+  private static final String MONITOR_WORK_NAME = "neo_network_monitoring_periodic";
+
+  @PluginMethod
+  public void configureBackgroundMonitoring(PluginCall call) {
+    int intervalMinutes = Math.max(15, call.getInt("intervalMinutes", 30));
+    boolean enabled = call.getBoolean("enabled", false);
+    boolean notifyOnChanges = call.getBoolean("notifyOnChanges", true);
+
+    SharedPreferences prefs = getContext().getSharedPreferences(NeoMonitoringWorker.PREFS, Context.MODE_PRIVATE);
+    prefs.edit().putBoolean(NeoMonitoringWorker.KEY_NOTIFY, notifyOnChanges).apply();
+
+    if (!enabled) {
+      WorkManager.getInstance(getContext()).cancelUniqueWork(MONITOR_WORK_NAME);
+      JSObject result = new JSObject();
+      result.put("enabled", false);
+      result.put("schedulerStatus", "idle");
+      result.put("backgroundCapability", "android-workmanager");
+      call.resolve(result);
+      return;
+    }
+
+    PeriodicWorkRequest request =
+      new PeriodicWorkRequest.Builder(NeoMonitoringWorker.class, intervalMinutes, TimeUnit.MINUTES).build();
+    WorkManager.getInstance(getContext()).enqueueUniquePeriodicWork(
+      MONITOR_WORK_NAME,
+      ExistingPeriodicWorkPolicy.UPDATE,
+      request
+    );
+
+    JSObject result = new JSObject();
+    result.put("enabled", true);
+    result.put("schedulerStatus", "scheduled");
+    result.put("backgroundCapability", "android-workmanager");
+    result.put("intervalMinutes", intervalMinutes);
+    call.resolve(result);
+  }
+
+  @PluginMethod
+  public void getBackgroundMonitoringStatus(PluginCall call) {
+    JSObject result = new JSObject();
+    String status = "idle";
+    try {
+      List<WorkInfo> workInfos = WorkManager.getInstance(getContext()).getWorkInfosForUniqueWork(MONITOR_WORK_NAME).get();
+      if (workInfos != null && !workInfos.isEmpty()) {
+        WorkInfo.State state = workInfos.get(0).getState();
+        status = state == WorkInfo.State.RUNNING ? "running" : state == WorkInfo.State.ENQUEUED ? "scheduled" : "idle";
+      }
+    } catch (Exception ignored) {}
+    result.put("schedulerStatus", status);
+    result.put("backgroundCapability", "android-workmanager");
+    String lastResult = getContext().getSharedPreferences(NeoMonitoringWorker.PREFS, Context.MODE_PRIVATE)
+      .getString(NeoMonitoringWorker.KEY_LAST_RESULT, null);
+    if (lastResult != null) result.put("lastResult", lastResult);
+    call.resolve(result);
+  }
 
   @PluginMethod
   public void getLocalNetworkContext(PluginCall call) {

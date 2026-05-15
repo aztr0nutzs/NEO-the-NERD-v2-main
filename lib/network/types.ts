@@ -234,6 +234,59 @@ export interface DiagnosticProbeResult {
   provider?: string;
 }
 
+export type SpeedTestMode = "internet" | "custom-endpoint" | "local-agent";
+export type SpeedTestPhaseName = "preparing" | "latency" | "download" | "upload" | "complete" | "failed";
+
+export interface SpeedTestConfig {
+  mode: SpeedTestMode;
+  provider: string;
+  latencyUrl: string;
+  downloadUrl: string;
+  uploadUrl?: string;
+  timeoutMs: number;
+  downloadDurationMs: number;
+  uploadBytes?: number;
+  latencySampleCount?: number;
+  environmentNotes?: string;
+}
+
+export interface ThroughputSample {
+  phase: "download" | "upload";
+  timestamp: string;
+  bytesTransferred: number;
+  elapsedMs: number;
+  mbps: number;
+}
+
+export interface SpeedTestPhase {
+  name: SpeedTestPhaseName;
+  startedAt: string;
+  completedAt: string;
+  elapsedMs: number;
+  success: boolean;
+}
+
+export interface SpeedTestResult {
+  id: string;
+  startedAt: string;
+  completedAt: string;
+  mode: SpeedTestMode;
+  provider: string;
+  source: string;
+  downloadMbps: number;
+  uploadMbps: number | null;
+  latencyMs: number;
+  jitterMs: number;
+  testBytesDownloaded: number;
+  testBytesUploaded: number;
+  sampleCount: number;
+  success: boolean;
+  failureReason?: string;
+  phases: SpeedTestPhase[];
+  samples: ThroughputSample[];
+  environmentNotes: string;
+}
+
 export interface NetworkHealthFactor {
   id: string;
   label: string;

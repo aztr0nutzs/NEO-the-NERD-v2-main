@@ -29,6 +29,7 @@ export function NetworkHealthPanel({
 }: NetworkHealthPanelProps) {
   const gradeClass = snapshot ? GRADE_COLOR[snapshot.grade] : "text-gray-400 border-gray-700 bg-gray-900/40";
   const factors = snapshot?.factors.slice(0, 3) ?? [];
+  const throughputProbe = snapshot?.diagnostics.find((probe) => probe.key === "throughput");
   const changeLine = lastScanDelta
     ? `${lastScanDelta.newDeviceIds.length} new / ${lastScanDelta.offlineDeviceIds.length} offline / ${lastScanDelta.changedDeviceIds.length} changed since latest scan`
     : "No scan delta recorded yet";
@@ -120,11 +121,11 @@ export function NetworkHealthPanel({
         </Button>
       </div>
 
-      {snapshot?.diagnostics.some((probe) => probe.key === "throughput" && probe.status !== "passed") && (
-        <p className="mt-3 rounded border border-gray-800 bg-black/35 p-2 font-mono text-[10px] text-gray-500">
-          Throughput/speed Mbps is intentionally not shown without a real provider-backed speed test.
-        </p>
-      )}
+      <p className="mt-3 rounded border border-gray-800 bg-black/35 p-2 font-mono text-[10px] text-gray-400">
+        {throughputProbe
+          ? `SPEED_TEST: ${throughputProbe.status.toUpperCase()} · ${throughputProbe.value ?? throughputProbe.detail}`
+          : "SPEED_TEST: not run in this snapshot."}
+      </p>
     </section>
   );
 }

@@ -39,6 +39,7 @@ export interface NetworkReportSummary {
   flaggedDevices: number
   lastScanAt: string | null
   latestHealth: NetworkHealthSnapshot | null
+  latestSpeedTest: string | null
 }
 
 export interface DeviceRow {
@@ -210,6 +211,7 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
       deviceRows.filter((row) => row.trustLevel === "blocked").length,
     lastScanAt: status?.lastScanAt ?? null,
     latestHealth,
+    latestSpeedTest: latestHealth?.diagnostics.find((probe) => probe.key === "throughput")?.value ?? null,
   }
 
   return {

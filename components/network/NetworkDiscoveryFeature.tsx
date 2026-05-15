@@ -77,6 +77,10 @@ import {
 } from "@/lib/network/networkNotifications";
 import { computeNextAutoScanAt, shouldRunAutoScan } from "@/lib/network/networkMonitoring";
 import {
+  configureAndroidBackgroundMonitoring,
+  getAndroidBackgroundMonitoringStatus,
+} from "@/lib/network/native-network-bridge";
+import {
   calculateNetworkHealth,
   retainHealthSnapshots,
   runNetworkDiagnostics,
@@ -562,6 +566,42 @@ export function NetworkDiscoveryFeature() {
     setNetworkMonitorState,
   ]);
 
+  useEffect(() => {
+    let cancelled = false;
+    const syncNativeMonitoring = async () => {
+      if (!settings) return;
+      try {
+        await configureAndroidBackgroundMonitoring({
+          enabled: settings.autoScanEnabled,
+          intervalMinutes: settings.autoScanIntervalMinutes,
+          notifyOnChanges: settings.notifyNewDevices || settings.notifyOfflineDevices,
+        });
+        const nativeStatus = await getAndroidBackgroundMonitoringStatus();
+        if (!cancelled && nativeStatus) {
+          setNetworkMonitorState((current) => ({
+            ...current,
+            schedulerStatus: nativeStatus.schedulerStatus,
+            backgroundCapability: "workmanager-unavailable",
+            lastIssue:
+              "Android WorkManager is active for closed-app checks. Execution time is OS-managed and may be deferred by battery policy.",
+          }));
+        }
+      } catch {
+        if (!cancelled) {
+          setNetworkMonitorState((current) => ({
+            ...current,
+            lastIssue:
+              "Closed-app monitoring could not be configured on this runtime. In-app scheduler remains active while NEO is open.",
+          }));
+        }
+      }
+    };
+    void syncNativeMonitoring();
+    return () => {
+      cancelled = true;
+    };
+  }, [settings, setNetworkMonitorState]);
+
   const handleStopScan = useCallback(async () => {
     await networkAdapter.stopNetworkScan();
     const status = await networkAdapter.getNetworkStatus();
@@ -789,6 +829,25 @@ export function NetworkDiscoveryFeature() {
     try {
       const diagnostics = await runNetworkDiagnostics(networkStatus);
       setLatestDiagnostics(diagnostics);
+      const throughputProbe = diagnostics.find((probe) => probe.key === "throughput");
+      if (throughputProbe) {
+        appendEvents([
+          {
+            id: `event-speed-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            type: throughputProbe.status === "passed" ? "scan_completed" : "scan_failed",
+            severity: throughputProbe.status === "passed" ? "info" : "medium",
+            title:
+              throughputProbe.status === "passed"
+                ? `Speed test completed: ${throughputProbe.value ?? "result available"}`
+                : "Speed test failed",
+            detail: {
+              provider: throughputProbe.provider ?? "unknown",
+              probe: throughputProbe.detail,
+            },
+          },
+        ]);
+      }
       const previousSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
       const snapshot = calculateNetworkHealth({
         status: networkStatus,

@@ -10,6 +10,7 @@ import type {
   RouterStatus,
   ScanComparisonSummary,
 } from "./types";
+import { runSpeedTest } from "./speedTest";
 
 const HEALTH_HISTORY_LIMIT = 60;
 
@@ -269,6 +270,41 @@ export async function runNetworkDiagnostics(status: NetworkStatus): Promise<Diag
   const internet = await timedFetch("https://www.gstatic.com/generate_204", 2500, { mode: "no-cors" });
   const dns = await timedFetch("https://dns.google/resolve?name=example.com&type=A", 3000);
 
+  const speedProvider = "Cloudflare speed.cloudflare.com";
+  const speedConfig = {
+    mode: "internet" as const,
+    provider: speedProvider,
+    latencyUrl: "https://speed.cloudflare.com/__down?bytes=1",
+    downloadUrl: "https://speed.cloudflare.com/__down?bytes=25000000",
+    timeoutMs: 12000,
+    downloadDurationMs: 8000,
+    latencySampleCount: 5,
+  };
+  let speedProbe: DiagnosticProbeResult;
+  try {
+    const speed = await runSpeedTest(speedConfig);
+    speedProbe = {
+      key: "throughput",
+      label: "Internet throughput",
+      status: speed.success ? "passed" : "failed",
+      value: `down ${speed.downloadMbps.toFixed(2)} Mbps · up ${speed.uploadMbps === null ? "n/a" : speed.uploadMbps.toFixed(2)} Mbps`,
+      latencyMs: speed.latencyMs,
+      samples: speed.samples.slice(0, 8).map((sample) => Number(sample.mbps.toFixed(2))),
+      detail: `Provider=${speed.provider}; bytes down=${speed.testBytesDownloaded}; bytes up=${speed.testBytesUploaded}; jitter=${speed.jitterMs.toFixed(2)}ms.`,
+      measuredAt,
+      provider: speed.provider,
+    };
+  } catch (error) {
+    speedProbe = {
+      key: "throughput",
+      label: "Internet throughput",
+      status: "failed",
+      detail: `Speed test failed: ${error instanceof Error ? error.message : "unknown error"}`,
+      measuredAt,
+      provider: speedProvider,
+    };
+  }
+
   return [
     {
       key: "gateway",
@@ -322,13 +358,7 @@ export async function runNetworkDiagnostics(status: NetworkStatus): Promise<Diag
       detail: "Approximation from failed browser-safe gateway probes; not raw packet loss.",
       measuredAt,
     },
-    {
-      key: "throughput",
-      label: "Throughput",
-      status: "not-run",
-      detail: "True speed testing requires a provider/server. No fake Mbps value is generated.",
-      measuredAt,
-    },
+    speedProbe,
   ];
 }
 

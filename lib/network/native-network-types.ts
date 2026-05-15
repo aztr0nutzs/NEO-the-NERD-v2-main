@@ -50,3 +50,9 @@ export interface NativeScanOptions {
   timeoutMs?: number;
   commonPorts?: number[];
 }
+
+export interface NativeBackgroundMonitoringStatus {
+  schedulerStatus: "idle" | "scheduled" | "running" | "error";
+  backgroundCapability: "android-workmanager" | "in-app-only";
+  lastResult?: string;
+}
