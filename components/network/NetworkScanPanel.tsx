@@ -26,7 +26,7 @@ const SCAN_MODES: { mode: ScanMode; label: string; icon: typeof Zap; description
     mode: "balanced",
     label: "BALANCED",
     icon: Scale,
-    description: "ARP + mDNS + SSDP",
+    description: "ARP + host checks (current build)",
   },
   {
     mode: "deep",
@@ -122,7 +122,7 @@ export function NetworkScanPanel({
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" />
             <span className="animate-pulse">
               {selectedMode === "quick" && "Performing ARP sweep..."}
-              {selectedMode === "balanced" && "Discovering via ARP, mDNS, SSDP..."}
+              {selectedMode === "balanced" && "Discovering via ARP + host checks..."}
               {selectedMode === "deep" && "Deep scanning with port probe..."}
             </span>
           </div>

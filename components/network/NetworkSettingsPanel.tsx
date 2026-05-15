@@ -32,8 +32,8 @@ interface NetworkSettingsPanelProps {
 
 const SCAN_MODES: { value: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
   { value: "quick", label: "QUICK", icon: Zap, description: "Fast ARP sweep only" },
-  { value: "balanced", label: "BALANCED", icon: Scale, description: "ARP + mDNS + SSDP" },
-  { value: "deep", label: "DEEP", icon: Search, description: "Full port scan included" },
+  { value: "balanced", label: "BALANCED", icon: Scale, description: "ARP + host checks (current build)" },
+  { value: "deep", label: "DEEP", icon: Search, description: "Extended bounded port probe (current build)" },
 ];
 
 const INTERVAL_OPTIONS = [
@@ -125,7 +125,7 @@ export function NetworkSettingsPanel({
             <div className="space-y-4">
               <SettingToggle
                 label="ENABLE_AUTO_SCAN"
-                description="Automatically scan network at interval"
+                description="Planned automation — not active in this build yet"
                 checked={settings.autoScanEnabled}
                 onCheckedChange={(checked) => onUpdateSettings({ autoScanEnabled: checked })}
               />

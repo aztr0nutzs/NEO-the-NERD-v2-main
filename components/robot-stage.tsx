@@ -191,7 +191,7 @@ export function RobotStage({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-full"
           style={{
-            background: `radial-gradient(ellipse 72% 82% at 50% 52%, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.90) 42%, ${moodColor}26 68%, rgba(0,0,0,0) 92%)`,
+            background: `radial-gradient(ellipse 74% 86% at 50% 50%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.94) 40%, rgba(0,0,0,0.78) 62%, ${moodColor}33 76%, rgba(0,0,0,0.08) 92%, rgba(0,0,0,0) 100%)`,
           }}
         />
         <NeoAvatarVideo
