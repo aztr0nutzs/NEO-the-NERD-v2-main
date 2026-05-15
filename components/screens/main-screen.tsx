@@ -2,22 +2,34 @@
 
 import { motion } from "framer-motion"
 import {
+  Bell,
+  Bot,
   Dices,
+  History,
   Keyboard,
+  Map,
   Mic,
   Sparkles,
   X,
   Gamepad2,
   Radar,
   ChevronRight,
+  ShieldQuestion,
+  Timer,
+  Wifi,
 } from "lucide-react"
-import { useState } from "react"
+import type { LucideIcon } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { useApp } from "@/lib/store"
 import { MOOD_COLORS, PERSONALITIES, VOICES } from "@/lib/data"
+import { generateAssistantReply } from "@/lib/assistant/assistant-runtime"
+import { buildNetworkAssistantContext } from "@/lib/network/networkAssistantContext"
+import { networkAdapter } from "@/lib/network/networkDiscoveryAdapter"
 import { NeonPanel } from "../neon-panel"
 import { RobotStage } from "../robot-stage"
 import { VoiceVisualizer } from "../voice-visualizer"
 import { QuickCommandChips } from "../quick-command-chips"
+import type { NetworkHealthSnapshot } from "@/lib/network/types"
 
 const RESPONSE_TEMPLATES: Record<string, string> = {
   "Tell a joke":
@@ -42,6 +54,13 @@ export function MainScreen() {
     dismissGameInvite,
     playAvatarReaction,
     networkHealthSnapshots,
+    networkAssistantSnapshot,
+    lastNetworkScanDelta,
+    networkEvents,
+    networkAlerts,
+    networkMonitorState,
+    persistedNetworkSettings,
+    sendMessage,
   } = useApp()
 
   const voice = VOICES.find((v) => v.id === voiceId)
@@ -50,9 +69,91 @@ export function MainScreen() {
     "Boot sequence complete. NEO online. Tap my chest to greet, my head to switch personality, or hit a quick command below.",
   )
   const moodColor = MOOD_COLORS.idle
-  const latestNetworkHealth = [...networkHealthSnapshots].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  )[0]
+  const latestNetworkHealth = useMemo(
+    () =>
+      [...networkHealthSnapshots].sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      )[0],
+    [networkHealthSnapshots],
+  )
+  const topAlert = useMemo(
+    () =>
+      [...networkAlerts].sort(
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      )[0],
+    [networkAlerts],
+  )
+  const unknownDevices = useMemo(
+    () =>
+      networkAssistantSnapshot?.devices.filter(
+        (device) =>
+          device.trustLevel === "new" ||
+          device.deviceType === "unknown" ||
+          device.isNewIdentity,
+      ) ?? [],
+    [networkAssistantSnapshot],
+  )
+  const onlineDeviceCount =
+    networkAssistantSnapshot?.status?.onlineDevices ??
+    networkAssistantSnapshot?.devices.filter((device) => device.status === "online").length ??
+    0
+  const networkContext = useMemo(
+    () =>
+      buildNetworkAssistantContext({
+        prompt: "Explain my network",
+        snapshot: networkAssistantSnapshot,
+        events: networkEvents,
+        latestScan: lastNetworkScanDelta,
+        healthSnapshots: networkHealthSnapshots,
+        alerts: networkAlerts,
+        monitorState: networkMonitorState,
+      }),
+    [
+      lastNetworkScanDelta,
+      networkAlerts,
+      networkAssistantSnapshot,
+      networkEvents,
+      networkHealthSnapshots,
+      networkMonitorState,
+    ],
+  )
+  const deterministicSummary = useMemo(
+    () =>
+      buildMissionSummary({
+        health: latestNetworkHealth,
+        onlineDeviceCount,
+        unknownCount: unknownDevices.length,
+        offlineCount: lastNetworkScanDelta?.offlineDeviceIds.length ?? 0,
+        topAlertTitle: topAlert?.title,
+      }),
+    [lastNetworkScanDelta?.offlineDeviceIds.length, latestNetworkHealth, onlineDeviceCount, topAlert, unknownDevices.length],
+  )
+  const [missionSummary, setMissionSummary] = useState(deterministicSummary)
+
+  useEffect(() => {
+    let cancelled = false
+    setMissionSummary(deterministicSummary)
+    if (!networkContext) return
+
+    generateAssistantReply({
+      userMessage: "Explain my network in one short mission-control sentence.",
+      recentMessages: [],
+      personalityId,
+      conversationMode: "Tech Helper",
+      networkContext,
+    })
+      .then((reply) => {
+        if (cancelled) return
+        setMissionSummary(reply.text.split(/\n+/)[0].slice(0, 180))
+      })
+      .catch(() => {
+        if (!cancelled) setMissionSummary(deterministicSummary)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [deterministicSummary, networkContext, personalityId])
 
   const handleChip = (label: string) => {
     setMood("speaking")
@@ -73,6 +174,22 @@ export function MainScreen() {
   }
 
   const handleType = () => setScreen("chat")
+  const handleRunScan = () => {
+    const scanMode = persistedNetworkSettings?.scanMode ?? "balanced"
+    playAvatarReaction("thinking")
+    setResponse(`Network scan requested in ${scanMode.toUpperCase()} mode. Opening Network control now.`)
+    networkAdapter.startNetworkScan(scanMode).catch(() => {
+      setResponse("Scan request could not start from Home. Open Network controls and try again.")
+      playAvatarReaction("angry")
+    })
+    setTimeout(() => setScreen("network"), 500)
+  }
+  const handleAskChanges = () => {
+    const prompt = "What changed on my network today?"
+    playAvatarReaction("thinking")
+    sendMessage(prompt).catch(() => {})
+    setScreen("chat")
+  }
   const handleRandom = () => {
     const labels = Object.keys(RESPONSE_TEMPLATES)
     const pick = labels[Math.floor(Math.random() * labels.length)]
@@ -148,6 +265,98 @@ export function MainScreen() {
         <div className="mt-3">
           <VoiceVisualizer />
         </div>
+      </NeonPanel>
+
+      <NeonPanel accent="green" glow="strong" scanlines className="p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-green">
+              MISSION_CONTROL // NETWORK
+            </p>
+            <h2 className="mt-1 ps-heading text-xl leading-tight text-white/95">
+              {latestNetworkHealth ? latestNetworkHealth.grade : "Awaiting Scan"}
+            </h2>
+          </div>
+          <div className="rounded-xl border border-[#39ff14]/35 bg-black/45 px-4 py-2 text-right">
+            <p className="ps-mono text-[9px] tracking-[0.25em] text-white/45">HEALTH</p>
+            <p className="ps-heading text-2xl leading-none ps-text-green">
+              {latestNetworkHealth ? latestNetworkHealth.score : "--"}
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-3 text-sm leading-relaxed text-white/85">{missionSummary}</p>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <MissionStat
+            icon={Wifi}
+            label="ONLINE"
+            value={String(onlineDeviceCount)}
+            accent="#00f0ff"
+          />
+          <MissionStat
+            icon={ShieldQuestion}
+            label="UNKNOWN"
+            value={String(unknownDevices.length)}
+            accent={unknownDevices.length > 0 ? "#ff7a00" : "#39ff14"}
+          />
+          <MissionStat
+            icon={Timer}
+            label={networkMonitorState.enabled ? "NEXT_SCAN" : "LAST_SCAN"}
+            value={
+              networkMonitorState.enabled && networkMonitorState.nextRunAt
+                ? formatDashboardTime(networkMonitorState.nextRunAt)
+                : formatDashboardTime(networkAssistantSnapshot?.status?.lastScanAt)
+            }
+            accent="#b829ff"
+          />
+          <MissionStat
+            icon={Bell}
+            label="TOP_ALERT"
+            value={topAlert ? topAlert.title : "CLEAR"}
+            accent={topAlert ? "#ff2d9c" : "#39ff14"}
+          />
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <MissionAction icon={Radar} label="RUN_SCAN" accent="#00f0ff" onClick={handleRunScan} />
+          <MissionAction
+            icon={ShieldQuestion}
+            label="REVIEW_NEW"
+            accent="#ff7a00"
+            onClick={() => setScreen("network")}
+          />
+          <MissionAction icon={Map} label="OPEN_3D_MAP" accent="#39ff14" onClick={() => setScreen("network")} />
+          <MissionAction icon={History} label="ALERTS_TIMELINE" accent="#b829ff" onClick={() => setScreen("network")} />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAskChanges}
+          className="mt-3 flex w-full items-center justify-between rounded-lg border border-[#ff2d9c]/35 bg-[#ff2d9c]/10 px-3 py-2 text-left"
+        >
+          <span className="flex items-center gap-2 ps-mono text-[10px] tracking-[0.22em] ps-text-pink">
+            <Bot className="h-4 w-4" />
+            ASK_NEO_TO_EXPLAIN_CHANGES
+          </span>
+          <ChevronRight className="h-4 w-4 ps-text-pink" />
+        </button>
+
+        <details className="mt-3 rounded-lg border border-white/10 bg-black/35 p-3">
+          <summary className="cursor-pointer ps-mono text-[10px] tracking-[0.25em] text-white/60">
+            STATUS_GLANCE
+          </summary>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Stat label="MONITOR" value={networkMonitorState.enabled ? "ON" : "OFF"} color="#39ff14" />
+            <Stat
+              label="ADAPTER"
+              value={persistedNetworkSettings?.demoMode ? "DEMO" : "LIVE/READY"}
+              color="#00f0ff"
+            />
+            <Stat label="VOICE" value={voice?.name ?? "—"} color="#b829ff" />
+            <Stat label="MODE" value={personality?.name?.split(" ")[0] ?? "—"} color="#ff2d9c" />
+          </div>
+        </details>
       </NeonPanel>
 
       {/* Game invite notification */}
@@ -328,7 +537,7 @@ function ActionBtn({
   accent,
   onClick,
 }: {
-  icon: typeof Mic
+  icon: LucideIcon
   label: string
   accent: string
   onClick?: () => void
@@ -349,4 +558,99 @@ function ActionBtn({
       </span>
     </motion.button>
   )
+}
+
+function MissionStat({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string
+  accent: string
+}) {
+  return (
+    <div
+      className="min-w-0 rounded-lg border border-white/10 bg-black/45 p-3"
+      style={{ boxShadow: `inset 0 0 0 1px ${accent}44` }}
+    >
+      <div className="mb-1 flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" style={{ color: accent, filter: `drop-shadow(0 0 6px ${accent})` }} />
+        <p className="ps-mono text-[9px] tracking-[0.22em] text-white/45">{label}</p>
+      </div>
+      <p className="truncate ps-mono text-[12px] font-semibold tracking-wider text-white/90">{value}</p>
+    </div>
+  )
+}
+
+function MissionAction({
+  icon: Icon,
+  label,
+  accent,
+  onClick,
+}: {
+  icon: LucideIcon
+  label: string
+  accent: string
+  onClick: () => void
+}) {
+  return (
+    <motion.button
+      type="button"
+      whileTap={{ scale: 0.96 }}
+      onClick={onClick}
+      className="flex h-12 items-center justify-center gap-2 rounded-lg border border-white/10 bg-black/55 ps-mono text-[10px] tracking-[0.2em]"
+      style={{
+        color: accent,
+        boxShadow: `inset 0 0 0 1px ${accent}55, 0 0 14px ${accent}22`,
+      }}
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </motion.button>
+  )
+}
+
+function buildMissionSummary({
+  health,
+  onlineDeviceCount,
+  unknownCount,
+  offlineCount,
+  topAlertTitle,
+}: {
+  health?: NetworkHealthSnapshot
+  onlineDeviceCount: number
+  unknownCount: number
+  offlineCount: number
+  topAlertTitle?: string
+}) {
+  if (!health) {
+    return "Network snapshot pending. Open Network or run a scan to let NEO build the mission picture."
+  }
+  if (topAlertTitle) {
+    return `${health.headline}. ${onlineDeviceCount} devices online. Alert: ${topAlertTitle}.`
+  }
+  if (unknownCount > 0) {
+    return `${health.headline}. ${onlineDeviceCount} devices online. ${unknownCount} unknown device${unknownCount === 1 ? "" : "s"} need review.`
+  }
+  if (offlineCount > 0) {
+    return `${health.headline}. ${offlineCount} device${offlineCount === 1 ? "" : "s"} went offline in the latest scan.`
+  }
+  return `${health.headline}. ${onlineDeviceCount} devices online. No new review target is currently flagged.`
+}
+
+function formatDashboardTime(value?: string | null) {
+  if (!value) return "NONE"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "UNKNOWN"
+  const diffMs = date.getTime() - Date.now()
+  const absMs = Math.abs(diffMs)
+  const minutes = Math.round(absMs / 60_000)
+  if (minutes < 1) return diffMs >= 0 ? "NOW" : "JUST NOW"
+  if (minutes < 60) return diffMs >= 0 ? `${minutes}M` : `${minutes}M AGO`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return diffMs >= 0 ? `${hours}H` : `${hours}H AGO`
+  return date.toLocaleDateString()
 }
