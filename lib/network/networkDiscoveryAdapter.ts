@@ -8,8 +8,8 @@
  * FUTURE INTEGRATION POINTS:
  * - Android native LAN scanner (via Capacitor plugin or WebView bridge)
  * - ARP table parser (requires native/root access)
- * - mDNS discovery (Bonjour/Avahi)
- * - SSDP discovery (UPnP)
+ * - mDNS discovery (not available in current native plugin implementation)
+ * - SSDP discovery (not available in current native plugin implementation)
  * - TCP port probe (requires native implementation)
  * - Router API connector (vendor-specific APIs)
  * - Local backend service (Node.js/Python scanner service)
@@ -667,6 +667,10 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       services: host.services ?? [],
       notes: host.dataLimited ? "LIMITED DATA" : "LIVE ANDROID DISCOVERY",
       latencyMs: host.latencyMs,
+      discoverySources: host.discoverySources ?? ["tcp-probe"],
+      confidence: host.confidence ?? "low",
+      dataLimited: host.dataLimited,
+      lastScanSource: host.lastScanSource ?? "tcp-probe",
     }));
   }
 

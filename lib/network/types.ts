@@ -41,6 +41,10 @@ export type InsightSeverity = "info" | "low" | "medium" | "high";
 
 export type ScanMode = "quick" | "balanced" | "deep";
 
+export type DiscoverySource = "arp" | "tcp-probe" | "gateway" | "hostname" | "mdns" | "ssdp";
+
+export type DiscoveryConfidence = "low" | "medium" | "high";
+
 export type NetworkTopologyRole = "gateway" | "client" | "access-point" | "unknown";
 
 export type NetworkTopologyEdgeRelation =
@@ -91,6 +95,10 @@ export interface DiscoveredDevice {
   notes: string;
   signalStrength?: number;
   latencyMs?: number;
+  discoverySources: DiscoverySource[];
+  confidence: DiscoveryConfidence;
+  dataLimited: boolean;
+  lastScanSource: DiscoverySource;
 }
 
 export interface NetworkTopologyPosition {

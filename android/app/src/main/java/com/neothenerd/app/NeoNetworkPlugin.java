@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -67,9 +68,10 @@ public class NeoNetworkPlugin extends Plugin {
   @PluginMethod
   public void scanLocalSubnet(PluginCall call) {
     String scanMode = call.getString("scanMode", "balanced");
-    int maxHosts = call.getInt("maxHosts", getDefaultMaxHosts(scanMode));
-    int timeoutMs = call.getInt("timeoutMs", getDefaultTimeoutMs(scanMode));
-    List<Integer> commonPorts = getCommonPorts(call);
+    ScanProfile profile = getScanProfile(scanMode, call);
+    int maxHosts = profile.maxHosts;
+    int timeoutMs = profile.timeoutMs;
+    List<Integer> commonPorts = profile.ports;
     Log.d(TAG, "scanLocalSubnet started scanMode=" + scanMode + " maxHosts=" + maxHosts + " timeoutMs=" + timeoutMs);
 
     JSObject context = buildLocalNetworkContext();
@@ -92,13 +94,13 @@ public class NeoNetworkPlugin extends Plugin {
 
     List<String> targets = enumerateSubnet(localIp, prefixLength, maxHosts);
     Map<String, String> arpCache = readArpCache();
-    int concurrency = Math.min(24, Math.max(4, scanMode.equals("deep") ? 16 : (scanMode.equals("quick") ? 8 : 12)));
+    int concurrency = Math.min(24, Math.max(4, profile.concurrency));
 
     ExecutorService executor = Executors.newFixedThreadPool(concurrency);
     List<Future<JSObject>> futures = new ArrayList<>();
 
     for (String ip : targets) {
-      futures.add(executor.submit(new HostProbe(ip, timeoutMs, commonPorts, arpCache)));
+      futures.add(executor.submit(new HostProbe(ip, timeoutMs, commonPorts, arpCache, profile.resolveHostname, context.getString("gatewayIp"))));
     }
 
     List<JSObject> discovered = new ArrayList<>();
@@ -227,6 +229,94 @@ public class NeoNetworkPlugin extends Plugin {
     return entries;
   }
 
+
+  private static class ScanProfile {
+    final int maxHosts;
+    final int timeoutMs;
+    final int concurrency;
+    final boolean resolveHostname;
+    final List<Integer> ports;
+
+    ScanProfile(int maxHosts, int timeoutMs, int concurrency, boolean resolveHostname, List<Integer> ports) {
+      this.maxHosts = maxHosts;
+      this.timeoutMs = timeoutMs;
+      this.concurrency = concurrency;
+      this.resolveHostname = resolveHostname;
+      this.ports = ports;
+    }
+  }
+
+  private ScanProfile getScanProfile(String scanMode, PluginCall call) {
+    if ("quick".equals(scanMode)) {
+      return new ScanProfile(
+        call.getInt("maxHosts", 48),
+        call.getInt("timeoutMs", 320),
+        8,
+        false,
+        parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443))
+      );
+    }
+
+    if ("deep".equals(scanMode)) {
+      return new ScanProfile(
+        call.getInt("maxHosts", 220),
+        call.getInt("timeoutMs", 1400),
+        18,
+        true,
+        parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443, 53, 22, 445, 8080, 8443, 139))
+      );
+    }
+
+    return new ScanProfile(
+      call.getInt("maxHosts", 128),
+      call.getInt("timeoutMs", 700),
+      12,
+      true,
+      parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443, 53, 22, 445, 8080))
+    );
+  }
+
+  private List<Integer> parsePorts(JSArray portArray, List<Integer> defaults) {
+    if (portArray == null || portArray.length() == 0) return defaults;
+    List<Integer> ports = new ArrayList<>();
+    for (int i = 0; i < portArray.length(); i++) {
+      Integer port = portArray.optInt(i);
+      if (port != null && port > 0 && port <= 65535) ports.add(port);
+    }
+    return ports.isEmpty() ? defaults : ports;
+  }
+
+  private String serviceLabelForPort(int port) {
+    switch (port) {
+      case 80: return "Possible service: HTTP (tcp/80)";
+      case 443: return "Possible service: HTTPS (tcp/443)";
+      case 22: return "Possible service: SSH (tcp/22)";
+      case 445: return "Possible service: SMB (tcp/445)";
+      case 53: return "Possible service: DNS (tcp/53)";
+      default: return "Possible service: tcp/" + port;
+    }
+  }
+
+  private String normalizeMac(String macAddress) {
+    if (macAddress == null) return null;
+    String trimmed = macAddress.trim();
+    if (trimmed.isEmpty() || "00:00:00:00:00:00".equals(trimmed)) return null;
+    return trimmed.toUpperCase(Locale.US);
+  }
+
+  private String confidenceFor(Set<String> discoverySources, JSArray openPorts, String hostname, String macAddress) {
+    int score = 0;
+    if (discoverySources.contains("gateway")) score += 2;
+    if (discoverySources.contains("arp")) score += 2;
+    if (discoverySources.contains("tcp-probe")) score += 2;
+    if (hostname != null) score += 1;
+    if (openPorts.length() > 0) score += 1;
+    if (macAddress != null) score += 1;
+    if (score >= 6) return "high";
+    if (score >= 3) return "medium";
+    return "low";
+  }
+
   private List<Integer> getCommonPorts(PluginCall call) {
     JSArray portArray = call.getArray("commonPorts");
     if (portArray == null || portArray.length() == 0) {
@@ -311,12 +401,16 @@ public class NeoNetworkPlugin extends Plugin {
     private final int timeoutMs;
     private final List<Integer> ports;
     private final Map<String, String> arpCache;
+    private final boolean resolveHostnameEnabled;
+    private final String gatewayIp;
 
-    HostProbe(String ip, int timeoutMs, List<Integer> ports, Map<String, String> arpCache) {
+    HostProbe(String ip, int timeoutMs, List<Integer> ports, Map<String, String> arpCache, boolean resolveHostnameEnabled, String gatewayIp) {
       this.ip = ip;
       this.timeoutMs = timeoutMs;
       this.ports = ports;
       this.arpCache = arpCache;
+      this.resolveHostnameEnabled = resolveHostnameEnabled;
+      this.gatewayIp = gatewayIp;
     }
 
     @Override
@@ -324,30 +418,41 @@ public class NeoNetworkPlugin extends Plugin {
       long start = System.nanoTime();
       JSArray openPorts = new JSArray();
       Set<String> services = new HashSet<>();
+      Set<String> discoverySources = new HashSet<>();
 
       for (Integer port : ports) {
         if (isHostReachable(ip, port, timeoutMs)) {
           openPorts.put(port);
-          services.add("tcp/" + port);
+          services.add(serviceLabelForPort(port));
+          discoverySources.add("tcp-probe");
         }
       }
 
-      String macAddress = arpCache.get(ip);
-      boolean reachable = openPorts.length() > 0 || (macAddress != null && !"00:00:00:00:00:00".equals(macAddress));
+      String macAddress = normalizeMac(arpCache.get(ip));
+      if (macAddress != null) discoverySources.add("arp");
+      if (ip != null && ip.equals(gatewayIp)) discoverySources.add("gateway");
+      boolean reachable = openPorts.length() > 0 || macAddress != null || ip.equals(gatewayIp);
       if (!reachable) return null;
 
       JSObject host = new JSObject();
       host.put("ipAddress", ip);
       host.put("status", "online");
-      host.put("hostname", resolveHostname(ip));
+      String hostname = resolveHostnameEnabled ? resolveHostname(ip) : null;
+      if (hostname != null) discoverySources.add("hostname");
+      host.put("hostname", hostname);
       host.put("macAddress", macAddress);
-      host.put("vendor", null);
+      host.put("vendor", "Unavailable");
       host.put("openPorts", openPorts);
       JSArray serviceArray = new JSArray();
       for (String service : services) serviceArray.put(service);
       host.put("services", serviceArray);
+      JSArray sourceArray = new JSArray();
+      for (String source : discoverySources) sourceArray.put(source);
+      host.put("discoverySources", sourceArray);
+      host.put("confidence", confidenceFor(discoverySources, openPorts, hostname, macAddress));
+      host.put("lastScanSource", discoverySources.contains("tcp-probe") ? "tcp-probe" : discoverySources.contains("arp") ? "arp" : "gateway");
       host.put("latencyMs", TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start));
-      host.put("dataLimited", macAddress == null);
+      host.put("dataLimited", macAddress == null || hostname == null);
       return host;
     }
   }

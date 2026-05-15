@@ -20,6 +20,8 @@ export function NetworkNodeTooltip({ node, device }: NetworkNodeTooltipProps) {
           <TooltipRow label="TYPE" value={node.deviceType} />
           <TooltipRow label="STATUS" value={node.status} />
           <TooltipRow label="TRUST" value={node.trustLevel} />
+          {device && <TooltipRow label="CONF" value={device.confidence} />}
+          {device && <TooltipRow label="SRC" value={device.lastScanSource} />}
         </div>
       </div>
     </Html>

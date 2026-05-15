@@ -85,3 +85,13 @@ when the native/backend layer can prove relationships from real routing, ARP, AP
 - Verify topology badge remains `ESTIMATED LOGICAL TOPOLOGY` unless relationships are proven.
 - Disconnect or stop the native/backend service and verify the UI shows `DEMO_FALLBACK`.
 - Confirm router/device control actions do not execute in native/backend mode.
+
+
+## Current Android Native Plugin Truth Notes
+
+- Scan modes now map to bounded native profiles (quick/balanced/deep) with explicit host caps, timeout, and bounded port sets.
+- Discovery provenance includes `discoverySources`, `confidence`, `dataLimited`, and `lastScanSource`.
+- MAC addresses are only reported from ARP when present; vendor is `Unavailable` unless a deterministic source is added.
+- Service hints are conservative `Possible service: ...` labels derived from open TCP ports.
+- mDNS/Bonjour discovery is currently not implemented in this native plugin path.
+- SSDP/UPnP discovery is currently not implemented in this native plugin path.
