@@ -5,6 +5,26 @@ import { Check, Info, Play, Star } from "lucide-react"
 import type { VoiceProfile } from "@/lib/voice/types"
 import { availabilityLabel } from "@/lib/voice/voicePresets"
 
+type AuthoredBadge = "UNIQUE TIMBRE" | "STYLED VARIANT" | "DEVICE VOICE" | "PROFILE ONLY" | "UNAVAILABLE"
+
+function authoredBadge(voice: VoiceProfile): AuthoredBadge {
+  if (voice.availability === "unavailable") return "UNAVAILABLE"
+  switch (voice.timbreSource) {
+    case "provider-distinct": return "UNIQUE TIMBRE"
+    case "styled-variant": return "STYLED VARIANT"
+    case "native-distinct": return "DEVICE VOICE"
+    case "profile-only": return "PROFILE ONLY"
+  }
+}
+
+const BADGE_COLOR: Record<AuthoredBadge, string> = {
+  "UNIQUE TIMBRE": "#39ff14",
+  "STYLED VARIANT": "#00f0ff",
+  "DEVICE VOICE": "#b829ff",
+  "PROFILE ONLY": "#ff7a00",
+  UNAVAILABLE: "#ff2d9c",
+}
+
 const ACCENT_HEX: Record<VoiceProfile["accent"], string> = {
   cyan: "#00f0ff",
   purple: "#b829ff",
@@ -78,6 +98,23 @@ export function VoiceCard({
           <p className="mt-1 ps-mono text-[9px] tracking-[0.25em] text-white/45">
             PREVIEW: {availabilityLabel(voice.availability)}
           </p>
+          {(() => {
+            const badge = authoredBadge(voice)
+            const badgeColor = BADGE_COLOR[badge]
+            return (
+              <span
+                className="mt-1.5 inline-block rounded-full px-2 py-0.5 ps-mono text-[9px] tracking-[0.22em]"
+                style={{
+                  color: badgeColor,
+                  background: `${badgeColor}1A`,
+                  boxShadow: `inset 0 0 0 1px ${badgeColor}66`,
+                }}
+                title={voice.uniquenessExplanation}
+              >
+                {badge}
+              </span>
+            )
+          })()}
         </div>
 
         <div className="flex shrink-0 flex-col gap-1.5">

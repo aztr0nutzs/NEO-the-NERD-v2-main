@@ -27,7 +27,11 @@ import {
 import { DEFAULT_VOICE_FILTERS, categoryBreakdown, filterVoiceProfiles } from "@/lib/voice/voiceFilters"
 import { VOICE_CATEGORIES, VOICE_PROFILES, VOICE_TONE_TAGS, getVoiceProfile } from "@/lib/voice/voiceProfiles"
 import { availabilityLabel, voiceProfileToParams } from "@/lib/voice/voicePresets"
-import { getUniquenessSummary, runtimeTimbreLabel } from "@/lib/voice/voiceUniqueness"
+import {
+  getUniquenessSummary,
+  getVoiceAvailabilityExplanation,
+  runtimeTimbreLabel,
+} from "@/lib/voice/voiceUniqueness"
 import type { VoiceFilterState, VoiceProfile } from "@/lib/voice/types"
 import { IDLE_PLAYBACK_SNAPSHOT, type VoicePlaybackSnapshot } from "@/lib/voice/voicePlayback"
 import { getRecommendedPersonalityNamesForVoice, getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
@@ -314,10 +318,18 @@ export function VoicesScreen() {
 
       <NeonPanel accent="green" glow="soft" className="p-3">
         <p className="ps-mono text-[10px] tracking-[0.3em] text-[#39ff14] mb-2">VOICE UNIQUENESS MODEL</p>
-        <p className="text-xs text-white/80">{runtimeTimbreLabel(uniqueness.runtimeSource)} · {uniqueness.whatChanges}</p>
+        <p className="text-xs text-white/80">
+          {runtimeTimbreLabel(uniqueness.runtimeSource)} · {uniqueness.whatChanges}
+        </p>
+        <p className="mt-2 ps-mono text-[10px] tracking-[0.22em] text-white/55">
+          AUTHORED={uniqueness.authoredSource.toUpperCase()} · RUNTIME={uniqueness.runtimeSource.toUpperCase()} · SCORE={uniqueness.uniquenessScore}/100
+        </p>
         <p className="mt-1 ps-mono text-[10px] tracking-[0.2em] text-white/55">
           DISTINCT={uniqueness.isDistinctTimbre ? "YES" : "NO"} · FULLY_REALIZED={uniqueness.isFullyRealized ? "YES" : "NO"} · ENGINE={uniqueness.resolvedEngine.toUpperCase()}
         </p>
+        <p className="mt-2 text-[11px] text-white/70">{uniqueness.uniquenessExplanation}</p>
+        <p className="mt-1 text-[11px] text-white/55">Fallback: {uniqueness.fallbackBehavior}</p>
+        <p className="mt-1 text-[11px] text-white/55">{getVoiceAvailabilityExplanation(getVoiceProfile(voiceId), capabilities)}</p>
       </NeonPanel>
 
       <NeonPanel accent="purple" glow="soft" className="p-3">

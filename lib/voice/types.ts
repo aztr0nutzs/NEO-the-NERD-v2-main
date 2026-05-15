@@ -29,6 +29,33 @@ export type VoiceToneProfile =
   | "retro"
   | "playful"
 
+/**
+ * Authored uniqueness classification for a voice profile.
+ *
+ * - "provider-distinct"  → profile owns a unique underlying provider timbre
+ *                          (canonical for that providerVoiceId).
+ * - "native-distinct"    → profile maps to a genuinely different native engine
+ *                          voice on Android (device dependent).
+ * - "styled-variant"     → profile shares an underlying engine voice with
+ *                          another profile; uniqueness comes from styling.
+ * - "profile-only"       → no realized engine timbre; profile metadata only.
+ */
+export type VoiceTimbreSource =
+  | "provider-distinct"
+  | "native-distinct"
+  | "styled-variant"
+  | "profile-only"
+
+export type VoiceCadenceProfile =
+  | "steady"
+  | "brisk"
+  | "snappy"
+  | "measured"
+  | "deliberate"
+  | "lyrical"
+  | "staccato"
+  | "languid"
+
 export interface VoiceProfile {
   id: string
   displayName: string
@@ -60,6 +87,26 @@ export interface VoiceProfile {
   providerVoiceId?: string
   availability: VoiceAvailability
   accent: AccentColor
+
+  /** First-class uniqueness metadata (authored, not inferred at runtime). */
+  timbreSource: VoiceTimbreSource
+  /** 0..100 — how distinct the profile's realized output is expected to be. */
+  uniquenessScore: number
+  /** One-sentence honest explanation of the profile's uniqueness/fallback. */
+  uniquenessExplanation: string
+  /** Truthful description of what happens when the ideal engine isn't available. */
+  fallbackBehavior: string
+
+  /** Optional: provider-side natural-language style prompt (e.g. for gpt-4o-mini-tts). */
+  stylePrompt?: string
+  /** Optional: provider-side emotional/delivery instructions appended to the prompt. */
+  emotionalInstructions?: string
+  /** Optional: targeted Android native voice id (used when capable). */
+  nativeVoiceId?: string
+  /** Optional: pacing/cadence shape applied on top of slider rate. */
+  cadenceProfile?: VoiceCadenceProfile
+  /** Optional: 1..5 commanding presence/authority intensity for delivery. */
+  authorityLevel?: 1 | 2 | 3 | 4 | 5
 }
 
 export interface VoiceFilterState {

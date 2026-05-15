@@ -1,6 +1,6 @@
 import type { VoiceParams } from "@/lib/types"
 import { VOICE_PROFILES, getVoiceProfile } from "./voiceProfiles"
-import { buildStyledVoiceSpeech, toneInstructions } from "./voiceStyle"
+import { buildProviderInstructions, buildStyledVoiceSpeech } from "./voiceStyle"
 
 export interface VoiceProviderConfig {
   providerVoiceId: string
@@ -73,7 +73,7 @@ export function emotionToInstructions(emotion: number) {
 
 function providerInstructions(voiceId: string, emotion: number) {
   const profile = getVoiceProfile(voiceId)
-  return `${toneInstructions(profile)} ${emotionToInstructions(emotion)}`
+  return buildProviderInstructions(profile, emotionToInstructions(emotion))
 }
 
 export async function generateOpenAITts(request: TtsRequest): Promise<TtsResult> {

@@ -44,6 +44,7 @@ import {
   speakWithAndroidNativeTts,
   stopAndroidNativeTts,
 } from "./native-tts-bridge"
+import { getVoiceTruthLabel } from "./voiceUniqueness"
 
 // -----------------------------------------------------------------------------
 // Capability model
@@ -565,43 +566,20 @@ export { downloadAudio, shareOrSaveAudio } from "./ttsClient"
  * previewed in the current runtime. Strictly truthful: it composes both the
  * profile's intrinsic availability AND the live runtime capabilities.
  */
+/**
+ * Truthful runtime label for the *currently selected* profile. Composes the
+ * profile's authored timbre source with the live runtime capabilities so the
+ * UI never overclaims uniqueness.
+ *
+ * Provider-ready is no longer treated as "provider distinct" by itself —
+ * only the canonical owner of a provider voice id is. See
+ * `lib/voice/voiceUniqueness.ts` for the full classification.
+ */
 export function getProfileTruthLabel(
   profile: VoiceProfile,
   capabilities: VoiceRuntimeCapabilities,
 ): string {
-  if (profile.availability === "unavailable") return "PREVIEW UNAVAILABLE"
-
-  if (profile.availability === "provider-ready") {
-    if (capabilities.providerTtsAvailable) return "Provider Distinct Voice"
-    if (capabilities.nativeAndroidTtsAvailable) {
-      return capabilities.selectedAndroidVoiceName
-        ? `Styled Android TTS (${capabilities.selectedAndroidVoiceName})`
-        : "Styled Android TTS"
-    }
-    if (capabilities.browserSpeechSupported) return "Browser Speech (Styled)"
-    return "PROVIDER READY // NO LOCAL FALLBACK"
-  }
-
-  if (profile.availability === "browser-preview") {
-    if (capabilities.nativeAndroidTtsAvailable) return "Styled Android TTS"
-    return capabilities.browserSpeechSupported
-      ? "Browser Speech (Styled)"
-      : "BROWSER PREVIEW UNAVAILABLE"
-  }
-
-  if (profile.availability === "future-provider-target") {
-    if (capabilities.nativeAndroidTtsAvailable) return "Styled Android TTS"
-    return capabilities.browserSpeechSupported
-      ? "Browser Speech (Styled)"
-      : "FUTURE PROVIDER TARGET"
-  }
-
-  if (profile.availability === "profile-only") {
-    if (capabilities.nativeAndroidTtsAvailable) return "Styled Android TTS"
-    return capabilities.browserSpeechSupported
-      ? "Browser Speech (Styled)"
-      : "Profile-only / no unique engine timbre"
-  }
-
-  return "PREVIEW UNAVAILABLE"
+  // Delegated to the uniqueness module so card badge, detail label, and
+  // Voice screen all share one truth source.
+  return getVoiceTruthLabel(profile, capabilities)
 }

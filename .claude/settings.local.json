@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx cap *)",
-      "Bash(./gradlew assembleDebug --no-daemon)"
+      "Bash(./gradlew assembleDebug --no-daemon)",
+      "Bash(node -e ' *)"
     ]
   }
 }

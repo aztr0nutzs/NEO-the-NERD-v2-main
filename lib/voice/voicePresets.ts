@@ -23,13 +23,13 @@ export function voiceProfileToParams(voiceId: string): VoiceParams {
 export function availabilityLabel(availability: string) {
   switch (availability) {
     case "provider-ready":
-      return "PROVIDER DISTINCT VOICE"
+      return "PROVIDER MAPPED"
     case "browser-preview":
       return "BROWSER PREVIEW"
     case "future-provider-target":
       return "FUTURE PROVIDER TARGET"
     case "profile-only":
-      return "PROFILE-ONLY / NO UNIQUE TIMBRE"
+      return "PROFILE-ONLY"
     default:
       return "UNAVAILABLE"
   }

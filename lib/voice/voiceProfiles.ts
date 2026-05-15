@@ -1,4 +1,234 @@
-import type { VoiceProfile, VoiceToneProfile } from "./types"
+import type {
+  VoiceCadenceProfile,
+  VoiceProfile,
+  VoiceTimbreSource,
+  VoiceToneProfile,
+} from "./types"
+
+// -----------------------------------------------------------------------------
+// Uniqueness authoring
+// -----------------------------------------------------------------------------
+//
+// Truth rule: a profile may only claim `"provider-distinct"` if it is the
+// canonical owner of a given underlying provider voice id. Any other profile
+// reusing the same provider voice id is a `"styled-variant"` — its uniqueness
+// comes from styling/pacing/delivery instructions, NOT from a different timbre.
+//
+// The map below names exactly one canonical profile per provider voice id.
+//
+// Profiles without a provider voice id (browser-preview, future-provider-target,
+// or profile-only) are classified as `"profile-only"` because no engine timbre
+// is realized; they still get distinct styling but the underlying voice is
+// whatever the runtime fallback exposes (Android device voice or browser).
+
+const CANONICAL_PROVIDER_DISTINCT: Record<string, string> = {
+  alloy: "neo",
+  nova: "nova",
+  echo: "glitch",
+  coral: "sparky",
+  onyx: "commander",
+  shimmer: "prankster",
+  sage: "neon-mentor",
+  fable: "retro",
+  ash: "snark",
+  ballad: "villain",
+}
+
+interface UniquenessOverride {
+  stylePrompt?: string
+  emotionalInstructions?: string
+  cadenceProfile?: VoiceCadenceProfile
+  authorityLevel?: 1 | 2 | 3 | 4 | 5
+  uniquenessExplanation?: string
+}
+
+// Per-id authoring overrides for the high-character profiles. Anything not
+// listed here gets synthesized defaults from tone/category/tags.
+const UNIQUENESS_OVERRIDES: Record<string, UniquenessOverride> = {
+  neo: {
+    stylePrompt: "Default NEO companion: clear, stable, lightly synthetic, futuristic confidence.",
+    emotionalInstructions: "Balanced, composed, mission-aware. No theatrics; precise diction.",
+    cadenceProfile: "steady",
+    authorityLevel: 3,
+  },
+  nova: {
+    stylePrompt: "Bright synthwave hostess: bubbly, warm, neon-lit greeter energy.",
+    emotionalInstructions: "Upbeat and welcoming; lift sentence endings slightly, no rush.",
+    cadenceProfile: "brisk",
+    authorityLevel: 2,
+  },
+  glitch: {
+    stylePrompt: "Distorted prank gremlin: chaotic stutter, jagged synthetic edge.",
+    emotionalInstructions: "Add micro-glitches via repeated consonants on cue words; playful, never menacing.",
+    cadenceProfile: "staccato",
+    authorityLevel: 2,
+  },
+  sparky: {
+    stylePrompt: "High-voltage hype-bot: punchy, celebratory, scoreboard energy.",
+    emotionalInstructions: "Loud, fast, smiley; emphasize verbs and numbers, no slow phrases.",
+    cadenceProfile: "snappy",
+    authorityLevel: 3,
+  },
+  commander: {
+    stylePrompt: "Tactical baritone: mission-control discipline, firm baritone presence.",
+    emotionalInstructions: "Clipped command phrasing, decisive stops, zero filler. No warmth.",
+    cadenceProfile: "deliberate",
+    authorityLevel: 5,
+  },
+  prankster: {
+    stylePrompt: "Mischievous sing-song: always plotting, playful conspiratorial lilt.",
+    emotionalInstructions: "Smile audible; trail off on punchlines; never mean-spirited.",
+    cadenceProfile: "lyrical",
+    authorityLevel: 2,
+  },
+  retro: {
+    stylePrompt: "8-bit arcade announcer: vintage chiptune cadence, cartridge-era flavor.",
+    emotionalInstructions: "Punchy bite-sized phrases, faint mechanical lilt, never modern slang.",
+    cadenceProfile: "staccato",
+    authorityLevel: 2,
+  },
+  snark: {
+    stylePrompt: "Dry, surgical sarcasm: deadpan robot wit, controlled bite.",
+    emotionalInstructions: "Long beat before punchlines, flat affect on setups, never raise pitch.",
+    cadenceProfile: "deliberate",
+    authorityLevel: 3,
+  },
+  villain: {
+    stylePrompt: "Cartoon-evil monologue: theatrical menace, harmless drama.",
+    emotionalInstructions: "Slow vowels, rolled emphasis, smug laugh-ready cadence. Never sincere.",
+    cadenceProfile: "languid",
+    authorityLevel: 4,
+  },
+  "neon-mentor": {
+    stylePrompt: "Wise cyberpunk mentor: composed guidance with neon polish.",
+    emotionalInstructions: "Calm, deliberate, principle-first phrasing. Pause before key advice.",
+    cadenceProfile: "measured",
+    authorityLevel: 4,
+  },
+  // Styled variants (reuse same underlying provider voice as a canonical above)
+  byte: {
+    stylePrompt: "Scholarly NEO sibling: articulate professor energy over the alloy base voice.",
+    emotionalInstructions: "Pedagogical pacing, brief mid-sentence pauses on definitions, gentle warmth.",
+    cadenceProfile: "measured",
+    authorityLevel: 3,
+  },
+  droid: {
+    stylePrompt: "Warm classic robot helper using the alloy base voice with softened delivery.",
+    emotionalInstructions: "Round vowels, friendly affirmations, slight upward inflection.",
+    cadenceProfile: "steady",
+    authorityLevel: 2,
+  },
+  "friendly-tech-support": {
+    stylePrompt: "Patient support-desk delivery over the alloy base voice.",
+    emotionalInstructions: "Slow, low-pressure, reassuring. Pause before each instruction step.",
+    cadenceProfile: "measured",
+    authorityLevel: 2,
+  },
+  "holo-host": {
+    stylePrompt: "Polished holographic presenter using the alloy base voice with showcase polish.",
+    emotionalInstructions: "Crisp consonants, presentational rhythm, mild theatrical lift.",
+    cadenceProfile: "brisk",
+    authorityLevel: 3,
+  },
+  hyper: {
+    stylePrompt: "Best-friend caffeine energy over the coral base voice.",
+    emotionalInstructions: "Rapid, smiley, encouraging; double down on enthusiastic verbs.",
+    cadenceProfile: "snappy",
+    authorityLevel: 3,
+  },
+  "hyperdrive-host": {
+    stylePrompt: "Game-show host atop the coral base voice.",
+    emotionalInstructions: "Big announcer arcs, dramatic mid-sentence pauses, applause-ready endings.",
+    cadenceProfile: "brisk",
+    authorityLevel: 3,
+  },
+  "overclock-coach": {
+    stylePrompt: "Performance coach atop the coral base voice with processor metaphors.",
+    emotionalInstructions: "Clipped pep, imperative phrasing, no slack.",
+    cadenceProfile: "snappy",
+    authorityLevel: 4,
+  },
+  "circuit-cheerleader": {
+    stylePrompt: "Sparkly encouragement on the coral base voice.",
+    emotionalInstructions: "Upbeat, smiley, exclamation-flavored without shouting.",
+    cadenceProfile: "snappy",
+    authorityLevel: 2,
+  },
+  arcade: {
+    stylePrompt: "Reverberant haunted-cabinet variant of the echo base voice.",
+    emotionalInstructions: "Hollow timbre cues, eerie spacing, never frightening.",
+    cadenceProfile: "deliberate",
+    authorityLevel: 2,
+  },
+  deepcore: {
+    stylePrompt: "Sub-bass narrator on the onyx base voice with cinematic gravity.",
+    emotionalInstructions: "Slow vowels, weighty pauses, low intensity.",
+    cadenceProfile: "languid",
+    authorityLevel: 4,
+  },
+  "midnight-narrator": {
+    stylePrompt: "Late-night storyteller atop the onyx base voice.",
+    emotionalInstructions: "Smooth, low, moody. Trail thoughts gently into silence.",
+    cadenceProfile: "languid",
+    authorityLevel: 3,
+  },
+  "tactical-guide": {
+    stylePrompt: "Field-ops instruction delivery on the onyx base voice.",
+    emotionalInstructions: "Numbered steps, clipped imperatives, zero embellishment.",
+    cadenceProfile: "deliberate",
+    authorityLevel: 4,
+  },
+  "velvet-circuit": {
+    stylePrompt: "Soft synthetic lounge tone on the shimmer base voice.",
+    emotionalInstructions: "Whispered consonants, generous pauses, late-night calm.",
+    cadenceProfile: "languid",
+    authorityLevel: 2,
+  },
+  "solar-diplomat": {
+    stylePrompt: "Optimistic mediator on the shimmer base voice.",
+    emotionalInstructions: "Even tone, careful word choice, warm but composed.",
+    cadenceProfile: "measured",
+    authorityLevel: 3,
+  },
+  tiny: {
+    stylePrompt: "Squeaky chaos atop the shimmer base voice (pitched-up styling only).",
+    emotionalInstructions: "Bouncy, over-excited, harmlessly chaotic. Short sentences.",
+    cadenceProfile: "snappy",
+    authorityLevel: 1,
+  },
+  cyberkid: {
+    stylePrompt: "Curious internet-native learner on the sage base voice.",
+    emotionalInstructions: "Bright, casual, occasional micro-pauses before reveals.",
+    cadenceProfile: "brisk",
+    authorityLevel: 2,
+  },
+  "chill-byte": {
+    stylePrompt: "Low-pressure helper on the sage base voice.",
+    emotionalInstructions: "Slow, relaxed, no urgency words. Even cadence throughout.",
+    cadenceProfile: "languid",
+    authorityLevel: 2,
+  },
+  "synth-sage": {
+    stylePrompt: "Meditative synthetic wisdom on the sage base voice.",
+    emotionalInstructions: "Long phrase pauses; calm, reflective, almost rhythmic.",
+    cadenceProfile: "languid",
+    authorityLevel: 3,
+  },
+  "smooth-operator": {
+    stylePrompt: "Slick, relaxed confidence on the ash base voice.",
+    emotionalInstructions: "Cool, unhurried, dry warmth; let endings settle.",
+    cadenceProfile: "measured",
+    authorityLevel: 3,
+  },
+  "cosmic-commentator": {
+    stylePrompt: "Space-broadcast presenter on the ballad base voice.",
+    emotionalInstructions: "Big-picture phrasing, dramatic intakes, wide vowels.",
+    cadenceProfile: "deliberate",
+    authorityLevel: 4,
+  },
+  // Profile-only / future-provider-target / browser-preview entries get
+  // synthesized defaults below.
+}
 
 export const VOICE_PROFILES: VoiceProfile[] = [
   profile("neo", "NEO", "Core NEO voices", "Calm, confident futuristic core voice.", "The default NEO companion voice: clear, stable, lightly synthetic, and suitable for most assistant interactions.", ["core", "calm", "futuristic"], ["default chat", "briefings", "navigation"], 3, 4, 2, 3, 5, 50, 50, 75, 60, ["genius", "friendly", "strat"], "NEO online. Tell me the mission.", true, "alloy", "provider-ready", "cyan"),
@@ -70,6 +300,20 @@ function profile(
   const pitch = sliderToProfilePitch(defaultPitch)
   const rate = sliderToProfileRate(defaultSpeed)
   const toneProfile = inferToneProfile(category, toneTags, energyLevel, humorLevel, roboticnessLevel)
+  const uniqueness = computeUniqueness({
+    id,
+    name,
+    providerVoiceId,
+    availability,
+    toneProfile,
+    shortDescription,
+    toneTags,
+  })
+  const override = UNIQUENESS_OVERRIDES[id] ?? {}
+  const stylePrompt = override.stylePrompt ?? synthesizeStylePrompt(name, shortDescription, toneProfile, toneTags)
+  const emotionalInstructions = override.emotionalInstructions ?? synthesizeEmotionalInstructions(toneProfile, energyLevel, humorLevel)
+  const cadenceProfile = override.cadenceProfile ?? defaultCadence(toneProfile, energyLevel)
+  const authorityLevel = override.authorityLevel ?? defaultAuthority(toneProfile, energyLevel, roboticnessLevel)
   return {
     id,
     displayName: name,
@@ -101,7 +345,145 @@ function profile(
     providerVoiceId,
     availability,
     accent,
+    timbreSource: uniqueness.timbreSource,
+    uniquenessScore: uniqueness.uniquenessScore,
+    uniquenessExplanation: override.uniquenessExplanation ?? uniqueness.uniquenessExplanation,
+    fallbackBehavior: uniqueness.fallbackBehavior,
+    stylePrompt,
+    emotionalInstructions,
+    cadenceProfile,
+    authorityLevel,
   }
+}
+
+interface ComputeUniquenessInput {
+  id: string
+  name: string
+  providerVoiceId: string | undefined
+  availability: VoiceProfile["availability"]
+  toneProfile: VoiceToneProfile
+  shortDescription: string
+  toneTags: string[]
+}
+
+interface UniquenessComputation {
+  timbreSource: VoiceTimbreSource
+  uniquenessScore: number
+  uniquenessExplanation: string
+  fallbackBehavior: string
+}
+
+function computeUniqueness(input: ComputeUniquenessInput): UniquenessComputation {
+  const { id, providerVoiceId, availability } = input
+  if (availability === "provider-ready" && providerVoiceId) {
+    const canonicalId = CANONICAL_PROVIDER_DISTINCT[providerVoiceId]
+    if (canonicalId === id) {
+      return {
+        timbreSource: "provider-distinct",
+        uniquenessScore: 95,
+        uniquenessExplanation:
+          `Canonical owner of provider voice "${providerVoiceId}". Realized as a unique provider timbre when provider TTS is available.`,
+        fallbackBehavior:
+          "If provider TTS is offline, falls back to a styled Android/browser voice using profile pitch, rate, and style instructions.",
+      }
+    }
+    return {
+      timbreSource: "styled-variant",
+      uniquenessScore: 65,
+      uniquenessExplanation:
+        `Shares provider voice "${providerVoiceId}" with another profile. Uniqueness comes from style, pacing, and delivery instructions — not a different underlying timbre.`,
+      fallbackBehavior:
+        "If provider TTS is offline, falls back to a styled Android/browser voice using profile pitch, rate, and style instructions.",
+    }
+  }
+
+  if (availability === "future-provider-target") {
+    return {
+      timbreSource: "profile-only",
+      uniquenessScore: 35,
+      uniquenessExplanation:
+        "Profile authored for a future provider voice. No realized engine timbre today; speech is styled over the current runtime fallback.",
+      fallbackBehavior:
+        "Today this voice plays through Android native TTS (if available) or browser SpeechSynthesis, styled by profile pitch and rate.",
+    }
+  }
+  if (availability === "browser-preview") {
+    return {
+      timbreSource: "profile-only",
+      uniquenessScore: 30,
+      uniquenessExplanation:
+        "Browser-preview profile. No dedicated provider/native timbre; speech is styled over the available runtime engine.",
+      fallbackBehavior:
+        "Plays via Android native TTS where available, otherwise browser SpeechSynthesis, styled with profile pitch and rate.",
+    }
+  }
+  if (availability === "profile-only") {
+    return {
+      timbreSource: "profile-only",
+      uniquenessScore: 20,
+      uniquenessExplanation:
+        "Profile-only voice. Carries personality metadata but no unique realized timbre; styling drives the difference.",
+      fallbackBehavior:
+        "Plays via Android native TTS where available, otherwise browser SpeechSynthesis, styled with profile pitch and rate.",
+    }
+  }
+  return {
+    timbreSource: "profile-only",
+    uniquenessScore: 10,
+    uniquenessExplanation: "Voice marked unavailable in this build.",
+    fallbackBehavior: "No speech engine path available.",
+  }
+}
+
+function synthesizeStylePrompt(
+  name: string,
+  shortDescription: string,
+  tone: VoiceToneProfile,
+  tags: string[],
+): string {
+  const flavor = tags.slice(0, 3).join(", ")
+  return `${name}: ${shortDescription} Tone: ${tone}${flavor ? `; cues: ${flavor}` : ""}.`
+}
+
+function synthesizeEmotionalInstructions(
+  tone: VoiceToneProfile,
+  energyLevel: number,
+  humorLevel: number,
+): string {
+  const parts: string[] = []
+  if (energyLevel >= 4) parts.push("brisk, energetic delivery")
+  else if (energyLevel <= 2) parts.push("slow, low-energy delivery")
+  if (humorLevel >= 4) parts.push("playful, smiley phrasing")
+  else if (humorLevel <= 2) parts.push("understated, serious phrasing")
+  if (tone === "robotic") parts.push("evenly metered, lightly synthetic timing")
+  if (tone === "dramatic") parts.push("cinematic pauses on key words")
+  if (tone === "sarcastic") parts.push("dry beat before punchlines")
+  return parts.length ? parts.join("; ") + "." : "Balanced delivery with clear phrase boundaries."
+}
+
+function defaultCadence(tone: VoiceToneProfile, energyLevel: number): VoiceCadenceProfile {
+  if (tone === "calm") return "languid"
+  if (tone === "dramatic") return "deliberate"
+  if (tone === "sarcastic") return "deliberate"
+  if (tone === "robotic") return "measured"
+  if (tone === "retro") return "staccato"
+  if (tone === "energetic" || energyLevel >= 5) return "snappy"
+  if (tone === "playful") return "lyrical"
+  if (energyLevel >= 4) return "brisk"
+  return "steady"
+}
+
+function defaultAuthority(
+  tone: VoiceToneProfile,
+  energyLevel: number,
+  roboticnessLevel: number,
+): 1 | 2 | 3 | 4 | 5 {
+  let v = 3
+  if (tone === "aggressive" || tone === "dramatic") v += 1
+  if (tone === "playful" || tone === "calm") v -= 1
+  if (roboticnessLevel >= 4) v += 0
+  if (energyLevel >= 5) v += 0
+  return Math.max(1, Math.min(5, v)) as 1 | 2 | 3 | 4 | 5
 }
 
 function inferCadenceHint(toneProfile: VoiceToneProfile) {
@@ -171,4 +553,20 @@ const duplicateVoiceIds = VOICE_PROFILES.filter((voice, index, list) => list.fin
 const duplicateVoiceNames = VOICE_PROFILES.filter((voice, index, list) => list.findIndex((v) => v.name.toLowerCase() === voice.name.toLowerCase()) !== index).map((voice) => voice.name)
 if (duplicateVoiceIds.length || duplicateVoiceNames.length) {
   throw new Error(`Duplicate voice profile entries detected. ids=[${duplicateVoiceIds.join(", ")}], names=[${duplicateVoiceNames.join(", ")}]`)
+}
+
+/** Map of providerVoiceId → list of profile ids that share that base voice. */
+export function getProviderReuseSummary(): Record<string, string[]> {
+  const map: Record<string, string[]> = {}
+  for (const v of VOICE_PROFILES) {
+    if (!v.providerVoiceId) continue
+    if (!map[v.providerVoiceId]) map[v.providerVoiceId] = []
+    map[v.providerVoiceId].push(v.id)
+  }
+  return map
+}
+
+/** Profile ids that are the canonical owner of their provider voice timbre. */
+export function getCanonicalProviderDistinctProfiles(): string[] {
+  return VOICE_PROFILES.filter((v) => v.timbreSource === "provider-distinct").map((v) => v.id)
 }

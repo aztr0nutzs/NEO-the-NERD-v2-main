@@ -117,3 +117,39 @@ export function toneInstructions(profile: VoiceProfile): string {
   const tags = profile.toneTags?.length ? ` Tone cues: ${profile.toneTags.join(", ")}.` : ""
   return `${base}${tags}`
 }
+
+const CADENCE_INSTRUCTION: Record<string, string> = {
+  steady: "Maintain an even, predictable cadence with clear phrase boundaries.",
+  brisk: "Use a brisk, forward-leaning pace without rushing endings.",
+  snappy: "Use short snappy phrases with crisp consonants.",
+  measured: "Use measured, deliberate pacing with brief reflective pauses.",
+  deliberate: "Use deliberate pacing with weighted pauses on key words.",
+  lyrical: "Use a lyrical, sing-song lilt with playful rise and fall.",
+  staccato: "Use clipped staccato phrasing with short percussive beats.",
+  languid: "Use a slow, languid cadence with long pauses and trailing endings.",
+}
+
+/**
+ * Build the full provider instruction string for a profile, composing tone,
+ * authored style prompt, emotional instructions, cadence, and authority cues.
+ * This is the single source of truth used by the OpenAI TTS path.
+ */
+export function buildProviderInstructions(
+  profile: VoiceProfile,
+  emotionInstruction: string,
+): string {
+  const parts: string[] = []
+  parts.push(toneInstructions(profile))
+  if (profile.stylePrompt) parts.push(profile.stylePrompt)
+  if (profile.emotionalInstructions) parts.push(profile.emotionalInstructions)
+  if (profile.cadenceProfile && CADENCE_INSTRUCTION[profile.cadenceProfile]) {
+    parts.push(CADENCE_INSTRUCTION[profile.cadenceProfile])
+  }
+  if (profile.authorityLevel != null) {
+    if (profile.authorityLevel >= 5) parts.push("Project firm command presence; decisive and unwavering.")
+    else if (profile.authorityLevel >= 4) parts.push("Project confident authority with controlled delivery.")
+    else if (profile.authorityLevel <= 2) parts.push("Keep authority light and approachable, not commanding.")
+  }
+  parts.push(emotionInstruction)
+  return parts.filter(Boolean).join(" ")
+}

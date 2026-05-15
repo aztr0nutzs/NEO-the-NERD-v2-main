@@ -867,6 +867,7 @@ export function NetworkDiscoveryFeature() {
       setDiagnosticsRunning(false);
     }
   }, [
+    appendEvents,
     devices,
     lastNetworkScanDelta,
     networkAlerts,
