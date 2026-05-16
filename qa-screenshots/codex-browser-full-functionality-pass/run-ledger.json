@@ -1,0 +1,259 @@
+{
+  "base": "http://localhost:3000",
+  "when": "2026-05-16T09:19:01.060Z",
+  "summary": {
+    "pass": 32,
+    "partial": 7,
+    "fail": 1,
+    "envLimited": 0
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [
+    "Failed to fetch"
+  ],
+  "results": [
+    {
+      "phase": "phase1",
+      "name": "Initial HTTP load",
+      "status": "pass",
+      "notes": "GET http://localhost:3000 reached domcontentloaded"
+    },
+    {
+      "phase": "phase1",
+      "name": "Boot overlay element present",
+      "status": "pass",
+      "notes": "video / boot artifact found in DOM"
+    },
+    {
+      "phase": "phase1",
+      "name": "Shell renders after boot",
+      "status": "pass",
+      "notes": "BottomDock found"
+    },
+    {
+      "phase": "phase1",
+      "name": "Background video element",
+      "status": "pass",
+      "notes": "{\"found\":true,\"src\":\"http://localhost:3000/media/neo/avatar/idle.mp4\",\"readyState\":0,\"paused\":true,\"width\":0,\"height\":0}"
+    },
+    {
+      "phase": "phase1",
+      "name": "Dock items present",
+      "status": "pass",
+      "notes": "labels=[\"Robot\",\"Chat\",\"Network\",\"Speed\",\"Voices\",\"Person.\",\"Games\",\"Ctrl\",\"Library\",\"Set\"]"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding wizard auto-appears on first run",
+      "status": "pass",
+      "notes": "dialog found"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step welcome: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step personality: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step voice: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step network: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step demo-vs-live: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step permissions: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step first-scan: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step review-unknown: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step monitoring: NEXT click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding step complete: LAUNCH NEO click",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "phase2",
+      "name": "Onboarding completes & closes",
+      "status": "pass",
+      "notes": "closed"
+    },
+    {
+      "phase": "phase3",
+      "name": "Main: hero / stage area renders",
+      "status": "pass",
+      "notes": "media element found"
+    },
+    {
+      "phase": "phase3",
+      "name": "Main: quick command chips render",
+      "status": "pass",
+      "notes": "chip count = 8"
+    },
+    {
+      "phase": "phase3",
+      "name": "Main: 'Tell a joke' chip click",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "phase3",
+      "name": "Main: visible interactive labels snapshot",
+      "status": "pass",
+      "notes": "sample=[\"RUN_SCAN\",\"REVIEW_NEW\",\"OPEN_3D_MAP\",\"SPEED_TEST\",\"ALERTS_TIMELINE\",\"ASK_NEO_TO_EXPLAIN_CHANGES\",\"ACCEPT\",\"Tell a joke\",\"Start chat\",\"Change voice\",\"Play a game\",\"Prank idea\",\"Daily briefing\",\"Explain my network\",\"Surprise me\",\"TALK\",\"TYPE\",\"RANDOM\",\"NEURAL_MAP // 3D NETWORK TOPOLOGYOpen the live device map & router scanner\",\"ROBOT\",\"CHAT\",\"NETWORK\",\"SPEED\",\"VOICES\",\"PERSON.\"]"
+    },
+    {
+      "phase": "phase4",
+      "name": "Chat: input field",
+      "status": "fail",
+      "notes": "no textarea/input found on chat screen"
+    },
+    {
+      "phase": "phase5",
+      "name": "Voices: page renders interactive items",
+      "status": "pass",
+      "notes": "interactive count = 346"
+    },
+    {
+      "phase": "phase5",
+      "name": "Voices: search input filters list",
+      "status": "pass",
+      "notes": "typed 'neo'"
+    },
+    {
+      "phase": "phase5",
+      "name": "Voices: preview button reachable",
+      "status": "pass",
+      "notes": "clicked 'PLAY VOICE PREVIEW'"
+    },
+    {
+      "phase": "phase6",
+      "name": "Personalities: page renders",
+      "status": "pass",
+      "notes": "interactive count = 42"
+    },
+    {
+      "phase": "phase6",
+      "name": "Personalities: pick a card",
+      "status": "pass",
+      "notes": "clicked 'Professor Byte'"
+    },
+    {
+      "phase": "phase7",
+      "name": "Library: page renders",
+      "status": "pass",
+      "notes": "buttons = 2475"
+    },
+    {
+      "phase": "phase7",
+      "name": "Library: search input works",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "phase8",
+      "name": "Network: tabs / sections discoverable",
+      "status": "pass",
+      "notes": "headings=[\"SIMULATED DEVICES8NOT A LIVE COUNT\",\"FLAGGED DEVICES31 UNKNOWN\",\"QUEUED ACTIONS0SIMULATED NETWORK DATA\",\"ADAPTER STATUSSIMULATED NETWORK DATA // IDLEOPEN SCAN\",\"HISTORY\",\"DEVICES_FOUND8\",\"SCAN HUDOPEN SCAN CONTROLS\",\"3D NETWORK MAPACTIVE\",\"MAP\",\"SCAN\",\"DEVICES\",\"TIMELINE\",\"ROUTER\",\"HISTORY\",\"Alerts\",\"Alerts\"]"
+    },
+    {
+      "phase": "phase8",
+      "name": "Network: scan button discoverable",
+      "status": "partial",
+      "notes": "{\"found\":false}"
+    },
+    {
+      "phase": "phase10",
+      "name": "Network: 3D map canvas present",
+      "status": "pass",
+      "notes": "{\"found\":true,\"width\":616,\"height\":749,\"clientW\":352,\"clientH\":428}"
+    },
+    {
+      "phase": "phase12",
+      "name": "Speed test: start button click",
+      "status": "partial",
+      "notes": "no start button found"
+    },
+    {
+      "phase": "phase13",
+      "name": "Controls screen renders",
+      "status": "pass",
+      "notes": "buttons=31"
+    },
+    {
+      "phase": "phase15",
+      "name": "Settings page renders",
+      "status": "pass",
+      "notes": "{\"switches\":0,\"buttons\":40,\"headings\":[\"CONFIG PANEL\"]}"
+    },
+    {
+      "phase": "phase15",
+      "name": "Settings: a switch can be toggled",
+      "status": "partial",
+      "notes": ""
+    },
+    {
+      "phase": "phase16",
+      "name": "Games: tic tac toe entry",
+      "status": "partial",
+      "notes": ""
+    },
+    {
+      "phase": "phase16",
+      "name": "Games: rock paper scissors entry",
+      "status": "partial",
+      "notes": ""
+    },
+    {
+      "phase": "phase17",
+      "name": "Console errors total",
+      "status": "partial",
+      "notes": "count=2; sample=[\"Failed to load resource: the server responded with a status of 404 (Not Found)\",\"Failed to load resource: the server responded with a status of 404 (Not Found)\"]"
+    },
+    {
+      "phase": "phase17",
+      "name": "Uncaught page errors total",
+      "status": "partial",
+      "notes": "count=1; sample=[\"Failed to fetch\"]"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "base": "http://localhost:3000",
+  "when": "2026-05-16T09:29:57.469Z",
+  "summary": {
+    "pass": 12,
+    "partial": 3,
+    "fail": 0
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "pageErrors": [
+    "Failed to fetch"
+  ],
+  "results": [
+    {
+      "phase": "setup",
+      "name": "Onboarding wizard hidden after proper seed",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "settings",
+      "name": "Settings: non-color toggles flip state",
+      "status": "pass",
+      "notes": "flips=5/5 sample=[{\"before\":\"false\",\"label\":\"Reduced motion\",\"after\":\"true\"},{\"before\":\"true\",\"label\":\"Trash talk\",\"after\":\"false\"},{\"before\":\"true\",\"label\":\"Auto-scroll\",\"after\":\"false\"},{\"before\":\"true\",\"label\":\"Show mood tags\",\"after\":\"false\"},{\"before\":\"false\",\"label\":\"Debug mode (planned)\",\"after\":\"true\"}]"
+    },
+    {
+      "phase": "games",
+      "name": "Games: LAUNCH button on robot challenge",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "games",
+      "name": "Games: a game became visible after LAUNCH",
+      "status": "pass",
+      "notes": "{\"tictactoe\":true,\"rps\":true,\"trivia\":true,\"reaction\":true}"
+    },
+    {
+      "phase": "games",
+      "name": "Games: interactive turn played",
+      "status": "pass",
+      "notes": "{\"type\":\"ttt-cell\",\"clicked\":true}"
+    },
+    {
+      "phase": "games",
+      "name": "Games: PLAY NOW on first card",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "games",
+      "name": "Games: small square cell elements rendered",
+      "status": "pass",
+      "notes": "{\"smallSquares\":9}"
+    },
+    {
+      "phase": "library",
+      "name": "Library: UI element snapshot",
+      "status": "pass",
+      "notes": "{\"buttons\":2475,\"cards\":0,\"searchInput\":true}"
+    },
+    {
+      "phase": "voices",
+      "name": "Voices: interactive count",
+      "status": "pass",
+      "notes": "{\"interactiveCount\":346}"
+    },
+    {
+      "phase": "chat",
+      "name": "Chat: response grows text content after prompt",
+      "status": "pass",
+      "notes": "before=406 after=571"
+    },
+    {
+      "phase": "personalities",
+      "name": "Personalities: selectable cards count",
+      "status": "partial",
+      "notes": "count=1"
+    },
+    {
+      "phase": "personalities",
+      "name": "Personalities: card aria-pressed flips",
+      "status": "partial",
+      "notes": "picks=[] after=[]"
+    },
+    {
+      "phase": "network",
+      "name": "Network: timeline rows render",
+      "status": "partial",
+      "notes": "rows=0"
+    },
+    {
+      "phase": "network",
+      "name": "Network: security/insights content present",
+      "status": "pass",
+      "notes": "samples=[\"ALERT_CENTER\",\"NO_RECENT_ALERTS\",\"NETWORK_HEALTH\",\"Health pending\",\"Run a scan or diagnostics to calculate health\",\"SECURITY_INSIGHTS\"]"
+    },
+    {
+      "phase": "network",
+      "name": "Network 3D Map canvas re-check",
+      "status": "pass",
+      "notes": "{\"w\":352,\"h\":428,\"found\":true}"
+    }
+  ]
+}
