@@ -61,7 +61,10 @@ export type NetworkEventType =
   | "device_flagged"
   | "router_status_changed"
   | "scan_failed"
-  | "network_context_changed";
+  | "network_context_changed"
+  | "speed_test_started"
+  | "speed_test_completed"
+  | "speed_test_failed";
 
 export type ScanMode = "quick" | "balanced" | "deep";
 

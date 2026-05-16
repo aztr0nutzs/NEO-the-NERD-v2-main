@@ -5,6 +5,7 @@ import type {
   NetworkEvent,
   NetworkHealthSnapshot,
   ScanComparisonSummary,
+  SpeedTestResult,
 } from "@/lib/network/types"
 
 export interface NetworkReportInput {
@@ -17,6 +18,7 @@ export interface NetworkReportInput {
   latestScan: ScanComparisonSummary | null
   adapterLabel?: string
   adapterIsDemo?: boolean
+  speedTestHistory?: SpeedTestResult[]
 }
 
 export interface NetworkReportSection<T> {
@@ -82,6 +84,19 @@ export interface AlertRow {
   relatedDeviceId: string
 }
 
+export interface SpeedTestRow {
+  id: string
+  startedAt: string
+  completedAt: string
+  provider: string
+  downloadMbps: number
+  uploadMbps: number | null
+  latencyMs: number
+  jitterMs: number
+  success: boolean
+  failureReason: string
+}
+
 export interface HealthRow {
   id: string
   timestamp: string
@@ -100,6 +115,7 @@ export interface NetworkReport {
   events: NetworkReportSection<EventRow>
   alerts: NetworkReportSection<AlertRow>
   health: NetworkReportSection<HealthRow>
+  speedTests: NetworkReportSection<SpeedTestRow>
 }
 
 function deviceRow(
@@ -145,6 +161,21 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
   const newIds = new Set(input.latestScan?.newDeviceIds ?? [])
   const offlineIds = new Set(input.latestScan?.offlineDeviceIds ?? [])
   const latestHealth = selectLatestHealthSnapshot(input.healthSnapshots)
+  const speedTests = [...(input.speedTestHistory ?? [])]
+    .sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())
+  const latestSpeedTestRun = speedTests[0] ?? null
+  const speedTestRows: SpeedTestRow[] = speedTests.slice(0, 30).map((run) => ({
+    id: run.id,
+    startedAt: run.startedAt,
+    completedAt: run.completedAt,
+    provider: run.provider,
+    downloadMbps: Number(run.downloadMbps.toFixed(2)),
+    uploadMbps: run.uploadMbps === null ? null : Number(run.uploadMbps.toFixed(2)),
+    latencyMs: Number(run.latencyMs.toFixed(2)),
+    jitterMs: Number(run.jitterMs.toFixed(2)),
+    success: run.success,
+    failureReason: run.failureReason ?? "",
+  }))
 
   const deviceRows = devices.map((device) => deviceRow(device, newIds, offlineIds))
   const flaggedRows = deviceRows.filter((row) => row.flagged)
@@ -211,7 +242,15 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
       deviceRows.filter((row) => row.trustLevel === "blocked").length,
     lastScanAt: status?.lastScanAt ?? null,
     latestHealth,
-    latestSpeedTest: latestHealth?.diagnostics.find((probe) => probe.key === "throughput")?.value ?? null,
+    // Prefer the standalone Speed Test run if one exists; fall back to the
+    // diagnostics-derived value so older reports remain meaningful.
+    latestSpeedTest: latestSpeedTestRun
+      ? `down ${latestSpeedTestRun.downloadMbps.toFixed(2)} Mbps · ${
+          latestSpeedTestRun.uploadMbps === null
+            ? "up n/a"
+            : `up ${latestSpeedTestRun.uploadMbps.toFixed(2)} Mbps`
+        } · lat ${Math.round(latestSpeedTestRun.latencyMs)}ms · ${latestSpeedTestRun.provider}`
+      : latestHealth?.diagnostics.find((probe) => probe.key === "throughput")?.value ?? null,
   }
 
   return {
@@ -246,6 +285,13 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
       description: "Up to 30 most recent health snapshots.",
       count: healthRows.length,
       items: healthRows,
+    },
+    speedTests: {
+      title: "Speed test history",
+      description:
+        "Up to 30 most recent throughput runs. download/upload Mbps are from real transferred bytes; latency is HTTPS request round-trip, not ICMP.",
+      count: speedTestRows.length,
+      items: speedTestRows,
     },
   }
 }

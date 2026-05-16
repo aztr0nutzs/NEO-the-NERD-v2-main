@@ -4,37 +4,36 @@
  * Faithful port of nerd_speed.html into NEO. The HUD layout, sphere gauge,
  * dual-value readout, stat panels, jitter bars, control strip, telemetry log,
  * safe-mode toggle, and Execute/Abort buttons are reproduced as in the source.
- * Only the colors are remapped from the source palette (cyan/pink/green/yellow)
- * to the NEO palette (cyan/pink/green/orange) defined in app/globals.css.
+ * Colors are remapped to the NEO palette (cyan/pink/green/orange) defined in
+ * app/globals.css. All metrics are produced by the real streaming engine in
+ * `lib/network/speedTestRunner.ts` — nothing on screen is fabricated.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Activity, Bolt, Rocket as RocketIcon, X, type LucideIcon } from "lucide-react"
+import { Activity, Bolt, Eraser, Rocket as RocketIcon, X, type LucideIcon } from "lucide-react"
+import { useApp } from "@/lib/store"
+import {
+  defaultCloudflarePreset,
+  runStreamingSpeedTest,
+  type SpeedTestRunStatus,
+} from "@/lib/network/speedTestRunner"
+import type { SpeedTestConfig, SpeedTestResult } from "@/lib/network/types"
 
 const NEO = {
   cyan: "#00f0ff",
   pink: "#ff2d9c",
   green: "#39ff14",
-  yellow: "#ff7a00", // NEO "warm accent" — replaces the source HUD's yellow
+  yellow: "#ff7a00",
   text: "rgba(231,251,255,0.92)",
 } as const
 
 interface SpeedTestScreenProps {
-  /** Optional internal test seam — defaults to live Cloudflare endpoints. */
-  endpoints?: {
-    latency: string
-    download: (bytes: number) => string
-    upload: string
-  }
+  /** Override the test configuration (e.g. point at a custom endpoint). */
+  configOverride?: Partial<SpeedTestConfig>
 }
 
-const DEFAULT_ENDPOINTS = {
-  latency: "https://www.cloudflare.com/cdn-cgi/trace",
-  download: (bytes: number) => `https://speed.cloudflare.com/__down?bytes=${bytes}`,
-  upload: "https://speed.cloudflare.com/__up",
-} as const
-
 type TelemetryColor = "cyan" | "pink" | "green" | "yellow"
+type LogLevel = "info" | "warn" | "error" | "ok"
 
 interface TelemetryLine {
   id: number
@@ -42,11 +41,31 @@ interface TelemetryLine {
   color: TelemetryColor
 }
 
-export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScreenProps = {}) {
+const STATUS_COLOR: Record<SpeedTestRunStatus, TelemetryColor> = {
+  idle: "pink",
+  preparing: "cyan",
+  latency: "pink",
+  download: "cyan",
+  upload: "green",
+  complete: "green",
+  aborted: "pink",
+  failed: "pink",
+}
+
+const LOG_LEVEL_COLOR: Record<LogLevel, TelemetryColor> = {
+  info: "cyan",
+  warn: "yellow",
+  error: "pink",
+  ok: "green",
+}
+
+export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
+  const { recordSpeedTestStarted, recordSpeedTestResult, speedTestHistory, clearSpeedTestHistory } =
+    useApp()
+
   // Probe state — preserves the source HUD's IDLE / INJECTING_PACKETS /
   // PULLING_PAYLOADS / PUSHING_UPLINK / COMPLETE / ABORT / HALT phases.
   const [statusLabel, setStatusLabel] = useState("IDLE")
-  const [statusColor, setStatusColor] = useState<TelemetryColor>("pink")
   const [probeStatus, setProbeStatus] = useState("READY")
   const [probeColor, setProbeColor] = useState<TelemetryColor>("green")
   const [mainValue, setMainValue] = useState(0)
@@ -58,12 +77,18 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
   const [safeMode, setSafeMode] = useState(true)
   const [running, setRunning] = useState(false)
   const [telemetry, setTelemetry] = useState<TelemetryLine[]>([])
+  const [uploadConfigured, setUploadConfigured] = useState<boolean>(
+    Boolean(configOverride?.uploadUrl),
+  )
 
-  const abortRef = useRef(false)
+  const abortRef = useRef<AbortController | null>(null)
   const telemetryRef = useRef<HTMLDivElement | null>(null)
+  const logSeqRef = useRef(0)
 
-  const log = useCallback((text: string, color: TelemetryColor = "cyan") => {
-    setTelemetry((prev) => [...prev, { id: prev.length + 1, text, color }])
+  const pushLog = useCallback((text: string, color: TelemetryColor = "cyan") => {
+    logSeqRef.current += 1
+    const id = logSeqRef.current
+    setTelemetry((prev) => [...prev, { id, text, color }])
   }, [])
 
   useEffect(() => {
@@ -144,73 +169,97 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
   }, [])
 
   /* ============================================================
-     Probe pipeline — same shape as the source: latency, download,
-     upload, in that order, with abort checkpoints between phases.
+     Real probe — drives every readout from the streaming runner's
+     callbacks. No values are invented; download Mbps animates from
+     the live byte stream, latency/jitter come from real samples,
+     upload only runs when an endpoint is configured.
   ============================================================ */
   const handleExecute = useCallback(async () => {
     if (running) return
-    abortRef.current = false
+    const ctrl = new AbortController()
+    abortRef.current = ctrl
+
+    const baseConfig = defaultCloudflarePreset(safeMode)
+    const config: SpeedTestConfig = { ...baseConfig, ...configOverride }
+    setUploadConfigured(Boolean(config.uploadUrl))
+
+    // Reset readouts for the new run.
     setRunning(true)
     setTelemetry([])
+    logSeqRef.current = 0
+    setMainValue(0)
+    setDlValue("--")
+    setUlValue(config.uploadUrl ? "--" : "N/A")
+    setPingMedian("--")
+    setJitter("--")
+    setJitterBars(seedJitterBars(2))
     setProbeStatus("RUNNING")
     setProbeColor("green")
-    setStatusLabel("INJECTING_PACKETS")
-    setStatusColor("pink")
-    log("PROBE START", "green")
+    setStatusLabel("PREPARING")
 
+    const runId = `speed-${Date.now()}`
+    recordSpeedTestStarted(runId, config.provider)
+
+    let result: SpeedTestResult
     try {
-      const p = await testLatency({ safe: safeMode, abortRef, url: endpoints.latency })
-      if (abortRef.current) throw new Error("ABORTED")
-      setPingMedian(String(Math.round(p.median)))
-      setJitter(String(Math.round(p.jitter)))
-      setJitterBars(seedJitterBars(p.jitter || 2))
-      log(`PING_MEDIAN=${Math.round(p.median)}ms JITTER=${Math.round(p.jitter)}ms`, "cyan")
-
-      setStatusLabel("PULLING_PAYLOADS")
-      setStatusColor("cyan")
-      const dl = await testDownload({
-        safe: safeMode,
-        abortRef,
-        url: endpoints.download(safeMode ? 6_000_000 : 12_000_000),
-        onTick: (mbps) => setMainValue(mbps),
-        log,
+      result = await runStreamingSpeedTest(config, {
+        signal: ctrl.signal,
+        onStatus: (status, label) => {
+          setStatusLabel(label)
+          setProbeColor(STATUS_COLOR[status])
+        },
+        onLog: (line) => pushLog(line.message, LOG_LEVEL_COLOR[line.level]),
+        onLatencySample: (sample) => {
+          // While the latency phase runs, surface the running sample count.
+          pushLog(`PING_SAMPLE ${sample.index}/${sample.total}=${Math.round(sample.sampleMs)}ms`, "cyan")
+        },
+        onLatencySummary: (summary) => {
+          setPingMedian(String(Math.round(summary.latencyMs)))
+          setJitter(String(Math.round(summary.jitterMs)))
+          setJitterBars(seedJitterBars(summary.jitterMs || 2))
+        },
+        onDownloadTick: (tick) => {
+          // Real live mbps — this is what feeds the main gauge animation.
+          setMainValue(tick.mbps)
+        },
+        onUploadComplete: (info) => {
+          if (info.mbps === null) {
+            setUlValue(info.reason === "upload-not-configured" ? "N/A" : "FAIL")
+          } else {
+            setUlValue(info.mbps.toFixed(1))
+          }
+        },
       })
-      if (abortRef.current) throw new Error("ABORTED")
-      setDlValue(dl.toFixed(1))
-      setMainValue(dl)
-      log(`DL=${dl.toFixed(1)} Mbps`, "yellow")
-
-      setStatusLabel("PUSHING_UPLINK")
-      setStatusColor("green")
-      const ul = await testUpload({ safe: safeMode, abortRef, url: endpoints.upload, log })
-      if (abortRef.current) throw new Error("ABORTED")
-      setUlValue(ul.toFixed(1))
-      log(`UL=${ul.toFixed(1)} Mbps`, "yellow")
-
-      setStatusLabel("COMPLETE")
-      setStatusColor("pink")
-      setProbeStatus("READY")
-      setProbeColor("green")
-      log("PROBE COMPLETE", "green")
-    } catch (err) {
-      setStatusLabel("HALT")
-      setStatusColor("pink")
-      setProbeStatus("READY")
-      setProbeColor("green")
-      log(`ERROR=${err instanceof Error ? err.message : String(err)}`, "pink")
     } finally {
+      abortRef.current = null
       setRunning(false)
     }
-  }, [endpoints, log, running, safeMode])
+
+    // Final commits derived from the result the runner returned.
+    setDlValue(result.downloadMbps.toFixed(1))
+    if (result.uploadMbps !== null) setUlValue(result.uploadMbps.toFixed(1))
+    setMainValue(result.downloadMbps)
+    setPingMedian(String(Math.round(result.latencyMs)))
+    setJitter(String(Math.round(result.jitterMs)))
+
+    if (result.success) {
+      setProbeStatus("READY")
+      setProbeColor("green")
+    } else {
+      setProbeStatus(result.failureReason === "aborted" ? "ABORTED" : "FAILED")
+      setProbeColor("pink")
+    }
+
+    recordSpeedTestResult(result)
+  }, [configOverride, pushLog, recordSpeedTestResult, recordSpeedTestStarted, running, safeMode])
 
   const handleAbort = useCallback(() => {
-    abortRef.current = true
-    setProbeStatus("ABORTED")
+    abortRef.current?.abort()
+    setProbeStatus("ABORTING")
     setProbeColor("pink")
     setStatusLabel("ABORT")
-    setStatusColor("pink")
-    log("ABORT SIGNAL SENT", "pink")
-  }, [log])
+    pushLog("ABORT_SIGNAL_SENT", "pink")
+  }, [pushLog])
 
   const mainDisplay = useMemo(() => mainValue.toFixed(1), [mainValue])
 
@@ -221,7 +270,6 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
     >
       <ScopedSpeedStyles />
 
-      {/* Top header strip — matches the source TOP BAR composition */}
       <header
         className="speedtest-topbar flex w-full items-center justify-between rounded-lg px-3 py-2"
         style={{
@@ -266,7 +314,6 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
         </div>
       </header>
 
-      {/* Gauge block */}
       <div className="rotating-sphere-container relative mx-auto flex aspect-square w-full max-w-[340px] items-center justify-center">
         <div
           className="absolute inset-0 rounded-full border opacity-30"
@@ -349,12 +396,11 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
         </div>
       </div>
 
-      {/* Stat panels — Ping Median + Jitter */}
       <div className="grid w-full grid-cols-2 gap-3">
         <Panel accent={NEO.cyan} cp>
           <div className="flex items-start justify-between">
             <span className="hud-mono text-[9px] font-black" style={{ color: NEO.cyan }}>
-              PING MEDIAN
+              REQUEST LATENCY
             </span>
             <Bolt className="h-3 w-3" style={{ color: NEO.cyan }} aria-hidden="true" />
           </div>
@@ -369,7 +415,7 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
               className="hud-mono text-[9px] font-bold opacity-70"
               style={{ color: "rgba(255,255,255,0.7)" }}
             >
-              ms
+              ms · median
             </span>
           </div>
           <div className="mt-2 h-1 w-full" style={{ background: "rgba(255,255,255,0.08)" }}>
@@ -377,7 +423,8 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
               className="h-full w-full"
               style={{
                 background: `linear-gradient(90deg, transparent, ${rgba(NEO.cyan, 0.9)}, transparent)`,
-                animation: "ps-pulse-ring 1.6s ease-in-out infinite",
+                animation: running ? "ps-pulse-ring 1.6s ease-in-out infinite" : undefined,
+                opacity: running ? 1 : 0.3,
               }}
             />
           </div>
@@ -386,7 +433,7 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
         <Panel accent={NEO.pink} cp>
           <div className="flex items-start justify-between">
             <span className="hud-mono text-[9px] font-black" style={{ color: NEO.pink }}>
-              JITTER
+              JITTER (σ)
             </span>
             <Activity className="h-3 w-3" style={{ color: NEO.pink }} aria-hidden="true" />
           </div>
@@ -419,7 +466,6 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
         </Panel>
       </div>
 
-      {/* Control strip */}
       <Panel accent={NEO.yellow} cp className="w-full">
         <div className="flex items-center justify-between">
           <div className="flex flex-col leading-tight">
@@ -484,6 +530,15 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
           />
         </div>
 
+        {!uploadConfigured && (
+          <p
+            className="hud-mono mt-3 text-[9px] font-black"
+            style={{ color: rgba(NEO.yellow, 0.85), letterSpacing: "0.10em" }}
+          >
+            UL_ENDPOINT_NOT_CONFIGURED — upload reads N/A until an upload URL is wired in.
+          </p>
+        )}
+
         <div className="mt-4">
           <div
             className="hud-mono mb-2 text-[9px] font-black opacity-70"
@@ -521,6 +576,16 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
           </div>
         </div>
       </Panel>
+
+      <RecentResultsPanel runs={speedTestHistory} onClear={clearSpeedTestHistory} />
+
+      <p
+        className="hud-mono px-2 pb-4 text-center text-[9px] font-bold opacity-60"
+        style={{ color: "rgba(255,255,255,0.65)", letterSpacing: "0.10em" }}
+      >
+        MEASURES HTTPS REQUEST LATENCY & REAL DOWNLOAD THROUGHPUT FROM THE CONFIGURED ENDPOINT.
+        RESULTS REFLECT INTERNET-PATH PERFORMANCE, NOT LAN-INTERNAL DEVICE SPEEDS.
+      </p>
     </div>
   )
 }
@@ -528,6 +593,77 @@ export function SpeedTestScreen({ endpoints = DEFAULT_ENDPOINTS }: SpeedTestScre
 /* =====================================================================
    Internal pieces
 ===================================================================== */
+
+function RecentResultsPanel({
+  runs,
+  onClear,
+}: {
+  runs: SpeedTestResult[]
+  onClear: () => void
+}) {
+  if (!runs.length) return null
+  const last = runs.slice(0, 5)
+  return (
+    <Panel accent={NEO.green} cp className="w-full">
+      <div className="flex items-center justify-between">
+        <span className="hud-mono text-[9px] font-black" style={{ color: NEO.green }}>
+          RECENT RUNS
+        </span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="hud-mono inline-flex items-center gap-1 text-[9px] font-black opacity-70"
+          style={{ color: "rgba(255,255,255,0.7)", letterSpacing: "0.10em" }}
+        >
+          <Eraser className="h-3 w-3" aria-hidden="true" />
+          CLEAR
+        </button>
+      </div>
+      <div className="mt-2 grid gap-2">
+        {last.map((run) => (
+          <div
+            key={run.id}
+            className="cpclip grid grid-cols-4 items-baseline gap-2 px-3 py-2"
+            style={{
+              background: "rgba(0,0,0,0.85)",
+              border: `1px solid ${rgba(run.success ? NEO.green : NEO.pink, 0.4)}`,
+            }}
+          >
+            <span
+              className="hud-mono text-[9px] font-bold opacity-70"
+              style={{ color: "rgba(255,255,255,0.7)" }}
+            >
+              {new Date(run.completedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+            <Metric label="DL" value={`${run.downloadMbps.toFixed(1)}`} color={NEO.cyan} />
+            <Metric
+              label="UL"
+              value={run.uploadMbps === null ? "N/A" : run.uploadMbps.toFixed(1)}
+              color={NEO.pink}
+            />
+            <Metric label="LAT" value={`${Math.round(run.latencyMs)}ms`} color={NEO.yellow} />
+          </div>
+        ))}
+      </div>
+    </Panel>
+  )
+}
+
+function Metric({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div className="flex flex-col leading-tight">
+      <span
+        className="hud-mono text-[8px] font-black opacity-65"
+        style={{ color: "rgba(255,255,255,0.7)" }}
+      >
+        {label}
+      </span>
+      <span className="hud-text-tight text-[11px] font-black italic" style={{ color }}>
+        {value}
+      </span>
+    </div>
+  )
+}
 
 function Panel({
   children,
@@ -669,10 +805,6 @@ function ScopedSpeedStyles() {
   )
 }
 
-/* =====================================================================
-   Probe helpers — ported from nerd_speed.html
-===================================================================== */
-
 function seedJitterBars(ms: number): number[] {
   const base = Math.max(2, Math.min(30, ms || 2))
   return Array.from({ length: 10 }, () =>
@@ -686,116 +818,4 @@ function rgba(hex: string, alpha: number) {
   const g = parseInt(m.slice(2, 4), 16)
   const b = parseInt(m.slice(4, 6), 16)
   return `rgba(${r},${g},${b},${alpha})`
-}
-
-async function fetchWithTimeout(url: string, timeoutMs: number, init?: RequestInit) {
-  const ctrl = new AbortController()
-  const to = window.setTimeout(() => ctrl.abort(), timeoutMs)
-  try {
-    return await fetch(url, { cache: "no-store", mode: "cors", signal: ctrl.signal, ...init })
-  } finally {
-    window.clearTimeout(to)
-  }
-}
-
-function sleep(ms: number) {
-  return new Promise<void>((r) => window.setTimeout(r, ms))
-}
-
-interface AbortLike {
-  current: boolean
-}
-
-async function testLatency({
-  safe,
-  abortRef,
-  url,
-}: {
-  safe: boolean
-  abortRef: AbortLike
-  url: string
-}): Promise<{ median: number; jitter: number }> {
-  const samples = safe ? 8 : 14
-  const timeoutMs = safe ? 1400 : 1800
-  const times: number[] = []
-  for (let i = 0; i < samples; i++) {
-    if (abortRef.current) throw new Error("ABORTED")
-    const t0 = performance.now()
-    await fetchWithTimeout(`${url}?${Date.now()}-${i}`, timeoutMs).catch(() => null)
-    times.push(performance.now() - t0)
-    await sleep(70)
-  }
-  if (times.length === 0) return { median: 0, jitter: 0 }
-  times.sort((a, b) => a - b)
-  const median = times[Math.floor(times.length / 2)]
-  const mean = times.reduce((s, v) => s + v, 0) / times.length
-  const variance = times.reduce((s, v) => s + (v - mean) ** 2, 0) / times.length
-  return { median, jitter: Math.sqrt(variance) }
-}
-
-async function testDownload({
-  safe,
-  abortRef,
-  url,
-  onTick,
-  log,
-}: {
-  safe: boolean
-  abortRef: AbortLike
-  url: string
-  onTick: (mbps: number) => void
-  log: (msg: string, color: TelemetryColor) => void
-}): Promise<number> {
-  const timeoutMs = safe ? 9000 : 12000
-  const t0 = performance.now()
-  let bytes = 0
-  const res = await fetchWithTimeout(`${url}&${Date.now()}`, timeoutMs).catch(() => null)
-  if (!res || !res.body) {
-    log("DL_ENDPOINT_BLOCKED (CORS/FILE MODE). DISPLAYING 0.0", "pink")
-    return 0
-  }
-  const reader = res.body.getReader()
-  while (true) {
-    if (abortRef.current) throw new Error("ABORTED")
-    const { value, done } = await reader.read()
-    if (done) break
-    bytes += value?.byteLength ?? 0
-    const dt = (performance.now() - t0) / 1000
-    if (dt > (safe ? 6.5 : 8.5)) break
-    const mbpsLive = (bytes * 8) / (dt * 1e6)
-    onTick(mbpsLive)
-  }
-  const secs = (performance.now() - t0) / 1000
-  const mbps = (bytes * 8) / (secs * 1e6)
-  return Number.isFinite(mbps) ? mbps : 0
-}
-
-async function testUpload({
-  safe,
-  abortRef,
-  url,
-  log,
-}: {
-  safe: boolean
-  abortRef: AbortLike
-  url: string
-  log: (msg: string, color: TelemetryColor) => void
-}): Promise<number> {
-  const timeoutMs = safe ? 9000 : 12000
-  const bytes = safe ? 2_500_000 : 5_000_000
-  const payload = new Uint8Array(bytes)
-  crypto.getRandomValues(payload)
-  if (abortRef.current) throw new Error("ABORTED")
-  const t0 = performance.now()
-  await fetchWithTimeout(`${url}?${Date.now()}`, timeoutMs, {
-    method: "POST",
-    body: payload,
-  }).catch(() => null)
-  const secs = (performance.now() - t0) / 1000
-  const mbps = (bytes * 8) / (secs * 1e6)
-  if (!Number.isFinite(mbps) || mbps < 0) {
-    log("UL_ENDPOINT_BLOCKED (CORS/FILE MODE). DISPLAYING 0.0", "pink")
-    return 0
-  }
-  return mbps
 }

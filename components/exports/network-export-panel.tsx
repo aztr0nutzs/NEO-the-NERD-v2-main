@@ -64,6 +64,7 @@ export function NetworkExportPanel() {
     networkMonitorState,
     persistedNetworkSettings,
     settings,
+    speedTestHistory,
   } = useApp()
 
   const [bundle, setBundle] = useState<Bundle>("network-report")
@@ -86,6 +87,7 @@ export function NetworkExportPanel() {
         latestScan: lastNetworkScanDelta,
         adapterLabel,
         adapterIsDemo,
+        speedTestHistory,
       }),
     [
       adapterIsDemo,
@@ -95,6 +97,7 @@ export function NetworkExportPanel() {
       networkAssistantSnapshot,
       networkEvents,
       networkHealthSnapshots,
+      speedTestHistory,
     ],
   )
 
@@ -111,6 +114,7 @@ export function NetworkExportPanel() {
         latestScan: lastNetworkScanDelta,
         adapterLabel,
         adapterIsDemo,
+        speedTestHistory,
       })
 
       let aiSummary: string | undefined
@@ -171,6 +175,7 @@ export function NetworkExportPanel() {
     networkEvents,
     networkHealthSnapshots,
     networkMonitorState,
+    speedTestHistory,
   ])
 
   const handleCopy = useCallback(async () => {
@@ -184,6 +189,7 @@ export function NetworkExportPanel() {
         latestScan: lastNetworkScanDelta,
         adapterLabel,
         adapterIsDemo,
+        speedTestHistory,
       })
       const serialized =
         bundle === "device-inventory"
@@ -211,6 +217,7 @@ export function NetworkExportPanel() {
     networkAssistantSnapshot,
     networkEvents,
     networkHealthSnapshots,
+    speedTestHistory,
   ])
 
   return (

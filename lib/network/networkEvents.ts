@@ -7,6 +7,7 @@ import type {
   ScanComparisonSummary,
   ScanMode,
   InsightSeverity,
+  SpeedTestResult,
 } from "./types";
 
 export const NETWORK_EVENT_RETENTION_LIMIT = 500;
@@ -80,6 +81,46 @@ export function createScanStartedEvent(scanId: string, scanMode: ScanMode, times
     timestamp,
     sourceScanId: scanId,
     detail: { scanId, scanMode },
+  });
+}
+
+export function createSpeedTestStartedEvent(runId: string, provider: string, timestamp = new Date().toISOString()) {
+  return createNetworkEvent({
+    type: "speed_test_started",
+    severity: "info",
+    title: "Speed test started",
+    timestamp,
+    detail: { runId, provider },
+  });
+}
+
+export function createSpeedTestCompletedEvent(result: SpeedTestResult) {
+  const upload = result.uploadMbps === null ? "n/a" : `${result.uploadMbps.toFixed(2)} Mbps`;
+  return createNetworkEvent({
+    type: "speed_test_completed",
+    severity: "info",
+    title: `Speed test complete: ↓${result.downloadMbps.toFixed(2)} Mbps · ↑${upload}`,
+    timestamp: result.completedAt,
+    detail: {
+      runId: result.id,
+      provider: result.provider,
+      downloadMbps: Number(result.downloadMbps.toFixed(2)),
+      uploadMbps: result.uploadMbps === null ? "n/a" : Number(result.uploadMbps.toFixed(2)),
+      latencyMs: Number(result.latencyMs.toFixed(2)),
+      jitterMs: Number(result.jitterMs.toFixed(2)),
+      bytesDown: result.testBytesDownloaded,
+      bytesUp: result.testBytesUploaded,
+    },
+  });
+}
+
+export function createSpeedTestFailedEvent(runId: string, provider: string, errorMessage: string, timestamp = new Date().toISOString()) {
+  return createNetworkEvent({
+    type: "speed_test_failed",
+    severity: "medium",
+    title: "Speed test failed",
+    timestamp,
+    detail: { runId, provider, errorMessage },
   });
 }
 

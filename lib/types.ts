@@ -7,6 +7,7 @@ import type {
   NetworkMonitorState,
   NetworkSettings,
   ScanComparisonSummary,
+  SpeedTestResult,
 } from "./network/types"
 import type { EntitlementState } from "./entitlements/tiers"
 
@@ -147,6 +148,7 @@ export interface PersistedAppState {
   networkAlerts?: NetworkAlert[]
   networkHealthSnapshots?: NetworkHealthSnapshot[]
   networkAssistantSnapshot?: NetworkAssistantSnapshot | null
+  speedTestHistory?: SpeedTestResult[]
 }
 
 export type ConversationMode =

@@ -37,7 +37,14 @@ import type {
   NetworkMonitorState,
   NetworkSettings,
   ScanComparisonSummary,
+  SpeedTestResult,
 } from "./network/types"
+import {
+  createSpeedTestCompletedEvent,
+  createSpeedTestFailedEvent,
+  createSpeedTestStartedEvent,
+  appendNetworkEvents,
+} from "./network/networkEvents"
 import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
 import {
   duplicateResponse,
@@ -136,6 +143,10 @@ interface AppState {
   setNetworkHealthSnapshots: Dispatch<SetStateAction<NetworkHealthSnapshot[]>>
   networkAssistantSnapshot: NetworkAssistantSnapshot | null
   setNetworkAssistantSnapshot: Dispatch<SetStateAction<NetworkAssistantSnapshot | null>>
+  speedTestHistory: SpeedTestResult[]
+  recordSpeedTestStarted: (runId: string, provider: string) => void
+  recordSpeedTestResult: (result: SpeedTestResult) => void
+  clearSpeedTestHistory: () => void
 
   notificationOpen: boolean
   setNotificationOpen: (o: boolean) => void
@@ -329,6 +340,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [networkHealthSnapshots, setNetworkHealthSnapshots] = useState<NetworkHealthSnapshot[]>([])
   const [networkAssistantSnapshot, setNetworkAssistantSnapshot] =
     useState<NetworkAssistantSnapshot | null>(null)
+  const [speedTestHistory, setSpeedTestHistory] = useState<SpeedTestResult[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -355,6 +367,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkAlerts,
       networkHealthSnapshots,
       networkAssistantSnapshot,
+      speedTestHistory,
     }),
     [
       accentColor,
@@ -368,6 +381,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkAlerts,
       networkHealthSnapshots,
       networkAssistantSnapshot,
+      speedTestHistory,
       personalityId,
       recentVoiceIds,
       responses,
@@ -430,6 +444,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setNetworkHealthSnapshots(stored.networkHealthSnapshots)
     }
     if (stored.networkAssistantSnapshot) setNetworkAssistantSnapshot(stored.networkAssistantSnapshot)
+    if (stored.speedTestHistory?.length) setSpeedTestHistory(stored.speedTestHistory)
+  }, [])
+
+  const recordSpeedTestStarted = useCallback((runId: string, provider: string) => {
+    setNetworkEvents((current) =>
+      appendNetworkEvents(current, [createSpeedTestStartedEvent(runId, provider)]),
+    )
+  }, [])
+
+  const recordSpeedTestResult = useCallback((result: SpeedTestResult) => {
+    setSpeedTestHistory((current) => [result, ...current].slice(0, 50))
+    setNetworkEvents((current) => {
+      const event = result.success
+        ? createSpeedTestCompletedEvent(result)
+        : createSpeedTestFailedEvent(
+            result.id,
+            result.provider,
+            result.failureReason ?? "unknown-error",
+            result.completedAt,
+          )
+      return appendNetworkEvents(current, [event])
+    })
+  }, [])
+
+  const clearSpeedTestHistory = useCallback(() => {
+    setSpeedTestHistory([])
   }, [])
 
   useEffect(() => {
@@ -876,6 +916,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           networkAlerts: parsed.networkAlerts ?? networkAlerts,
           networkHealthSnapshots: parsed.networkHealthSnapshots ?? networkHealthSnapshots,
           networkAssistantSnapshot: parsed.networkAssistantSnapshot ?? networkAssistantSnapshot,
+          speedTestHistory: parsed.speedTestHistory ?? speedTestHistory,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -898,6 +939,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkAlerts,
       networkHealthSnapshots,
       networkAssistantSnapshot,
+      speedTestHistory,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -930,6 +972,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setNetworkAlerts([])
     setNetworkHealthSnapshots([])
     setNetworkAssistantSnapshot(null)
+    setSpeedTestHistory([])
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -959,6 +1002,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkAlerts, setNetworkAlerts,
       networkHealthSnapshots, setNetworkHealthSnapshots,
       networkAssistantSnapshot, setNetworkAssistantSnapshot,
+      speedTestHistory, recordSpeedTestStarted, recordSpeedTestResult, clearSpeedTestHistory,
       notificationOpen, setNotificationOpen,
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
     }),
@@ -977,6 +1021,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkAlerts,
       networkHealthSnapshots,
       networkAssistantSnapshot,
+      speedTestHistory,
+      recordSpeedTestStarted,
+      recordSpeedTestResult,
+      clearSpeedTestHistory,
       sendMessage, clearMessages, toggleFavorite, deleteResponse, restoreResponse, restoreAllArchived, addResponse,
       updateResponse, duplicateSavedResponse, togglePinnedResponse, useResponseInChat,
       exportResponses, importResponses,
