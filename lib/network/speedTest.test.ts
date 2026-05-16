@@ -34,9 +34,10 @@ assert.equal(preset.mode, "internet");
 assert.ok(preset.downloadUrl.includes("speed.cloudflare.com"));
 assert.equal(preset.uploadUrl, undefined, "default preset has no upload endpoint — keeps results honest");
 
-// Failure path: bogus fetch URL drives the runner through failed status without throwing
-// Skip when running under Node without fetch (e.g. <18). We just exercise the type contract.
-if (typeof fetch === "function") {
+// Failure path: bogus fetch URL drives the runner through failed status
+// without throwing. Wrapped in an async IIFE to avoid top-level await.
+async function failurePathSmokeTest() {
+  if (typeof fetch !== "function") return;
   const statuses: SpeedTestRunStatus[] = [];
   const result = await runStreamingSpeedTest(
     {
@@ -58,4 +59,9 @@ if (typeof fetch === "function") {
   assert.ok(typeof result.failureReason === "string", "failure reason set");
 }
 
-console.log("speedTest logic checks passed");
+failurePathSmokeTest()
+  .then(() => console.log("speedTest logic checks passed"))
+  .catch((err) => {
+    console.error("speedTest test failed", err);
+    process.exitCode = 1;
+  });

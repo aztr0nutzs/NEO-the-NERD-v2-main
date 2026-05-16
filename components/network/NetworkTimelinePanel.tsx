@@ -40,6 +40,9 @@ const TYPE_LABELS: Record<NetworkEventType, string> = {
   router_status_changed: "ROUTER_CHANGED",
   scan_failed: "SCAN_FAILED",
   network_context_changed: "CONTEXT_CHANGED",
+  speed_test_started: "SPEED_STARTED",
+  speed_test_completed: "SPEED_COMPLETE",
+  speed_test_failed: "SPEED_FAILED",
 };
 
 const SEVERITY_STYLES: Record<InsightSeverity, string> = {
