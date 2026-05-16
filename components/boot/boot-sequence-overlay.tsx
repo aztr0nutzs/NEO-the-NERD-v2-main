@@ -43,7 +43,7 @@ export function BootSequenceOverlay({ onBootComplete }: BootSequenceOverlayProps
   }, [])
 
   const handleExitComplete = useCallback(() => {
-    if (completionStatusRef.current === "success") {
+    if (completionStatusRef.current !== "none") {
       onBootComplete?.()
     }
     completionStatusRef.current = "none"
