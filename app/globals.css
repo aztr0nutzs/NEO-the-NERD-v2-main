@@ -174,11 +174,44 @@
     );
   }
   .ps-glass {
+    /*
+      Panel substrate. The base alpha was 0.7, which let the animated
+      background bleed through enough to wash out title/value pairs on
+      bright frames. Raising the substrate to ~0.84 and dropping the
+      saturation slightly keeps the cyber-glass feel (you can still see
+      the background through the blur) but gives copy a clearly darker
+      field to sit on. The top highlight is preserved so the panels
+      still catch the NEO neon glow.
+    */
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
-      rgba(8, 8, 14, 0.7);
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+      rgba(6, 6, 12, 0.84);
+    backdrop-filter: blur(16px) saturate(130%);
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+  }
+  .ps-glass-strong {
+    /*
+      Data-heavy variant for panels that carry critical telemetry —
+      Speed Test rings, Mission Control summary cards, Network status
+      readouts. Almost opaque so numerals pop, with the same glow-friendly
+      top highlight.
+    */
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+      rgba(4, 4, 10, 0.92);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+  }
+  /*
+    Content-area scrim. Sits behind the screen viewport but above the
+    animated background and global scrim. Used on screens where panels
+    are dense and the background's brightest stripe would otherwise
+    cut straight through the layout. Width-bounded so the background
+    is still visible around the edges of the column.
+  */
+  .ps-content-shade {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0.30) 100%);
   }
   .ps-glow-cyan {
     box-shadow:

@@ -1125,7 +1125,7 @@ export function NetworkDiscoveryFeature() {
         <header className="mb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <div className="mb-2 flex items-center gap-2 font-mono text-xs text-gray-500">
+              <div className="mb-2 flex items-center gap-2 font-mono text-xs text-cyan-300/80">
                 <Network className="h-3.5 w-3.5" />
                 <span>N.E.O. // NETWORK_MODULE</span>
               </div>
@@ -1139,7 +1139,7 @@ export function NetworkDiscoveryFeature() {
               >
                 NETWORK DISCOVERY + CONTROL
               </h1>
-              <p className="mt-1 font-mono text-xs text-gray-500 sm:text-sm">
+              <p className="mt-1 font-mono text-xs text-gray-300/90 sm:text-sm">
                 Map nearby devices, review activity, and queue safe control actions from the N.E.O.
                 command layer.
               </p>
@@ -1454,8 +1454,8 @@ export function NetworkDiscoveryFeature() {
         </Tabs>
 
         {/* Footer - with padding for dock */}
-        <footer className="mt-8 border-t border-gray-800 pb-2 pt-4">
-          <p className="text-center font-mono text-[10px] text-gray-600">
+        <footer className="mt-8 border-t border-gray-700/70 pb-2 pt-4">
+          <p className="text-center font-mono text-[10px] text-gray-400">
             {`N.E.O. NETWORK MODULE // ${effectiveAdapterStatus.label} // ${
               effectiveAdapterStatus.mode === "native-android"
                 ? "LIVE LOCAL ANDROID DISCOVERY · NO BACKEND REQUIRED"
