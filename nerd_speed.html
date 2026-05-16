@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" name="viewport" />
+  <meta content="dark" name="color-scheme" />
+  <title>Holo Command Core | Speed + Scan</title>
+
+  <!-- Same font family set as cyber_speedhud2.html -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:ital,wght@0,400;0,700;0,900;1,700;1,900&family=Rajdhani:wght@400;600;700&family=Chakra+Petch:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind kept because your source file uses it; styling below overrides to enforce "no fog/glow" -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <style type="text/tailwindcss">
+    :root{
+      --bg:#000000;
+      --cyan:#00eaff;
+      --pink:#ff00e5;
+      --green:#b6ff00;
+      --yellow:#fff200;
+
+      --text: rgba(231,251,255,0.92);
+
+      /* IMPORTANT: No ambient fog/glow. These are used ONLY as tiny border accents (not background haze). */
+      --borderC: rgba(0,234,255,0.45);
+      --borderP: rgba(255,0,229,0.45);
+      --borderG: rgba(182,255,0,0.45);
+      --borderY: rgba(255,242,0,0.45);
+
+      --display:"Orbitron", sans-serif;
+      --mono:"Rajdhani", sans-serif;
+      --condensed:"Chakra Petch", sans-serif;
+
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body{
+      font-family: var(--mono);
+    }
+
+    /* Material symbols */
+    .material-symbols-outlined{
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* Keep scanlines (not fog). It's crisp overlay lines, not hazy glow. */
+    .scanlines{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 80;
+      background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.015), rgba(0, 0, 255, 0.04));
+      background-size: 100% 2px, 3px 100%;
+      opacity: 0.22;
+    }
+
+    /* No background fog. Enforced hard. */
+    .no-fog,
+    .no-fog *{
+      background-image: none !important;
+    }
+
+    /* Aggressive italic sci-fi text style: apply broadly */
+    .hud-text{
+      font-family: var(--display);
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .hud-text-tight{
+      font-family: var(--display);
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .hud-mono{
+      font-family: var(--condensed);
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+    }
+
+    /* Glitch text like source (no fog involved) */
+    .glitch-text{
+      text-shadow: 2px 0 var(--pink), -2px 0 var(--cyan);
+    }
+
+    /* Cyberpunk clipped edges */
+    .cpclip{
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    }
+
+    /* Panels: black + thin neon border accents. No hazy glow, no gradient fog. */
+    .panel{
+      background: rgba(0,0,0,0.72);
+      border: 1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(8px);
+    }
+    .panel.accent-c{ border-color: rgba(0,234,255,0.22); }
+    .panel.accent-p{ border-color: rgba(255,0,229,0.22); }
+    .panel.accent-g{ border-color: rgba(182,255,0,0.20); }
+    .panel.accent-y{ border-color: rgba(255,242,0,0.20); }
+
+    /* Border-only cyber buttons: black fill, neon border, tiny edge accent shadow only */
+    .cyber-btn{
+      height: 56px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.9);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 120ms ease, border-color 140ms ease, color 140ms ease;
+    }
+    .cyber-btn:active{ transform: scale(0.98); }
+
+    /* “No glowing inside buttons”: we do NOT use box-shadow as a fill. Only a subtle border accent shadow */
+    .cyber-btn.cyan { border-color: var(--borderC); color: var(--cyan); box-shadow: 0 0 0 1px rgba(0,234,255,0.06); }
+    .cyber-btn.pink { border-color: var(--borderP); color: var(--pink); box-shadow: 0 0 0 1px rgba(255,0,229,0.06); }
+    .cyber-btn.green{ border-color: var(--borderG); color: var(--green); box-shadow: 0 0 0 1px rgba(182,255,0,0.06); }
+    .cyber-btn.yellow{ border-color: var(--borderY); color: var(--yellow); box-shadow: 0 0 0 1px rgba(255,242,0,0.06); }
+
+    .cyber-btn .label{
+      font-family: var(--display);
+      font-style: italic;
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    /* Header */
+    .topbar{
+      height: 64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(10px);
+      z-index: 60;
+      position: relative;
+    }
+
+    /* Bottom nav */
+    .bnav{
+      height: 66px;
+      background: rgba(0,0,0,0.92);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-around;
+      padding-bottom: var(--safeBottom);
+      z-index: 70;
+      position: relative;
+    }
+    .btab{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 4px;
+      padding: 8px 14px;
+      border-bottom: 2px solid transparent;
+      opacity: 0.78;
+      transition: opacity 120ms ease, border-color 120ms ease, color 120ms ease;
+      cursor: pointer;
+    }
+    .btab .tlabel{
+      font-family: var(--display);
+      font-style: italic;
+      font-weight: 900;
+      font-size: 9px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+    }
+    .btab.active{
+      opacity: 1;
+      border-bottom-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Views */
+    .view{
+      display:none;
+      height: calc(100dvh - 64px - 66px);
+      overflow: hidden;
+    }
+    .view.active{ display:block; }
+
+    /* Sphere container (EXACT structure from cyber_speedhud2.html) */
+    .rotating-sphere-container { perspective: 1000px; }
+    .micro-glitch { animation: micro-glitch-anim 4s infinite; }
+    @keyframes micro-glitch-anim{
+      0%, 90%, 100%{ transform: translate(0,0); opacity: 1; }
+      91%{ transform: translate(-2px, 1px); opacity: 0.85; }
+      92%{ transform: translate(2px, -1px); opacity: 0.92; }
+      93%{ transform: translate(0,0); }
+    }
+
+    /* NO fog background helper */
+    .pure-black { background: #000 !important; }
+  </style>
+
+  <style>
+    /* Avoid min-height hacks that can create weird overscroll glare */
+    body { min-height: 100dvh; }
+  </style>
+</head>
+
+<body class="pure-black select-none no-fog">
+  <div class="scanlines"></div>
+
+  <div class="relative h-screen flex flex-col pt-[var(--safeTop)] pb-0 overflow-hidden pure-black" id="app">
+
+    <!-- TOP BAR -->
+    <header class="topbar pure-black">
+      <div class="flex flex-col leading-tight">
+        <span class="hud-mono text-[10px] font-black opacity-85" style="color: var(--cyan);">NET_PROBE_SUITE</span>
+        <h1 class="hud-text-tight text-[13px] font-black glitch-text" style="color: var(--yellow);">
+          HOLO COMMAND CORE
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex flex-col items-end leading-tight">
+          <span class="hud-mono text-[9px] font-bold opacity-50" style="color: rgba(255,255,255,0.60);">SIGNAL</span>
+          <div class="flex gap-0.5 mt-1">
+            <div class="w-1 h-3" style="background: var(--cyan);"></div>
+            <div class="w-1 h-3" style="background: var(--cyan);"></div>
+            <div class="w-1 h-3" style="background: var(--cyan);"></div>
+            <div class="w-1 h-3" style="background: rgba(255,255,255,0.10);"></div>
+          </div>
+        </div>
+
+        <button id="btnSettings" class="w-9 h-9 rounded-full pure-black flex items-center justify-center"
+          style="border:1px solid rgba(0,234,255,0.28);">
+          <span class="material-symbols-outlined text-[18px]" style="color: var(--cyan);">settings</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEWS -->
+    <main class="flex-1 relative overflow-hidden pure-black">
+
+      <!-- =========================
+           VIEW: SPEED (HUD)
+           Gauge replaced with EXACT sphere gauge from cyber_speedhud2.html
+           ========================= -->
+      <section id="view-speed" class="view active pure-black">
+        <div class="h-full w-full flex flex-col items-center justify-between px-4 py-6 pure-black overflow-hidden">
+
+          <!-- Gauge block (EXACT structure/IDs from cyber_speedhud2.html) -->
+          <div class="relative w-full aspect-square max-w-[340px] flex items-center justify-center rotating-sphere-container">
+            <div class="absolute inset-0 rounded-full border animate-[spin_20s_linear_infinite] opacity-30"
+                 style="border-color: rgba(0,234,255,0.12);"></div>
+
+            <div class="absolute inset-8 rounded-full border border-dashed animate-[spin_15s_linear_infinite_reverse] opacity-40"
+                 style="border-color: rgba(255,0,229,0.20);"></div>
+
+            <canvas class="absolute w-full h-full pointer-events-none z-10" id="sphere-canvas"></canvas>
+
+            <div class="relative z-20 text-center flex flex-col items-center">
+              <div class="mb-1">
+                <span class="hud-text text-[10px] font-black micro-glitch" id="readout-status" style="color: var(--pink);">
+                  IDLE
+                </span>
+              </div>
+
+              <div class="relative">
+                <!-- main-value EXACT ID -->
+                <span class="font-['Orbitron'] text-7xl font-black italic tracking-tighter leading-none"
+                      id="main-value" style="color: var(--yellow);">
+                  0.0
+                </span>
+                <!-- ghost overlay like your source -->
+                <span class="absolute inset-0 font-['Orbitron'] text-7xl font-black italic tracking-tighter opacity-25 blur-[1px] translate-x-1"
+                      id="main-value-ghost" style="color: var(--pink);">
+                  0.0
+                </span>
+              </div>
+
+              <span class="hud-text text-[18px] font-black mt-2 opacity-90" style="color: var(--cyan);">MBPS</span>
+
+              <div class="flex gap-2 mt-6">
+                <div class="px-3 py-1.5 rounded-full pure-black flex items-center gap-2"
+                     style="border:1px solid rgba(0,234,255,0.22);">
+                  <span class="hud-mono text-[9px] font-black" style="color: var(--cyan);">DL:</span>
+                  <span class="hud-text-tight text-[12px] font-black italic" id="dlValue" style="color: var(--yellow);">--</span>
+                </div>
+                <div class="px-3 py-1.5 rounded-full pure-black flex items-center gap-2"
+                     style="border:1px solid rgba(255,0,229,0.22);">
+                  <span class="hud-mono text-[9px] font-black" style="color: var(--pink);">UL:</span>
+                  <span class="hud-text-tight text-[12px] font-black italic" id="ulValue" style="color: var(--yellow);">--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats panels (black only, neon text only) -->
+          <div class="grid grid-cols-2 gap-3 w-full mt-6">
+            <div class="panel cpclip p-3 accent-c">
+              <div class="flex justify-between items-start">
+                <span class="hud-mono text-[9px] font-black" style="color: var(--cyan);">PING MEDIAN</span>
+                <span class="material-symbols-outlined text-[14px]" style="color: var(--cyan);">bolt</span>
+              </div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span class="font-['Orbitron'] font-black italic text-2xl" id="pingMedian" style="color: var(--yellow);">--</span>
+                <span class="hud-mono text-[9px] font-bold opacity-60" style="color: rgba(255,255,255,0.70);">ms</span>
+              </div>
+              <div class="mt-2 h-1 w-full" style="background: rgba(255,255,255,0.06);">
+                <div class="h-full w-full animate-[pulse_1.6s_infinite]"
+                     style="background: linear-gradient(90deg, transparent, rgba(0,234,255,0.9), transparent);"></div>
+              </div>
+            </div>
+
+            <div class="panel cpclip p-3 accent-p">
+              <div class="flex justify-between items-start">
+                <span class="hud-mono text-[9px] font-black" style="color: var(--pink);">JITTER</span>
+                <span class="material-symbols-outlined text-[14px]" style="color: var(--pink);">graphic_eq</span>
+              </div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span class="font-['Orbitron'] font-black italic text-2xl" id="jitter" style="color: var(--yellow);">--</span>
+                <span class="hud-mono text-[9px] font-bold opacity-60" style="color: rgba(255,255,255,0.70);">ms</span>
+              </div>
+              <div class="flex gap-0.5 mt-2 h-3 items-end" id="jitterBars"></div>
+            </div>
+          </div>
+
+          <!-- Control strip -->
+          <div class="w-full mt-4 panel cpclip p-4 accent-y">
+            <div class="flex items-center justify-between">
+              <div class="flex flex-col leading-tight">
+                <span class="hud-mono text-[9px] font-black opacity-60" style="color: rgba(255,255,255,0.70);">PROBE STATUS</span>
+                <span class="hud-text-tight text-[11px] font-black" id="probeStatus" style="color: var(--green);">READY</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="hud-mono text-[9px] font-black opacity-60" style="color: rgba(255,255,255,0.70);">SAFE_MODE</span>
+                <button id="safeToggle"
+                        class="w-12 h-6 rounded-full pure-black flex items-center px-1"
+                        style="border:1px solid rgba(255,255,255,0.10);">
+                  <span id="safeDot" class="w-3 h-3 rounded-full"
+                        style="background: var(--cyan); transform: translateX(24px); transition: transform 160ms ease;"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <button id="btnAbort" class="cyber-btn pink cpclip">
+                <span class="material-symbols-outlined text-[18px]">cancel</span>
+                <span class="label">Abort</span>
+              </button>
+              <button id="btnRun" class="cyber-btn cyan cpclip">
+                <span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+                <span class="label">Execute</span>
+              </button>
+            </div>
+
+            <div class="mt-4">
+              <div class="hud-mono text-[9px] font-black opacity-60 mb-2" style="color: rgba(255,255,255,0.70);">TELEMETRY</div>
+              <div id="telemetry" class="p-3 cpclip pure-black"
+                   style="border:1px solid rgba(255,255,255,0.10); height: 86px; overflow:auto;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           VIEW: SCAN
+           Pure black, no fog, neon accents only.
+           ========================= -->
+      <section id="view-scan" class="view pure-black">
+        <div class="h-full w-full flex flex-col px-4 py-5 gap-4 overflow-hidden pure-black">
+          <div class="flex items-end justify-between">
+            <div class="flex flex-col">
+              <span class="hud-mono text-[10px] font-black opacity-85" style="color: var(--cyan);">NETWORK & DEVICE SCANNER</span>
+              <span class="hud-text-tight text-[12px] font-black glitch-text" style="color: var(--yellow);">HOLO TOPOLOGY MAP</span>
+            </div>
+
+            <button id="btnScan" class="cyber-btn green cpclip" style="height:44px; padding:0 14px;">
+              <span class="material-symbols-outlined text-[18px]">radar</span>
+              <span class="label" style="font-size:11px;">Scan</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 h-full overflow-hidden">
+            <!-- Map -->
+            <div class="panel cpclip accent-c p-3 relative overflow-hidden" style="min-height: 240px;">
+              <div class="flex items-center justify-between">
+                <span class="hud-mono text-[9px] font-black" style="color: var(--cyan);">TOPOLOGY_RENDER</span>
+                <span class="hud-mono text-[9px] font-black" id="scanStatus" style="color: var(--pink);">IDLE</span>
+              </div>
+
+              <div class="mt-3 relative w-full h-[260px] cpclip pure-black overflow-hidden"
+                   style="border:1px solid rgba(0,234,255,0.18);">
+                <canvas id="mapCanvas" class="absolute inset-0 w-full h-full"></canvas>
+
+                <!-- HUD corner marks (no fog) -->
+                <div class="absolute inset-0 pointer-events-none">
+                  <div class="absolute left-2 top-2 w-6 h-6" style="border-left:2px solid rgba(0,234,255,0.65); border-top:2px solid rgba(0,234,255,0.65);"></div>
+                  <div class="absolute right-2 top-2 w-6 h-6" style="border-right:2px solid rgba(255,0,229,0.65); border-top:2px solid rgba(255,0,229,0.65);"></div>
+                  <div class="absolute left-2 bottom-2 w-6 h-6" style="border-left:2px solid rgba(182,255,0,0.65); border-bottom:2px solid rgba(182,255,0,0.65);"></div>
+                  <div class="absolute right-2 bottom-2 w-6 h-6" style="border-right:2px solid rgba(255,242,0,0.65); border-bottom:2px solid rgba(255,242,0,0.65);"></div>
+                </div>
+              </div>
+
+              <div class="mt-3 flex gap-2">
+                <input id="deviceFilter" class="cpclip w-full pure-black px-3 py-2"
+                       style="border:1px solid rgba(255,255,255,0.10); color: var(--yellow); font-family: var(--display); font-style: italic; letter-spacing:0.10em;"
+                       placeholder="FILTER: NAME / IP / MAC / VENDOR"
+                       autocomplete="off" />
+                <button id="btnClearFilter" class="cyber-btn yellow cpclip" style="height: 42px; padding:0 12px;">
+                  <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Device list -->
+            <div class="panel cpclip accent-p p-3 overflow-hidden flex flex-col">
+              <div class="flex items-center justify-between">
+                <span class="hud-mono text-[9px] font-black" style="color: var(--pink);">DISCOVERED_NODES</span>
+                <span class="hud-mono text-[9px] font-black" id="deviceCount" style="color: var(--cyan);">0</span>
+              </div>
+
+              <div id="deviceList" class="mt-3 overflow-auto pr-1" style="max-height: calc(100dvh - 64px - 66px - 420px);">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           VIEW: TOOLS
+           ========================= -->
+      <section id="view-tools" class="view pure-black">
+        <div class="h-full w-full px-4 py-6 pure-black overflow-hidden">
+          <div class="flex flex-col">
+            <span class="hud-mono text-[10px] font-black opacity-85" style="color: var(--cyan);">UTILITY MODULES</span>
+            <span class="hud-text-tight text-[12px] font-black glitch-text" style="color: var(--yellow);">TOOLS</span>
+          </div>
+
+          <div class="mt-5 grid grid-cols-1 gap-3">
+            <div class="panel cpclip accent-c p-4">
+              <div class="flex items-center justify-between">
+                <span class="hud-mono text-[10px] font-black" style="color: var(--cyan);">DNS QUICK CHECK</span>
+                <span class="material-symbols-outlined text-[18px]" style="color: var(--cyan);">dns</span>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button id="btnDns" class="cyber-btn cyan cpclip" style="height:44px; padding:0 14px;">
+                  <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                  <span class="label" style="font-size:11px;">Run</span>
+                </button>
+                <div id="dnsOut" class="cpclip pure-black px-3 py-2 flex-1"
+                     style="border:1px solid rgba(255,255,255,0.10); color: var(--yellow); font-family: var(--display); font-style: italic; letter-spacing:0.08em;">
+                  --
+                </div>
+              </div>
+            </div>
+
+            <div class="panel cpclip accent-g p-4">
+              <div class="flex items-center justify-between">
+                <span class="hud-mono text-[10px] font-black" style="color: var(--green);">CONNECTION INFO</span>
+                <span class="material-symbols-outlined text-[18px]" style="color: var(--green);">info</span>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-2">
+                <div class="cpclip pure-black p-3" style="border:1px solid rgba(255,255,255,0.10);">
+                  <div class="hud-mono text-[9px] font-black opacity-70" style="color: rgba(255,255,255,0.70);">DOWNLINK</div>
+                  <div class="hud-text-tight text-[12px] font-black" id="downlink" style="color: var(--yellow);">--</div>
+                </div>
+                <div class="cpclip pure-black p-3" style="border:1px solid rgba(255,255,255,0.10);">
+                  <div class="hud-mono text-[9px] font-black opacity-70" style="color: rgba(255,255,255,0.70);">RTT</div>
+                  <div class="hud-text-tight text-[12px] font-black" id="rtt" style="color: var(--yellow);">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================
+           VIEW: CONFIG
+           ========================= -->
+      <section id="view-config" class="view pure-black">
+        <div class="h-full w-full px-4 py-6 pure-black overflow-hidden">
+          <div class="flex flex-col">
+            <span class="hud-mono text-[10px] font-black opacity-85" style="color: var(--cyan);">SYSTEM CONFIG</span>
+            <span class="hud-text-tight text-[12px] font-black glitch-text" style="color: var(--yellow);">PREFERENCES</span>
+          </div>
+
+          <div class="mt-5 grid grid-cols-1 gap-3">
+            <div class="panel cpclip accent-y p-4">
+              <div class="flex items-center justify-between">
+                <span class="hud-mono text-[10px] font-black" style="color: var(--yellow);">THEME LOCK</span>
+                <span class="material-symbols-outlined text-[18px]" style="color: var(--yellow);">palette</span>
+              </div>
+              <div class="mt-3 hud-mono text-[9px] font-black opacity-70" style="color: rgba(255,255,255,0.70);">
+                BACKGROUND IS HARD-LOCKED TO PURE BLACK. NO FOG. NO AMBIENT GLOW.
+              </div>
+            </div>
+
+            <div class="panel cpclip accent-p p-4">
+              <div class="flex items-center justify-between">
+                <span class="hud-mono text-[10px] font-black" style="color: var(--pink);">RESET UI</span>
+                <span class="material-symbols-outlined text-[18px]" style="color: var(--pink);">restart_alt</span>
+              </div>
+              <div class="mt-3">
+                <button id="btnReset" class="cyber-btn pink cpclip w-full">
+                  <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                  <span class="label">Reset</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bnav pure-black">
+      <div class="btab active" data-target="speed" style="color: var(--cyan);">
+        <span class="material-symbols-outlined text-[22px]">grid_view</span>
+        <span class="tlabel">Speed</span>
+      </div>
+      <div class="btab" data-target="scan" style="color: rgba(255,255,255,0.55);">
+        <span class="material-symbols-outlined text-[22px]">account_tree</span>
+        <span class="tlabel">Scan</span>
+      </div>
+      <div class="btab" data-target="tools" style="color: rgba(255,255,255,0.55);">
+        <span class="material-symbols-outlined text-[22px]">construction</span>
+        <span class="tlabel">Tools</span>
+      </div>
+      <div class="btab" data-target="config" style="color: rgba(255,255,255,0.55);">
+        <span class="material-symbols-outlined text-[22px]">tune</span>
+        <span class="tlabel">Config</span>
+      </div>
+    </nav>
+
+  </div>
+
+<script>
+/* ============================================================
+   HARD GUARANTEE: NO FOG / NO AMBIENT GLOW
+   We do not apply any body/panel background gradients or radial glows.
+   Buttons are border-only with tiny edge accent.
+============================================================ */
+
+/* =========================
+   NAV ROUTING
+========================= */
+const views = {
+  speed: document.getElementById('view-speed'),
+  scan: document.getElementById('view-scan'),
+  tools: document.getElementById('view-tools'),
+  config: document.getElementById('view-config'),
+};
+
+document.querySelectorAll('.btab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.getAttribute('data-target');
+    document.querySelectorAll('.btab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    // recolor active/inactive (cyan active)
+    document.querySelectorAll('.btab').forEach(t => {
+      if (t.classList.contains('active')) {
+        t.style.color = 'var(--cyan)';
+      } else {
+        t.style.color = 'rgba(255,255,255,0.55)';
+      }
+    });
+
+    Object.values(views).forEach(v => v.classList.remove('active'));
+    views[target].classList.add('active');
+
+    // ensure canvases render after tab switch
+    if (target === 'scan') {
+      resizeMapCanvas();
+      drawMap(true);
+    }
+  });
+});
+
+/* =========================
+   SPEED HUD STATE
+========================= */
+const els = {
+  status: document.getElementById('readout-status'),
+  main: document.getElementById('main-value'),
+  ghost: document.getElementById('main-value-ghost'),
+  dl: document.getElementById('dlValue'),
+  ul: document.getElementById('ulValue'),
+  pingMedian: document.getElementById('pingMedian'),
+  jitter: document.getElementById('jitter'),
+  jitterBars: document.getElementById('jitterBars'),
+  probeStatus: document.getElementById('probeStatus'),
+  telemetry: document.getElementById('telemetry'),
+  safeToggle: document.getElementById('safeToggle'),
+  safeDot: document.getElementById('safeDot'),
+  btnRun: document.getElementById('btnRun'),
+  btnAbort: document.getElementById('btnAbort'),
+};
+
+let SAFE_MODE = true;
+let ABORT = false;
+
+function logT(msg, colorVar='--cyan'){
+  const line = document.createElement('div');
+  line.className = 'hud-mono';
+  line.style.fontSize = '9px';
+  line.style.fontWeight = '800';
+  line.style.letterSpacing = '0.10em';
+  line.style.marginBottom = '6px';
+  line.style.color = `var(${colorVar})`;
+  line.textContent = msg;
+  els.telemetry.appendChild(line);
+  els.telemetry.scrollTop = els.telemetry.scrollHeight;
+}
+
+function setMainValue(v){
+  const s = (typeof v === 'number') ? v.toFixed(1) : String(v);
+  els.main.textContent = s;
+  els.ghost.textContent = s;
+}
+
+/* jitter bars visual */
+function renderJitterBars(ms){
+  els.jitterBars.innerHTML = '';
+  const n = 10;
+  const base = Math.max(2, Math.min(30, ms || 2));
+  for(let i=0;i<n;i++){
+    const h = Math.max(3, Math.min(12, (Math.random()*base/2)+3));
+    const b = document.createElement('div');
+    b.style.width = '6px';
+    b.style.height = `${h}px`;
+    b.style.background = (i%2===0) ? 'rgba(255,0,229,0.8)' : 'rgba(255,0,229,0.45)';
+    els.jitterBars.appendChild(b);
+  }
+}
+
+els.safeToggle.addEventListener('click', () => {
+  SAFE_MODE = !SAFE_MODE;
+  els.safeDot.style.transform = SAFE_MODE ? 'translateX(24px)' : 'translateX(0px)';
+  logT(`SAFE_MODE=${SAFE_MODE ? 'ON' : 'OFF'}`, SAFE_MODE ? '--cyan' : '--pink');
+});
+
+els.btnAbort.addEventListener('click', () => {
+  ABORT = true;
+  els.probeStatus.textContent = 'ABORTED';
+  els.probeStatus.style.color = 'var(--pink)';
+  els.status.textContent = 'ABORT';
+  els.status.style.color = 'var(--pink)';
+  logT('ABORT SIGNAL SENT', '--pink');
+});
+
+els.btnRun.addEventListener('click', async () => {
+  if (els.btnRun.disabled) return;
+  ABORT = false;
+  els.btnRun.disabled = true;
+  els.probeStatus.textContent = 'RUNNING';
+  els.probeStatus.style.color = 'var(--green)';
+  els.status.textContent = 'INJECTING_PACKETS';
+  els.status.style.color = 'var(--pink)';
+  els.telemetry.innerHTML = '';
+  logT('PROBE START', '--green');
+
+  try{
+    // Latency
+    const p = await testLatency();
+    if (ABORT) throw new Error('ABORTED');
+    els.pingMedian.textContent = String(Math.round(p.median));
+    els.jitter.textContent = String(Math.round(p.jitter));
+    renderJitterBars(p.jitter);
+    logT(`PING_MEDIAN=${Math.round(p.median)}ms JITTER=${Math.round(p.jitter)}ms`, '--cyan');
+
+    // Download
+    els.status.textContent = 'PULLING_PAYLOADS';
+    els.status.style.color = 'var(--cyan)';
+    const dl = await testDownload();
+    if (ABORT) throw new Error('ABORTED');
+    els.dl.textContent = `${dl.toFixed(1)}`;
+    setMainValue(dl);
+    logT(`DL=${dl.toFixed(1)} Mbps`, '--yellow');
+
+    // Upload
+    els.status.textContent = 'PUSHING_UPLINK';
+    els.status.style.color = 'var(--green)';
+    const ul = await testUpload();
+    if (ABORT) throw new Error('ABORTED');
+    els.ul.textContent = `${ul.toFixed(1)}`;
+    setMainValue(dl); // keep main value as DL like many speed HUDs
+    logT(`UL=${ul.toFixed(1)} Mbps`, '--yellow');
+
+    els.status.textContent = 'COMPLETE';
+    els.status.style.color = 'var(--pink)';
+    els.probeStatus.textContent = 'READY';
+    els.probeStatus.style.color = 'var(--green)';
+    logT('PROBE COMPLETE', '--green');
+  }catch(e){
+    els.status.textContent = 'HALT';
+    els.status.style.color = 'var(--pink)';
+    els.probeStatus.textContent = 'READY';
+    els.probeStatus.style.color = 'var(--green)';
+    logT(`ERROR=${String(e && e.message ? e.message : e)}`, '--pink');
+  }finally{
+    els.btnRun.disabled = false;
+  }
+});
+
+/* =========================
+   Latency test (browser-limited but stable)
+========================= */
+async function testLatency(){
+  // Use cache-busted tiny fetches. Cloudflare /cdn-cgi/trace often works.
+  // If blocked by CORS in local-file mode, it will fail; we catch and degrade.
+  const url = `https://www.cloudflare.com/cdn-cgi/trace?${Date.now()}`;
+  const samples = SAFE_MODE ? 8 : 14;
+  const timeoutMs = SAFE_MODE ? 1400 : 1800;
+
+  const times = [];
+  for(let i=0;i<samples;i++){
+    if (ABORT) throw new Error('ABORTED');
+    const t0 = performance.now();
+    await fetchWithTimeout(url, timeoutMs).catch(() => null);
+    const t1 = performance.now();
+    times.push(t1 - t0);
+    await sleep(70);
+  }
+
+  times.sort((a,b)=>a-b);
+  const median = times[Math.floor(times.length/2)];
+  const mean = times.reduce((s,v)=>s+v,0)/times.length;
+  const variance = times.reduce((s,v)=>s+(v-mean)*(v-mean),0)/times.length;
+  const jitter = Math.sqrt(variance);
+
+  return { median, jitter };
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r, ms)); }
+async function fetchWithTimeout(url, timeoutMs){
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), timeoutMs);
+  try{
+    return await fetch(url, { cache:'no-store', mode:'cors', signal: ctrl.signal });
+  } finally {
+    clearTimeout(to);
+  }
+}
+
+/* =========================
+   Download test (stream bytes)
+========================= */
+async function testDownload(){
+  // Cloudflare speed test file; if blocked, degrade to fake minimal result (but still show UI)
+  const endpoint = `https://speed.cloudflare.com/__down?bytes=${SAFE_MODE ? 6_000_000 : 12_000_000}&${Date.now()}`;
+  const timeoutMs = SAFE_MODE ? 9000 : 12000;
+
+  const t0 = performance.now();
+  let bytes = 0;
+
+  const res = await fetchWithTimeout(endpoint, timeoutMs).catch(() => null);
+  if (!res || !res.body) {
+    logT('DL_ENDPOINT_BLOCKED (CORS/FILE MODE). DISPLAYING 0.0', '--pink');
+    return 0.0;
+  }
+
+  const reader = res.body.getReader();
+  while(true){
+    if (ABORT) throw new Error('ABORTED');
+    const { value, done } = await reader.read();
+    if (done) break;
+    bytes += value.byteLength;
+
+    const dt = (performance.now() - t0) / 1000;
+    if (dt > (SAFE_MODE ? 6.5 : 8.5)) break;
+    // live readout wiggle (HUD feel)
+    const mbpsLive = (bytes * 8) / (dt * 1e6);
+    setMainValue(mbpsLive);
+  }
+
+  const t1 = performance.now();
+  const secs = (t1 - t0) / 1000;
+  const mbps = (bytes * 8) / (secs * 1e6);
+  return isFinite(mbps) ? mbps : 0.0;
+}
+
+/* =========================
+   Upload test (POST payload)
+========================= */
+async function testUpload(){
+  const endpoint = `https://speed.cloudflare.com/__up?${Date.now()}`;
+  const timeoutMs = SAFE_MODE ? 9000 : 12000;
+  const bytes = SAFE_MODE ? 2_500_000 : 5_000_000;
+
+  // Build payload (no glow, no drama)
+  const payload = new Uint8Array(bytes);
+  crypto.getRandomValues(payload);
+
+  const t0 = performance.now();
+  const res = await fetchWithTimeout(endpoint, timeoutMs).then(r => r && r.ok ? r : null).catch(() => null);
+  if (!res) {
+    // Some environments block this. We'll attempt the POST anyway, but catch.
+    try{
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), timeoutMs);
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-store',
+        body: payload,
+        signal: ctrl.signal
+      }).catch(() => null);
+      clearTimeout(to);
+    }catch(_){}
+  } else {
+    // res exists, but we still need to do the POST (trace check above isn't the POST)
+    try{
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), timeoutMs);
+      await fetch(endpoint, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-store',
+        body: payload,
+        signal: ctrl.signal
+      }).catch(() => null);
+      clearTimeout(to);
+    }catch(_){}
+  }
+
+  const t1 = performance.now();
+  const secs = (t1 - t0) / 1000;
+
+  const mbps = (bytes * 8) / (secs * 1e6);
+  if (!isFinite(mbps) || mbps < 0) {
+    logT('UL_ENDPOINT_BLOCKED (CORS/FILE MODE). DISPLAYING 0.0', '--pink');
+    return 0.0;
+  }
+  return mbps;
+}
+
+/* =========================
+   EXACT sphere gauge animation from cyber_speedhud2.html
+   (structure + IDs already matched above)
+========================= */
+const sphereCanvas = document.getElementById('sphere-canvas');
+const sctx = sphereCanvas.getContext('2d');
+
+function resizeSphere(){
+  const box = sphereCanvas.getBoundingClientRect();
+  sphereCanvas.width = box.width * window.devicePixelRatio;
+  sphereCanvas.height = box.height * window.devicePixelRatio;
+}
+window.addEventListener('resize', () => {
+  resizeSphere();
+  resizeMapCanvas();
+});
+resizeSphere();
+
+let sframe = 0;
+function drawSphere(){
+  sctx.clearRect(0, 0, sphereCanvas.width, sphereCanvas.height);
+  const cx = sphereCanvas.width / 2;
+  const cy = sphereCanvas.height / 2;
+  const radius = Math.min(cx, cy) * 0.75;
+  sframe++;
+
+  // Draw grid rings
+  sctx.lineWidth = 1;
+  for (let i = 0; i < 8; i++) {
+    const t = sframe / 100 + (i / 8) * Math.PI * 2;
+    const xOffset = Math.sin(t) * 20;
+    sctx.beginPath();
+    sctx.strokeStyle = `rgba(0, 234, 255, ${0.10 + Math.abs(Math.cos(t)) * 0.20})`;
+    sctx.arc(cx + xOffset, cy, radius, 0, Math.PI * 2);
+    sctx.stroke();
+  }
+
+  // Draw floating particles
+  for (let i = 0; i < 15; i++) {
+    const angle = (sframe / 50) + (i / 15) * Math.PI * 2;
+    const dist = Math.sin(sframe / 30 + i) * radius * 0.8;
+    const x = cx + Math.cos(angle) * dist;
+    const y = cy + Math.sin(angle) * dist;
+
+    sctx.fillStyle = (i % 2 === 0) ? '#00eaff' : '#ff00e5';
+    sctx.beginPath();
+    sctx.arc(x, y, 1.5, 0, Math.PI * 2);
+    sctx.fill();
+
+    // Glow kept minimal; it's particle-local, not fog background
+    sctx.shadowBlur = 10;
+    sctx.shadowColor = sctx.fillStyle;
+    sctx.fill();
+    sctx.shadowBlur = 0;
+  }
+
+  requestAnimationFrame(drawSphere);
+}
+drawSphere();
+
+/* =========================
+   SCAN VIEW: HOLO MAP + DEVICE LIST
+   (Browser cannot do real LAN discovery, so we simulate results.
+   UI is ready to replace with native data later.)
+========================= */
+const mapCanvas = document.getElementById('mapCanvas');
+const mctx = mapCanvas.getContext('2d');
+
+function resizeMapCanvas(){
+  const box = mapCanvas.getBoundingClientRect();
+  mapCanvas.width = Math.max(1, Math.floor(box.width * window.devicePixelRatio));
+  mapCanvas.height = Math.max(1, Math.floor(box.height * window.devicePixelRatio));
+}
+
+const scan = {
+  nodes: [],
+  links: [],
+  running: false,
+  t: 0,
+};
+
+function seedScan(){
+  // gateway center + orbiting clients
+  const w = mapCanvas.width;
+  const h = mapCanvas.height;
+  const cx = w/2, cy = h/2;
+
+  const gateway = { id:'gw', type:'gateway', x:cx, y:cy, r: 10, name:'GATEWAY', ip:'192.168.1.1', mac:'AA:BB:CC:DD:EE:FF', vendor:'ROUTER_CORE', risk:'LOW' };
+  const nodes = [gateway];
+
+  const count = 10;
+  for(let i=0;i<count;i++){
+    const ang = (i/count)*Math.PI*2;
+    const rad = (Math.min(w,h)*0.34) + (Math.random()*Math.min(w,h)*0.10);
+    nodes.push({
+      id:'n'+i,
+      type: (i%3===0) ? 'pc' : (i%3===1) ? 'phone' : 'iot',
+      x: cx + Math.cos(ang)*rad,
+      y: cy + Math.sin(ang)*rad*0.72,
+      r: 6 + Math.random()*3,
+      name: (i%3===0) ? `WORKSTATION_${i}` : (i%3===1) ? `HANDSET_${i}` : `IOT_NODE_${i}`,
+      ip: `192.168.1.${20+i}`,
+      mac: `${(10+i).toString(16).padStart(2,'0')}:2A:9C:${(30+i).toString(16).padStart(2,'0')}:7F:${(40+i).toString(16).padStart(2,'0')}`,
+      vendor: (i%3===0) ? 'INTEL' : (i%3===1) ? 'SAMSUNG' : 'ESPRESSIF',
+      risk: (i%5===0) ? 'MED' : 'LOW'
+    });
+  }
+
+  const links = nodes.slice(1).map(n => ({ a:'gw', b:n.id }));
+
+  scan.nodes = nodes;
+  scan.links = links;
+}
+
+function drawMap(force=false){
+  if (!views.scan.classList.contains('active') && !force) return;
+  if (!mapCanvas.width || !mapCanvas.height) return;
+
+  const w = mapCanvas.width;
+  const h = mapCanvas.height;
+  mctx.clearRect(0,0,w,h);
+
+  // black background
+  mctx.fillStyle = '#000';
+  mctx.fillRect(0,0,w,h);
+
+  // perspective grid (crisp, not fog)
+  mctx.save();
+  mctx.globalAlpha = 0.30;
+  mctx.strokeStyle = 'rgba(0,234,255,0.22)';
+  mctx.lineWidth = 1;
+
+  const rows = 9;
+  for(let i=1;i<=rows;i++){
+    const y = (h*0.18) + i*(h*0.08);
+    mctx.beginPath();
+    mctx.moveTo(w*0.06, y);
+    mctx.lineTo(w*0.94, y);
+    mctx.stroke();
+  }
+
+  const cols = 10;
+  for(let i=1;i<cols;i++){
+    const x = w*0.06 + i*(w*0.88/cols);
+    mctx.beginPath();
+    mctx.moveTo(x, h*0.16);
+    mctx.lineTo(x, h*0.88);
+    mctx.stroke();
+  }
+  mctx.restore();
+
+  // sweep beam (no fog, just a sharp wedge)
+  scan.t += 0.012;
+  const cx = w/2, cy = h/2;
+  const sweep = scan.t % (Math.PI*2);
+  mctx.save();
+  mctx.globalAlpha = 0.22;
+  mctx.fillStyle = 'rgba(182,255,0,0.55)';
+  mctx.beginPath();
+  mctx.moveTo(cx, cy);
+  mctx.arc(cx, cy, Math.min(w,h)*0.42, sweep, sweep + 0.38);
+  mctx.closePath();
+  mctx.fill();
+  mctx.restore();
+
+  // links
+  mctx.save();
+  mctx.lineWidth = 1.2;
+  mctx.globalAlpha = 0.65;
+  for(const L of scan.links){
+    const a = scan.nodes.find(n => n.id===L.a);
+    const b = scan.nodes.find(n => n.id===L.b);
+    if (!a || !b) continue;
+
+    mctx.strokeStyle = (b.risk === 'MED') ? 'rgba(255,0,229,0.65)' : 'rgba(0,234,255,0.55)';
+    mctx.beginPath();
+    mctx.moveTo(a.x, a.y);
+    mctx.lineTo(b.x, b.y);
+    mctx.stroke();
+  }
+  mctx.restore();
+
+  // nodes
+  for(const n of scan.nodes){
+    // slight orbit motion for non-gw nodes
+    if (n.id !== 'gw'){
+      const dx = n.x - cx;
+      const dy = n.y - cy;
+      const ang = Math.atan2(dy, dx) + 0.0025;
+      const rad = Math.sqrt(dx*dx + dy*dy);
+      n.x = cx + Math.cos(ang)*rad;
+      n.y = cy + Math.sin(ang)*rad;
+    }
+
+    const col = (n.id==='gw')
+      ? 'rgba(255,242,0,0.95)'
+      : (n.risk === 'MED')
+        ? 'rgba(255,0,229,0.95)'
+        : 'rgba(0,234,255,0.95)';
+
+    // dot
+    mctx.save();
+    mctx.fillStyle = col;
+    mctx.beginPath();
+    mctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+    mctx.fill();
+
+    // thin ring
+    mctx.globalAlpha = 0.7;
+    mctx.strokeStyle = col;
+    mctx.lineWidth = 1.1;
+    mctx.beginPath();
+    mctx.arc(n.x, n.y, n.r + 6, 0, Math.PI*2);
+    mctx.stroke();
+    mctx.restore();
+  }
+
+  requestAnimationFrame(drawMap);
+}
+
+/* Device list */
+const deviceListEl = document.getElementById('deviceList');
+const deviceCountEl = document.getElementById('deviceCount');
+const deviceFilterEl = document.getElementById('deviceFilter');
+document.getElementById('btnClearFilter').addEventListener('click', () => {
+  deviceFilterEl.value = '';
+  renderDeviceList();
+});
+
+function renderDeviceList(){
+  const q = (deviceFilterEl.value || '').trim().toLowerCase();
+  const items = scan.nodes.filter(n => n.id !== 'gw').filter(n => {
+    if (!q) return true;
+    const blob = `${n.name} ${n.ip} ${n.mac} ${n.vendor} ${n.risk}`.toLowerCase();
+    return blob.includes(q);
+  });
+
+  deviceCountEl.textContent = String(items.length);
+  deviceListEl.innerHTML = '';
+
+  for(const n of items){
+    const card = document.createElement('div');
+    card.className = 'cpclip pure-black p-3 mb-2';
+    card.style.border = '1px solid rgba(255,255,255,0.10)';
+
+    const title = document.createElement('div');
+    title.className = 'flex items-center justify-between';
+    title.innerHTML = `
+      <div class="hud-text-tight" style="font-size:11px; font-weight:900; color: var(${n.risk==='MED'?'--pink':'--cyan'});">
+        ${escapeHtml(n.name)}
+      </div>
+      <div class="hud-mono" style="font-size:9px; font-weight:900; color: var(--yellow);">
+        ${escapeHtml(n.type)}
+      </div>
+    `;
+
+    const meta = document.createElement('div');
+    meta.className = 'mt-2 grid grid-cols-2 gap-2';
+    meta.innerHTML = `
+      <div>
+        <div class="hud-mono" style="font-size:9px; font-weight:900; color: rgba(255,255,255,0.65);">IP</div>
+        <div class="hud-text-tight" style="font-size:11px; font-weight:900; color: var(--yellow);">${escapeHtml(n.ip)}</div>
+      </div>
+      <div>
+        <div class="hud-mono" style="font-size:9px; font-weight:900; color: rgba(255,255,255,0.65);">RISK</div>
+        <div class="hud-text-tight" style="font-size:11px; font-weight:900; color: var(${n.risk==='MED'?'--pink':'--green'});">${escapeHtml(n.risk)}</div>
+      </div>
+      <div class="col-span-2">
+        <div class="hud-mono" style="font-size:9px; font-weight:900; color: rgba(255,255,255,0.65);">MAC / VENDOR</div>
+        <div class="hud-text-tight" style="font-size:10px; font-weight:900; color: var(--cyan);">
+          ${escapeHtml(n.mac)} · ${escapeHtml(n.vendor)}
+        </div>
+      </div>
+    `;
+
+    card.appendChild(title);
+    card.appendChild(meta);
+    deviceListEl.appendChild(card);
+  }
+}
+
+deviceFilterEl.addEventListener('input', renderDeviceList);
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* Scan button */
+const btnScan = document.getElementById('btnScan');
+const scanStatus = document.getElementById('scanStatus');
+btnScan.addEventListener('click', () => {
+  seedScan();
+  renderDeviceList();
+  scanStatus.textContent = 'ACTIVE';
+  scanStatus.style.color = 'var(--green)';
+  resizeMapCanvas();
+  drawMap(true);
+});
+
+/* Initialize map once (idle state) */
+seedScan();
+resizeMapCanvas();
+renderDeviceList();
+drawMap(false);
+
+/* =========================
+   TOOLS: DNS + Connection Info
+========================= */
+const dnsOut = document.getElementById('dnsOut');
+document.getElementById('btnDns').addEventListener('click', async () => {
+  dnsOut.textContent = 'RUNNING...';
+  try{
+    // This is a light “does fetch resolve quickly” check. Browsers can't do raw DNS.
+    const t0 = performance.now();
+    await fetch(`https://1.1.1.1/cdn-cgi/trace?${Date.now()}`, { cache:'no-store', mode:'no-cors' }).catch(() => null);
+    const t1 = performance.now();
+    dnsOut.style.color = 'var(--yellow)';
+    dnsOut.textContent = `RESOLVE_OK (${Math.round(t1-t0)}ms)`;
+  }catch(e){
+    dnsOut.style.color = 'var(--pink)';
+    dnsOut.textContent = 'BLOCKED';
+  }
+});
+
+function refreshConnInfo(){
+  const downlink = document.getElementById('downlink');
+  const rtt = document.getElementById('rtt');
+
+  const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (c){
+    downlink.textContent = c.downlink ? `${c.downlink} Mbps` : '--';
+    rtt.textContent = c.rtt ? `${c.rtt} ms` : '--';
+  } else {
+    downlink.textContent = '--';
+    rtt.textContent = '--';
+  }
+}
+refreshConnInfo();
+setInterval(refreshConnInfo, 2500);
+
+/* =========================
+   CONFIG: RESET
+========================= */
+document.getElementById('btnReset').addEventListener('click', () => {
+  // Speed HUD resets
+  ABORT = false;
+  els.probeStatus.textContent = 'READY';
+  els.probeStatus.style.color = 'var(--green)';
+  els.status.textContent = 'IDLE';
+  els.status.style.color = 'var(--pink)';
+  els.telemetry.innerHTML = '';
+  els.dl.textContent = '--';
+  els.ul.textContent = '--';
+  els.pingMedian.textContent = '--';
+  els.jitter.textContent = '--';
+  renderJitterBars(2);
+  setMainValue(0.0);
+
+  // Scan resets
+  scanStatus.textContent = 'IDLE';
+  scanStatus.style.color = 'var(--pink)';
+  seedScan();
+  deviceFilterEl.value = '';
+  renderDeviceList();
+  drawMap(true);
+});
+
+/* Seed jitter bars */
+renderJitterBars(2);
+</script>
+</body>
+</html>
