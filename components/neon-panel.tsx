@@ -20,6 +20,13 @@ interface NeonPanelProps {
   corners?: boolean
   scanlines?: boolean
   glow?: "soft" | "strong" | "none"
+  /**
+   * Density of the panel substrate. `data` (default) is the standard glass
+   * surface used by HUD cards. `heavy` opts into the `ps-glass-strong`
+   * substrate for panels that carry critical numerals/telemetry and need
+   * to be readable on the brightest frames of the animated background.
+   */
+  density?: "data" | "heavy"
   as?: "div" | "section" | "article"
 }
 
@@ -30,20 +37,25 @@ export function NeonPanel({
   corners = true,
   scanlines = false,
   glow = "soft",
+  density = "data",
   as: Tag = "div",
 }: NeonPanelProps) {
   const rgb = ACCENT_RGB[accent]
+  // Slightly stronger inset stroke + drop shadow so panels separate cleanly
+  // from the bright animated background. The outer drop shadow is kept
+  // restrained so the neon glow (which carries the NEO identity) still leads.
   const borderShadow =
     glow === "strong"
-      ? `0 0 0 1px rgba(${rgb}, 0.55) inset, 0 0 24px rgba(${rgb}, 0.35), 0 0 60px rgba(${rgb}, 0.18)`
+      ? `0 0 0 1px rgba(${rgb}, 0.6) inset, 0 0 26px rgba(${rgb}, 0.36), 0 0 60px rgba(${rgb}, 0.18), 0 8px 28px rgba(0,0,0,0.45)`
       : glow === "soft"
-        ? `0 0 0 1px rgba(${rgb}, 0.32) inset, 0 0 14px rgba(${rgb}, 0.18)`
-        : `0 0 0 1px rgba(${rgb}, 0.22) inset`
+        ? `0 0 0 1px rgba(${rgb}, 0.38) inset, 0 0 14px rgba(${rgb}, 0.2), 0 6px 22px rgba(0,0,0,0.4)`
+        : `0 0 0 1px rgba(${rgb}, 0.28) inset, 0 4px 18px rgba(0,0,0,0.4)`
 
   return (
     <Tag
       className={cn(
-        "relative rounded-[14px] ps-glass overflow-hidden",
+        "relative rounded-[14px] overflow-hidden",
+        density === "heavy" ? "ps-glass-strong" : "ps-glass",
         className,
       )}
       style={{ boxShadow: borderShadow }}

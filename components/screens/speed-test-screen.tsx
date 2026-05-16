@@ -273,9 +273,13 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
       <header
         className="speedtest-topbar flex w-full items-center justify-between rounded-lg px-3 py-2"
         style={{
-          background: "rgba(0,0,0,0.55)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          backdropFilter: "blur(10px)",
+          // Substrate raised from 0.55 -> 0.78 so the topbar reads cleanly
+          // when the animated background is on a bright frame. Border is
+          // a touch warmer for hierarchy without changing the cyber accent.
+          background: "rgba(0,0,0,0.78)",
+          border: "1px solid rgba(255,255,255,0.12)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
         }}
       >
         <div className="flex flex-col leading-tight">
@@ -680,9 +684,13 @@ function Panel({
     <div
       className={`${cp ? "cpclip" : ""} p-3 ${className ?? ""}`}
       style={{
-        background: "rgba(0,0,0,0.72)",
-        border: `1px solid ${rgba(accent, 0.28)}`,
-        backdropFilter: "blur(8px)",
+        // Bumped from 0.72 -> 0.86: makes the telemetry cards read
+        // clearly when the background is on a bright stripe, without
+        // killing the glass effect (still allows accent glow through).
+        background: "rgba(0,0,0,0.86)",
+        border: `1px solid ${rgba(accent, 0.36)}`,
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
       }}
     >
       {children}

@@ -75,7 +75,19 @@ export function AppShell() {
           rendering throughout boot so the visual identity is preserved —
           the heavy MP4 simply fades in once the boot sequence has exited. */}
       <NeoBackgroundScene videoEnabled={!bootMounted} />
-      <div className="pointer-events-none fixed inset-0 z-[1] ps-scanlines opacity-20" />
+      {/*
+        Content-column shade. Sits behind the main viewport and in front of
+        the animated background. Width-bounded to the same max-w-2xl column
+        used by <main>, so the background stays visible on the left and
+        right gutters (preserving the NEO art) while the content area gets
+        an extra darker substrate that makes text and HUD cards readable
+        on bright frames. Opaque enough to win contrast, soft enough to keep
+        the cyberpunk depth.
+      */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 bottom-0 z-[1] flex justify-center">
+        <div className="ps-content-shade h-full w-full max-w-2xl" />
+      </div>
+      <div className="pointer-events-none fixed inset-0 z-[2] ps-scanlines opacity-25" />
 
       <AssistantStatusBar />
       {showPersistentOrb && <PersistentAvatarOrb />}

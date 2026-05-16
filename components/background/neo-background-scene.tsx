@@ -140,14 +140,35 @@ export function NeoBackgroundScene({ mode = "auto", videoEnabled = true }: NeoBa
       )}
 
       {/*
-        Soft vertical scrim — keeps the status bar and bottom dock legible
-        without dimming the focal NEO art in the middle of the frame.
+        Readability stack. The background art is intentionally vivid, so we
+        layer two compositing fields on top of it before any UI mounts:
+
+        1. A heavier vertical scrim that keeps a usable contrast floor across
+           the whole frame. The previous gradient dipped to ~0.04 alpha in
+           the middle band — exactly where content sits — and let the bright
+           portions of the animated background bleed straight into headings
+           and telemetry. The new stop pattern keeps the same shape but
+           raises the minimum to ~0.40, so the NEO art is still clearly
+           recognizable while text and HUD cards regain separation.
+
+        2. A subtle centered radial vignette dimming the focal hot spot a
+           little further. This keeps the background "alive" near the edges
+           and lets the middle of the canvas — where headlines, key numbers,
+           and dock chips live — sit on a darker substrate without flattening
+           the look into a generic dashboard.
       */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(180deg, rgba(0,0,0,0.34) 0%, rgba(0,0,0,0.08) 22%, rgba(0,0,0,0.04) 60%, rgba(0,0,0,0.38) 100%)",
+            "linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.42) 22%, rgba(0,0,0,0.40) 60%, rgba(0,0,0,0.66) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.18) 35%, rgba(0,0,0,0) 75%)",
         }}
       />
     </div>
