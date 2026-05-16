@@ -10,9 +10,19 @@ const ANIMATED_BACKGROUND = "/media/neo/neo_backround.mp4"
 
 interface NeoBackgroundSceneProps {
   mode?: BackgroundMode
+  /**
+   * Controls whether the animated background `<video>` element is allowed to
+   * mount. The boot overlay sets this to `false` for the duration of the
+   * cinematic intro so the background decoder does not fight the boot video
+   * for memory/decoder slots on Android WebView. The static PNG poster is
+   * always rendered behind both states, so gating the video here does not
+   * change the visual identity — the background simply fades in cleanly
+   * once the boot sequence has exited.
+   */
+  videoEnabled?: boolean
 }
 
-export function NeoBackgroundScene({ mode = "auto" }: NeoBackgroundSceneProps) {
+export function NeoBackgroundScene({ mode = "auto", videoEnabled = true }: NeoBackgroundSceneProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   // `videoReady` flips true once the MP4 is actually playing, which fades it
   // in over the static PNG fallback. If autoplay fails or the file errors out
@@ -34,7 +44,7 @@ export function NeoBackgroundScene({ mode = "auto" }: NeoBackgroundSceneProps) {
   // frames. The play() call is wrapped because some browsers reject promises
   // when the document just unhid; failures fall back to the PNG quietly.
   useEffect(() => {
-    if (videoDisabled || reducedMotion) return
+    if (videoDisabled || reducedMotion || !videoEnabled) return
     const handleVisibility = () => {
       const video = videoRef.current
       if (!video) return
@@ -46,7 +56,15 @@ export function NeoBackgroundScene({ mode = "auto" }: NeoBackgroundSceneProps) {
     }
     document.addEventListener("visibilitychange", handleVisibility)
     return () => document.removeEventListener("visibilitychange", handleVisibility)
-  }, [videoDisabled, reducedMotion])
+  }, [videoDisabled, reducedMotion, videoEnabled])
+
+  // When the video is gated off (boot in progress), make sure any leftover
+  // playback state is reset so the next mount starts clean.
+  useEffect(() => {
+    if (!videoEnabled) {
+      setVideoReady(false)
+    }
+  }, [videoEnabled])
 
   const handleCanPlay = useCallback(() => {
     const video = videoRef.current
@@ -65,7 +83,7 @@ export function NeoBackgroundScene({ mode = "auto" }: NeoBackgroundSceneProps) {
     setVideoDisabled(true)
   }, [])
 
-  const showVideo = !reducedMotion && !videoDisabled
+  const showVideo = !reducedMotion && !videoDisabled && videoEnabled
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black" aria-hidden="true">
@@ -102,7 +120,10 @@ export function NeoBackgroundScene({ mode = "auto" }: NeoBackgroundSceneProps) {
           autoPlay
           loop
           playsInline
-          preload="auto"
+          // `metadata` lets Android WebView prepare the demuxer without
+          // pulling the full asset across the wire alongside the boot
+          // decoder. We then start playback explicitly in onCanPlay.
+          preload="metadata"
           controls={false}
           controlsList="nodownload nofullscreen noremoteplayback"
           disablePictureInPicture

@@ -4,7 +4,15 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 const BOOT_VIDEO_SRC = "/media/neo/boot/neo_boot_new.mp4"
-const BOOT_MAX_FAILSAFE_MS = 35000
+// Outer hard ceiling. Reached only when the <video> never even emits
+// `loadedmetadata` (e.g. asset missing, format rejected). The metadata
+// failsafe below replaces this with a duration-derived bound as soon as
+// the media starts to negotiate.
+const BOOT_MAX_FAILSAFE_MS = 12000
+// If the video element emits no progress for this long after starting
+// playback we treat it as stalled and exit so the user is never trapped
+// behind a frozen frame.
+const BOOT_STALL_THRESHOLD_MS = 6000
 
 interface BootSequenceOverlayProps {
   onBootComplete?: () => void
@@ -14,6 +22,8 @@ export function BootSequenceOverlay({ onBootComplete }: BootSequenceOverlayProps
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const completedRef = useRef(false)
   const failsafeRef = useRef<number | null>(null)
+  const stallRef = useRef<number | null>(null)
+  const lastTimeRef = useRef(0)
   const [visible, setVisible] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
   const [pageVisible, setPageVisible] = useState(true)
@@ -30,6 +40,10 @@ export function BootSequenceOverlay({ onBootComplete }: BootSequenceOverlayProps
     if (failsafeRef.current !== null) {
       window.clearTimeout(failsafeRef.current)
       failsafeRef.current = null
+    }
+    if (stallRef.current !== null) {
+      window.clearInterval(stallRef.current)
+      stallRef.current = null
     }
     const video = videoRef.current
     if (video) {
@@ -79,6 +93,29 @@ export function BootSequenceOverlay({ onBootComplete }: BootSequenceOverlayProps
     video.controls = false
     video.muted = true
     video.play().catch(() => finishBoot(false))
+  }, [finishBoot])
+
+  // Watch playback progress. If currentTime is not advancing while the
+  // element is supposed to be playing, exit the overlay so a broken
+  // decoder cannot trap the user behind a frozen frame.
+  const armStallWatcher = useCallback(() => {
+    if (stallRef.current !== null) window.clearInterval(stallRef.current)
+    lastTimeRef.current = 0
+    let stagnantFor = 0
+    stallRef.current = window.setInterval(() => {
+      const video = videoRef.current
+      if (!video || completedRef.current) return
+      if (video.paused || video.ended) return
+      if (video.currentTime > lastTimeRef.current + 0.05) {
+        lastTimeRef.current = video.currentTime
+        stagnantFor = 0
+        return
+      }
+      stagnantFor += 250
+      if (stagnantFor >= BOOT_STALL_THRESHOLD_MS) {
+        finishBoot(false)
+      }
+    }, 250)
   }, [finishBoot])
 
   useEffect(() => {
@@ -135,7 +172,11 @@ export function BootSequenceOverlay({ onBootComplete }: BootSequenceOverlayProps
             }}
             onLoadedMetadata={(event) => armFailsafe(event.currentTarget)}
             onCanPlay={(event) => startVideo(event.currentTarget)}
-            onPlaying={() => setIsPlaying(true)}
+            onPlaying={() => {
+              setIsPlaying(true)
+              armStallWatcher()
+            }}
+            onStalled={() => armStallWatcher()}
             onEnded={() => finishBoot(true)}
             onError={() => finishBoot(false)}
           />
