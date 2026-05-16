@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   ChevronDown,
   Box,
+  RotateCcw,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/lib/store";
@@ -50,6 +51,13 @@ import {
   resolveNetworkAdapterStatus,
   resolveNetworkUiAdapterStatus,
 } from "@/lib/network/networkDiscoveryAdapter";
+import {
+  MOCK_NETWORK_STATUS,
+  MOCK_ROUTER_STATUS,
+  MOCK_SECURITY_INSIGHTS,
+  MOCK_SCAN_HISTORY,
+  DEFAULT_NETWORK_SETTINGS,
+} from "@/lib/network/mockNetworkData";
 import {
   wakeDevice,
   rebootRouter,
@@ -148,6 +156,11 @@ export function NetworkDiscoveryFeature() {
   const [adapterStatus, setAdapterStatus] = useState<NetworkAdapterStatus | null>(null);
   const [routerCapabilities, setRouterCapabilities] = useState<RouterCapability[]>([]);
   const [routerControlMode, setRouterControlMode] = useState<RouterControlMode>("read-only");
+  // Initialization state machine — must always terminate so the UI never
+  // gets stuck on `INITIALIZING_NETWORK_MODULE...`.
+  const [initState, setInitState] = useState<"loading" | "ready" | "partial-ready" | "failed">("loading");
+  const [initIssues, setInitIssues] = useState<string[]>([]);
+  const [initAttempt, setInitAttempt] = useState(0);
 
   // UI state
   const [selectedDevice, setSelectedDevice] = useState<DiscoveredDevice | null>(null);
@@ -267,67 +280,179 @@ export function NetworkDiscoveryFeature() {
       : "idle";
 
   // Load initial data
+  //
+  // Initialization MUST always terminate. We use Promise.allSettled and per-call
+  // safe defaults so a single failed adapter call cannot trap the user on
+  // `INITIALIZING_NETWORK_MODULE...`. If a critical call fails we surface a
+  // visible failure panel with retry, but the screen never hangs.
   useEffect(() => {
+    let cancelled = false;
     const loadData = async () => {
+      const issues: string[] = [];
+      const settled = await Promise.allSettled([
+        networkAdapter.getNetworkStatus(),
+        networkAdapter.getDiscoveredDevices(),
+        networkAdapter.getRouterStatus(),
+        networkAdapter.getSecurityInsights(),
+        networkAdapter.getScanHistory(),
+        networkAdapter.getNetworkSettings(),
+        networkAdapter.getAdapterStatus(),
+        networkAdapter.getRouterCapabilities(),
+        networkAdapter.getRouterControlMode(),
+      ]);
+
+      const recordIssue = (label: string, result: PromiseSettledResult<unknown>) => {
+        if (result.status === "rejected") {
+          const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
+          issues.push(`${label}: ${message}`);
+        }
+      };
+
+      const pick = <T,>(result: PromiseSettledResult<T>, fallback: T, label: string): T => {
+        recordIssue(label, result);
+        return result.status === "fulfilled" ? result.value : fallback;
+      };
+
+      const [
+        statusResult,
+        devicesResult,
+        routerResult,
+        insightsResult,
+        historyResult,
+        settingsResult,
+        adapterResult,
+        capabilitiesResult,
+        controlModeResult,
+      ] = settled;
+
+      const status = pick<NetworkStatus>(statusResult, { ...MOCK_NETWORK_STATUS }, "network_status");
+      const deviceList = pick<DiscoveredDevice[]>(devicesResult, [], "discovered_devices");
+      const router = pick<RouterStatus>(routerResult, { ...MOCK_ROUTER_STATUS }, "router_status");
+      const insights = pick<SecurityInsight[]>(insightsResult, [...MOCK_SECURITY_INSIGHTS], "security_insights");
+      const history = pick<ScanHistoryEntry[]>(historyResult, [...MOCK_SCAN_HISTORY], "scan_history");
+      const networkSettings = pick<NetworkSettings>(
+        settingsResult,
+        { ...DEFAULT_NETWORK_SETTINGS },
+        "network_settings"
+      );
+      const currentAdapterStatus = pick<NetworkAdapterStatus>(
+        adapterResult,
+        resolveNetworkAdapterStatus({
+          demoMode: false,
+          nativePluginAvailable: false,
+          fallbackReason:
+            adapterResult.status === "rejected"
+              ? adapterResult.reason instanceof Error
+                ? adapterResult.reason.message
+                : String(adapterResult.reason)
+              : "Adapter status unavailable",
+        }),
+        "adapter_status"
+      );
+      const capabilities = pick<RouterCapability[]>(capabilitiesResult, [], "router_capabilities");
+      const controlMode = pick<RouterControlMode>(controlModeResult, "read-only", "router_control_mode");
+
+      // Restore persisted settings on top, but never let a failed write trap us.
+      let restoredSettings = networkSettings;
+      if (persistedNetworkSettingsRef.current) {
+        try {
+          restoredSettings = await networkAdapter.updateNetworkSettings(persistedNetworkSettingsRef.current);
+        } catch (error) {
+          issues.push(
+            `persisted_settings_restore: ${error instanceof Error ? error.message : String(error)}`
+          );
+          restoredSettings = { ...networkSettings, ...persistedNetworkSettingsRef.current };
+        }
+      }
+
+      let notificationCapability: Awaited<ReturnType<typeof getNetworkNotificationCapability>> = "unavailable";
       try {
-        const [status, deviceList, router, insights, history, networkSettings, currentAdapterStatus, capabilities, controlMode] = await Promise.all([
-          networkAdapter.getNetworkStatus(),
-          networkAdapter.getDiscoveredDevices(),
-          networkAdapter.getRouterStatus(),
-          networkAdapter.getSecurityInsights(),
-          networkAdapter.getScanHistory(),
-          networkAdapter.getNetworkSettings(),
-          networkAdapter.getAdapterStatus(),
-          networkAdapter.getRouterCapabilities(),
-          networkAdapter.getRouterControlMode(),
-        ]);
-
-        const restoredSettings = persistedNetworkSettingsRef.current
-          ? await networkAdapter.updateNetworkSettings(persistedNetworkSettingsRef.current)
-          : networkSettings;
-        const notificationCapability = await getNetworkNotificationCapability();
-        const identityDevices = mergeIdentitiesForDevices(deviceList);
-
-        setNetworkStatus(status);
-        setDevices(identityDevices);
-        setRouterStatus(router);
-        setSecurityInsights(insights);
-        setScanHistory(history);
-        setSettings(restoredSettings);
-        setPersistedNetworkSettings(restoredSettings);
-        setAdapterStatus(currentAdapterStatus);
-        setRouterCapabilities(capabilities);
-        setRouterControlMode(controlMode);
-        setSelectedMode(restoredSettings.scanMode);
-        setNetworkMonitorState((current) => ({
-          ...current,
-          enabled: restoredSettings.autoScanEnabled,
-          nextRunAt:
-            restoredSettings.autoScanEnabled && !current.nextRunAt
-              ? computeNextAutoScanAt(restoredSettings)
-              : current.nextRunAt,
-          schedulerStatus: restoredSettings.autoScanEnabled ? "scheduled" : "idle",
-          backgroundCapability: "in-app-only",
-          notificationCapability,
-        }));
-        previousDevicesRef.current = identityDevices;
-        previousNetworkStatusRef.current = status;
-        previousRouterStatusRef.current = router;
+        notificationCapability = await getNetworkNotificationCapability();
       } catch (error) {
-        setAdapterStatus(resolveNetworkAdapterStatus({
+        issues.push(
+          `notification_capability: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+
+      if (cancelled) return;
+
+      const identityDevices = mergeIdentitiesForDevices(deviceList);
+
+      setNetworkStatus(status);
+      setDevices(identityDevices);
+      setRouterStatus(router);
+      setSecurityInsights(insights);
+      setScanHistory(history);
+      setSettings(restoredSettings);
+      setPersistedNetworkSettings(restoredSettings);
+      setAdapterStatus(currentAdapterStatus);
+      setRouterCapabilities(capabilities);
+      setRouterControlMode(controlMode);
+      setSelectedMode(restoredSettings.scanMode);
+      setNetworkMonitorState((current) => ({
+        ...current,
+        enabled: restoredSettings.autoScanEnabled,
+        nextRunAt:
+          restoredSettings.autoScanEnabled && !current.nextRunAt
+            ? computeNextAutoScanAt(restoredSettings)
+            : current.nextRunAt,
+        schedulerStatus: restoredSettings.autoScanEnabled ? "scheduled" : "idle",
+        backgroundCapability: "in-app-only",
+        notificationCapability,
+      }));
+      previousDevicesRef.current = identityDevices;
+      previousNetworkStatusRef.current = status;
+      previousRouterStatusRef.current = router;
+
+      // Resolution rule:
+      //   - 0 issues       -> ready
+      //   - 1+ critical    -> partial-ready (we still rendered, but warn)
+      //   - all critical   -> failed (only when literally nothing usable came back)
+      const allCriticalFailed =
+        statusResult.status === "rejected" &&
+        devicesResult.status === "rejected" &&
+        routerResult.status === "rejected" &&
+        settingsResult.status === "rejected" &&
+        adapterResult.status === "rejected";
+
+      setInitIssues(issues);
+      setInitState(allCriticalFailed ? "failed" : issues.length === 0 ? "ready" : "partial-ready");
+    };
+
+    setInitState("loading");
+    setInitIssues([]);
+    loadData().catch((error) => {
+      if (cancelled) return;
+      // Last-resort safety net — should not be reachable because every
+      // adapter call above is wrapped in allSettled, but if something
+      // throws synchronously we still escape the spinner.
+      setNetworkStatus((current) => current ?? { ...MOCK_NETWORK_STATUS });
+      setRouterStatus((current) => current ?? { ...MOCK_ROUTER_STATUS });
+      setSettings((current) => current ?? { ...DEFAULT_NETWORK_SETTINGS });
+      setAdapterStatus(
+        resolveNetworkAdapterStatus({
           demoMode: false,
           nativePluginAvailable: false,
           fallbackReason: error instanceof Error ? error.message : "Native discovery unavailable",
-        }))
-      }
-    };
+        })
+      );
+      setInitIssues([error instanceof Error ? error.message : String(error)]);
+      setInitState("failed");
+    });
 
-    loadData();
+    return () => {
+      cancelled = true;
+    };
   }, [
     mergeIdentitiesForDevices,
     setNetworkMonitorState,
     setPersistedNetworkSettings,
+    initAttempt,
   ]);
+
+  const handleRetryInitialization = useCallback(() => {
+    setInitAttempt((value) => value + 1);
+  }, []);
 
   // Scan progress polling
   useEffect(() => {
@@ -341,11 +466,35 @@ export function NetworkDiscoveryFeature() {
 
       if (progress >= 100) {
         clearInterval(interval);
-        // Refresh data after scan completes
+        // Refresh data after scan completes. progress=100 covers BOTH
+        // success and explicit failure paths in the native adapter, so
+        // detect the failed state here and surface a real error alert.
         networkAdapter.getNetworkStatus().then((status) => {
           appendEvents(compareNetworkContext(previousNetworkStatusRef.current, status));
           previousNetworkStatusRef.current = status;
           setNetworkStatus(status);
+          if (status.scanState === "failed") {
+            const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
+            const failureEvent = createScanFailedEvent(
+              scanId,
+              selectedMode,
+              "Native local discovery returned no result. No backend is required for local LAN scanning — retry from the Scan tab."
+            );
+            appendEvents([failureEvent]);
+            appendAlerts([
+              {
+                id: `alert-${failureEvent.id}`,
+                eventId: failureEvent.id,
+                timestamp: failureEvent.timestamp,
+                title: "Native discovery failed",
+                message: failureEvent.title,
+                severity: "high",
+                status: "unread",
+              },
+            ]).catch(() => undefined);
+            setScanProgress(0);
+            playAvatarReaction("angry");
+          }
         }).catch(() => undefined);
         networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
         networkAdapter.getDiscoveredDevices().then((rawUpdatedDevices) => {
@@ -454,6 +603,7 @@ export function NetworkDiscoveryFeature() {
     latestDiagnostics,
     networkStatus,
     setNetworkHealthSnapshots,
+    selectedMode,
   ]);
 
   // Action polling
@@ -913,13 +1063,49 @@ export function NetworkDiscoveryFeature() {
     setTimeout(() => setRobotMessage(null), 4000);
   }, [adapterStatus, devices, settings]);
 
-  // Loading state
-  if (!networkStatus || !routerStatus || !settings) {
+  // Loading state — bounded. While loading we render the spinner, but if the
+  // initializer reaches a terminal state with critical state still missing we
+  // fall through to the failure panel below instead of hanging forever.
+  if (initState === "loading" && (!networkStatus || !routerStatus || !settings)) {
     return (
       <div className="flex min-h-[420px] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Radar className="h-12 w-12 animate-pulse text-cyan-400" />
           <p className="font-mono text-sm text-cyan-400">INITIALIZING_NETWORK_MODULE...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (initState === "failed" || !networkStatus || !routerStatus || !settings) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center px-4">
+        <div className="w-full max-w-md space-y-4 rounded-lg border border-red-500/40 bg-black/70 p-6 text-center backdrop-blur-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-red-500/50 bg-red-500/10">
+            <AlertTriangle className="h-6 w-6 text-red-400" />
+          </div>
+          <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-red-300">
+            NETWORK_MODULE_INIT_FAILED
+          </h2>
+          <p className="font-mono text-[11px] leading-relaxed text-red-200/85">
+            Native Android discovery did not initialize and no usable fallback could be loaded.
+            Local LAN discovery does not require a backend — try again, or restart the app.
+          </p>
+          {initIssues.length > 0 && (
+            <ul className="space-y-1 rounded border border-red-500/20 bg-red-500/5 p-3 text-left font-mono text-[10px] text-red-200/80">
+              {initIssues.slice(0, 5).map((issue) => (
+                <li key={issue} className="break-words">• {issue}</li>
+              ))}
+            </ul>
+          )}
+          <button
+            type="button"
+            onClick={handleRetryInitialization}
+            className="inline-flex items-center gap-2 rounded border border-cyan-500/50 bg-cyan-500/10 px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-cyan-300 hover:bg-cyan-500/20"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            RETRY_LIVE_DISCOVERY
+          </button>
         </div>
       </div>
     );
@@ -1271,7 +1457,13 @@ export function NetworkDiscoveryFeature() {
         <footer className="mt-8 border-t border-gray-800 pb-2 pt-4">
           <p className="text-center font-mono text-[10px] text-gray-600">
             {`N.E.O. NETWORK MODULE // ${effectiveAdapterStatus.label} // ${
-              effectiveAdapterStatus.mode === "native-unavailable" ? "NATIVE DISCOVERY UNAVAILABLE" : "SIMULATED BROWSER PREVIEW"
+              effectiveAdapterStatus.mode === "native-android"
+                ? "LIVE LOCAL ANDROID DISCOVERY · NO BACKEND REQUIRED"
+                : effectiveAdapterStatus.mode === "native-unavailable"
+                  ? "NATIVE DISCOVERY UNAVAILABLE"
+                  : effectiveAdapterStatus.mode === "scan-failed"
+                    ? "LAST SCAN FAILED"
+                    : "SIMULATED BROWSER PREVIEW"
             }`}
           </p>
         </footer>
