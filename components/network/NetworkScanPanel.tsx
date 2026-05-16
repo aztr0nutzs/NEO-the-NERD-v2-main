@@ -175,7 +175,7 @@ export function NetworkScanPanel({
       {/* Demo Notice */}
       {isDemoMode && (
         <p className="font-mono text-[10px] text-gray-500">
-          {"//"} Demo mode: Scan simulates discovery. Connect native backend for real network scanning.
+          {"//"} Demo mode: Scan simulates discovery. Install/run the Android app for live local LAN scanning.
         </p>
       )}
     </div>

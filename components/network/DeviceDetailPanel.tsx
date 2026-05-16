@@ -520,7 +520,7 @@ export function DeviceDetailPanel({
             {/* Demo Notice */}
             {isDemoMode && (
               <p className="rounded border border-gray-800 bg-gray-900/30 p-2 font-mono text-[10px] text-gray-500">
-                {"//"} Actions below are queued in demo mode. Connect native backend for real device
+                {"//"} Actions below are queued in demo mode. Connect native cloud backend for real device
                 control.
               </p>
             )}

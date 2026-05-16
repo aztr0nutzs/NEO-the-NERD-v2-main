@@ -894,11 +894,11 @@ export function NetworkDiscoveryFeature() {
       ? resolveNetworkUiAdapterStatus(settings, adapterStatus)
       : null
     const adapterHint =
-      effectiveAdapterStatus?.mode === "demo"
+      effectiveAdapterStatus?.mode === "demo-browser"
         ? "Simulated network data mode is active."
         : effectiveAdapterStatus?.label === "LIVE_ANDROID_DISCOVERY"
           ? "Live Android discovery bridge is active."
-          : effectiveAdapterStatus?.mode === "fallback"
+          : effectiveAdapterStatus?.mode === "native-unavailable"
             ? `Live discovery unavailable: ${effectiveAdapterStatus.message}`
             : "Discovery runtime status is initializing."
     const messages = [
@@ -928,7 +928,7 @@ export function NetworkDiscoveryFeature() {
   const effectiveAdapterStatus = resolveNetworkUiAdapterStatus(settings, adapterStatus);
   const isDemoMode = settings.demoMode || effectiveAdapterStatus.isDemo;
   const effectivePanelSettings =
-    effectiveAdapterStatus.mode === "fallback" ? { ...settings, demoMode: true } : settings;
+    (effectiveAdapterStatus.mode === "native-unavailable" || effectiveAdapterStatus.mode === "scan-failed") ? { ...settings, demoMode: true } : settings;
   const newIdentityDevices = devices.filter((device) => device.isNewIdentity && !device.dismissedForNow);
   const latestHealthSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
 
@@ -974,18 +974,18 @@ export function NetworkDiscoveryFeature() {
                   </span>
                 )}
                 <span className={`flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                  effectiveAdapterStatus.isBackendAvailable
+                  effectiveAdapterStatus.mode === "native-android"
                     ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
                     : "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
                 }`}>
                   <Cpu className="h-3 w-3" />
                   {effectiveAdapterStatus.label === "LIVE_ANDROID_DISCOVERY"
                     ? "LIVE ANDROID DISCOVERY"
-                    : effectiveAdapterStatus.mode === "fallback"
+                    : effectiveAdapterStatus.mode === "native-unavailable"
                       ? "LIMITED DATA"
-                      : effectiveAdapterStatus.isBackendAvailable
-                        ? "BACKEND_CONNECTED"
-                        : "DEMO ADAPTER"}
+                      : effectiveAdapterStatus.mode === "native-android"
+                        ? "LIVE LOCAL ANDROID DISCOVERY"
+                        : "SIMULATED BROWSER PREVIEW"}
                 </span>
               </div>
             </div>
@@ -1271,7 +1271,7 @@ export function NetworkDiscoveryFeature() {
         <footer className="mt-8 border-t border-gray-800 pb-2 pt-4">
           <p className="text-center font-mono text-[10px] text-gray-600">
             {`N.E.O. NETWORK MODULE // ${effectiveAdapterStatus.label} // ${
-              effectiveAdapterStatus.mode === "fallback" ? "LIMITED DATA" : "DEMO/LIVE TRUTHFUL MODE"
+              effectiveAdapterStatus.mode === "native-unavailable" ? "NATIVE DISCOVERY UNAVAILABLE" : "SIMULATED BROWSER PREVIEW"
             }`}
           </p>
         </footer>

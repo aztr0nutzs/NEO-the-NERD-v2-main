@@ -129,70 +129,44 @@ type AdapterStatusResolutionInput = {
   demoMode: boolean;
   nativePluginAvailable: boolean;
   webBridgeAvailable?: boolean;
-  backendAvailable?: boolean;
-  backendLabel?: string;
-  fallbackReason?: string | null;
+    fallbackReason?: string | null;
 };
 
 export function resolveNetworkAdapterStatus({
   demoMode,
   nativePluginAvailable,
   webBridgeAvailable = false,
-  backendAvailable = false,
-  backendLabel = "NATIVE_BACKEND_CONNECTED",
   fallbackReason = null,
 }: AdapterStatusResolutionInput): NetworkAdapterStatus {
   // Native/plugin availability is only capability. demoMode is the active-mode override.
   if (demoMode) {
     return {
-      mode: "demo",
+      mode: "demo-browser",
       label: "SIMULATED NETWORK DATA",
       isDemo: true,
-      isBackendAvailable: false,
       message: nativePluginAvailable
         ? "Native bridge is available, but demo mode is forcing simulated discovery data."
-        : "Using simulated network data. Native/backend discovery is not active.",
+        : "Browser preview mode is using simulated discovery data. Install/run Android app for live local LAN scanning.",
     };
   }
 
   if (nativePluginAvailable) {
     return {
-      mode: "native-backend",
+      mode: "native-android",
       label: "LIVE_ANDROID_DISCOVERY",
       isDemo: false,
-      isBackendAvailable: true,
-      message: "Using Android native local-network discovery bridge.",
+      message: "Live local Android discovery active. Scanning the local LAN directly from this device. No cloud backend required for local device discovery.",
     };
   }
 
-  if (webBridgeAvailable) {
-    return {
-      mode: "native-backend",
-      label: "NATIVE_DISCOVERY_CONNECTED",
-      isDemo: false,
-      isBackendAvailable: true,
-      message: "Using read-only native WebView bridge for network discovery.",
-    };
-  }
-
-  if (backendAvailable) {
-    return {
-      mode: "native-backend",
-      label: backendLabel,
-      isDemo: false,
-      isBackendAvailable: true,
-      message: `Using read-only network discovery backend at ${BACKEND_BASE_URL}.`,
-    };
-  }
 
   return {
-    mode: "fallback",
+    mode: "native-unavailable",
     label: "SIMULATED NETWORK DATA",
     isDemo: true,
-    isBackendAvailable: false,
-    message:
+        message:
       fallbackReason ??
-      "Native/backend discovery is unavailable, so the Network module is using demo data.",
+      "Native Android discovery is unavailable or failed to initialize. Retry live discovery, or choose Demo Preview explicitly.",
   };
 }
 
@@ -219,7 +193,7 @@ export function resolveNetworkUiAdapterStatus(
 
 function createReadOnlyActionResult(
   action: Omit<NetworkAction, "id" | "createdAt" | "status">,
-  reason = "Native/backend adapter is read-only in this phase. Control actions are not executed."
+  reason = "Native discovery adapter is read-only for control actions. Local LAN scanning remains live when the plugin is available."
 ): NetworkAction {
   return {
     ...action,
@@ -706,18 +680,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       };
     }
 
-    const status = await (this.bridge?.getNetworkStatus?.() ??
-      requestBackendJson<NetworkStatus>("/status"));
-
-    if (status.scanState === "complete") {
-      this.isScanning = false;
-      this.scanProgress = 100;
-    } else if (status.scanState === "failed" || status.scanState === "idle") {
-      this.isScanning = false;
-      this.scanProgress = 0;
-    }
-
-    return status;
+    throw new Error("Native Android discovery plugin unavailable.");
   }
 
   async startNetworkScan(mode: ScanMode): Promise<void> {
@@ -748,17 +711,6 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
         this.lastScanFailed = true;
       });
 
-    if (await isAndroidNativeNetworkPluginAvailable()) return;
-
-    const result = await (this.bridge?.startNetworkScan?.(mode) ??
-      requestBackendJson<{ scanProgress?: number }>("/scan", {
-        method: "POST",
-        body: JSON.stringify({ mode }),
-      }));
-
-    if (result?.scanProgress != null) {
-      this.scanProgress = result.scanProgress;
-    }
   }
 
   async stopNetworkScan(): Promise<void> {
@@ -849,7 +801,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   }
 
   async getScanHistory(): Promise<ScanHistoryEntry[]> {
-    return this.bridge?.getScanHistory?.() ?? requestBackendJson<ScanHistoryEntry[]>("/history");
+    return [];
   }
 
   async saveDeviceNote(deviceId: string, note: string): Promise<void> {
@@ -857,10 +809,10 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       type: "note",
       label: "Note not saved",
       deviceId,
-      message: `Native/backend note save skipped: ${note.slice(0, 48)}`,
+      message: `Native discovery note save skipped: ${note.slice(0, 48)}`,
     });
     this.actionHistory = [action, ...this.actionHistory].slice(0, 50);
-    throw new Error("Native/backend adapter is read-only; note writes are disabled.");
+    throw new Error("Native discovery adapter is read-only; note writes are disabled.");
   }
 
   async updateNetworkSettings(settings: Partial<NetworkSettings>): Promise<NetworkSettings> {
@@ -873,16 +825,10 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   }
 
   async getSecurityInsights(): Promise<SecurityInsight[]> {
-    return this.bridge?.getSecurityInsights?.() ?? requestBackendJson<SecurityInsight[]>("/insights");
+    return [];
   }
 
   async getNetworkTopology(): Promise<NetworkTopologyGraph> {
-    const topology =
-      (await this.bridge?.getNetworkTopology?.()) ??
-      (await requestBackendJson<NetworkTopologyGraph | null>("/topology"));
-
-    if (topology) return normalizeNativeTopology(topology);
-
     const devices = await this.getDiscoveredDevices();
     return buildTopologyGraphFromDevices(devices, "estimated");
   }
@@ -902,7 +848,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
 }
 
 class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
-  private activeMode: NetworkAdapterStatus["mode"] = "demo";
+  private activeMode: NetworkAdapterStatus["mode"] = "demo-browser";
   private fallbackReason: string | null = null;
   private nativeOverrideResolved: boolean | null = null;
 
@@ -927,18 +873,18 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
     fallback: (adapter: DemoNetworkAdapter) => Promise<T>
   ): Promise<T> {
     if (await this.shouldUseDemo()) {
-      this.activeMode = "demo";
+      this.activeMode = "demo-browser";
       this.fallbackReason = null;
       return fallback(this.demoAdapter);
     }
 
     try {
       const result = await operation(this.nativeNetworkAdapter);
-      this.activeMode = "native-backend";
+      this.activeMode = "native-android";
       this.fallbackReason = null;
       return result;
     } catch (error) {
-      this.activeMode = "fallback";
+      this.activeMode = "native-unavailable";
       this.fallbackReason = getErrorMessage(error);
       throw error;
     }
@@ -946,18 +892,18 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
 
   async getAdapterStatus(): Promise<NetworkAdapterStatus> {
     if (await this.shouldUseDemo()) {
-      this.activeMode = "demo";
+      this.activeMode = "demo-browser";
       this.fallbackReason = null;
       return this.demoAdapter.getAdapterStatus();
     }
 
     try {
       const status = await this.nativeNetworkAdapter.getAdapterStatus();
-      this.activeMode = "native-backend";
+      this.activeMode = "native-android";
       this.fallbackReason = null;
       return status;
     } catch (error) {
-      this.activeMode = "fallback";
+      this.activeMode = "native-unavailable";
       this.fallbackReason = getErrorMessage(error);
       return resolveNetworkAdapterStatus({
         demoMode: false,
@@ -1037,20 +983,20 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
     action: Omit<NetworkAction, "id" | "createdAt" | "status">
   ): Promise<NetworkAction> {
     if (await this.shouldUseDemo()) {
-      this.activeMode = "demo";
+      this.activeMode = "demo-browser";
       this.fallbackReason = null;
       return this.demoAdapter.runNetworkAction(action);
     }
 
     try {
       const result = await this.nativeNetworkAdapter.runNetworkAction(action);
-      this.activeMode = "native-backend";
+      this.activeMode = "native-android";
       this.fallbackReason = null;
       return result;
     } catch (error) {
-      this.activeMode = "fallback";
+      this.activeMode = "native-unavailable";
       this.fallbackReason = getErrorMessage(error);
-      return createReadOnlyActionResult(action, this.fallbackReason);
+      return createReadOnlyActionResult(action, this.fallbackReason ?? "Native discovery unavailable.");
     }
   }
 
@@ -1070,17 +1016,17 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
 
   async saveDeviceNote(deviceId: string, note: string): Promise<void> {
     if (await this.shouldUseDemo()) {
-      this.activeMode = "demo";
+      this.activeMode = "demo-browser";
       this.fallbackReason = null;
       return this.demoAdapter.saveDeviceNote(deviceId, note);
     }
 
     try {
       await this.nativeNetworkAdapter.saveDeviceNote(deviceId, note);
-      this.activeMode = "native-backend";
+      this.activeMode = "native-android";
       this.fallbackReason = null;
     } catch (error) {
-      this.activeMode = "fallback";
+      this.activeMode = "native-unavailable";
       this.fallbackReason = getErrorMessage(error);
       throw error;
     }
@@ -1092,14 +1038,14 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
     if (!updated.demoMode) {
       try {
         await this.nativeNetworkAdapter.updateNetworkSettings(updated);
-        this.activeMode = "native-backend";
+        this.activeMode = "native-android";
         this.fallbackReason = null;
       } catch (error) {
-        this.activeMode = "fallback";
+        this.activeMode = "native-unavailable";
         this.fallbackReason = getErrorMessage(error);
       }
     } else {
-      this.activeMode = "demo";
+      this.activeMode = "demo-browser";
       this.fallbackReason = null;
     }
 
@@ -1131,13 +1077,13 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   getScanProgress(): number {
-    return this.activeMode === "native-backend"
+    return this.activeMode === "native-android"
       ? this.nativeNetworkAdapter.getScanProgress()
       : this.demoAdapter.getScanProgress();
   }
 
   getIsScanning(): boolean {
-    return this.activeMode === "native-backend"
+    return this.activeMode === "native-android"
       ? this.nativeNetworkAdapter.getIsScanning()
       : this.demoAdapter.getIsScanning();
   }

@@ -74,19 +74,19 @@ export function NetworkSettingsPanel({
               <div>
                 <p className="font-mono text-xs font-bold text-orange-400">DEMO_MODE_ACTIVE</p>
                 <p className="mt-0.5 font-mono text-[10px] text-orange-300/80">
-                  Network data is simulated. Disable demo mode when backend is connected.
+                  Network data is simulated. On Android, disable demo mode for live local discovery.
                 </p>
               </div>
             </div>
           )}
 
-          {!settings.demoMode && adapterStatus?.mode === "fallback" && (
+          {!settings.demoMode && adapterStatus?.mode === "native-unavailable" && (
             <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
               <div>
                 <p className="font-mono text-xs font-bold text-yellow-400">DEMO_FALLBACK_ACTIVE</p>
                 <p className="mt-0.5 font-mono text-[10px] text-yellow-300/80">
-                  Native/backend discovery did not answer. N.E.O. is keeping the Network module
+                  Native/cloud backend discovery did not answer. N.E.O. is keeping the Network module
                   usable with labeled demo fallback data.
                 </p>
               </div>
@@ -213,7 +213,7 @@ export function NetworkSettingsPanel({
                 highlight={settings.demoMode}
               />
               <p className="font-mono text-[10px] text-gray-500">
-                {"//"} Disable demo mode to use the native bridge or backend URL. If neither is
+                {"//"} Disable demo mode to use the native Android discovery plugin. If neither is
                 reachable, N.E.O. will clearly label demo fallback data.
               </p>
             </div>
