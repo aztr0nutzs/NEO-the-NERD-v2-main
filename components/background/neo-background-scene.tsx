@@ -115,7 +115,6 @@ export function NeoBackgroundScene({ mode = "auto" }: NeoBackgroundSceneProps) {
           onCanPlay={handleCanPlay}
           onPlaying={() => setVideoReady(true)}
           onError={handleError}
-          onStalled={() => setVideoReady(false)}
         />
       )}
 
