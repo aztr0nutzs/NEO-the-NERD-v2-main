@@ -85,10 +85,10 @@ export function NetworkSettingsPanel({
             <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
               <div>
-                <p className="font-mono text-xs font-bold text-yellow-400">DEMO_FALLBACK_ACTIVE</p>
+                <p className="font-mono text-xs font-bold text-yellow-400">NATIVE_DISCOVERY_UNAVAILABLE</p>
                 <p className="mt-0.5 font-mono text-[10px] text-yellow-300/80">
-                  Native Android discovery did not answer. N.E.O. is keeping the Network module usable
-                  with labeled demo fallback data.
+                  Native Android discovery failed to initialize. No backend is required for local LAN scanning —
+                  retry live discovery from the Scan tab, or enable Demo Preview to use labeled simulated data.
                 </p>
               </div>
             </div>

@@ -2,21 +2,11 @@
  * N.E.O. the N.E.R.D. - Network Discovery + Control Feature
  * Network Discovery Adapter
  *
- * This adapter layer abstracts all network functionality.
- * Browser preview returns DEMO/MOCK data; installed Android uses the native plugin.
- *
- * FUTURE INTEGRATION POINTS:
- * - Android native LAN scanner (via Capacitor plugin or WebView bridge)
- * - ARP table parser (requires native/root access)
- * - SSDP discovery (Android native plugin, bounded multicast M-SEARCH)
- * - mDNS discovery (not available in current native plugin implementation)
- * - TCP port probe (requires native implementation)
- * - Router API connector (vendor-specific APIs)
- * - Optional router/provider connectors for non-discovery extras
- *
- * DO NOT implement unsafe scanning logic directly in the browser.
- * Live local LAN scanning must run through the Android native plugin.
- * Backend services are not required for basic Android device discovery.
+ * Browser preview returns DEMO/MOCK data; installed Android uses the native plugin
+ * directly. Local Android LAN discovery is the true default live path and does NOT
+ * require any backend service. Backend code paths have been removed from this
+ * adapter — any optional remote integrations (AI provider, TTS, speed-test upload)
+ * live in their own modules and are intentionally unrelated to local discovery.
  */
 
 import type {
@@ -50,75 +40,13 @@ import {
   getGatewayInfo as getNativeGatewayInfo,
   isAndroidNativeNetworkPluginAvailable,
   getLocalNetworkContext as getNativeLocalNetworkContext,
-  isAndroidNativeNetworkAvailable,
   scanLocalSubnet as runNativeSubnetScan,
 } from "./native-network-bridge";
 
-type NativeNetworkDiscoveryBridge = {
-  getNetworkStatus?: () => Promise<NetworkStatus>;
-  startNetworkScan?: (mode: ScanMode) => Promise<{ scanProgress?: number } | void>;
-  stopNetworkScan?: () => Promise<void>;
-  getDiscoveredDevices?: () => Promise<DiscoveredDevice[]>;
-  getDeviceDetails?: (deviceId: string) => Promise<DiscoveredDevice | null>;
-  getRouterStatus?: () => Promise<RouterStatus>;
-  getScanHistory?: () => Promise<ScanHistoryEntry[]>;
-  getSecurityInsights?: () => Promise<SecurityInsight[]>;
-  getNetworkTopology?: () => Promise<NetworkTopologyGraph>;
-  getAdapterStatus?: () => Promise<NetworkAdapterStatus>;
-};
-
-declare global {
-  interface Window {
-    NeoNetworkDiscovery?: NativeNetworkDiscoveryBridge;
-  }
-}
-
-const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_NEO_NETWORK_BACKEND_URL?.replace(/\/$/, "") ?? "";
-const BACKEND_TIMEOUT_MS = 4500;
-
-class BackendUnavailableError extends Error {
-  constructor(message = "Optional network connector is unavailable") {
+class NativeDiscoveryUnavailableError extends Error {
+  constructor(message = "Native Android discovery is unavailable") {
     super(message);
-    this.name = "BackendUnavailableError";
-  }
-}
-
-function getNativeBridge(): NativeNetworkDiscoveryBridge | null {
-  if (typeof window === "undefined") return null;
-  return window.NeoNetworkDiscovery ?? null;
-}
-
-async function requestBackendJson<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!BACKEND_BASE_URL) {
-    throw new BackendUnavailableError(
-      "Optional network connector URL is not configured; Android local discovery does not require it"
-    );
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
-      ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...init?.headers,
-      },
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`Optional network connector returned ${response.status} for ${path}`);
-    }
-
-    if (response.status === 204) {
-      return undefined as T;
-    }
-
-    return (await response.json()) as T;
-  } finally {
-    clearTimeout(timeout);
+    this.name = "NativeDiscoveryUnavailableError";
   }
 }
 
@@ -129,14 +57,12 @@ function getErrorMessage(error: unknown): string {
 type AdapterStatusResolutionInput = {
   demoMode: boolean;
   nativePluginAvailable: boolean;
-  webBridgeAvailable?: boolean;
-    fallbackReason?: string | null;
+  fallbackReason?: string | null;
 };
 
 export function resolveNetworkAdapterStatus({
   demoMode,
   nativePluginAvailable,
-  webBridgeAvailable = false,
   fallbackReason = null,
 }: AdapterStatusResolutionInput): NetworkAdapterStatus {
   // Native/plugin availability is only capability. demoMode is the active-mode override.
@@ -202,18 +128,6 @@ function createReadOnlyActionResult(
     createdAt: new Date().toISOString(),
     status: "failed",
     message: `${action.message} [READ_ONLY_NATIVE_ADAPTER - ${reason}]`,
-  };
-}
-
-function normalizeNativeTopology(topology: NetworkTopologyGraph): NetworkTopologyGraph {
-  if (topology.topologyMode !== "backend-confirmed" || topology.relationshipsConfirmed) {
-    return topology;
-  }
-
-  return {
-    ...topology,
-    topologyMode: "estimated",
-    relationshipsConfirmed: false,
   };
 }
 
@@ -604,6 +518,14 @@ class DemoNetworkAdapter implements NetworkAdapterInterface {
   }
 }
 
+// Native scan hard timeout — if the plugin promise neither resolves nor rejects within
+// this bound, treat the scan as failed instead of leaving the spinner up forever.
+const NATIVE_SCAN_TIMEOUT_MS: Record<ScanMode, number> = {
+  quick: 15_000,
+  balanced: 25_000,
+  deep: 45_000,
+};
+
 class NativeNetworkAdapter implements NetworkAdapterInterface {
   private isScanning = false;
   private scanProgress = 0;
@@ -613,9 +535,26 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   private settings: NetworkSettings = { ...DEFAULT_NETWORK_SETTINGS, demoMode: false };
   private lastNativeScan: NativeScanResult | null = null;
   private lastScanFailed = false;
+  private lastScanFailureReason: string | null = null;
+  private lastScanFinishedAt: string | null = null;
+  private scanTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
 
-  private get bridge(): NativeNetworkDiscoveryBridge | null {
-    return getNativeBridge();
+  private clearScanTimeout(): void {
+    if (this.scanTimeoutHandle !== null) {
+      clearTimeout(this.scanTimeoutHandle);
+      this.scanTimeoutHandle = null;
+    }
+  }
+
+  private markScanFinished(success: boolean, reason: string | null = null): void {
+    this.clearScanTimeout();
+    this.isScanning = false;
+    // Always pin progress to 100 so the React-side completion poller can
+    // observe scan termination regardless of success/failure path.
+    this.scanProgress = 100;
+    this.lastScanFailed = !success;
+    this.lastScanFailureReason = success ? null : reason;
+    this.lastScanFinishedAt = new Date().toISOString();
   }
 
   private updateProgressFromClock(): number {
@@ -657,8 +596,8 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       });
     }
 
-    throw new BackendUnavailableError(
-      "Android NeoNetwork plugin is unavailable; falling back to labeled demo data."
+    throw new NativeDiscoveryUnavailableError(
+      "Android NeoNetwork plugin is unavailable. No backend is required for local LAN discovery — install/run the Android app to enable live scanning."
     );
   }
 
@@ -672,8 +611,14 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
         localIp: nativeContext.localIp ?? "Unavailable",
         subnet: nativeContext.subnet ?? "Unavailable",
         connectionType: nativeContext.connectionType ?? "unknown",
-        scanState: this.isScanning ? "scanning" : this.lastScanFailed ? "failed" : this.lastNativeScan ? "complete" : "idle",
-        lastScanAt: this.lastNativeScan ? new Date().toISOString() : null,
+        scanState: this.isScanning
+          ? "scanning"
+          : this.lastScanFailed
+            ? "failed"
+            : this.lastNativeScan
+              ? "complete"
+              : "idle",
+        lastScanAt: this.lastScanFinishedAt,
         devicesFound: nativeDevices.length,
         onlineDevices: nativeDevices.filter((device) => device.status === "online").length,
         unknownDevices: nativeDevices.filter((device) => device.deviceType === "unknown").length,
@@ -681,7 +626,9 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       };
     }
 
-    throw new Error("Native Android discovery plugin unavailable.");
+    throw new NativeDiscoveryUnavailableError(
+      "Native Android discovery plugin unavailable. Local LAN discovery requires the Android app and does not depend on any backend."
+    );
   }
 
   async startNetworkScan(mode: ScanMode): Promise<void> {
@@ -691,32 +638,51 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       deep: 12000,
     };
 
+    // Cancel any prior pending timeout before starting a new scan attempt.
+    this.clearScanTimeout();
     this.isScanning = true;
     this.scanProgress = 0;
     this.scanStartedAt = Date.now();
     this.scanDurationMs = durations[mode];
+    this.lastScanFailed = false;
+    this.lastScanFailureReason = null;
+
+    // Hard timeout — make sure UI never freezes on a hung native promise.
+    this.scanTimeoutHandle = setTimeout(() => {
+      if (!this.isScanning) return;
+      this.markScanFinished(
+        false,
+        "Native scan did not complete within the expected window. The Android plugin may be busy or unavailable."
+      );
+    }, NATIVE_SCAN_TIMEOUT_MS[mode]);
 
     void runNativeSubnetScan({ scanMode: mode })
       .then((nativeScan) => {
         if (nativeScan) {
           this.lastNativeScan = nativeScan;
-          this.lastScanFailed = false;
-          this.scanProgress = 100;
-          this.isScanning = false;
-          this.scanStartedAt = Date.now();
+          this.markScanFinished(true);
+        } else {
+          // A null result means the native bridge is not active on this
+          // runtime (e.g. browser preview). Treat as an explicit failure
+          // so the scan UI surfaces a real failure instead of stalling.
+          this.markScanFinished(
+            false,
+            "Native scan returned no result. Install/run the Android app for live local LAN discovery."
+          );
         }
       })
-      .catch(() => {
-        this.scanProgress = 0;
-        this.isScanning = false;
-        this.lastScanFailed = true;
+      .catch((error) => {
+        this.markScanFinished(false, getErrorMessage(error));
       });
-
   }
 
   async stopNetworkScan(): Promise<void> {
-    await (this.bridge?.stopNetworkScan?.() ??
-      requestBackendJson<void>("/scan/stop", { method: "POST" }));
+    // Local LAN scanning is owned by the Android plugin; there is no
+    // backend stop endpoint. We simply mark the React-visible state as
+    // not scanning so the controls re-enable. The plugin's own scan
+    // continues until completion in the background, which is fine —
+    // its result will be ignored if a newer scan supersedes it.
+    this.clearScanTimeout();
     this.isScanning = false;
     this.scanProgress = 0;
   }
@@ -730,10 +696,11 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   }
 
   async getDeviceDetails(deviceId: string): Promise<DiscoveredDevice | null> {
-    return (
-      this.bridge?.getDeviceDetails?.(deviceId) ??
-      requestBackendJson<DiscoveredDevice | null>(`/devices/${encodeURIComponent(deviceId)}`)
-    );
+    // No backend fallback. Resolve from the most recent native scan only;
+    // additional native per-device probing can be added later without
+    // re-introducing a remote dependency for local discovery.
+    const devices = await this.getDiscoveredDevices();
+    return devices.find((device) => device.id === deviceId) ?? null;
   }
 
   async getRouterStatus(): Promise<RouterStatus> {
@@ -756,7 +723,9 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       };
     }
 
-    return this.bridge?.getRouterStatus?.() ?? requestBackendJson<RouterStatus>("/router");
+    throw new NativeDiscoveryUnavailableError(
+      "Local gateway information is unavailable. The Android native plugin returned no gateway. Local discovery does not require a backend."
+    );
   }
 
   async getRouterCapabilities(): Promise<RouterCapability[]> {
@@ -851,24 +820,23 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
 class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   private activeMode: NetworkAdapterStatus["mode"] = "demo-browser";
   private fallbackReason: string | null = null;
-  private nativeOverrideResolved: boolean | null = null;
 
   constructor(
     private readonly demoAdapter: DemoNetworkAdapter,
     private readonly nativeNetworkAdapter: NativeNetworkAdapter
   ) {}
 
-  private async nativePluginCanOverrideDemo(): Promise<boolean> {
-    if (this.nativeOverrideResolved !== null) return this.nativeOverrideResolved;
-    this.nativeOverrideResolved = await isAndroidNativeNetworkPluginAvailable();
-    return this.nativeOverrideResolved;
-  }
-
   private async shouldUseDemo(): Promise<boolean> {
     const settings = await this.demoAdapter.getNetworkSettings();
     return settings.demoMode;
   }
 
+  /**
+   * Attempt native first when the user has not explicitly chosen demo mode.
+   * On native failure, transparently serve the demo adapter so the UI keeps
+   * working — and surface the reason via adapter status. The screen must
+   * never get stuck because the native plugin is missing or threw.
+   */
   private async withFallback<T>(
     operation: (adapter: NativeNetworkAdapter) => Promise<T>,
     fallback: (adapter: DemoNetworkAdapter) => Promise<T>
@@ -887,7 +855,7 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
     } catch (error) {
       this.activeMode = "native-unavailable";
       this.fallbackReason = getErrorMessage(error);
-      throw error;
+      return fallback(this.demoAdapter);
     }
   }
 
