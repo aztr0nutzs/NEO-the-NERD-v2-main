@@ -10,7 +10,20 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Activity, Bolt, Eraser, Rocket as RocketIcon, X, type LucideIcon } from "lucide-react"
+import {
+  Activity,
+  ArrowDown,
+  ArrowUp,
+  Bolt,
+  CheckCircle2,
+  Eraser,
+  Link as LinkIcon,
+  Rocket as RocketIcon,
+  TrendingDown,
+  TrendingUp,
+  X,
+  type LucideIcon,
+} from "lucide-react"
 import { useApp } from "@/lib/store"
 import {
   defaultCloudflarePreset,
@@ -18,6 +31,32 @@ import {
   type SpeedTestRunStatus,
 } from "@/lib/network/speedTestRunner"
 import type { SpeedTestConfig, SpeedTestResult } from "@/lib/network/types"
+
+const UPLOAD_URL_STORAGE_KEY = "neo:speedtest:upload-url"
+
+/**
+ * The five visible phases of a run. The runner emits more states internally
+ * (idle/aborted/failed) — those map to "prep" / "done" depending on outcome.
+ * The segment strip and progress arc both consume this ordering.
+ */
+const PHASE_ORDER: SpeedTestRunStatus[] = [
+  "preparing",
+  "latency",
+  "download",
+  "upload",
+  "complete",
+]
+
+const PHASE_LABEL: Record<SpeedTestRunStatus, string> = {
+  idle: "IDLE",
+  preparing: "PREP",
+  latency: "PING",
+  download: "DL",
+  upload: "UL",
+  complete: "DONE",
+  aborted: "ABORT",
+  failed: "HALT",
+}
 
 const NEO = {
   cyan: "#00f0ff",
@@ -77,19 +116,73 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
   const [safeMode, setSafeMode] = useState(true)
   const [running, setRunning] = useState(false)
   const [telemetry, setTelemetry] = useState<TelemetryLine[]>([])
-  const [uploadConfigured, setUploadConfigured] = useState<boolean>(
-    Boolean(configOverride?.uploadUrl),
-  )
+  // Active run state — every visual element below derives from these so the
+  // animation always reflects real probe state and never decorative theatrics.
+  const [activeStatus, setActiveStatus] = useState<SpeedTestRunStatus>("idle")
+  const [phaseProgress, setPhaseProgress] = useState(0)
+  const [latencySamplesCount, setLatencySamplesCount] = useState({ done: 0, total: 0 })
+  // Persisted upload endpoint (user-configurable). When set, the runner will
+  // actually exercise the upload path; otherwise UL reads "N/A" honestly.
+  const [uploadUrlInput, setUploadUrlInput] = useState<string>("")
+  const [uploadUrlSaved, setUploadUrlSaved] = useState<string | null>(null)
+  const [uploadConfigOpen, setUploadConfigOpen] = useState(false)
+  // Latest completed result — drives the verdict banner and delta badges.
+  const [lastResult, setLastResult] = useState<SpeedTestResult | null>(null)
 
   const abortRef = useRef<AbortController | null>(null)
   const telemetryRef = useRef<HTMLDivElement | null>(null)
   const logSeqRef = useRef(0)
+  // Hold start times locally so the progress arc can render an honest 0→100
+  // fill across the download window — driven by elapsed/duration, not magic.
+  const downloadStartedAtRef = useRef<number>(0)
+  const downloadDurationRef = useRef<number>(0)
 
   const pushLog = useCallback((text: string, color: TelemetryColor = "cyan") => {
     logSeqRef.current += 1
     const id = logSeqRef.current
     setTelemetry((prev) => [...prev, { id, text, color }])
   }, [])
+
+  // Restore saved upload endpoint from localStorage so the user's
+  // configured URL persists across launches. No server round-trip.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const stored = window.localStorage.getItem(UPLOAD_URL_STORAGE_KEY)
+      if (stored) {
+        setUploadUrlSaved(stored)
+        setUploadUrlInput(stored)
+      }
+    } catch {
+      /* localStorage unavailable — ignore */
+    }
+  }, [])
+
+  // True only when an upload endpoint is wired in either via prop override
+  // or via the user-configured saved URL. Drives all upload-related copy.
+  const uploadConfigured = useMemo(
+    () => Boolean(configOverride?.uploadUrl ?? uploadUrlSaved),
+    [configOverride?.uploadUrl, uploadUrlSaved],
+  )
+
+  // Per-phase progress is what the arc around the gauge consumes. We derive
+  // it from real signals only — latency uses sample-count progress, download
+  // uses elapsed/duration of the current window, upload terminates on
+  // completion. Never randomized.
+  useEffect(() => {
+    if (activeStatus !== "download") return
+    let raf = 0
+    const tick = () => {
+      const duration = downloadDurationRef.current
+      if (duration > 0) {
+        const elapsed = performance.now() - downloadStartedAtRef.current
+        setPhaseProgress(Math.max(0, Math.min(1, elapsed / duration)))
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [activeStatus])
 
   useEffect(() => {
     const el = telemetryRef.current
@@ -98,10 +191,25 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
   }, [telemetry])
 
   /* ============================================================
-     Sphere gauge — EXACT canvas animation from nerd_speed.html.
-     Particle colors remapped to NEO cyan / pink.
+     Sphere gauge — canvas animation faithful to nerd_speed.html
+     but with intensity/particle count/color *driven by real
+     probe phase*. Idle = restrained baseline. Latency = sharper
+     rings. Download = full particle storm scaled by live mbps.
+     Upload = green-tinted. Failed = pink burst-down.
+
+     The status ref is read each frame so the same RAF loop can
+     mirror the live state without re-spinning on every status
+     change (a remount would kill the smooth motion).
   ============================================================ */
   const sphereRef = useRef<HTMLCanvasElement | null>(null)
+  const sphereStateRef = useRef({
+    status: "idle" as SpeedTestRunStatus,
+    mbps: 0,
+  })
+  useEffect(() => {
+    sphereStateRef.current = { status: activeStatus, mbps: mainValue }
+  }, [activeStatus, mainValue])
+
   useEffect(() => {
     const canvas = sphereRef.current
     if (!canvas) return
@@ -130,28 +238,61 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
       const radius = Math.min(cx, cy) * 0.75
       frame++
 
+      const { status, mbps } = sphereStateRef.current
+      // Phase-driven intensity: 0.55 idle, 1.0 running, 0.4 aborted/failed.
+      // mbps boost only kicks in during download where mbps is meaningful.
+      const baseIntensity =
+        status === "download"
+          ? 1
+          : status === "latency" || status === "upload" || status === "preparing"
+            ? 0.85
+            : status === "failed" || status === "aborted"
+              ? 0.45
+              : 0.55
+      const mbpsBoost = status === "download" ? Math.min(0.5, Math.log10(1 + mbps) / 3) : 0
+      const intensity = Math.min(1.3, baseIntensity + mbpsBoost)
+      const ringCount = Math.round(8 * intensity)
+      const particleCount = Math.round(15 * intensity) + (status === "download" ? 6 : 0)
+
+      // Phase color tinting for the particle set without redoing the rings,
+      // so the cyber identity reads consistently.
+      const particleA =
+        status === "complete"
+          ? NEO.green
+          : status === "failed" || status === "aborted"
+            ? NEO.pink
+            : status === "upload"
+              ? NEO.green
+              : NEO.cyan
+      const particleB =
+        status === "complete"
+          ? NEO.cyan
+          : status === "failed" || status === "aborted"
+            ? NEO.yellow
+            : NEO.pink
+
       ctx.lineWidth = 1
-      for (let i = 0; i < 8; i++) {
-        const t = frame / 100 + (i / 8) * Math.PI * 2
-        const xOffset = Math.sin(t) * 20
+      for (let i = 0; i < ringCount; i++) {
+        const t = frame / 100 + (i / ringCount) * Math.PI * 2
+        const xOffset = Math.sin(t) * 20 * intensity
         ctx.beginPath()
-        ctx.strokeStyle = `rgba(0, 240, 255, ${0.1 + Math.abs(Math.cos(t)) * 0.2})`
+        ctx.strokeStyle = `rgba(0, 240, 255, ${0.1 + Math.abs(Math.cos(t)) * 0.2 * intensity})`
         ctx.arc(cx + xOffset, cy, radius, 0, Math.PI * 2)
         ctx.stroke()
       }
 
-      for (let i = 0; i < 15; i++) {
-        const angle = frame / 50 + (i / 15) * Math.PI * 2
-        const dist = Math.sin(frame / 30 + i) * radius * 0.8
+      for (let i = 0; i < particleCount; i++) {
+        const angle = frame / 50 + (i / particleCount) * Math.PI * 2
+        const dist = Math.sin(frame / 30 + i) * radius * 0.8 * intensity
         const x = cx + Math.cos(angle) * dist
         const y = cy + Math.sin(angle) * dist
 
-        ctx.fillStyle = i % 2 === 0 ? NEO.cyan : NEO.pink
+        ctx.fillStyle = i % 2 === 0 ? particleA : particleB
         ctx.beginPath()
         ctx.arc(x, y, 1.5, 0, Math.PI * 2)
         ctx.fill()
 
-        ctx.shadowBlur = 10
+        ctx.shadowBlur = 10 * intensity
         ctx.shadowColor = ctx.fillStyle as string
         ctx.fill()
         ctx.shadowBlur = 0
@@ -180,11 +321,18 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     abortRef.current = ctrl
 
     const baseConfig = defaultCloudflarePreset(safeMode)
-    const config: SpeedTestConfig = { ...baseConfig, ...configOverride }
-    setUploadConfigured(Boolean(config.uploadUrl))
+    const effectiveUploadUrl = configOverride?.uploadUrl ?? uploadUrlSaved ?? undefined
+    const config: SpeedTestConfig = {
+      ...baseConfig,
+      ...configOverride,
+      ...(effectiveUploadUrl ? { uploadUrl: effectiveUploadUrl } : {}),
+    }
 
     // Reset readouts for the new run.
     setRunning(true)
+    setActiveStatus("preparing")
+    setPhaseProgress(0)
+    setLatencySamplesCount({ done: 0, total: 0 })
     setTelemetry([])
     logSeqRef.current = 0
     setMainValue(0)
@@ -196,6 +344,8 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     setProbeStatus("RUNNING")
     setProbeColor("green")
     setStatusLabel("PREPARING")
+    downloadStartedAtRef.current = 0
+    downloadDurationRef.current = config.downloadDurationMs
 
     const runId = `speed-${Date.now()}`
     recordSpeedTestStarted(runId, config.provider)
@@ -207,11 +357,24 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
         onStatus: (status, label) => {
           setStatusLabel(label)
           setProbeColor(STATUS_COLOR[status])
+          setActiveStatus(status)
+          if (status === "download") {
+            downloadStartedAtRef.current = performance.now()
+            setPhaseProgress(0)
+          } else if (status === "upload") {
+            setPhaseProgress(0)
+          } else if (status === "complete") {
+            setPhaseProgress(1)
+          } else if (status === "failed" || status === "aborted") {
+            setPhaseProgress(1)
+          }
         },
         onLog: (line) => pushLog(line.message, LOG_LEVEL_COLOR[line.level]),
         onLatencySample: (sample) => {
           // While the latency phase runs, surface the running sample count.
           pushLog(`PING_SAMPLE ${sample.index}/${sample.total}=${Math.round(sample.sampleMs)}ms`, "cyan")
+          setLatencySamplesCount({ done: sample.index, total: sample.total })
+          setPhaseProgress(sample.index / sample.total)
         },
         onLatencySummary: (summary) => {
           setPingMedian(String(Math.round(summary.latencyMs)))
@@ -241,17 +404,69 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     setMainValue(result.downloadMbps)
     setPingMedian(String(Math.round(result.latencyMs)))
     setJitter(String(Math.round(result.jitterMs)))
+    setLastResult(result)
 
     if (result.success) {
       setProbeStatus("READY")
       setProbeColor("green")
+      setActiveStatus("complete")
+      setPhaseProgress(1)
     } else {
       setProbeStatus(result.failureReason === "aborted" ? "ABORTED" : "FAILED")
       setProbeColor("pink")
+      setActiveStatus(result.failureReason === "aborted" ? "aborted" : "failed")
+      setPhaseProgress(1)
     }
 
     recordSpeedTestResult(result)
-  }, [configOverride, pushLog, recordSpeedTestResult, recordSpeedTestStarted, running, safeMode])
+  }, [
+    configOverride,
+    pushLog,
+    recordSpeedTestResult,
+    recordSpeedTestStarted,
+    running,
+    safeMode,
+    uploadUrlSaved,
+  ])
+
+  const handleSaveUploadUrl = useCallback(() => {
+    const trimmed = uploadUrlInput.trim()
+    if (trimmed.length === 0) {
+      try {
+        window.localStorage.removeItem(UPLOAD_URL_STORAGE_KEY)
+      } catch {
+        /* ignore */
+      }
+      setUploadUrlSaved(null)
+      setUploadConfigOpen(false)
+      return
+    }
+    try {
+      // Validate the URL shape so we never persist garbage.
+      const parsed = new URL(trimmed)
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        pushLog("UL_ENDPOINT_REJECTED scheme must be http/https", "pink")
+        return
+      }
+      window.localStorage.setItem(UPLOAD_URL_STORAGE_KEY, trimmed)
+      setUploadUrlSaved(trimmed)
+      setUploadConfigOpen(false)
+      pushLog(`UL_ENDPOINT_SET ${parsed.host}`, "green")
+    } catch {
+      pushLog("UL_ENDPOINT_REJECTED invalid URL", "pink")
+    }
+  }, [pushLog, uploadUrlInput])
+
+  const handleClearUploadUrl = useCallback(() => {
+    try {
+      window.localStorage.removeItem(UPLOAD_URL_STORAGE_KEY)
+    } catch {
+      /* ignore */
+    }
+    setUploadUrlSaved(null)
+    setUploadUrlInput("")
+    pushLog("UL_ENDPOINT_CLEARED", "yellow")
+  }, [pushLog])
 
   const handleAbort = useCallback(() => {
     abortRef.current?.abort()
@@ -318,6 +533,19 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
         </div>
       </header>
 
+      {/* Phase segment strip — five LED slots mapping to prep / ping / dl /
+          ul / done. Active phase glows, completed phases dim to a steady
+          accent, future phases stay muted. Drives clear motion across the
+          run. The right-hand side surfaces the current sample-count so the
+          motion is obviously tied to live measurement. */}
+      <PhaseSegmentStrip
+        status={activeStatus}
+        running={running}
+        latencySamples={latencySamplesCount}
+        phaseProgress={phaseProgress}
+        uploadConfigured={uploadConfigured}
+      />
+
       <div className="rotating-sphere-container relative mx-auto flex aspect-square w-full max-w-[340px] items-center justify-center">
         <div
           className="absolute inset-0 rounded-full border opacity-30"
@@ -333,6 +561,12 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
             animation: "ps-spin-rev 15s linear infinite",
           }}
         />
+
+        {/* Real-state progress arc. Wraps the gauge with a stroke that fills
+            cleanly during latency (sample count / total), download (elapsed
+            within the test window), and snaps to full on terminal states.
+            Color switches to green on success, pink on failure. */}
+        <ProgressArc status={activeStatus} progress={phaseProgress} />
 
         <canvas
           ref={sphereRef}
@@ -399,6 +633,12 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
           </div>
         </div>
       </div>
+
+      {/* Verdict banner — only renders once a run has finished. Pulls
+          thresholds from the result itself, no fabrication. */}
+      {lastResult && !running && (
+        <VerdictBanner result={lastResult} previous={speedTestHistory[1] ?? null} />
+      )}
 
       <div className="grid w-full grid-cols-2 gap-3">
         <Panel accent={NEO.cyan} cp>
@@ -534,14 +774,21 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
           />
         </div>
 
-        {!uploadConfigured && (
-          <p
-            className="hud-mono mt-3 text-[9px] font-black"
-            style={{ color: rgba(NEO.yellow, 0.85), letterSpacing: "0.10em" }}
-          >
-            UL_ENDPOINT_NOT_CONFIGURED — upload reads N/A until an upload URL is wired in.
-          </p>
-        )}
+        {/* Upload endpoint configuration. The runner has no built-in upload
+            target because we will not fabricate upload numbers — but the
+            user can wire in their own POST endpoint (e.g. a self-hosted
+            speed-test backend) and the URL is persisted to localStorage.
+            When unset we say so explicitly; when set we show the host
+            and let the user clear or change it. */}
+        <UploadEndpointConfig
+          uploadUrlSaved={uploadUrlSaved}
+          uploadUrlInput={uploadUrlInput}
+          onChangeInput={setUploadUrlInput}
+          open={uploadConfigOpen}
+          onToggle={() => setUploadConfigOpen((v) => !v)}
+          onSave={handleSaveUploadUrl}
+          onClear={handleClearUploadUrl}
+        />
 
         <div className="mt-4">
           <div
@@ -607,11 +854,25 @@ function RecentResultsPanel({
 }) {
   if (!runs.length) return null
   const last = runs.slice(0, 5)
+  // Compute best download and lowest latency across the entire history so
+  // each card can flag itself with a tiny badge. Pure computation — no
+  // fabricated data anywhere.
+  const successful = runs.filter((r) => r.success)
+  const bestDownload = successful.reduce(
+    (best, r) => (r.downloadMbps > (best?.downloadMbps ?? -Infinity) ? r : best),
+    null as SpeedTestResult | null,
+  )
+  const bestLatency = successful.reduce(
+    (best, r) =>
+      r.latencyMs > 0 && r.latencyMs < (best?.latencyMs ?? Infinity) ? r : best,
+    null as SpeedTestResult | null,
+  )
+
   return (
     <Panel accent={NEO.green} cp className="w-full">
       <div className="flex items-center justify-between">
         <span className="hud-mono text-[9px] font-black" style={{ color: NEO.green }}>
-          RECENT RUNS
+          RECENT RUNS · {runs.length}
         </span>
         <button
           type="button"
@@ -624,36 +885,90 @@ function RecentResultsPanel({
         </button>
       </div>
       <div className="mt-2 grid gap-2">
-        {last.map((run) => (
-          <div
-            key={run.id}
-            className="cpclip grid grid-cols-4 items-baseline gap-2 px-3 py-2"
-            style={{
-              background: "rgba(0,0,0,0.85)",
-              border: `1px solid ${rgba(run.success ? NEO.green : NEO.pink, 0.4)}`,
-            }}
-          >
-            <span
-              className="hud-mono text-[9px] font-bold opacity-70"
-              style={{ color: "rgba(255,255,255,0.7)" }}
+        {last.map((run, index) => {
+          const prior = last[index + 1] ?? null
+          const isBestDl = bestDownload && run.id === bestDownload.id
+          const isBestLat = bestLatency && run.id === bestLatency.id
+          return (
+            <div
+              key={run.id}
+              className="cpclip grid grid-cols-[1fr,1fr,1fr,1fr] items-baseline gap-2 px-3 py-2"
+              style={{
+                background: "rgba(0,0,0,0.86)",
+                border: `1px solid ${rgba(run.success ? NEO.green : NEO.pink, 0.45)}`,
+              }}
             >
-              {new Date(run.completedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </span>
-            <Metric label="DL" value={`${run.downloadMbps.toFixed(1)}`} color={NEO.cyan} />
-            <Metric
-              label="UL"
-              value={run.uploadMbps === null ? "N/A" : run.uploadMbps.toFixed(1)}
-              color={NEO.pink}
-            />
-            <Metric label="LAT" value={`${Math.round(run.latencyMs)}ms`} color={NEO.yellow} />
-          </div>
-        ))}
+              <div className="flex flex-col leading-tight">
+                <span
+                  className="hud-mono text-[9px] font-bold opacity-70"
+                  style={{ color: "rgba(255,255,255,0.78)" }}
+                >
+                  {new Date(run.completedAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+                {(isBestDl || isBestLat) && (
+                  <span
+                    className="hud-mono mt-0.5 text-[8px] font-black"
+                    style={{ color: NEO.green, letterSpacing: "0.12em" }}
+                  >
+                    {isBestDl ? "BEST DL" : "BEST LAT"}
+                  </span>
+                )}
+              </div>
+              <MetricWithDelta
+                label="DL"
+                value={run.downloadMbps.toFixed(1)}
+                delta={prior ? run.downloadMbps - prior.downloadMbps : null}
+                color={NEO.cyan}
+                higherIsBetter
+              />
+              <MetricWithDelta
+                label="UL"
+                value={run.uploadMbps === null ? "N/A" : run.uploadMbps.toFixed(1)}
+                delta={
+                  prior && prior.uploadMbps !== null && run.uploadMbps !== null
+                    ? run.uploadMbps - prior.uploadMbps
+                    : null
+                }
+                color={NEO.pink}
+                higherIsBetter
+              />
+              <MetricWithDelta
+                label="LAT"
+                value={`${Math.round(run.latencyMs)}ms`}
+                delta={prior ? run.latencyMs - prior.latencyMs : null}
+                color={NEO.yellow}
+              />
+            </div>
+          )
+        })}
       </div>
     </Panel>
   )
 }
 
-function Metric({ label, value, color }: { label: string; value: string; color: string }) {
+function MetricWithDelta({
+  label,
+  value,
+  delta,
+  color,
+  higherIsBetter = false,
+}: {
+  label: string
+  value: string
+  delta: number | null
+  color: string
+  higherIsBetter?: boolean
+}) {
+  // Significance threshold so a noisy 0.05 Mbps wiggle does not light up
+  // the badge — keeps the delta indicator honest.
+  const significant = delta !== null && Math.abs(delta) > (higherIsBetter ? 0.5 : 2)
+  const positive = delta !== null && delta > 0
+  const goodDirection = higherIsBetter ? positive : !positive
+  const trendColor = significant ? (goodDirection ? NEO.green : NEO.pink) : "rgba(255,255,255,0.5)"
+  const TrendIcon = significant ? (positive ? TrendingUp : TrendingDown) : null
   return (
     <div className="flex flex-col leading-tight">
       <span
@@ -662,9 +977,20 @@ function Metric({ label, value, color }: { label: string; value: string; color: 
       >
         {label}
       </span>
-      <span className="hud-text-tight text-[11px] font-black italic" style={{ color }}>
-        {value}
-      </span>
+      <div className="flex items-baseline gap-1">
+        <span className="hud-text-tight text-[11px] font-black italic" style={{ color }}>
+          {value}
+        </span>
+        {TrendIcon && significant && delta !== null && (
+          <span
+            className="inline-flex items-center"
+            style={{ color: trendColor }}
+            title={`Δ ${delta > 0 ? "+" : ""}${delta.toFixed(1)} vs prior`}
+          >
+            <TrendIcon className="h-2.5 w-2.5" aria-hidden="true" />
+          </span>
+        )}
+      </div>
     </div>
   )
 }
@@ -811,6 +1137,504 @@ function ScopedSpeedStyles() {
       }
     `}</style>
   )
+}
+
+/* =====================================================================
+   PhaseSegmentStrip — five-segment LED bar mapping to the real runner
+   phases (prep / ping / dl / ul / done). The active segment glows
+   brightly, completed segments dim to a steady accent, future segments
+   stay muted. All motion is driven by the runner's onStatus callbacks.
+===================================================================== */
+function PhaseSegmentStrip({
+  status,
+  running,
+  latencySamples,
+  phaseProgress,
+  uploadConfigured,
+}: {
+  status: SpeedTestRunStatus
+  running: boolean
+  latencySamples: { done: number; total: number }
+  phaseProgress: number
+  uploadConfigured: boolean
+}) {
+  const activeIndex = PHASE_ORDER.indexOf(status)
+  const isFailed = status === "failed" || status === "aborted"
+  const PHASE_COLOR: Record<SpeedTestRunStatus, string> = {
+    idle: NEO.cyan,
+    preparing: NEO.cyan,
+    latency: NEO.cyan,
+    download: NEO.cyan,
+    upload: NEO.green,
+    complete: NEO.green,
+    aborted: NEO.pink,
+    failed: NEO.pink,
+  }
+
+  // Detail label shown under the strip — kept honest. During latency we
+  // show the sample counter; during download we show the elapsed window
+  // percentage; in terminal states we show the verdict word.
+  const detail =
+    status === "latency" && latencySamples.total > 0
+      ? `PING ${latencySamples.done}/${latencySamples.total}`
+      : status === "download"
+        ? `DL ${Math.round(phaseProgress * 100)}%`
+        : status === "upload"
+          ? uploadConfigured
+            ? "PUSHING UPLINK"
+            : "UL N/A"
+          : status === "preparing"
+            ? "WARMING PROBE"
+            : status === "complete"
+              ? "PROBE COMPLETE"
+              : isFailed
+                ? status === "aborted"
+                  ? "ABORTED"
+                  : "HALTED"
+                : running
+                  ? "ARMED"
+                  : "READY"
+
+  return (
+    <div
+      className="cpclip w-full"
+      style={{
+        background: "rgba(0,0,0,0.78)",
+        border: "1px solid rgba(255,255,255,0.10)",
+        padding: "10px 12px",
+      }}
+    >
+      <div className="flex w-full items-center justify-between">
+        <span
+          className="hud-mono text-[9px] font-black"
+          style={{ color: "rgba(255,255,255,0.72)" }}
+        >
+          PHASE TRACK
+        </span>
+        <span
+          className="hud-text-tight text-[10px] font-black"
+          style={{ color: isFailed ? NEO.pink : NEO.cyan, letterSpacing: "0.18em" }}
+        >
+          {detail}
+        </span>
+      </div>
+      <div className="mt-2 flex gap-1.5">
+        {PHASE_ORDER.map((phase, i) => {
+          const isActive = i === activeIndex
+          const isPast = activeIndex > i || status === "complete"
+          const segColor = isFailed
+            ? i <= activeIndex
+              ? NEO.pink
+              : "rgba(255,255,255,0.08)"
+            : isActive
+              ? PHASE_COLOR[phase]
+              : isPast
+                ? rgba(NEO.cyan, 0.45)
+                : "rgba(255,255,255,0.08)"
+          return (
+            <div
+              key={phase}
+              className="flex-1"
+              style={{
+                height: 6,
+                background: segColor,
+                boxShadow: isActive ? `0 0 12px ${PHASE_COLOR[phase]}` : undefined,
+                animation: isActive && running ? "ps-pulse-ring 1.4s ease-in-out infinite" : undefined,
+              }}
+              aria-label={PHASE_LABEL[phase]}
+              role="presentation"
+            />
+          )
+        })}
+      </div>
+      <div className="mt-1 flex justify-between">
+        {PHASE_ORDER.map((phase) => (
+          <span
+            key={phase}
+            className="hud-mono text-[8px] font-black opacity-65"
+            style={{ color: "rgba(255,255,255,0.6)", letterSpacing: "0.16em" }}
+          >
+            {PHASE_LABEL[phase]}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* =====================================================================
+   ProgressArc — SVG ring sitting just inside the sphere container.
+   Sweep is driven by the real per-phase progress (sample count /
+   elapsed window / completion state). Stays subtle on idle, locks
+   green on success, locks pink on failure.
+===================================================================== */
+function ProgressArc({
+  status,
+  progress,
+}: {
+  status: SpeedTestRunStatus
+  progress: number
+}) {
+  // Size matches the sphere container's aspect-square 340 max width with
+  // a small inset. SVG draws a 1:1 coordinate system; absolute positioning
+  // scales it to the actual rendered box.
+  const size = 100
+  const radius = 46
+  const cx = size / 2
+  const cy = size / 2
+  const circumference = 2 * Math.PI * radius
+  const clamped = Math.max(0, Math.min(1, progress))
+  const dashOffset = circumference * (1 - clamped)
+  const strokeColor =
+    status === "complete"
+      ? NEO.green
+      : status === "failed" || status === "aborted"
+        ? NEO.pink
+        : status === "upload"
+          ? NEO.green
+          : NEO.cyan
+  const trackOpacity = status === "idle" ? 0.08 : 0.16
+
+  return (
+    <svg
+      className="pointer-events-none absolute z-[5] h-[88%] w-[88%]"
+      viewBox={`0 0 ${size} ${size}`}
+      aria-hidden="true"
+    >
+      <circle
+        cx={cx}
+        cy={cy}
+        r={radius}
+        fill="none"
+        stroke={`rgba(255,255,255,${trackOpacity})`}
+        strokeWidth={1.6}
+      />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={radius}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={dashOffset}
+        transform={`rotate(-90 ${cx} ${cy})`}
+        style={{
+          transition: "stroke-dashoffset 220ms ease-out, stroke 200ms ease-out",
+          filter: `drop-shadow(0 0 6px ${strokeColor})`,
+        }}
+      />
+    </svg>
+  )
+}
+
+/* =====================================================================
+   VerdictBanner — completion verdict computed from REAL thresholds.
+   Renders only after a run finishes. Tone shifts to pink when the run
+   failed; green when excellent; cyan/yellow for mid-tier results.
+===================================================================== */
+function VerdictBanner({
+  result,
+  previous,
+}: {
+  result: SpeedTestResult
+  previous: SpeedTestResult | null
+}) {
+  const verdict = computeVerdict(result)
+  const dlDelta =
+    previous && previous.success && result.success
+      ? result.downloadMbps - previous.downloadMbps
+      : null
+  const latDelta =
+    previous && previous.success && result.success
+      ? result.latencyMs - previous.latencyMs
+      : null
+  return (
+    <div
+      className="cpclip w-full p-3"
+      style={{
+        background: "rgba(0,0,0,0.88)",
+        border: `1px solid ${rgba(verdict.color, 0.55)}`,
+        boxShadow: `0 0 0 1px ${rgba(verdict.color, 0.1)}, 0 0 24px ${rgba(verdict.color, 0.18)}`,
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {result.success ? (
+            <CheckCircle2 className="h-4 w-4" style={{ color: verdict.color }} aria-hidden="true" />
+          ) : (
+            <X className="h-4 w-4" style={{ color: verdict.color }} aria-hidden="true" />
+          )}
+          <span
+            className="hud-text-tight text-[12px] font-black italic"
+            style={{ color: verdict.color, letterSpacing: "0.18em" }}
+          >
+            {verdict.label}
+          </span>
+        </div>
+        <span
+          className="hud-mono text-[9px] font-black opacity-70"
+          style={{ color: "rgba(255,255,255,0.7)" }}
+        >
+          {new Date(result.completedAt).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      </div>
+      <p
+        className="hud-mono mt-1 text-[9px] font-bold opacity-85"
+        style={{ color: "rgba(255,255,255,0.82)" }}
+      >
+        {verdict.detail}
+      </p>
+      {(dlDelta !== null || latDelta !== null) && (
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          {dlDelta !== null && (
+            <DeltaChip
+              icon={ArrowDown}
+              label="DL"
+              delta={dlDelta}
+              unit="Mbps"
+              higherIsBetter
+            />
+          )}
+          {latDelta !== null && (
+            <DeltaChip icon={Bolt} label="LAT" delta={latDelta} unit="ms" />
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DeltaChip({
+  icon: Icon,
+  label,
+  delta,
+  unit,
+  higherIsBetter = false,
+}: {
+  icon: LucideIcon
+  label: string
+  delta: number
+  unit: string
+  higherIsBetter?: boolean
+}) {
+  const positive = delta > 0
+  const goodDirection = higherIsBetter ? positive : !positive
+  // Same significance gating as the recent-runs delta — keeps small
+  // measurement noise from triggering misleading colored chips.
+  const significant = Math.abs(delta) > (higherIsBetter ? 0.5 : 2)
+  const color = significant ? (goodDirection ? NEO.green : NEO.pink) : "rgba(255,255,255,0.55)"
+  const sign = delta > 0 ? "+" : ""
+  return (
+    <span
+      className="hud-mono inline-flex items-center gap-1 text-[9px] font-black"
+      style={{ color, letterSpacing: "0.14em" }}
+    >
+      <Icon className="h-3 w-3" aria-hidden="true" />
+      {label} {sign}
+      {delta.toFixed(1)} {unit} vs prior
+    </span>
+  )
+}
+
+function computeVerdict(result: SpeedTestResult): {
+  label: string
+  detail: string
+  color: string
+} {
+  if (!result.success) {
+    if (result.failureReason === "aborted") {
+      return {
+        label: "ABORTED",
+        detail: "Probe aborted before completion. No metrics recorded.",
+        color: NEO.pink,
+      }
+    }
+    return {
+      label: "PROBE FAILED",
+      detail: result.failureReason
+        ? `Reason: ${result.failureReason.replace(/-/g, " ")}`
+        : "Probe did not complete; metrics unavailable.",
+      color: NEO.pink,
+    }
+  }
+  const dl = result.downloadMbps
+  const lat = result.latencyMs
+  if (dl >= 50 && lat <= 35) {
+    return {
+      label: "EXCELLENT",
+      detail: `Internet path is fast and responsive — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+      color: NEO.green,
+    }
+  }
+  if (dl >= 20 && lat <= 80) {
+    return {
+      label: "GOOD",
+      detail: `Stable internet path — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+      color: NEO.cyan,
+    }
+  }
+  if (dl >= 5) {
+    return {
+      label: "USABLE",
+      detail: `Throughput is adequate but latency or jitter may impact realtime use (${dl.toFixed(1)} Mbps · ${Math.round(lat)} ms).`,
+      color: NEO.yellow,
+    }
+  }
+  return {
+    label: "DEGRADED",
+    detail: `Throughput is low — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+    color: NEO.pink,
+  }
+}
+
+/* =====================================================================
+   UploadEndpointConfig — honest UI for the upload path. Without a
+   configured endpoint we say so explicitly, and offer an inline input
+   that the user can fill with their own POST endpoint. The URL is
+   persisted to localStorage; the runner picks it up on the next run.
+===================================================================== */
+function UploadEndpointConfig({
+  uploadUrlSaved,
+  uploadUrlInput,
+  onChangeInput,
+  open,
+  onToggle,
+  onSave,
+  onClear,
+}: {
+  uploadUrlSaved: string | null
+  uploadUrlInput: string
+  onChangeInput: (value: string) => void
+  open: boolean
+  onToggle: () => void
+  onSave: () => void
+  onClear: () => void
+}) {
+  return (
+    <div
+      className="cpclip mt-3 p-3"
+      style={{
+        background: "rgba(0,0,0,0.86)",
+        border: `1px solid ${rgba(NEO.yellow, 0.32)}`,
+      }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <LinkIcon className="h-3 w-3" style={{ color: NEO.yellow }} aria-hidden="true" />
+          <span
+            className="hud-mono text-[9px] font-black"
+            style={{ color: NEO.yellow, letterSpacing: "0.12em" }}
+          >
+            UPLOAD ENDPOINT
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="hud-mono text-[9px] font-black opacity-80"
+          style={{ color: NEO.cyan, letterSpacing: "0.12em" }}
+        >
+          {open ? "CLOSE" : uploadUrlSaved ? "EDIT" : "CONFIGURE"}
+        </button>
+      </div>
+      <p
+        className="hud-mono mt-1 text-[9px] font-bold"
+        style={{ color: "rgba(255,255,255,0.78)", letterSpacing: "0.08em" }}
+      >
+        {uploadUrlSaved ? (
+          <>
+            <span style={{ color: NEO.green }}>CONFIGURED · </span>
+            {safeUrlHost(uploadUrlSaved)}
+          </>
+        ) : (
+          <>
+            <span style={{ color: NEO.yellow }}>UL_ENDPOINT_NOT_CONFIGURED · </span>
+            Upload reads N/A until a POST endpoint is wired in. Other metrics
+            (download, latency, jitter) remain fully real.
+          </>
+        )}
+      </p>
+      {open && (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            type="url"
+            value={uploadUrlInput}
+            placeholder="https://your-endpoint.example/upload"
+            onChange={(event) => onChangeInput(event.target.value)}
+            className="cpclip flex-1 px-3 py-2 hud-mono text-[10px] font-black"
+            style={{
+              background: "rgba(0,0,0,0.92)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              color: NEO.yellow,
+              letterSpacing: "0.10em",
+            }}
+            autoComplete="off"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            aria-label="Upload endpoint URL"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onSave}
+              className="cpclip inline-flex h-9 items-center justify-center gap-1.5 px-3 hud-mono text-[10px] font-black"
+              style={{
+                background: "rgba(0,0,0,0.92)",
+                border: `1px solid ${rgba(NEO.cyan, 0.55)}`,
+                color: NEO.cyan,
+                letterSpacing: "0.16em",
+              }}
+            >
+              SAVE
+            </button>
+            {uploadUrlSaved && (
+              <button
+                type="button"
+                onClick={onClear}
+                className="cpclip inline-flex h-9 items-center justify-center gap-1.5 px-3 hud-mono text-[10px] font-black"
+                style={{
+                  background: "rgba(0,0,0,0.92)",
+                  border: `1px solid ${rgba(NEO.pink, 0.55)}`,
+                  color: NEO.pink,
+                  letterSpacing: "0.16em",
+                }}
+              >
+                CLEAR
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {uploadConfiguredHasUrlAndIsOpen(uploadUrlSaved, open) && (
+        <p
+          className="hud-mono mt-2 text-[9px] font-bold opacity-75"
+          style={{ color: "rgba(255,255,255,0.7)", letterSpacing: "0.08em" }}
+        >
+          Endpoint must accept POST with a raw binary body and respond 200 OK.
+          The runner sends a 64–512 KB payload of cryptographic random bytes.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function safeUrlHost(url: string): string {
+  try {
+    return new URL(url).host
+  } catch {
+    return url
+  }
+}
+
+function uploadConfiguredHasUrlAndIsOpen(saved: string | null, open: boolean): boolean {
+  // Small helper purely to keep the JSX readable above.
+  return open && saved !== null
 }
 
 function seedJitterBars(ms: number): number[] {
