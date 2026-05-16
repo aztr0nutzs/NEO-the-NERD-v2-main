@@ -1,0 +1,179 @@
+{
+  "base": "http://localhost:3000",
+  "when": "2026-05-16T09:44:08.040Z",
+  "summary": {
+    "pass": 23,
+    "partial": 3,
+    "fail": 0
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID"
+  ],
+  "pageErrors": [
+    "Failed to fetch"
+  ],
+  "results": [
+    {
+      "phase": "chat",
+      "name": "Chat: send 'Hello NEO.' via Enter",
+      "status": "pass",
+      "notes": "input filled & submitted"
+    },
+    {
+      "phase": "chat",
+      "name": "Chat: text content density after 3 prompts",
+      "status": "pass",
+      "notes": "text-bearing block count = 44"
+    },
+    {
+      "phase": "chat",
+      "name": "Chat: send button discoverable",
+      "status": "pass",
+      "notes": "{\"label\":\"Send\",\"ariaLabel\":\"Send\"}"
+    },
+    {
+      "phase": "network",
+      "name": "Network: SCAN tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: START_SCAN button click",
+      "status": "partial",
+      "notes": "not found via START_SCAN text"
+    },
+    {
+      "phase": "network",
+      "name": "Network: DEVICES tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: TIMELINE tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: ROUTER tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: SECURITY tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: HISTORY tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: CONFIG tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "Network: MAP tab opens",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "network",
+      "name": "3D Map canvas dimensions",
+      "status": "partial",
+      "notes": "{\"found\":false}"
+    },
+    {
+      "phase": "speed",
+      "name": "Speed test: Execute button",
+      "status": "pass",
+      "notes": "clicked"
+    },
+    {
+      "phase": "speed",
+      "name": "Speed test: telemetry text snapshot",
+      "status": "pass",
+      "notes": "samples=[\"HALT0.00.0MBPSDL:0.0UL:N/A\",\"HALT0.00.0MBPSDL:0.0UL:N/A\",\"MBPS\",\"REQUEST LATENCY4ms · medianJITTER (σ)68ms\",\"REQUEST LATENCY4ms · median\",\"4ms · median\",\"ms · median\",\"JITTER (σ)68ms\",\"68ms\",\"ms\"]"
+    },
+    {
+      "phase": "settings",
+      "name": "Settings: aria-pressed toggle count",
+      "status": "pass",
+      "notes": "count=10"
+    },
+    {
+      "phase": "settings",
+      "name": "Settings: toggles flip state",
+      "status": "partial",
+      "notes": "flips=0/3 sample=[{\"label\":\"cyan\",\"before\":\"true\",\"after\":\"true\"},{\"label\":\"purple\",\"before\":\"false\",\"after\":\"false\"},{\"label\":\"pink\",\"before\":\"false\",\"after\":\"false\"}]"
+    },
+    {
+      "phase": "games",
+      "name": "Games: PLAY NOW / LAUNCH buttons rendered",
+      "status": "pass",
+      "notes": "labels=[\"LAUNCH\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\",\"PLAY NOW\"]"
+    },
+    {
+      "phase": "games",
+      "name": "Games: Tic Tac Toe launched",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "games",
+      "name": "Games: TicTacToe move click",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "voices",
+      "name": "Voices: preview triggered",
+      "status": "pass",
+      "notes": "clicked 'PLAY VOICE PREVIEW'"
+    },
+    {
+      "phase": "voices",
+      "name": "Voices: voice cards visible count snapshot",
+      "status": "pass",
+      "notes": "count=60"
+    },
+    {
+      "phase": "personalities",
+      "name": "Personalities: preview/test button reachable",
+      "status": "pass",
+      "notes": "{\"previewLabel\":\"TEST N.E.O.\"}"
+    },
+    {
+      "phase": "library",
+      "name": "Library: action button clickable",
+      "status": "pass",
+      "notes": "clicked 'Favorites'"
+    },
+    {
+      "phase": "games",
+      "name": "Games: Rock Paper Scissors launched",
+      "status": "pass",
+      "notes": ""
+    },
+    {
+      "phase": "controls",
+      "name": "Controls: slider count",
+      "status": "pass",
+      "notes": "count=1"
+    }
+  ]
+}
