@@ -4,8 +4,17 @@ import { createRequire } from "node:module"
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 
+// Resolve Playwright from the project's own node_modules first; fall back to
+// a globally installed copy. Same approach as scripts/capture-*.mjs.
 const require = createRequire(import.meta.url)
-const { chromium } = require("/opt/node22/lib/node_modules/playwright")
+let chromium
+try {
+  ({ chromium } = require("playwright"))
+} catch {
+  const globalPath =
+    process.env.PLAYWRIGHT_NODE_MODULES ?? "/opt/node22/lib/node_modules/playwright"
+  ;({ chromium } = require(globalPath))
+}
 
 const BASE = process.env.NEO_BASE_URL ?? "http://localhost:3000"
 const OUT = path.resolve(process.cwd(), "qa-screenshots/codex-browser-full-functionality-pass")

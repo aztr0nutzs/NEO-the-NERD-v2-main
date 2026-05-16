@@ -4,8 +4,17 @@ import { createRequire } from "node:module"
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 
+// Resolve Playwright from the project's own node_modules first; fall back to
+// a globally installed copy. Same approach as scripts/capture-*.mjs.
 const require = createRequire(import.meta.url)
-const { chromium } = require("/opt/node22/lib/node_modules/playwright")
+let chromium
+try {
+  ({ chromium } = require("playwright"))
+} catch {
+  const globalPath =
+    process.env.PLAYWRIGHT_NODE_MODULES ?? "/opt/node22/lib/node_modules/playwright"
+  ;({ chromium } = require(globalPath))
+}
 
 const BASE = process.env.NEO_BASE_URL ?? "http://localhost:3000"
 const OUT = path.resolve(process.cwd(), "qa-screenshots/codex-browser-full-functionality-pass")
@@ -58,14 +67,21 @@ async function clickDock(page, label) {
   page.on("pageerror", (e) => pageErrors.push(e.message))
 
   // Pre-set onboarding to completed so we land on main fast.
+  // Uses the flat PersistedAppState shape (see lib/types.ts:130 and
+  // lib/persistence.ts). The earlier `{ schemaVersion, state }` wrapper was
+  // wrong and caused the wizard to re-trigger after the 40 s failsafe.
   await page.goto(BASE, { waitUntil: "domcontentloaded" })
   await page.evaluate(() => {
     try {
       const seed = {
-        schemaVersion: 1,
-        state: {
-          settings: {
-            onboarding: { completed: true, skipped: false, monitoringOptIn: false, initialScanRequested: false, completedAt: new Date().toISOString() },
+        version: 1,
+        settings: {
+          onboarding: {
+            completed: true,
+            skipped: false,
+            monitoringOptIn: false,
+            initialScanRequested: false,
+            completedAt: new Date().toISOString(),
           },
         },
       }

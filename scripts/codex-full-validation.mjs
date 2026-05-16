@@ -12,8 +12,19 @@ import { createRequire } from "node:module"
 import { mkdir, writeFile } from "node:fs/promises"
 import path from "node:path"
 
+// Resolve Playwright from the project's own node_modules first; fall back to a
+// globally installed copy (matches the existing scripts/capture-*.mjs pattern
+// in this repo). This keeps the script portable while still working in
+// environments — like Codex — where Playwright is preinstalled globally.
 const require = createRequire(import.meta.url)
-const { chromium } = require("/opt/node22/lib/node_modules/playwright")
+let chromium
+try {
+  ({ chromium } = require("playwright"))
+} catch {
+  const globalPath =
+    process.env.PLAYWRIGHT_NODE_MODULES ?? "/opt/node22/lib/node_modules/playwright"
+  ;({ chromium } = require(globalPath))
+}
 
 const BASE = process.env.NEO_BASE_URL ?? "http://localhost:3000"
 const OUT = path.resolve(process.cwd(), "qa-screenshots/codex-browser-full-functionality-pass")
@@ -97,16 +108,6 @@ async function countVisibleButtons(page) {
   return page.evaluate(() => document.querySelectorAll("button").length)
 }
 
-async function withErrorCount(page, label, fn) {
-  const before = consoleErrors.length + pageErrors.length
-  try {
-    await fn()
-  } catch (e) {
-    push("runtime", label, "fail", `interaction threw: ${e.message}`)
-  }
-  return consoleErrors.length + pageErrors.length - before
-}
-
 ;(async () => {
   await mkdir(OUT, { recursive: true })
 
@@ -173,31 +174,15 @@ async function withErrorCount(page, label, fn) {
   })
   await page.reload({ waitUntil: "domcontentloaded" })
   await waitForBootGone(page)
-  // Trigger app-shell's 40s failsafe by waiting for the wizard portal.
-  // Faster: poll for it for a bit; if it isn't shown, push partial.
-  let onboardingShown = false
-  for (let i = 0; i < 25; i++) {
-    if (await page.$('[role="dialog"][aria-labelledby="neo-onboarding-title"]')) {
-      onboardingShown = true
-      break
-    }
-    await page.waitForTimeout(300)
-  }
-  // Boot overlay manages its own 40s failsafe; we may need to wait longer for
-  // onboarding to come up if it's gated on bootSettled. Force it via timer.
-  if (!onboardingShown) {
-    await page.evaluate(() => {
-      // Force advance any timers by setting an unrelated state change.
-      // Easiest: dispatch a 'visibilitychange' to nudge React.
+  // Wait for the wizard portal to mount. app-shell.tsx has a 40 s failsafe
+  // before onboarding is allowed to surface (so the cinematic boot plays
+  // first); 55 s gives that comfortably plus animation.
+  const onboardingShown = await page
+    .waitForSelector('[role="dialog"][aria-labelledby="neo-onboarding-title"]', {
+      timeout: 55_000,
     })
-    for (let i = 0; i < 80; i++) {
-      if (await page.$('[role="dialog"][aria-labelledby="neo-onboarding-title"]')) {
-        onboardingShown = true
-        break
-      }
-      await page.waitForTimeout(600)
-    }
-  }
+    .then(() => true)
+    .catch(() => false)
   await shot(page, "10-onboarding-welcome-attempt.png")
   push("phase2", "Onboarding wizard auto-appears on first run", onboardingShown ? "pass" : "partial",
     onboardingShown ? "dialog found" : "wizard did not appear within 50s of reload")

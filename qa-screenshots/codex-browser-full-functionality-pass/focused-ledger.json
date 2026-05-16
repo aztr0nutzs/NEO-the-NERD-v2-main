@@ -1,6 +1,6 @@
 {
   "base": "http://localhost:3000",
-  "when": "2026-05-16T09:23:58.879Z",
+  "when": "2026-05-16T09:44:08.040Z",
   "summary": {
     "pass": 23,
     "partial": 3,
@@ -107,7 +107,7 @@
       "phase": "speed",
       "name": "Speed test: telemetry text snapshot",
       "status": "pass",
-      "notes": "samples=[\"HALT0.00.0MBPSDL:0.0UL:N/A\",\"HALT0.00.0MBPSDL:0.0UL:N/A\",\"MBPS\",\"REQUEST LATENCY4ms · medianJITTER (σ)131ms\",\"REQUEST LATENCY4ms · median\",\"4ms · median\",\"ms · median\",\"JITTER (σ)131ms\",\"131ms\",\"ms\"]"
+      "notes": "samples=[\"HALT0.00.0MBPSDL:0.0UL:N/A\",\"HALT0.00.0MBPSDL:0.0UL:N/A\",\"MBPS\",\"REQUEST LATENCY4ms · medianJITTER (σ)68ms\",\"REQUEST LATENCY4ms · median\",\"4ms · median\",\"ms · median\",\"JITTER (σ)68ms\",\"68ms\",\"ms\"]"
     },
     {
       "phase": "settings",
