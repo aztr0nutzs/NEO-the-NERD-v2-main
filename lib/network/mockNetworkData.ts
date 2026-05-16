@@ -4,7 +4,7 @@
  *
  * This file contains simulated demo data for the network discovery module.
  * All data here is clearly fake and for demonstration purposes only.
- * Replace with real data from native/backend adapter when available.
+ * Browser preview data. Installed Android live discovery uses the native plugin.
  */
 
 import type {
@@ -264,8 +264,8 @@ export const MOCK_SECURITY_INSIGHTS: SecurityInsight[] = [
     severity: "info",
     title: "Router Read-Only Mode",
     description:
-      "Router control is in read-only mode. Control actions are simulated until backend is connected.",
-    recommendedAction: "Connect native backend to enable real control",
+      "Router control is in read-only mode. Control actions require a separate router connector; local discovery does not.",
+    recommendedAction: "Add a router connector to enable real control actions",
   },
 ];
 

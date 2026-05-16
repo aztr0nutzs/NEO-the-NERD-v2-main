@@ -1,4 +1,4 @@
-# N.E.O. Network Native/Backend Adapter Contract
+# N.E.O. Network Native Adapter Contract
 
 This contract is the boundary for real network discovery. Browser code must not perform LAN scans directly.
 
@@ -6,7 +6,9 @@ This contract is the boundary for real network discovery. Browser code must not 
 
 - Demo Mode on: `demoNetworkAdapter`
 - Demo Mode off: `nativeNetworkAdapter`
-- Native/backend failure: `networkAdapter` falls back to demo data and reports `DEMO_FALLBACK`
+- Browser preview: simulated network data with explicit browser-preview messaging.
+- Installed Android with `NeoNetwork` plugin available: live local LAN discovery through the native plugin.
+- Installed Android native failure: truthful native-unavailable/failure state, with optional labeled demo fallback.
 
 ## Native Bridge
 
@@ -29,15 +31,16 @@ window.NeoNetworkDiscovery = {
 
 The bridge is read-only in this phase. Do not expose router reboot, block, wake, QoS, guest network, or trust/write actions yet.
 
-## Backend Endpoints
+## Optional Connector Endpoints
 
-If using a local/native backend, set:
+Basic Android LAN discovery does not require any backend, server, or configured remote endpoint.
+If a separate local connector is added for router-control or provider extras, it may use:
 
 ```env
 NEXT_PUBLIC_NEO_NETWORK_BACKEND_URL=http://127.0.0.1:PORT
 ```
 
-Required read endpoints:
+Possible read endpoints for that optional connector:
 
 - `GET /health`
 - `GET /status`
@@ -56,6 +59,8 @@ Expected real data:
 - Device discovery results, including IP address, MAC address when available, hostname, vendor hint, type hint, status, trust level, open ports/services when available.
 - Router/gateway status as read-only facts.
 
+Browser preview must remain simulated and must say so. The installed Android app should use the `NeoNetwork` native plugin for local scan data.
+
 ## Topology Truth Rule
 
 Generated topology from scan results must use:
@@ -72,19 +77,19 @@ topologyMode: "backend-confirmed"
 relationshipsConfirmed: true
 ```
 
-when the native/backend layer can prove relationships from real routing, ARP, AP association, router API, or another reliable source.
+when the native plugin or a dedicated connector can prove relationships from real routing, ARP, AP association, router API, or another reliable source.
 
 ## Android QA Checklist
 
 - Install on a physical Android device connected to Wi-Fi.
 - Disable Demo Mode in Network settings.
-- Confirm the header shows `NATIVE_DISCOVERY_CONNECTED` or `NATIVE_BACKEND_CONNECTED`.
+- Confirm the header shows live Android discovery status.
 - Run Quick scan and verify gateway IP/local IP match the device network.
 - Verify discovered devices are real LAN entries, not mock names.
 - Verify hostname/vendor hints appear only when available.
 - Verify topology badge remains `ESTIMATED LOGICAL TOPOLOGY` unless relationships are proven.
-- Disconnect or stop the native/backend service and verify the UI shows `DEMO_FALLBACK`.
-- Confirm router/device control actions do not execute in native/backend mode.
+- Disable or break the native plugin path and verify the UI reports native discovery unavailable or labeled demo fallback.
+- Confirm router/device control actions do not execute from the discovery-only native mode.
 
 
 ## Current Android Native Plugin Truth Notes

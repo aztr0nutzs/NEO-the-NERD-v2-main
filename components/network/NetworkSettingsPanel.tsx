@@ -74,7 +74,8 @@ export function NetworkSettingsPanel({
               <div>
                 <p className="font-mono text-xs font-bold text-orange-400">DEMO_MODE_ACTIVE</p>
                 <p className="mt-0.5 font-mono text-[10px] text-orange-300/80">
-                  Network data is simulated. On Android, disable demo mode for live local discovery.
+                  Browser preview mode: simulated network data. Install/run the Android app for live local LAN discovery.
+                  Installed Android local discovery does not require a backend.
                 </p>
               </div>
             </div>
@@ -86,8 +87,8 @@ export function NetworkSettingsPanel({
               <div>
                 <p className="font-mono text-xs font-bold text-yellow-400">DEMO_FALLBACK_ACTIVE</p>
                 <p className="mt-0.5 font-mono text-[10px] text-yellow-300/80">
-                  Native/cloud backend discovery did not answer. N.E.O. is keeping the Network module
-                  usable with labeled demo fallback data.
+                  Native Android discovery did not answer. N.E.O. is keeping the Network module usable
+                  with labeled demo fallback data.
                 </p>
               </div>
             </div>
@@ -213,8 +214,9 @@ export function NetworkSettingsPanel({
                 highlight={settings.demoMode}
               />
               <p className="font-mono text-[10px] text-gray-500">
-                {"//"} Disable demo mode to use the native Android discovery plugin. If neither is
-                reachable, N.E.O. will clearly label demo fallback data.
+                {"//"} Browser preview uses simulated data. Installed Android uses the NeoNetwork
+                native plugin for live local discovery; optional backend services are unrelated to
+                basic LAN scanning.
               </p>
             </div>
           </SettingGroup>

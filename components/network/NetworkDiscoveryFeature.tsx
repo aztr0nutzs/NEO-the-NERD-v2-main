@@ -6,7 +6,7 @@
  * 1. Copy `components/network/*` to your project
  * 2. Copy `lib/network/*` to your project
  * Integrated into the existing NEO screen-state shell.
- * Replace mock adapter with native/backend adapter when ready.
+ * Browser preview uses demo data. Installed Android live discovery uses the native plugin.
  *
  * This is a self-contained feature module designed to be dropped into
  * the existing NEO the N.E.R.D. application without modification.

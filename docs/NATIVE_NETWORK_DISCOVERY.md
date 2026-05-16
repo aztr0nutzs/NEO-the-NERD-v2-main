@@ -3,7 +3,9 @@
 ## Supported runtime
 - Android runtime inside Capacitor WebView.
 - Uses Capacitor plugin name: `NeoNetwork`.
-- Non-Android or unavailable-plugin runtime falls back to demo adapter.
+- Browser preview intentionally uses simulated network data and should display: `Browser preview mode: simulated network data`.
+- Live local LAN discovery requires the installed Android app/native runtime, not a backend.
+- Unavailable-plugin runtime reports native discovery unavailable or uses clearly labeled demo fallback data.
 
 ## Android permissions
 Required and used:
@@ -78,7 +80,8 @@ seen for that host: `gateway`, `ssdp`, `tcp-probe`, `arp`, then `hostname`.
 
 ## Demo fallback behavior
 - Adapter attempts Android native bridge first.
-- If native path unavailable/fails, adapter uses existing demo adapter.
+- Browser preview uses existing demo adapter by design.
+- If native path unavailable/fails in Android, UI must report native-unavailable/failure truthfully before any explicit demo fallback.
 - UI state labels distinguish live discovery vs demo/fallback.
 
 ## Limitations

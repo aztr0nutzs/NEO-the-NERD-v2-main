@@ -3,7 +3,7 @@
  * Network Discovery Adapter
  *
  * This adapter layer abstracts all network functionality.
- * Currently returns DEMO/MOCK data for UI development.
+ * Browser preview returns DEMO/MOCK data; installed Android uses the native plugin.
  *
  * FUTURE INTEGRATION POINTS:
  * - Android native LAN scanner (via Capacitor plugin or WebView bridge)
@@ -12,10 +12,11 @@
  * - mDNS discovery (not available in current native plugin implementation)
  * - TCP port probe (requires native implementation)
  * - Router API connector (vendor-specific APIs)
- * - Local backend service (Node.js/Python scanner service)
+ * - Optional router/provider connectors for non-discovery extras
  *
  * DO NOT implement unsafe scanning logic directly in the browser.
- * All real scanning must be done through native/backend connectors.
+ * Live local LAN scanning must run through the Android native plugin.
+ * Backend services are not required for basic Android device discovery.
  */
 
 import type {
@@ -76,7 +77,7 @@ const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_NEO_NETWORK_BACKEND_URL?.replac
 const BACKEND_TIMEOUT_MS = 4500;
 
 class BackendUnavailableError extends Error {
-  constructor(message = "Native/backend network adapter is unavailable") {
+  constructor(message = "Optional network connector is unavailable") {
     super(message);
     this.name = "BackendUnavailableError";
   }
@@ -90,7 +91,7 @@ function getNativeBridge(): NativeNetworkDiscoveryBridge | null {
 async function requestBackendJson<T>(path: string, init?: RequestInit): Promise<T> {
   if (!BACKEND_BASE_URL) {
     throw new BackendUnavailableError(
-      "NEXT_PUBLIC_NEO_NETWORK_BACKEND_URL is not configured and no native bridge handled the request"
+      "Optional network connector URL is not configured; Android local discovery does not require it"
     );
   }
 
@@ -108,7 +109,7 @@ async function requestBackendJson<T>(path: string, init?: RequestInit): Promise<
     });
 
     if (!response.ok) {
-      throw new Error(`Network backend returned ${response.status} for ${path}`);
+      throw new Error(`Optional network connector returned ${response.status} for ${path}`);
     }
 
     if (response.status === 204) {
@@ -145,8 +146,8 @@ export function resolveNetworkAdapterStatus({
       label: "SIMULATED NETWORK DATA",
       isDemo: true,
       message: nativePluginAvailable
-        ? "Native bridge is available, but demo mode is forcing simulated discovery data."
-        : "Browser preview mode is using simulated discovery data. Install/run Android app for live local LAN scanning.",
+        ? "Demo Preview is active: simulated network data. Switch back to Live Android Discovery for native local LAN scanning."
+        : "Browser preview mode: simulated network data. Install/run the Android app for live local LAN discovery. No backend is required for installed Android local discovery.",
     };
   }
 
@@ -437,7 +438,7 @@ class DemoNetworkAdapter implements NetworkAdapterInterface {
   /**
    * Execute a network action
    *
-   * FUTURE: Route to appropriate native/backend handler
+   * FUTURE: Route to the appropriate native or optional connector handler
    * - Wake-on-LAN: Send magic packet via native code
    * - Router reboot: API call to router
    * - Block device: Router API or firewall rules
@@ -563,7 +564,7 @@ class DemoNetworkAdapter implements NetworkAdapterInterface {
    * Get topology graph for future 3D map consumers.
    *
    * Demo mode returns a clearly marked demo graph. Non-demo scan-derived data is still
-   * marked estimated until a native/backend source confirms real physical relations.
+   * marked estimated until a native plugin or connector source confirms real physical relations.
    */
   async getNetworkTopology(): Promise<NetworkTopologyGraph> {
     return currentSettings.demoMode

@@ -111,7 +111,9 @@ export function NetworkScanPanel({
       {isScanning && (
         <div className="space-y-2">
           <div className="flex items-center justify-between font-mono text-xs">
-            <span className="text-cyan-400">SCANNING_NETWORK...</span>
+            <span className="text-cyan-400">
+              {isDemoMode ? "RUNNING_PREVIEW_SCAN..." : "SCANNING_NETWORK..."}
+            </span>
             <span className="text-cyan-300">{Math.round(scanProgress)}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-gray-800">
@@ -123,9 +125,10 @@ export function NetworkScanPanel({
           <div className="flex items-center gap-2 text-[10px] text-gray-500">
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" />
             <span className="animate-pulse">
-              {selectedMode === "quick" && "Resolving local context + gateway + shallow host probe..."}
-              {selectedMode === "balanced" && "Running ARP/MAC, hostname, SSDP, and bounded port probes..."}
-              {selectedMode === "deep" && "Running expanded local host cap, timeout, and bounded port/service inference..."}
+              {isDemoMode && "Simulating browser-preview discovery data..."}
+              {!isDemoMode && selectedMode === "quick" && "Resolving local context + gateway + shallow host probe..."}
+              {!isDemoMode && selectedMode === "balanced" && "Running ARP/MAC, hostname, SSDP, and bounded port probes..."}
+              {!isDemoMode && selectedMode === "deep" && "Running expanded local host cap, timeout, and bounded port/service inference..."}
             </span>
           </div>
         </div>
@@ -139,7 +142,7 @@ export function NetworkScanPanel({
             className="flex-1 border border-cyan-500/50 bg-cyan-500/20 font-mono text-sm font-bold uppercase tracking-wider text-cyan-400 transition-all hover:bg-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
           >
             <Radar className="mr-2 h-4 w-4" />
-            START_SCAN
+            {isDemoMode ? "START_DEMO_SCAN" : "START_SCAN"}
           </Button>
         ) : (
           <Button
@@ -175,7 +178,7 @@ export function NetworkScanPanel({
       {/* Demo Notice */}
       {isDemoMode && (
         <p className="font-mono text-[10px] text-gray-500">
-          {"//"} Demo mode: Scan simulates discovery. Install/run the Android app for live local LAN scanning.
+          {"//"} Browser preview mode: simulated network data. Install/run the Android app for live local LAN discovery. No backend is required for installed Android local discovery.
         </p>
       )}
     </div>

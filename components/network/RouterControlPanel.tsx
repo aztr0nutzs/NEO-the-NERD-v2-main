@@ -240,13 +240,14 @@ export function RouterControlPanel({
             <div>
               {routerStatus.readOnlyMode && (
                 <p className="mb-1">
-                  READ_ONLY_MODE: Router control actions are disabled until cloud backend is connected.
+                  READ_ONLY_MODE: Router control actions require a separate router connector. Local
+                  LAN discovery is unaffected.
                 </p>
               )}
               {isDemoMode && (
                 <p>
-                  DEMO_ADAPTER: Toggle actions are simulated. Connect native cloud backend for real router
-                  control.
+                  DEMO_ADAPTER: Toggle actions are simulated. Real router control requires a separate
+                  router connector; live Android discovery does not require one.
                 </p>
               )}
             </div>
