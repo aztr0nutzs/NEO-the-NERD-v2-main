@@ -48,14 +48,17 @@ export function AppShell() {
 
   // Onboarding only shows once boot is offscreen so the cinematic intro plays
   // first. A failsafe timer also fires so that a failed boot (e.g. video error
-  // on a headless device) does not block the wizard indefinitely.
+  // on a headless device) does not block the wizard indefinitely. The window
+  // is sized to match the boot overlay's own outer failsafe with a small
+  // safety margin — it should rarely if ever fire because the overlay also
+  // self-exits on stall/error.
   const [bootSettled, setBootSettled] = useState(false)
   useEffect(() => {
     if (!bootMounted) {
       setBootSettled(true)
       return
     }
-    const timer = window.setTimeout(() => setBootSettled(true), 40_000)
+    const timer = window.setTimeout(() => setBootSettled(true), 15_000)
     return () => window.clearTimeout(timer)
   }, [bootMounted])
   const showOnboarding = bootSettled && !settings.onboarding.completed
@@ -66,8 +69,12 @@ export function AppShell() {
 
   return (
     <div className="relative isolate min-h-[100dvh] w-full overflow-x-hidden bg-transparent">
-      {/* Background layers */}
-      <NeoBackgroundScene />
+      {/* Background layers. The animated MP4 inside NeoBackgroundScene is
+          gated by `videoEnabled` so it does not compete with the boot video
+          for decoder slots on Android WebView. The static PNG poster keeps
+          rendering throughout boot so the visual identity is preserved —
+          the heavy MP4 simply fades in once the boot sequence has exited. */}
+      <NeoBackgroundScene videoEnabled={!bootMounted} />
       <div className="pointer-events-none fixed inset-0 z-[1] ps-scanlines opacity-20" />
 
       <AssistantStatusBar />
