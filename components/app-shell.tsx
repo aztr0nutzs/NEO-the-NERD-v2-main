@@ -14,6 +14,7 @@ import { ControlsScreen } from "./screens/controls-screen"
 import { NetworkScreen } from "./screens/network-screen"
 import { LibraryScreen } from "./screens/library-screen"
 import { SettingsScreen } from "./screens/settings-screen"
+import { SpeedTestScreen } from "./screens/speed-test-screen"
 import { NeoBackgroundScene } from "./background/neo-background-scene"
 import { BootSequenceOverlay } from "./boot/boot-sequence-overlay"
 import { PersistentAvatarOrb } from "./avatar/persistent-avatar-orb"
@@ -27,6 +28,7 @@ const SCREEN_MAP = {
   games: GamesScreen,
   controls: ControlsScreen,
   network: NetworkScreen,
+  speed: SpeedTestScreen,
   library: LibraryScreen,
   settings: SettingsScreen,
 } as const

@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx cap *)",
       "Bash(./gradlew assembleDebug --no-daemon)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(where ffprobe *)",
+      "Bash(ffprobe -v error -show_entries stream=width,height,duration,codec_type,codec_name -of default=noprint_wrappers=1 \"c:/Users/Aztr0nutZs/Desktop/NEO-the-NERD-v2-main/neo_backround.mp4\")"
     ]
   }
 }

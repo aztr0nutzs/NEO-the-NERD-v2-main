@@ -331,6 +331,7 @@ export function MainScreen() {
             onClick={() => setScreen("network")}
           />
           <MissionAction icon={Map} label="OPEN_3D_MAP" accent="#39ff14" onClick={() => setScreen("network")} />
+          <MissionAction icon={Timer} label="SPEED_TEST" accent="#ff7a00" onClick={() => setScreen("speed")} />
           <MissionAction icon={History} label="ALERTS_TIMELINE" accent="#b829ff" onClick={() => setScreen("network")} />
         </div>
 

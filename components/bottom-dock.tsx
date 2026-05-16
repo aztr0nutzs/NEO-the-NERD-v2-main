@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import {
   Bot,
   Gamepad2,
+  Gauge,
   Library,
   MessageSquare,
   Mic2,
@@ -33,6 +34,7 @@ const ITEMS: DockItem[] = [
   { id: "main", label: "Robot", icon: Bot, accent: "#00f0ff" },
   { id: "chat", label: "Chat", icon: MessageSquare, accent: "#b829ff" },
   { id: "network", label: "Network", icon: Radar, accent: "#39ff14" },
+  { id: "speed", label: "Speed", icon: Gauge, accent: "#ff7a00" },
   { id: "voices", label: "Voices", icon: Mic2, accent: "#ff2d9c" },
   { id: "personalities", label: "Person.", icon: Sparkles, accent: "#39ff14" },
   { id: "games", label: "Games", icon: Gamepad2, accent: "#ff7a00" },
@@ -88,7 +90,7 @@ export function BottomDock() {
 
         <ul
           ref={listRef}
-          className="grid auto-cols-[4.75rem] grid-flow-col overflow-x-auto scroll-smooth px-1 py-1.5 [scrollbar-width:none] sm:grid-cols-9 sm:auto-cols-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+          className="grid auto-cols-[4.75rem] grid-flow-col overflow-x-auto scroll-smooth px-1 py-1.5 [scrollbar-width:none] sm:grid-cols-10 sm:auto-cols-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
         >
           {ITEMS.map((item) => {
             const active = screen === item.id
