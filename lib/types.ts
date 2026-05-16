@@ -263,5 +263,6 @@ export type ScreenId =
   | "games"
   | "controls"
   | "network"
+  | "speed"
   | "library"
   | "settings"
