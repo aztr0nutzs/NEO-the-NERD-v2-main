@@ -313,7 +313,7 @@ export const DEFAULT_NETWORK_SETTINGS: NetworkSettings = {
   notifyOfflineDevices: false,
   safeMode: true,
   allowControlActions: false,
-  demoMode: true,
+  demoMode: false,
 };
 
 export const MOCK_NETWORK_TOPOLOGY: NetworkTopologyGraph = createDemoTopologyGraph(MOCK_DEVICES);

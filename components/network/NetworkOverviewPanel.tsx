@@ -189,7 +189,7 @@ export function NetworkOverviewPanel({
         <div className="flex items-center gap-2 rounded border border-orange-500/30 bg-orange-500/5 px-3 py-2 font-mono text-xs text-orange-400">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>
-            DEMO_ADAPTER // Displaying simulated device data. Connect native backend for real scan results.
+            DEMO_ADAPTER // Displaying simulated device data. Install/run the Android app for live local LAN scanning.
           </span>
         </div>
       )}

@@ -85,7 +85,7 @@ export type NetworkTopologyEdgeQuality = "strong" | "fair" | "weak" | "unknown";
 
 export type NetworkTopologyMode = "demo" | "estimated" | "backend-confirmed";
 
-export type NetworkAdapterMode = "demo" | "native-backend" | "fallback";
+export type NetworkAdapterMode = "demo-browser" | "native-android" | "native-unavailable" | "scan-failed";
 
 export type NetworkMapViewMode =
   | "orbital-3d"
@@ -603,7 +603,6 @@ export interface NetworkAdapterStatus {
   mode: NetworkAdapterMode;
   label: string;
   isDemo: boolean;
-  isBackendAvailable: boolean;
   message: string;
 }
 
