@@ -33,6 +33,15 @@ import {
   type SpeedTestRunStatus,
 } from "@/lib/network/speedTestRunner"
 import type { SpeedTestConfig, SpeedTestResult } from "@/lib/network/types"
+import {
+  NEO_PALETTE,
+  SPEED_TEST_SIGNIFICANCE,
+  gradeDownload,
+  gradeJitter,
+  gradeLatency,
+  gradeUpload,
+  type MetricTier,
+} from "@/lib/network/speedTestThresholds"
 
 const UPLOAD_URL_STORAGE_KEY = "neo:speedtest:upload-url"
 
@@ -60,13 +69,10 @@ const PHASE_LABEL: Record<SpeedTestRunStatus, string> = {
   failed: "HALT",
 }
 
-const NEO = {
-  cyan: "#00f0ff",
-  pink: "#ff2d9c",
-  green: "#39ff14",
-  yellow: "#ff7a00",
-  text: "rgba(231,251,255,0.92)",
-} as const
+// Local alias kept so existing call sites (NEO.cyan etc.) keep reading the
+// same — the underlying values now live in lib/network/speedTestThresholds.ts
+// so Mission Control and the Speed Test screen share one palette.
+const NEO = NEO_PALETTE
 
 interface SpeedTestScreenProps {
   /** Override the test configuration (e.g. point at a custom endpoint). */
@@ -1056,8 +1062,12 @@ function MetricWithDelta({
   higherIsBetter?: boolean
 }) {
   // Significance threshold so a noisy 0.05 Mbps wiggle does not light up
-  // the badge — keeps the delta indicator honest.
-  const significant = delta !== null && Math.abs(delta) > (higherIsBetter ? 0.5 : 2)
+  // the badge — keeps the delta indicator honest. Pulled from the shared
+  // module so Mission Control and this screen agree on the noise floor.
+  const noiseFloor = higherIsBetter
+    ? SPEED_TEST_SIGNIFICANCE.downloadMbps
+    : SPEED_TEST_SIGNIFICANCE.latencyMs
+  const significant = delta !== null && Math.abs(delta) > noiseFloor
   const positive = delta !== null && delta > 0
   const goodDirection = higherIsBetter ? positive : !positive
   const trendColor = significant ? (goodDirection ? NEO.green : NEO.pink) : "rgba(255,255,255,0.5)"
@@ -1679,51 +1689,51 @@ function computeMetricHighlights(result: SpeedTestResult): {
   strongest: { label: string; note: string }
   weakest: { label: string; note: string; tone: "ok" | "warn" }
 } {
-  type Tier = "strong" | "ok" | "weak"
   type Metric = {
     name: string
     note: string
-    tier: Tier
+    tier: MetricTier
     rank: number
   }
 
+  // Each metric is graded by the shared helpers in
+  // lib/network/speedTestThresholds.ts so this UI never disagrees with
+  // computeVerdict / verdictAccentColor / Mission Control.
   const metrics: Metric[] = []
 
-  // Download
   metrics.push({
     name: "Download path",
     note: `${result.downloadMbps.toFixed(1)} Mbps`,
-    tier: result.downloadMbps >= 50 ? "strong" : result.downloadMbps >= 20 ? "ok" : "weak",
+    tier: gradeDownload(result.downloadMbps),
     rank: result.downloadMbps,
   })
 
-  // Latency (lower is better — invert rank for comparison)
+  // Latency + jitter rank as -value so lower-is-better metrics sort the
+  // same direction as higher-is-better metrics in the tier-tied tiebreaker.
   metrics.push({
     name: "Request latency",
     note: `${Math.round(result.latencyMs)} ms`,
-    tier: result.latencyMs <= 35 ? "strong" : result.latencyMs <= 80 ? "ok" : "weak",
+    tier: gradeLatency(result.latencyMs),
     rank: -result.latencyMs,
   })
 
-  // Jitter (lower is better)
   metrics.push({
     name: "Jitter",
     note: `${Math.round(result.jitterMs)} ms σ`,
-    tier: result.jitterMs <= 8 ? "strong" : result.jitterMs <= 25 ? "ok" : "weak",
+    tier: gradeJitter(result.jitterMs),
     rank: -result.jitterMs,
   })
 
-  // Upload — only included when actually measured
   if (result.uploadMbps !== null) {
     metrics.push({
       name: "Upload path",
       note: `${result.uploadMbps.toFixed(1)} Mbps`,
-      tier: result.uploadMbps >= 10 ? "strong" : result.uploadMbps >= 3 ? "ok" : "weak",
+      tier: gradeUpload(result.uploadMbps),
       rank: result.uploadMbps,
     })
   }
 
-  const TIER_RANK: Record<Tier, number> = { strong: 2, ok: 1, weak: 0 }
+  const TIER_RANK: Record<MetricTier, number> = { strong: 2, ok: 1, weak: 0 }
   const sorted = [...metrics].sort((a, b) => {
     const t = TIER_RANK[b.tier] - TIER_RANK[a.tier]
     if (t !== 0) return t
@@ -1773,8 +1783,12 @@ function DeltaChip({
   const positive = delta > 0
   const goodDirection = higherIsBetter ? positive : !positive
   // Same significance gating as the recent-runs delta — keeps small
-  // measurement noise from triggering misleading colored chips.
-  const significant = Math.abs(delta) > (higherIsBetter ? 0.5 : 2)
+  // measurement noise from triggering misleading colored chips. Pulled
+  // from the shared module so the noise floor matches Mission Control.
+  const noiseFloor = higherIsBetter
+    ? SPEED_TEST_SIGNIFICANCE.downloadMbps
+    : SPEED_TEST_SIGNIFICANCE.latencyMs
+  const significant = Math.abs(delta) > noiseFloor
   const color = significant ? (goodDirection ? NEO.green : NEO.pink) : "rgba(255,255,255,0.55)"
   const sign = delta > 0 ? "+" : ""
   return (
@@ -1810,23 +1824,28 @@ function computeVerdict(result: SpeedTestResult): {
       color: NEO.pink,
     }
   }
+  // Use the shared graders so this verdict, the strongest/weakest chips,
+  // and Mission Control's LAST_RUN summary all interpret the same numbers
+  // the same way.
   const dl = result.downloadMbps
   const lat = result.latencyMs
-  if (dl >= 50 && lat <= 35) {
+  const dlTier = gradeDownload(dl)
+  const latTier = gradeLatency(lat)
+  if (dlTier === "strong" && latTier === "strong") {
     return {
       label: "EXCELLENT",
       detail: `Internet path is fast and responsive — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
       color: NEO.green,
     }
   }
-  if (dl >= 20 && lat <= 80) {
+  if (dlTier !== "weak" && latTier !== "weak") {
     return {
       label: "GOOD",
       detail: `Stable internet path — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
       color: NEO.cyan,
     }
   }
-  if (dl >= 5) {
+  if (dlTier !== "weak" || latTier !== "weak") {
     return {
       label: "USABLE",
       detail: `Throughput is adequate but latency or jitter may impact realtime use (${dl.toFixed(1)} Mbps · ${Math.round(lat)} ms).`,

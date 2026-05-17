@@ -31,6 +31,12 @@ import { RobotStage } from "../robot-stage"
 import { VoiceVisualizer } from "../voice-visualizer"
 import { QuickCommandChips } from "../quick-command-chips"
 import type { NetworkHealthSnapshot, SpeedTestResult } from "@/lib/network/types"
+import {
+  NEO_PALETTE,
+  isDownloadDeltaSignificant,
+  isLatencyDeltaSignificant,
+  verdictAccentColor,
+} from "@/lib/network/speedTestThresholds"
 
 const RESPONSE_TEMPLATES: Record<string, string> = {
   "Tell a joke":
@@ -622,6 +628,11 @@ function SpeedTestSummary({
   previous: SpeedTestResult | null
   onOpen: () => void
 }) {
+  // verdictAccentColor combines download AND latency tiers (same grading
+  // the Speed Test verdict banner uses) so this dashboard glance never
+  // disagrees with the full result page. NEO_PALETTE is the shared
+  // neon palette — no duplicated hex strings here.
+  const accent = verdictAccentColor(latest)
   if (!latest) {
     return (
       <motion.button
@@ -629,12 +640,12 @@ function SpeedTestSummary({
         whileTap={{ scale: 0.97 }}
         onClick={onOpen}
         className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-left"
-        style={{ boxShadow: "inset 0 0 0 1px rgba(184,41,255,0.28)" }}
+        style={{ boxShadow: `inset 0 0 0 1px ${accent}48` }}
       >
         <div className="flex items-center gap-2">
           <Gauge
             className="h-4 w-4"
-            style={{ color: "#b829ff", filter: "drop-shadow(0 0 6px #b829ff)" }}
+            style={{ color: accent, filter: `drop-shadow(0 0 6px ${accent})` }}
           />
           <div className="leading-tight">
             <p className="ps-mono text-[9px] tracking-[0.22em] text-white/45">
@@ -649,18 +660,12 @@ function SpeedTestSummary({
       </motion.button>
     )
   }
-  const accent =
-    latest.downloadMbps >= 50
-      ? "#39ff14"
-      : latest.downloadMbps >= 20
-        ? "#00f0ff"
-        : "#ff7a00"
   const dlDelta =
     previous && previous.success ? latest.downloadMbps - previous.downloadMbps : null
   const latDelta =
     previous && previous.success ? latest.latencyMs - previous.latencyMs : null
-  const dlDeltaSignificant = dlDelta !== null && Math.abs(dlDelta) > 0.5
-  const latDeltaSignificant = latDelta !== null && Math.abs(latDelta) > 2
+  const dlDeltaSignificant = isDownloadDeltaSignificant(dlDelta)
+  const latDeltaSignificant = isLatencyDeltaSignificant(latDelta)
   return (
     <motion.button
       type="button"
@@ -687,8 +692,7 @@ function SpeedTestSummary({
               {dlDeltaSignificant && (
                 <span
                   style={{
-                    color:
-                      (dlDelta ?? 0) > 0 ? "#39ff14" : "#ff2d9c",
+                    color: (dlDelta ?? 0) > 0 ? NEO_PALETTE.green : NEO_PALETTE.pink,
                   }}
                 >
                   Δ DL {(dlDelta ?? 0) > 0 ? "+" : ""}
@@ -701,8 +705,8 @@ function SpeedTestSummary({
               {latDeltaSignificant && (
                 <span
                   style={{
-                    color:
-                      (latDelta ?? 0) < 0 ? "#39ff14" : "#ff2d9c",
+                    // Latency: lower is better — invert the polarity.
+                    color: (latDelta ?? 0) < 0 ? NEO_PALETTE.green : NEO_PALETTE.pink,
                   }}
                 >
                   Δ LAT {(latDelta ?? 0) > 0 ? "+" : ""}
