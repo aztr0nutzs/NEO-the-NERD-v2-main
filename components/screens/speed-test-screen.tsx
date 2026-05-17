@@ -17,7 +17,9 @@ import {
   Bolt,
   CheckCircle2,
   Eraser,
+  Gauge,
   Link as LinkIcon,
+  Lock,
   Rocket as RocketIcon,
   TrendingDown,
   TrendingUp,
@@ -136,6 +138,16 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
   // fill across the download window — driven by elapsed/duration, not magic.
   const downloadStartedAtRef = useRef<number>(0)
   const downloadDurationRef = useRef<number>(0)
+  // One-shot completion shockwave: scaled ring overlay fired the instant the
+  // status transitions to `complete`. Auto-clears so it cannot replay.
+  const [showShockwave, setShowShockwave] = useState(false)
+  // One-shot failure scanline glitch — pink overlay flash when the run halts
+  // or is aborted. Auto-clears like the shockwave so it stays a punctuation.
+  const [showFailGlitch, setShowFailGlitch] = useState(false)
+  // Rolling buffer of the last few latency samples, used to drive the jitter
+  // bar heights from REAL measurements during the latency phase. Falls back
+  // to the seeded decorative bars when not running.
+  const recentLatencySamples = useRef<number[]>([])
 
   const pushLog = useCallback((text: string, color: TelemetryColor = "cyan") => {
     logSeqRef.current += 1
@@ -189,6 +201,24 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     if (!el) return
     el.scrollTop = el.scrollHeight
   }, [telemetry])
+
+  // Trigger the completion shockwave the instant the runner transitions to
+  // `complete`. The animation runs once and then we clear the flag so it
+  // cannot replay (and so subsequent renders are quiet). The pink failure
+  // flash works the same way on `failed` / `aborted`.
+  useEffect(() => {
+    if (activeStatus === "complete") {
+      setShowShockwave(true)
+      const t = window.setTimeout(() => setShowShockwave(false), 1500)
+      return () => window.clearTimeout(t)
+    }
+    if (activeStatus === "failed" || activeStatus === "aborted") {
+      setShowFailGlitch(true)
+      const t = window.setTimeout(() => setShowFailGlitch(false), 900)
+      return () => window.clearTimeout(t)
+    }
+    return undefined
+  }, [activeStatus])
 
   /* ============================================================
      Sphere gauge — canvas animation faithful to nerd_speed.html
@@ -341,6 +371,7 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     setPingMedian("--")
     setJitter("--")
     setJitterBars(seedJitterBars(2))
+    recentLatencySamples.current = []
     setProbeStatus("RUNNING")
     setProbeColor("green")
     setStatusLabel("PREPARING")
@@ -371,10 +402,18 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
         },
         onLog: (line) => pushLog(line.message, LOG_LEVEL_COLOR[line.level]),
         onLatencySample: (sample) => {
-          // While the latency phase runs, surface the running sample count.
+          // While the latency phase runs, surface the running sample count
+          // and drive the jitter bars from REAL measurements so the user
+          // sees the engine working with actual data instead of decorative
+          // randomness. Bars are clamped to a readable height range.
           pushLog(`PING_SAMPLE ${sample.index}/${sample.total}=${Math.round(sample.sampleMs)}ms`, "cyan")
           setLatencySamplesCount({ done: sample.index, total: sample.total })
           setPhaseProgress(sample.index / sample.total)
+          recentLatencySamples.current = [
+            ...recentLatencySamples.current,
+            sample.sampleMs,
+          ].slice(-10)
+          setJitterBars(barsFromLatencySamples(recentLatencySamples.current))
         },
         onLatencySummary: (summary) => {
           setPingMedian(String(Math.round(summary.latencyMs)))
@@ -561,6 +600,60 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
             animation: "ps-spin-rev 15s linear infinite",
           }}
         />
+
+        {/* Idle "ready" breath halo — only visible when no run is active.
+            A slow cyan opacity throb makes the screen read as ALIVE before
+            the user presses Execute, replacing the previously dead idle
+            state. Disabled the moment a run kicks off so it never competes
+            with the live phase animations. */}
+        {!running && activeStatus === "idle" && (
+          <div
+            className="speedtest-ready-halo pointer-events-none absolute z-[2] aspect-square w-[88%] rounded-full"
+            style={{
+              border: `1px solid ${rgba(NEO.cyan, 0.35)}`,
+              boxShadow: `0 0 36px ${rgba(NEO.cyan, 0.25)} inset, 0 0 24px ${rgba(NEO.cyan, 0.22)}`,
+            }}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* One-shot completion shockwave. Fires the moment status transitions
+            to `complete` and clears after ~1.5s so it cannot replay. Green
+            ring expands outward, signalling "PROBE COMPLETE" viscerally. */}
+        {showShockwave && (
+          <>
+            <div
+              className="speedtest-shockwave pointer-events-none absolute z-[6] aspect-square w-[80%] rounded-full"
+              style={{
+                border: `2px solid ${NEO.green}`,
+                boxShadow: `0 0 18px ${NEO.green}`,
+              }}
+              aria-hidden="true"
+            />
+            <div
+              className="speedtest-shockwave-late pointer-events-none absolute z-[6] aspect-square w-[80%] rounded-full"
+              style={{
+                border: `1px solid ${rgba(NEO.cyan, 0.85)}`,
+                boxShadow: `0 0 12px ${rgba(NEO.cyan, 0.6)}`,
+              }}
+              aria-hidden="true"
+            />
+          </>
+        )}
+
+        {/* One-shot failure scanline glitch. Quick pink flash + horizontal
+            scanline overlay on `failed` / `aborted` so the user feels the
+            verdict rather than just reading it. */}
+        {showFailGlitch && (
+          <div
+            className="speedtest-fail-glitch pointer-events-none absolute z-[6] aspect-square w-[88%] rounded-full"
+            style={{
+              border: `1px solid ${rgba(NEO.pink, 0.85)}`,
+              boxShadow: `0 0 22px ${rgba(NEO.pink, 0.55)} inset, 0 0 18px ${rgba(NEO.pink, 0.45)}`,
+            }}
+            aria-hidden="true"
+          />
+        )}
 
         {/* Real-state progress arc. Wraps the gauge with a stroke that fills
             cleanly during latency (sample count / total), download (elapsed
@@ -1135,6 +1228,93 @@ function ScopedSpeedStyles() {
           transform: translate(0, 0);
         }
       }
+
+      /* Slow opacity + scale breath used by the idle ready-halo so the
+         screen reads alive before a run starts. Caps at ~5% scale so the
+         halo never crowds the sphere. */
+      .speedtest-root .speedtest-ready-halo {
+        animation: speedtest-ready-breath 3.4s ease-in-out infinite;
+      }
+      @keyframes speedtest-ready-breath {
+        0%,
+        100% {
+          opacity: 0.35;
+          transform: scale(0.97);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.04);
+        }
+      }
+
+      /* Completion shockwave: green ring expands and fades out once. A
+         second cyan ring follows slightly later so the burst reads as
+         multilayered without looping. */
+      .speedtest-root .speedtest-shockwave {
+        animation: speedtest-shockwave 1.4s ease-out forwards;
+        opacity: 0;
+      }
+      .speedtest-root .speedtest-shockwave-late {
+        animation: speedtest-shockwave 1.5s ease-out forwards;
+        animation-delay: 0.18s;
+        opacity: 0;
+      }
+      @keyframes speedtest-shockwave {
+        0% {
+          opacity: 0.95;
+          transform: scale(0.55);
+        }
+        70% {
+          opacity: 0.45;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.6);
+        }
+      }
+
+      /* Failure flash + brief horizontal jitter so a halted probe feels
+         punctuated. Tasteful — runs for under a second total. */
+      .speedtest-root .speedtest-fail-glitch {
+        animation: speedtest-fail-glitch 0.85s steps(1, end) forwards;
+        opacity: 0;
+      }
+      @keyframes speedtest-fail-glitch {
+        0% {
+          opacity: 0;
+          transform: translateX(0);
+        }
+        12% {
+          opacity: 0.9;
+          transform: translateX(-3px);
+        }
+        24% {
+          opacity: 0.85;
+          transform: translateX(3px);
+        }
+        36% {
+          opacity: 0.9;
+          transform: translateX(-2px);
+        }
+        48% {
+          opacity: 0.8;
+          transform: translateX(2px);
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .speedtest-root .micro-glitch,
+        .speedtest-root .speedtest-ready-halo,
+        .speedtest-root .speedtest-shockwave,
+        .speedtest-root .speedtest-shockwave-late,
+        .speedtest-root .speedtest-fail-glitch {
+          animation: none;
+        }
+      }
     `}</style>
   )
 }
@@ -1342,6 +1522,7 @@ function VerdictBanner({
   previous: SpeedTestResult | null
 }) {
   const verdict = computeVerdict(result)
+  const highlights = result.success ? computeMetricHighlights(result) : null
   const dlDelta =
     previous && previous.success && result.success
       ? result.downloadMbps - previous.downloadMbps
@@ -1389,6 +1570,24 @@ function VerdictBanner({
       >
         {verdict.detail}
       </p>
+      {highlights && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <HighlightChip
+            icon={TrendingUp}
+            label="STRONGEST"
+            value={highlights.strongest.label}
+            note={highlights.strongest.note}
+            color={NEO.green}
+          />
+          <HighlightChip
+            icon={TrendingDown}
+            label="WEAKEST"
+            value={highlights.weakest.label}
+            note={highlights.weakest.note}
+            color={highlights.weakest.tone === "ok" ? NEO.cyan : NEO.yellow}
+          />
+        </div>
+      )}
       {(dlDelta !== null || latDelta !== null) && (
         <div className="mt-2 flex flex-wrap items-center gap-3">
           {dlDelta !== null && (
@@ -1405,8 +1604,157 @@ function VerdictBanner({
           )}
         </div>
       )}
+      {result.success && result.uploadMbps === null && (
+        <p
+          className="hud-mono mt-2 text-[9px] font-bold"
+          style={{ color: rgba(NEO.yellow, 0.85), letterSpacing: "0.08em" }}
+        >
+          UL_NOT_MEASURED · UPLOAD ENDPOINT NOT CONFIGURED
+        </p>
+      )}
     </div>
   )
+}
+
+function HighlightChip({
+  icon: Icon,
+  label,
+  value,
+  note,
+  color,
+}: {
+  icon: LucideIcon
+  label: string
+  value: string
+  note: string
+  color: string
+}) {
+  return (
+    <div
+      className="cpclip flex flex-col gap-0.5 px-2.5 py-2"
+      style={{
+        background: "rgba(0,0,0,0.78)",
+        border: `1px solid ${rgba(color, 0.45)}`,
+      }}
+    >
+      <div className="flex items-center gap-1.5">
+        <Icon className="h-3 w-3" style={{ color }} aria-hidden="true" />
+        <span
+          className="hud-mono text-[8px] font-black opacity-80"
+          style={{ color: "rgba(255,255,255,0.75)", letterSpacing: "0.16em" }}
+        >
+          {label}
+        </span>
+      </div>
+      <span
+        className="hud-text-tight text-[11px] font-black italic"
+        style={{ color, letterSpacing: "0.06em" }}
+      >
+        {value}
+      </span>
+      <span
+        className="hud-mono text-[9px] font-bold"
+        style={{ color: "rgba(255,255,255,0.7)", letterSpacing: "0.06em" }}
+      >
+        {note}
+      </span>
+    </div>
+  )
+}
+
+/**
+ * Pick a strongest/weakest metric from a completed result. The criteria are
+ * the same thresholds the verdict uses (download, latency, jitter), but
+ * applied per-metric so the user gets a one-glance interpretation:
+ *
+ *   - download:  ≥50 strong · ≥20 ok · <20 weak
+ *   - latency:   ≤35 strong · ≤80 ok · >80 weak
+ *   - jitter:    ≤8 strong  · ≤25 ok · >25 weak
+ *   - upload:    measured + ≥10 Mbps strong · measured ok · not-measured weak
+ *
+ * The function is honest: it never lies, never invents a metric that wasn't
+ * captured, and labels "Upload not measured" plainly when applicable.
+ */
+function computeMetricHighlights(result: SpeedTestResult): {
+  strongest: { label: string; note: string }
+  weakest: { label: string; note: string; tone: "ok" | "warn" }
+} {
+  type Tier = "strong" | "ok" | "weak"
+  type Metric = {
+    name: string
+    note: string
+    tier: Tier
+    rank: number
+  }
+
+  const metrics: Metric[] = []
+
+  // Download
+  metrics.push({
+    name: "Download path",
+    note: `${result.downloadMbps.toFixed(1)} Mbps`,
+    tier: result.downloadMbps >= 50 ? "strong" : result.downloadMbps >= 20 ? "ok" : "weak",
+    rank: result.downloadMbps,
+  })
+
+  // Latency (lower is better — invert rank for comparison)
+  metrics.push({
+    name: "Request latency",
+    note: `${Math.round(result.latencyMs)} ms`,
+    tier: result.latencyMs <= 35 ? "strong" : result.latencyMs <= 80 ? "ok" : "weak",
+    rank: -result.latencyMs,
+  })
+
+  // Jitter (lower is better)
+  metrics.push({
+    name: "Jitter",
+    note: `${Math.round(result.jitterMs)} ms σ`,
+    tier: result.jitterMs <= 8 ? "strong" : result.jitterMs <= 25 ? "ok" : "weak",
+    rank: -result.jitterMs,
+  })
+
+  // Upload — only included when actually measured
+  if (result.uploadMbps !== null) {
+    metrics.push({
+      name: "Upload path",
+      note: `${result.uploadMbps.toFixed(1)} Mbps`,
+      tier: result.uploadMbps >= 10 ? "strong" : result.uploadMbps >= 3 ? "ok" : "weak",
+      rank: result.uploadMbps,
+    })
+  }
+
+  const TIER_RANK: Record<Tier, number> = { strong: 2, ok: 1, weak: 0 }
+  const sorted = [...metrics].sort((a, b) => {
+    const t = TIER_RANK[b.tier] - TIER_RANK[a.tier]
+    if (t !== 0) return t
+    return b.rank - a.rank
+  })
+
+  const strongest = sorted[0]
+  const weakest = sorted[sorted.length - 1]
+
+  // Upload-not-measured is shown explicitly in the weakest slot only when no
+  // other "weak" metric stands out — keeps the badge honest.
+  const uploadMissing = result.uploadMbps === null
+  if (uploadMissing && weakest.tier === "strong") {
+    return {
+      strongest: { label: strongest.name, note: strongest.note },
+      weakest: {
+        label: "Upload not measured",
+        note: "Endpoint not configured",
+        tone: "warn",
+      },
+    }
+  }
+
+  return {
+    strongest: { label: strongest.name, note: strongest.note },
+    weakest: {
+      label: weakest.name,
+      note: weakest.note,
+      tone: weakest.tier === "weak" ? "warn" : "ok",
+    },
+  }
 }
 
 function DeltaChip({
@@ -1515,47 +1863,72 @@ function UploadEndpointConfig({
   onSave: () => void
   onClear: () => void
 }) {
+  const configured = uploadUrlSaved !== null
+  const accentColor = configured ? NEO.green : NEO.yellow
   return (
     <div
       className="cpclip mt-3 p-3"
       style={{
         background: "rgba(0,0,0,0.86)",
-        border: `1px solid ${rgba(NEO.yellow, 0.32)}`,
+        // Configured state gets the green accent (live and ready); the
+        // unconfigured "locked by configuration" state gets a warm-amber
+        // accent so it reads as intentional, not as an error dump.
+        border: `1px solid ${rgba(accentColor, configured ? 0.45 : 0.4)}`,
+        boxShadow: configured
+          ? `0 0 0 1px ${rgba(NEO.green, 0.08)}`
+          : `0 0 0 1px ${rgba(NEO.yellow, 0.06)}`,
       }}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <LinkIcon className="h-3 w-3" style={{ color: NEO.yellow }} aria-hidden="true" />
+          {configured ? (
+            <LinkIcon className="h-3 w-3" style={{ color: NEO.green }} aria-hidden="true" />
+          ) : (
+            <Lock className="h-3 w-3" style={{ color: NEO.yellow }} aria-hidden="true" />
+          )}
           <span
             className="hud-mono text-[9px] font-black"
-            style={{ color: NEO.yellow, letterSpacing: "0.12em" }}
+            style={{ color: accentColor, letterSpacing: "0.12em" }}
           >
             UPLOAD ENDPOINT
           </span>
+          {!configured && (
+            <span
+              className="hud-mono rounded px-1.5 py-px text-[8px] font-black"
+              style={{
+                color: NEO.yellow,
+                background: rgba(NEO.yellow, 0.1),
+                border: `1px solid ${rgba(NEO.yellow, 0.45)}`,
+                letterSpacing: "0.18em",
+              }}
+            >
+              LOCKED
+            </span>
+          )}
         </div>
         <button
           type="button"
           onClick={onToggle}
-          className="hud-mono text-[9px] font-black opacity-80"
+          className="hud-mono text-[9px] font-black opacity-90"
           style={{ color: NEO.cyan, letterSpacing: "0.12em" }}
         >
-          {open ? "CLOSE" : uploadUrlSaved ? "EDIT" : "CONFIGURE"}
+          {open ? "CLOSE" : configured ? "EDIT" : "UNLOCK"}
         </button>
       </div>
       <p
         className="hud-mono mt-1 text-[9px] font-bold"
-        style={{ color: "rgba(255,255,255,0.78)", letterSpacing: "0.08em" }}
+        style={{ color: "rgba(255,255,255,0.82)", letterSpacing: "0.08em" }}
       >
-        {uploadUrlSaved ? (
+        {configured ? (
           <>
             <span style={{ color: NEO.green }}>CONFIGURED · </span>
-            {safeUrlHost(uploadUrlSaved)}
+            {safeUrlHost(uploadUrlSaved!)}
           </>
         ) : (
           <>
             <span style={{ color: NEO.yellow }}>UL_ENDPOINT_NOT_CONFIGURED · </span>
-            Upload reads N/A until a POST endpoint is wired in. Other metrics
-            (download, latency, jitter) remain fully real.
+            Upload reads N/A until a POST endpoint is wired in. Download,
+            latency, and jitter are unaffected — they remain fully measured.
           </>
         )}
       </p>
@@ -1642,6 +2015,26 @@ function seedJitterBars(ms: number): number[] {
   return Array.from({ length: 10 }, () =>
     Math.max(3, Math.min(12, (Math.random() * base) / 2 + 3)),
   )
+}
+
+/**
+ * Bars derived from REAL latency samples. Each bar height is proportional to
+ * the spread between that sample and the rolling mean — so a quiet network
+ * produces a flat row, a noisy one produces visible variation. Padded with
+ * neutral mid-height bars when we have fewer than 10 samples so the row
+ * still looks alive while the phase fills up.
+ */
+function barsFromLatencySamples(samples: number[]): number[] {
+  if (!samples.length) return seedJitterBars(2)
+  const mean = samples.reduce((a, b) => a + b, 0) / samples.length
+  const mapped = samples.map((s) => {
+    const delta = Math.abs(s - mean)
+    // Scale to [3..12] using the deviation; cap at 12 so the tallest bar
+    // stays inside the row. Floor at 3 so bars stay visible at low jitter.
+    return Math.max(3, Math.min(12, 3 + delta / 1.5))
+  })
+  while (mapped.length < 10) mapped.unshift(6)
+  return mapped.slice(-10)
 }
 
 function rgba(hex: string, alpha: number) {
