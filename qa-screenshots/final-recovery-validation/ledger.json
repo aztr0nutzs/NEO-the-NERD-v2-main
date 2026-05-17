@@ -1,0 +1,185 @@
+{
+  "baseUrl": "http://localhost:3300",
+  "bootMillis": [
+    1345,
+    1084,
+    1050
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+    "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID"
+  ],
+  "pageErrors": [],
+  "ledger": [
+    {
+      "phase": "boot",
+      "name": "cold launch 1",
+      "status": "pass",
+      "notes": "Shell visible in 1345 ms; boot overlay completed and unmounted.",
+      "evidence": {
+        "initial": "qa-screenshots/final-recovery-validation/boot-cold-1-01-initial.png",
+        "settled": "qa-screenshots/final-recovery-validation/boot-cold-1-02-main.png"
+      }
+    },
+    {
+      "phase": "boot",
+      "name": "cold launch 2",
+      "status": "pass",
+      "notes": "Shell visible in 1084 ms; boot overlay completed and unmounted.",
+      "evidence": {
+        "initial": "qa-screenshots/final-recovery-validation/boot-cold-2-01-initial.png",
+        "settled": "qa-screenshots/final-recovery-validation/boot-cold-2-02-main.png"
+      }
+    },
+    {
+      "phase": "boot",
+      "name": "cold launch 3",
+      "status": "pass",
+      "notes": "Shell visible in 1050 ms; boot overlay completed and unmounted.",
+      "evidence": {
+        "initial": "qa-screenshots/final-recovery-validation/boot-cold-3-01-initial.png",
+        "settled": "qa-screenshots/final-recovery-validation/boot-cold-3-02-main.png"
+      }
+    },
+    {
+      "phase": "boot",
+      "name": "background gating after boot",
+      "status": "pass",
+      "notes": "boot overlay still present=false; bg <video>=0; bg <img poster>=1"
+    },
+    {
+      "phase": "readability",
+      "name": "Main screen",
+      "status": "pass",
+      "notes": "Captured.",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/ui-main.png"
+      }
+    },
+    {
+      "phase": "readability",
+      "name": "Network screen",
+      "status": "pass",
+      "notes": "Captured.",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/ui-network.png"
+      }
+    },
+    {
+      "phase": "readability",
+      "name": "Speed Test screen",
+      "status": "pass",
+      "notes": "Captured.",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/ui-speed-test.png"
+      }
+    },
+    {
+      "phase": "readability",
+      "name": "Voice Library screen",
+      "status": "pass",
+      "notes": "Captured.",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/ui-voices.png"
+      }
+    },
+    {
+      "phase": "readability",
+      "name": "content shade present behind main",
+      "status": "pass",
+      "notes": "ps-content-shade count=1"
+    },
+    {
+      "phase": "network-init",
+      "name": "screen escapes initializing spinner",
+      "status": "pass",
+      "notes": "header present=1, failure panel=0, spinner=0",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/network-init-settled.png"
+      }
+    },
+    {
+      "phase": "scan",
+      "name": "scan button triggers and terminates",
+      "status": "pass",
+      "notes": "Scan completed (or failed explicitly) within 0.703s.",
+      "evidence": {
+        "before": "qa-screenshots/final-recovery-validation/scan-before.png",
+        "during": "qa-screenshots/final-recovery-validation/scan-during.png",
+        "after": "qa-screenshots/final-recovery-validation/scan-after.png"
+      }
+    },
+    {
+      "phase": "scan",
+      "name": "no backend prompt on local discovery",
+      "status": "pass",
+      "notes": "backend prompt occurrences on Network screen: 0"
+    },
+    {
+      "phase": "map",
+      "name": "3D map canvas mounts",
+      "status": "pass",
+      "notes": "canvas elements on map tab: 1",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/map-after-scan.png"
+      }
+    },
+    {
+      "phase": "map",
+      "name": "device count card populated",
+      "status": "pass",
+      "notes": "DEVICES_FOUND card reads 8 (browser preview uses demo set; native build uses live NativeScanResult)",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/device-list-after-scan.png"
+      }
+    },
+    {
+      "phase": "speed",
+      "name": "phase strip + upload config affordance",
+      "status": "pass",
+      "notes": "phase-strip count=1, upload-config count=1"
+    },
+    {
+      "phase": "speed",
+      "name": "real probe → verdict banner",
+      "status": "pass",
+      "notes": "outcome=verdict-rendered; container has limited external network so the probe may complete or fail explicitly",
+      "evidence": {
+        "screenshot": "qa-screenshots/final-recovery-validation/speedtest-after-run.png"
+      }
+    },
+    {
+      "phase": "voice",
+      "name": "HEARING: live disclosure line",
+      "status": "pass",
+      "notes": "live disclosure occurrences=1"
+    },
+    {
+      "phase": "voice",
+      "name": "neural vs fallback label visible",
+      "status": "pass",
+      "notes": "neural-label=1, fallback-label=1"
+    },
+    {
+      "phase": "voice",
+      "name": "personalities screen reaches steady state",
+      "status": "pass",
+      "notes": "Captured."
+    },
+    {
+      "phase": "voice",
+      "name": "voiceQualityPreference setting visible",
+      "status": "pass",
+      "notes": "voice quality label=2, segmented options=2"
+    }
+  ]
+}
