@@ -193,6 +193,21 @@ export function SettingsScreen() {
           value={backendRuntime.engineLabel}
           color={backendRuntime.engineLabelColor}
         />
+        <Row
+          label="ACTIVE MODE"
+          value={resolveSpeechModeLabel(
+            settings.voiceQualityPreference,
+            backendRuntime.engineLabel,
+          )}
+          color={resolveSpeechModeColor(
+            settings.voiceQualityPreference,
+            backendRuntime.engineLabel,
+          )}
+        />
+        <p className="ps-mono text-[9px] uppercase tracking-[0.18em] text-white/45 px-1">
+          Realistic neural output requires provider voice mode. Native Android fallback adapts to the
+          voices installed on this device — quality varies by OEM. Browser speech is the weakest path.
+        </p>
       </SettingsSection>
 
       <SettingsSection
@@ -422,6 +437,25 @@ export function SettingsScreen() {
       />
     </div>
   )
+}
+
+function resolveSpeechModeLabel(
+  preference: "prefer-high-quality" | "fallback-only",
+  engineLabel: string,
+): string {
+  const providerLive = engineLabel === "PROVIDER READY" || engineLabel === "REMOTE PROVIDER"
+  if (preference === "fallback-only") return "STYLED FALLBACK"
+  if (providerLive) return "HIGH-QUALITY PROVIDER"
+  return "STYLED FALLBACK"
+}
+
+function resolveSpeechModeColor(
+  preference: "prefer-high-quality" | "fallback-only",
+  engineLabel: string,
+): string {
+  const providerLive = engineLabel === "PROVIDER READY" || engineLabel === "REMOTE PROVIDER"
+  if (preference === "fallback-only") return "#ff7a00"
+  return providerLive ? "#39ff14" : "#ff7a00"
 }
 
 function Row({ label, value, color }: { label: string; value: string; color: string }) {

@@ -19,6 +19,7 @@ import {
   type VoiceRuntimeCapabilities,
 } from "@/lib/voice/voice-runtime"
 import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
+import { intentForLibraryCategory } from "@/lib/voice/speechIntent"
 import { getRecommendedResponses } from "@/lib/assistant/assistantIntegrations"
 import { DEFAULT_RESPONSE_FILTERS, filterResponses } from "@/lib/responses/responseFilters"
 import { RESPONSE_CATEGORY_COUNTS, RESPONSE_CATEGORY_LIST, RESPONSE_TONE_TAGS, SYSTEM_RESPONSE_LIBRARY } from "@/lib/responses/responseLibraryData"
@@ -132,12 +133,15 @@ export function LibraryScreen() {
     setStatus("PLAYING VOICE PREVIEW")
     try {
       stopVoicePreview()
+      const intent = intentForLibraryCategory(response.category)
       await previewVoice({
         profile: activeVoice,
         text: responseDisplayText(response),
         params: voiceParams,
         mode: "auto",
         qualityPreference,
+        personalityId,
+        intent,
         onStateChange: (snapshot) => setStatus(snapshot.message),
       })
     } finally {
@@ -161,10 +165,13 @@ export function LibraryScreen() {
     }
     setBusyId(response.id)
     setStatus("GENERATING AUDIO FILE")
+    const intent = intentForLibraryCategory(response.category)
     const result = await generateProviderAudio({
       voiceId,
       text: responseDisplayText(response),
       params: voiceParams,
+      personalityId,
+      intent,
     })
     if (result.payload) {
       playAudioPayload(result.payload)

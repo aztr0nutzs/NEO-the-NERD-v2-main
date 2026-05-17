@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server"
 import { generateOpenAITts } from "@/lib/voice/ttsClient"
 import type { VoiceParams } from "@/lib/types"
+import type { SpeechIntent } from "@/lib/voice/speechIntent"
 
 interface TtsRouteBody {
   voiceId?: string
   text?: string
   params?: VoiceParams
+  personalityId?: string
+  intent?: SpeechIntent
 }
 
 const DEFAULT_PARAMS: VoiceParams = {
@@ -32,6 +35,8 @@ export async function POST(request: Request) {
       voiceId: body.voiceId,
       text: body.text.trim(),
       params: { ...DEFAULT_PARAMS, ...body.params },
+      personalityId: body.personalityId,
+      intent: body.intent,
     })
     return NextResponse.json(result)
   } catch (error) {

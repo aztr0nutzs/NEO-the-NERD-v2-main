@@ -27,6 +27,8 @@ import {
 import { DEFAULT_VOICE_FILTERS, categoryBreakdown, filterVoiceProfiles } from "@/lib/voice/voiceFilters"
 import { VOICE_CATEGORIES, VOICE_PROFILES, VOICE_TONE_TAGS, getVoiceProfile } from "@/lib/voice/voiceProfiles"
 import { availabilityLabel, voiceProfileToParams } from "@/lib/voice/voicePresets"
+import { getPreviewTextSeed } from "@/lib/voice/personalityPreviewCorpus"
+import { inferSpeechIntent } from "@/lib/voice/speechIntent"
 import {
   getUniquenessSummary,
   getVoiceAvailabilityExplanation,
@@ -52,9 +54,10 @@ export function VoicesScreen() {
   const [filters, setFilters] = useState<VoiceFilterState>(DEFAULT_VOICE_FILTERS)
   const [detailVoice, setDetailVoice] = useState<VoiceProfile | null>(null)
   const [previewId, setPreviewId] = useState<string | null>(null)
-  const [previewText, setPreviewText] = useState(
-    "Boot sequence complete. NEO online and ready to play.",
-  )
+  // Seed the preview textarea with a personality-aware greeting line so the
+  // initial preview demonstrates the active persona instead of a bland
+  // boot string. User edits take precedence — we only seed once.
+  const [previewText, setPreviewText] = useState(() => getPreviewTextSeed(personalityId))
   const [generating, setGenerating] = useState(false)
   const [playback, setPlayback] = useState<VoicePlaybackSnapshot>(IDLE_PLAYBACK_SNAPSHOT)
   const [capabilities, setCapabilities] = useState<VoiceRuntimeCapabilities>(() =>
@@ -119,12 +122,16 @@ export function VoicesScreen() {
     setPreviewId(id)
     setAudioPayload(null)
     const previewParams = id === voiceId ? voiceParams : voiceProfileToParams(id)
+    const text = previewText.trim() || voice.sampleText
+    const intent = inferSpeechIntent({ text })
     const result = await previewVoice({
       profile: voice,
-      text: previewText.trim() || voice.sampleText,
+      text,
       params: previewParams,
       mode: "auto",
       qualityPreference,
+      personalityId,
+      intent,
       onStateChange: (snapshot) => {
         setPlayback(snapshot)
         setVoiceStatus(snapshot.message)
@@ -152,7 +159,14 @@ export function VoicesScreen() {
     setGenerating(true)
     setVoiceStatus("GENERATING PREVIEW AUDIO")
     setPlayback({ state: "preparing", source: "provider", voiceId, message: "GENERATING PROVIDER AUDIO" })
-    const result = await generateProviderAudio({ voiceId, text: previewText || profile.sampleText, params: voiceParams })
+    const generateText = previewText || profile.sampleText
+    const result = await generateProviderAudio({
+      voiceId,
+      text: generateText,
+      params: voiceParams,
+      personalityId,
+      intent: inferSpeechIntent({ text: generateText }),
+    })
     if (result.payload) {
       setAudioPayload(result.payload)
       playPayload(result.payload)
@@ -317,11 +331,11 @@ export function VoicesScreen() {
           >
             HEARING:{" "}
             {providerTtsAvailable && qualityPreference === "prefer-high-quality"
-              ? "HIGH-QUALITY NEURAL VOICE"
+              ? "HIGH-QUALITY PROVIDER VOICE"
               : capabilities.nativeAndroidTtsAvailable
-                ? "ANDROID DEVICE TTS (STYLED FALLBACK)"
+                ? "STYLED ANDROID FALLBACK"
                 : capabilities.browserSpeechSupported
-                  ? "BROWSER SPEECH (STYLED FALLBACK)"
+                  ? "BROWSER SPEECH FALLBACK"
                   : "NO ENGINE AVAILABLE"}
             {" · "}
             {getProfileTruthLabel(getVoiceProfile(voiceId), capabilities)}

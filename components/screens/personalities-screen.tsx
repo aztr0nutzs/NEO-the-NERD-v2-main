@@ -19,11 +19,20 @@ import { getPersonalityProfile } from "@/lib/personality/personalityProfiles"
 import { getCachedVoiceRuntimeCapabilities, getProfileTruthLabel, previewVoice } from "@/lib/voice/voice-runtime"
 import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
+import { getPersonalityPreviewLine, type PreviewCategory } from "@/lib/voice/personalityPreviewCorpus"
 
 type PreviewState = "idle" | "speaking" | "done" | "error"
 
 const PREVIEW_RESET_MS = 2400
 const SAVED_BADGE_MS = 1800
+
+const PREVIEW_CATEGORIES: { id: PreviewCategory; label: string; intent: "greeting" | "alert" | "explanation" | "humorous-aside" | "scan-summary" }[] = [
+  { id: "greeting", label: "GREETING", intent: "greeting" },
+  { id: "alert", label: "ALERT", intent: "alert" },
+  { id: "explanation", label: "EXPLAIN", intent: "explanation" },
+  { id: "humorous-aside", label: "ASIDE", intent: "humorous-aside" },
+  { id: "scan-summary", label: "SCAN", intent: "scan-summary" },
+]
 
 export function PersonalitiesScreen() {
   const { personalityId, setPersonalityId, voiceId, setVoiceId, setScreen, settings } = useApp()
@@ -39,6 +48,7 @@ export function PersonalitiesScreen() {
   })
   const [previewState, setPreviewState] = useState<PreviewState>("idle")
   const [previewMessage, setPreviewMessage] = useState<string | null>(null)
+  const [previewCategory, setPreviewCategory] = useState<PreviewCategory>("greeting")
   // Brief "auto-saved" confirmation flashed when the user picks a personality.
   // Selection is persisted by the store immediately; this just makes the
   // invisible store write visible to the user.
@@ -86,14 +96,19 @@ export function PersonalitiesScreen() {
     if (previewState === "speaking") return
     const behavior = getPersonalityProfile(active.id)
     const voice = getVoiceProfile(behavior.voiceId)
-    const sampleResponse = generatePersonalityPreviewResponse(active.id)
+    const intent = PREVIEW_CATEGORIES.find((cat) => cat.id === previewCategory)?.intent ?? "greeting"
+    // Use the personality preview corpus when available so each personality
+    // sounds distinct, falling back to the response-engine-generated sample
+    // for any personality not yet authored in the corpus.
+    const corpusLine = getPersonalityPreviewLine(active.id, previewCategory)
+    const sampleResponse = corpusLine || generatePersonalityPreviewResponse(active.id)
     if (voice.availability === "unavailable") {
       setPreviewState("error")
       setPreviewMessage("VOICE PREVIEW UNAVAILABLE ON THIS DEVICE")
       return
     }
     setPreviewState("speaking")
-    setPreviewMessage(`SPEAKING AS ${active.name.toUpperCase()} // ${voice.name.toUpperCase()}`)
+    setPreviewMessage(`SPEAKING AS ${active.name.toUpperCase()} // ${voice.name.toUpperCase()} · ${previewCategory.toUpperCase()}`)
     try {
       const result = await previewVoice({
         profile: voice,
@@ -101,6 +116,8 @@ export function PersonalitiesScreen() {
         params: voiceProfileToParams(voice.id),
         mode: "auto",
         qualityPreference,
+        personalityId: active.id,
+        intent,
         onStateChange: (snapshot) => {
           if (snapshot.message) setPreviewMessage(snapshot.message)
         },
@@ -109,11 +126,11 @@ export function PersonalitiesScreen() {
         setPreviewState("done")
         const friendlyMode =
           result.mode === "provider-tts"
-            ? "HIGH-QUALITY NEURAL VOICE"
+            ? "HIGH-QUALITY PROVIDER VOICE"
             : result.mode === "native-android"
-              ? "ANDROID DEVICE TTS · STYLED FALLBACK"
+              ? "STYLED ANDROID FALLBACK"
               : result.mode === "browser-speech"
-                ? "BROWSER SPEECH · STYLED FALLBACK"
+                ? "BROWSER SPEECH FALLBACK"
                 : result.mode.replace("-", " ").toUpperCase()
         setPreviewMessage(`HEARD VIA ${friendlyMode}`)
       } else {
@@ -215,12 +232,49 @@ export function PersonalitiesScreen() {
           className="mt-3 rounded-lg bg-black/40 px-3 py-2"
           style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}
         >
-          <p className="ps-mono text-[9px] tracking-[0.3em] text-white/45 mb-1">
-            SAMPLE_LINE
+          <div className="flex items-center justify-between gap-2">
+            <p className="ps-mono text-[9px] tracking-[0.3em] text-white/45">
+              SAMPLE_LINE · {previewCategory.toUpperCase()}
+            </p>
+            <p
+              className="ps-mono text-[9px] uppercase tracking-[0.18em]"
+              style={{ color: "rgba(255,255,255,0.55)" }}
+              title="The live runtime label of the linked voice — Provider Distinct / Styled Android / Browser fallback."
+            >
+              {previewTruth}
+            </p>
+          </div>
+          <p className="mt-1.5 text-[13px] text-white/90 text-pretty">
+            &ldquo;{getPersonalityPreviewLine(active.id, previewCategory)}&rdquo;
           </p>
-          <p className="text-[13px] text-white/90 text-pretty">
-            &ldquo;{activeBehavior.sampleResponseText}&rdquo;
-          </p>
+        </div>
+
+        <div className="mt-3 -mx-1 ps-no-scrollbar overflow-x-auto px-1">
+          <div className="flex w-max gap-1.5">
+            {PREVIEW_CATEGORIES.map((cat) => {
+              const isActiveCategory = cat.id === previewCategory
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setPreviewCategory(cat.id)}
+                  className="shrink-0 rounded-full px-2.5 py-1 ps-mono text-[9px] tracking-[0.22em]"
+                  style={{
+                    color: isActiveCategory ? "#000" : "rgba(255,255,255,0.75)",
+                    background: isActiveCategory
+                      ? "linear-gradient(180deg, #00f0ff, #2ea3ff)"
+                      : "rgba(255,255,255,0.04)",
+                    boxShadow: isActiveCategory
+                      ? "inset 0 0 0 1px rgba(255,255,255,0.4), 0 0 10px rgba(0,240,255,0.45)"
+                      : "inset 0 0 0 1px rgba(255,255,255,0.14)",
+                  }}
+                  aria-pressed={isActiveCategory}
+                >
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
