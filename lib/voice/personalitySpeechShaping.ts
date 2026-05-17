@@ -196,8 +196,13 @@ function shapeCinematicDelivery(text: string, _profile: PersonalityProfile, _int
 function shapeStrategicDelivery(text: string, _profile: PersonalityProfile, intent: SpeechIntent): string {
   // Strategy: enumerate clauses lightly when the text contains an "or"
   // disjunction or "options" — keeps the planner cadence intact.
+  // We only insert the cadence comma when the next character is not
+  // already a punctuation mark (so "Three options:" / "or," stay intact)
+  // and when a comma is not already present in that position.
   if (intent === "explanation" || intent === "command") {
-    return text.replace(/\b(option|options)\b/gi, "$1, ").replace(/\b(or)\b/gi, "or, ")
+    return text
+      .replace(/\b(option|options)\b(?!\s*[,:;.!?])/gi, "$1,")
+      .replace(/\b(or)\b(?!\s*[,:;.!?])/gi, "$1,")
   }
   return text
 }
@@ -205,8 +210,10 @@ function shapeStrategicDelivery(text: string, _profile: PersonalityProfile, inte
 function shapeTechnicalDelivery(text: string, _profile: PersonalityProfile, _intent: SpeechIntent): string {
   // Tech Wizard: insert short stops between procedural steps so the engine
   // doesn't run sentences together. Conservative — only the most common
-  // joiners.
-  return text.replace(/\b(then|next|after that),?\s+/gi, (m) => `${m.trim()}, `)
+  // joiners, and we only add the comma when the joiner is not already
+  // followed by `,` `:` `;` etc., so "Next: open the trace" / "Then, ship"
+  // stay intact instead of becoming "Next,:" / "Then,, ship".
+  return text.replace(/\b(then|next|after that)\b(?!\s*[,:;.!?])/gi, "$1,")
 }
 
 function shapeWarmDelivery(text: string, _profile: PersonalityProfile, intent: SpeechIntent): string {

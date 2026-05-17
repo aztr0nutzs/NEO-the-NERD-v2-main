@@ -23,6 +23,26 @@ const CATS: PreviewCategory[] = [
 
 const SAMPLE = "Network scan complete. Twelve devices online, no warnings."
 
+console.log("=== STRATEGIC + TECHNICAL SHAPING REGRESSIONS ===")
+const stratSamples = [
+  "Three options: fastest, safest, cheapest. Pick the priority.",
+  "Pick fast, safe, or cheap.",
+  "Choose options and constraints.",
+]
+for (const s of stratSamples) {
+  const out = applyPersonalitySpeechShaping(s, "strat", "explanation")
+  console.log(`  STRAT IN : ${s}\n  STRAT OUT: ${out.text}\n`)
+}
+const techSamples = [
+  "Reproduce the failure. Next, isolate the smallest failing unit. Then, ship the patch.",
+  "Trace the logs. Then dig into the symptom. After that test the fix.",
+  "Capture the error. Next: open the stack trace.",
+]
+for (const s of techSamples) {
+  const out = applyPersonalitySpeechShaping(s, "wizard", "explanation")
+  console.log(`  TECH IN : ${s}\n  TECH OUT: ${out.text}\n`)
+}
+
 console.log("=== PERSONALITY SHAPING: SARCASTIC NUANCE ===")
 const sarcasticSamples = [
   "Boot complete. Devices online. Try not to break anything important today.",
