@@ -4,7 +4,8 @@ import { Capacitor, registerPlugin } from "@capacitor/core"
 import type { VoiceParams } from "@/lib/types"
 import type { NativeVoiceResolution, VoiceProfile } from "./types"
 import { VOICE_PROFILES } from "./voiceProfiles"
-import { buildStyledVoiceSpeech } from "./voiceStyle"
+import { prepareSpeechForDelivery } from "./speechPreparation"
+import type { SpeechIntent } from "./speechIntent"
 
 export interface NativeTtsAvailability {
   available: boolean
@@ -70,12 +71,20 @@ export async function speakWithAndroidNativeTts(options: {
   text: string
   profile: VoiceProfile
   params: VoiceParams
+  personalityId?: string
+  intent?: SpeechIntent
 }): Promise<NativeTtsSpeakResult> {
   const availability = await waitForAndroidNativeTtsReady()
   if (!availability.available || !availability.ready) {
     return { ok: false, message: availability.message ?? "Android TTS engine not ready." }
   }
-  const speech = buildStyledVoiceSpeech(options.profile, options.text, options.params)
+  const speech = prepareSpeechForDelivery({
+    voice: options.profile,
+    text: options.text,
+    params: options.params,
+    personalityId: options.personalityId,
+    intent: options.intent,
+  })
   const voiceName = await selectAndroidNativeVoiceName(options.profile)
   return neoTts.speak({
     text: speech.text,

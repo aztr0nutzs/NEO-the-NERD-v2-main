@@ -45,6 +45,7 @@ import {
   stopAndroidNativeTts,
 } from "./native-tts-bridge"
 import { getVoiceTruthLabel } from "./voiceUniqueness"
+import type { SpeechIntent } from "./speechIntent"
 
 // -----------------------------------------------------------------------------
 // Capability model
@@ -94,6 +95,16 @@ export interface VoicePreviewRequest {
    * `prefer-high-quality` (`undefined` is treated as the default).
    */
   qualityPreference?: VoiceQualityPreference
+  /**
+   * Optional personality id active at the time of speech. Drives the
+   * personality-aware delivery shaping layer (cadence cues, opener
+   * framing) and the provider-side persona instruction string. Pass
+   * `undefined` to skip personality shaping (e.g. raw voice library
+   * preview where no persona is intended).
+   */
+  personalityId?: string
+  /** Optional spoken-delivery intent — sharpens cadence + provider hints. */
+  intent?: SpeechIntent
   onStateChange?: (snapshot: VoicePlaybackSnapshot) => void
 }
 
@@ -434,6 +445,8 @@ export async function previewVoice(
       profile: request.profile,
       text: request.text,
       params: request.params,
+      personalityId: request.personalityId,
+      intent: request.intent,
       onStateChange: request.onStateChange,
     })
     return { mode: "browser-speech", ok }
@@ -468,6 +481,8 @@ async function previewViaNativeAndroidTts(
     text: request.text.trim() || request.profile.sampleLine,
     profile: request.profile,
     params: request.params,
+    personalityId: request.personalityId,
+    intent: request.intent,
   })
 
   if (!result.ok) {
@@ -505,6 +520,8 @@ async function previewViaProvider(
     voiceId: request.profile.id,
     text: request.text,
     params: request.params,
+    personalityId: request.personalityId,
+    intent: request.intent,
   })
 
   if (!transport.payload) {
@@ -569,6 +586,8 @@ export async function generateProviderAudio(request: {
   voiceId: string
   text: string
   params: VoiceParams
+  personalityId?: string
+  intent?: SpeechIntent
 }): Promise<GenerateProviderAudioResult> {
   const transport = await postTtsPreview(request)
   if (transport.payload) {

@@ -1,5 +1,7 @@
 import type { VoiceParams } from "@/lib/types"
 import type { VoiceProfile, VoiceToneProfile } from "./types"
+import type { SpeechIntent } from "./speechIntent"
+import { describePersonalityForProvider } from "./personalitySpeechShaping"
 
 /**
  * Engine-ready speech payload derived from a voice profile + the user's live
@@ -117,6 +119,13 @@ function shapeSpeechTextForProfile(profile: VoiceProfile, text: string) {
   }
   if (id === "prankster" || id === "snark") {
     const punchline = id === "snark" ? "...obviously." : "...probably."
+    // Skip when an upstream layer (personalitySpeechShaping for the Sarcastic
+    // Sidekick / Chaotic Prankster personalities) has already appended an
+    // "obviously" / "probably" payoff. Matches both the unicode "…" and the
+    // ASCII "..." dialect so the personality and voice layers cannot stack.
+    if (/(obviously|probably|shockingly|somehow|sure thing)\s*\.?\s*$/i.test(normalized)) {
+      return normalized
+    }
     return normalized.endsWith("!") || normalized.endsWith(".")
       ? `${normalized} ${punchline}`
       : `${normalized}, ${punchline}`
@@ -211,16 +220,33 @@ const CADENCE_INSTRUCTION: Record<string, string> = {
   languid: "Use a slow, languid cadence with long pauses and trailing endings.",
 }
 
+export interface ProviderInstructionContext {
+  /** Active personality at speech time — drives persona delivery hint. */
+  personalityId?: string
+  /** Spoken-delivery intent (greeting, alert, joke, etc.). */
+  intent?: SpeechIntent
+}
+
 /**
  * Build the full provider instruction string for a profile, composing tone,
- * authored style prompt, emotional instructions, cadence, and authority cues.
- * This is the single source of truth used by the OpenAI TTS path.
+ * authored style prompt, emotional instructions, cadence, authority cues,
+ * and (when provided) the active personality + spoken-delivery intent.
+ *
+ * Order: persona context → voice tone → voice style → voice emotion →
+ * cadence → authority → user-level emotion slider instruction. The neural
+ * provider weights earlier parts higher, so the personality + intent
+ * framing lands first for chat / vault playback, while pure voice library
+ * previews (no personality, no intent) fall through to the voice-only
+ * instruction set unchanged.
  */
 export function buildProviderInstructions(
   profile: VoiceProfile,
   emotionInstruction: string,
+  context: ProviderInstructionContext = {},
 ): string {
   const parts: string[] = []
+  const persona = describePersonalityForProvider(context.personalityId, context.intent ?? "default")
+  if (persona) parts.push(persona)
   parts.push(toneInstructions(profile))
   if (profile.stylePrompt) parts.push(profile.stylePrompt)
   if (profile.emotionalInstructions) parts.push(profile.emotionalInstructions)

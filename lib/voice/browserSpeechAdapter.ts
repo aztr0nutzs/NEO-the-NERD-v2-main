@@ -3,7 +3,8 @@
 import type { VoiceParams } from "@/lib/types"
 import type { VoiceProfile } from "./types"
 import type { VoicePlaybackSnapshot } from "./voicePlayback"
-import { buildStyledVoiceSpeech } from "./voiceStyle"
+import { prepareSpeechForDelivery } from "./speechPreparation"
+import type { SpeechIntent } from "./speechIntent"
 
 type PlaybackListener = (snapshot: VoicePlaybackSnapshot) => void
 
@@ -11,6 +12,8 @@ interface BrowserSpeechRequest {
   profile: VoiceProfile
   text: string
   params: VoiceParams
+  personalityId?: string
+  intent?: SpeechIntent
   onStateChange?: PlaybackListener
 }
 
@@ -43,6 +46,8 @@ export async function speakWithBrowserSpeech({
   profile,
   text,
   params,
+  personalityId,
+  intent,
   onStateChange,
 }: BrowserSpeechRequest) {
   if (!isBrowserSpeechSupported()) {
@@ -55,7 +60,13 @@ export async function speakWithBrowserSpeech({
     return false
   }
 
-  const speech = buildStyledVoiceSpeech(profile, text, params)
+  const speech = prepareSpeechForDelivery({
+    voice: profile,
+    text,
+    params,
+    personalityId,
+    intent,
+  })
   stopBrowserSpeech()
 
   onStateChange?.({

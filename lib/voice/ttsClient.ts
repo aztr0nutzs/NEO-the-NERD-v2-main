@@ -1,6 +1,8 @@
 import type { VoiceParams } from "@/lib/types"
 import { VOICE_PROFILES, getVoiceProfile } from "./voiceProfiles"
-import { buildProviderInstructions, buildStyledVoiceSpeech } from "./voiceStyle"
+import { buildProviderInstructions } from "./voiceStyle"
+import { prepareSpeechForDelivery } from "./speechPreparation"
+import type { SpeechIntent } from "./speechIntent"
 
 export interface VoiceProviderConfig {
   providerVoiceId: string
@@ -17,6 +19,10 @@ export interface TtsRequest {
   voiceId: string
   text: string
   params: VoiceParams
+  /** Optional active personality id — shapes spoken delivery + provider hints. */
+  personalityId?: string
+  /** Optional spoken-delivery intent — sharpens provider hints. */
+  intent?: SpeechIntent
 }
 
 export interface TtsResult {
@@ -71,9 +77,17 @@ export function emotionToInstructions(emotion: number) {
   return "Read clearly with balanced emotion and a polished robot-companion tone."
 }
 
-function providerInstructions(voiceId: string, emotion: number) {
+function providerInstructions(
+  voiceId: string,
+  emotion: number,
+  personalityId?: string,
+  intent?: SpeechIntent,
+) {
   const profile = getVoiceProfile(voiceId)
-  return buildProviderInstructions(profile, emotionToInstructions(emotion))
+  return buildProviderInstructions(profile, emotionToInstructions(emotion), {
+    personalityId,
+    intent,
+  })
 }
 
 export async function generateOpenAITts(request: TtsRequest): Promise<TtsResult> {
@@ -83,7 +97,13 @@ export async function generateOpenAITts(request: TtsRequest): Promise<TtsResult>
   const config = getVoiceProviderConfig(request.voiceId)
   if (!config?.available) throw new Error("Selected voice is not available for TTS.")
   const profile = getVoiceProfile(request.voiceId)
-  const speech = buildStyledVoiceSpeech(profile, request.text, request.params)
+  const speech = prepareSpeechForDelivery({
+    voice: profile,
+    text: request.text,
+    params: request.params,
+    personalityId: request.personalityId,
+    intent: request.intent,
+  })
 
   const response = await fetch("https://api.openai.com/v1/audio/speech", {
     method: "POST",
@@ -97,7 +117,12 @@ export async function generateOpenAITts(request: TtsRequest): Promise<TtsResult>
       input: speech.text.slice(0, 4000),
       response_format: "mp3",
       speed: rateToProviderValue(speech.rate),
-      instructions: providerInstructions(request.voiceId, request.params.emotion),
+      instructions: providerInstructions(
+        request.voiceId,
+        request.params.emotion,
+        request.personalityId,
+        request.intent,
+      ),
     }),
   })
 

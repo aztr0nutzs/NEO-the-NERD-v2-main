@@ -14,6 +14,7 @@ import { getRecommendedGameInvites, getRecommendedResponses, getRecommendedVoice
 import { previewVoice } from "@/lib/voice/voice-runtime"
 import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
 import { voiceProfileToParams } from "@/lib/voice/voicePresets"
+import { inferSpeechIntent } from "@/lib/voice/speechIntent"
 
 const MODES: { id: ConversationMode; accent: string }[] = [
   { id: "Helpful Assistant", accent: "#00f0ff" },
@@ -209,17 +210,20 @@ export function ChatScreen() {
   }, [chatSendState, messages.length, settings.autoScroll])
 
 
-  const speakChatMessage = useCallback(async (text: string) => {
+  const speakChatMessage = useCallback(async (text: string, category?: ResponseCategory) => {
     if (!text.trim()) return
     const profile = getVoiceProfile(voiceId)
+    const intent = inferSpeechIntent({ text, category, conversationMode })
     await previewVoice({
       profile,
       text,
       params: voiceProfileToParams(voiceId),
       mode: "auto",
       qualityPreference: settings.voiceQualityPreference,
+      personalityId,
+      intent,
     })
-  }, [settings.voiceQualityPreference, voiceId])
+  }, [conversationMode, personalityId, settings.voiceQualityPreference, voiceId])
 
   const handleSend = (override?: string) => {
     const text = override ?? input
@@ -299,7 +303,7 @@ export function ChatScreen() {
               msg={m}
               onPlay={(msg) => {
                 if (msg.role === "assistant") {
-                  speakChatMessage(msg.text).catch(() => {})
+                  speakChatMessage(msg.text, msg.category).catch(() => {})
                 }
               }}
               onCopy={(msg) => {

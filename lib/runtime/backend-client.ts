@@ -15,6 +15,7 @@ import type {
   AssistantChatApiResponse,
 } from "@/lib/assistant/providerTypes";
 import type { VoiceParams } from "@/lib/types";
+import type { SpeechIntent } from "@/lib/voice/speechIntent";
 import { runAssistantLocally } from "@/lib/assistant/assistantLocalRuntime";
 import { getBackendConfig, resolveBackendUrl } from "./backend-config";
 import {
@@ -40,6 +41,8 @@ export interface TtsPreviewRequest {
   voiceId: string;
   text: string;
   params: VoiceParams;
+  personalityId?: string;
+  intent?: SpeechIntent;
 }
 
 export interface TtsPreviewPayload {
