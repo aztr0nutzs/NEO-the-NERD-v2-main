@@ -33,7 +33,7 @@ function avoidDoublePunct(input: string): string {
     .replace(/\.{4,}/g, "...")
     .replace(/!+\?/g, "?!")
     .replace(/\?!+/g, "?!")
-    .replace(/(\s|^)([.,!?])\s*\1/g, "$1$2")
+    .replace(/([.,!?])\s*\1+/g, "$1")
 }
 
 /**
@@ -112,6 +112,12 @@ function shapeSarcasticDelivery(text: string, _profile: PersonalityProfile, inte
   // payoff tag ("…obviously"), insert the beat directly before it.
   const trimmed = text.replace(/!+/g, ".").trim()
   if (/(obviously|shockingly|somehow|sure thing)\s*\.?$/i.test(trimmed)) {
+    // If the payoff word is already preceded by an ellipsis beat ("…" or
+    // "..."), leave the line alone — re-shaping it would produce
+    // "… … obviously." which reads as a stutter.
+    if (/(?:…|\.\.\.)\s+(?:obviously|shockingly|somehow|sure thing)\s*\.?$/i.test(trimmed)) {
+      return trimmed
+    }
     return trimmed.replace(/\s*\.?\s*$/, "").replace(/\s+(\w+)\s*\.?$/, " … $1.")
   }
   // Find the final sentence and insert a small beat marker. Avoids
@@ -123,7 +129,14 @@ function shapeSarcasticDelivery(text: string, _profile: PersonalityProfile, inte
     return sentences.join(" ")
   }
   // Single-sentence path: add a soft tail when the intent invites it.
+  // Skip when the snark/prankster voice-profile shaper will append its
+  // own "...obviously." / "...probably." tag downstream — we detect that
+  // by inspecting an existing trailing payoff word so we never produce
+  // "… obviously. ...obviously."
   if (intent === "joke" || intent === "humorous-aside") {
+    if (/(obviously|probably|shockingly|somehow|sure thing)\b/i.test(trimmed)) {
+      return SAFE_TAIL_SET.test(trimmed) ? trimmed : `${trimmed}.`
+    }
     const stem = SAFE_TAIL_SET.test(trimmed) ? trimmed.replace(/[.!?]+$/, "") : trimmed
     return `${stem}, … obviously.`
   }
@@ -140,7 +153,7 @@ function shapeEnergeticDelivery(text: string, _profile: PersonalityProfile, inte
   return text.replace(/\. (?=[A-Z])/g, "! ")
 }
 
-function shapeArcadeDelivery(text: string, _profile: PersonalityProfile, intent: SpeechIntent): string {
+function shapeArcadeDelivery(text: string, _profile: PersonalityProfile, _intent: SpeechIntent): string {
   // Arcade / game master: short punchy bursts. Strip a trailing period
   // and replace with an exclamation; convert mid-sentence periods (but
   // not ellipses) into exclamation+space so the engine reads each clause
@@ -148,9 +161,6 @@ function shapeArcadeDelivery(text: string, _profile: PersonalityProfile, intent:
   let out = text.replace(/(?<!\.)\.(?!\.)\s+(?=[A-Z])/g, "! ")
   out = out.replace(/!{2,}/g, "!")
   const stripped = trimTrailingPunct(out)
-  if (intent === "alert") {
-    return `${stripped}!`
-  }
   return `${stripped}!`
 }
 

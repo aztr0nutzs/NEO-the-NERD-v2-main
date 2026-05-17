@@ -28,9 +28,24 @@ const sarcasticSamples = [
   "Boot complete. Devices online. Try not to break anything important today.",
   "This is a great plan, obviously.",
   "Network is healthy.",
+  // Doubles-up regression: if the snark personality has appended its tail,
+  // the snark voice profile must NOT re-append "...obviously.".
+  "Network is healthy, … obviously.",
 ]
 for (const s of sarcasticSamples) {
   const out = applyPersonalitySpeechShaping(s, "snark", "joke")
+  console.log(`  IN : ${s}\n  OUT: ${out.text}\n`)
+}
+
+console.log("=== AVOID-DOUBLE-PUNCT REGRESSION ===")
+const dupSamples = [
+  "Hello..  World.",
+  "Wait,, what?",
+  "Stop!! Now!!",
+  "Fine. Then we go.",
+]
+for (const s of dupSamples) {
+  const out = applyPersonalitySpeechShaping(s, "genius", "default")
   console.log(`  IN : ${s}\n  OUT: ${out.text}\n`)
 }
 

@@ -119,6 +119,13 @@ function shapeSpeechTextForProfile(profile: VoiceProfile, text: string) {
   }
   if (id === "prankster" || id === "snark") {
     const punchline = id === "snark" ? "...obviously." : "...probably."
+    // Skip when an upstream layer (personalitySpeechShaping for the Sarcastic
+    // Sidekick / Chaotic Prankster personalities) has already appended an
+    // "obviously" / "probably" payoff. Matches both the unicode "…" and the
+    // ASCII "..." dialect so the personality and voice layers cannot stack.
+    if (/(obviously|probably|shockingly|somehow|sure thing)\s*\.?\s*$/i.test(normalized)) {
+      return normalized
+    }
     return normalized.endsWith("!") || normalized.endsWith(".")
       ? `${normalized} ${punchline}`
       : `${normalized}, ${punchline}`
