@@ -87,6 +87,16 @@ export interface VoiceParams {
   emotion: number
 }
 
+/**
+ * User-facing voice quality preference. Determines whether the voice
+ * runtime is allowed to pick the high-quality provider TTS path or
+ * must stay on the device-local fallback (native Android TextToSpeech
+ * or, in browsers, SpeechSynthesis). Default is "prefer-high-quality"
+ * because provider TTS is materially more realistic than fallback —
+ * we do not want to hide it behind a setting the user never finds.
+ */
+export type VoiceQualityPreference = "prefer-high-quality" | "fallback-only"
+
 export interface AssistantSettings {
   memoryEnabled: boolean
   randomGameInvites: boolean
@@ -114,6 +124,7 @@ export interface AssistantSettings {
   reducedMotion: boolean
   backgroundService: boolean
   debugMode: boolean
+  voiceQualityPreference: VoiceQualityPreference
   permissions: Record<CapabilityId, CapabilityState>
   onboarding: OnboardingState
   entitlement: EntitlementState

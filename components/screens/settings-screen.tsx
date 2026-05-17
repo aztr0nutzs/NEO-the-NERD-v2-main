@@ -154,7 +154,7 @@ export function SettingsScreen() {
 
       <SettingsSection
         title="Voice Settings"
-        description="Default TTS routing"
+        description="Voice quality + TTS routing"
         icon={Mic}
         accent="pink"
       >
@@ -167,6 +167,27 @@ export function SettingsScreen() {
             if (v) setVoiceId(v.id)
           }}
         />
+        <SegmentedSelect
+          label="Voice quality"
+          value={
+            settings.voiceQualityPreference === "fallback-only"
+              ? "FALLBACK ONLY"
+              : "PREFER HIGH-QUALITY"
+          }
+          options={["PREFER HIGH-QUALITY", "FALLBACK ONLY"]}
+          onChange={(label) =>
+            updateSettings({
+              voiceQualityPreference:
+                label === "FALLBACK ONLY" ? "fallback-only" : "prefer-high-quality",
+            })
+          }
+          color="#ff2d9c"
+        />
+        <p className="ps-mono text-[9px] uppercase tracking-[0.18em] text-white/45 px-1">
+          {settings.voiceQualityPreference === "fallback-only"
+            ? "Locked to local device TTS (Android engine or browser). Realism depends on the device; provider voice is skipped even if available."
+            : "Uses the high-quality neural provider voice when the backend is reachable. Falls back to local Android / browser TTS otherwise — that path will sound more synthetic."}
+        </p>
         <Row
           label="TTS ENGINE"
           value={backendRuntime.engineLabel}

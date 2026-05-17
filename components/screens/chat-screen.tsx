@@ -217,8 +217,9 @@ export function ChatScreen() {
       text,
       params: voiceProfileToParams(voiceId),
       mode: "auto",
+      qualityPreference: settings.voiceQualityPreference,
     })
-  }, [voiceId])
+  }, [settings.voiceQualityPreference, voiceId])
 
   const handleSend = (override?: string) => {
     const text = override ?? input

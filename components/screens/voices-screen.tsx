@@ -46,7 +46,9 @@ export function VoicesScreen() {
     recentVoiceIds,
     toggleVoiceFavorite,
     personalityId,
+    settings,
   } = useApp()
+  const qualityPreference = settings.voiceQualityPreference
   const [filters, setFilters] = useState<VoiceFilterState>(DEFAULT_VOICE_FILTERS)
   const [detailVoice, setDetailVoice] = useState<VoiceProfile | null>(null)
   const [previewId, setPreviewId] = useState<string | null>(null)
@@ -122,6 +124,7 @@ export function VoicesScreen() {
       text: previewText.trim() || voice.sampleText,
       params: previewParams,
       mode: "auto",
+      qualityPreference,
       onStateChange: (snapshot) => {
         setPlayback(snapshot)
         setVoiceStatus(snapshot.message)
@@ -177,7 +180,7 @@ export function VoicesScreen() {
           <span className="text-white/80">LIBRARY</span>
         </h2>
         <p className="mt-1 text-[12px] text-white/55 text-pretty">
-          {VOICE_PROFILES.length} profiles loaded. Provider distinct voices use mapped provider engines; Android previews are styled TTS unless a provider path is active.
+          {VOICE_PROFILES.length} profiles loaded. <span style={{ color: "#39ff14" }}>High-quality neural voices</span> require a configured backend and sound the most realistic. Without it, NEO routes to the local Android engine — same words, but the underlying timbre is whatever your device ships with.
         </p>
       </header>
 
@@ -219,7 +222,11 @@ export function VoicesScreen() {
             type="button"
             onClick={handleGenerate}
             disabled={generating || !providerTtsAvailable}
-            title={providerTtsAvailable ? undefined : "Provider TTS not available in this runtime"}
+            title={
+              providerTtsAvailable
+                ? "Render this voice through the high-quality neural TTS provider"
+                : "High-quality neural voice requires a configured backend"
+            }
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-2 ps-mono text-[10px] tracking-[0.25em]"
             style={{
               color:
@@ -229,10 +236,10 @@ export function VoicesScreen() {
             }}
           >
             {generating
-              ? "GENERATING PROVIDER AUDIO..."
+              ? "GENERATING NEURAL VOICE..."
               : providerTtsAvailable
-                ? "GENERATE PROVIDER AUDIO"
-                : "PROVIDER AUDIO UNAVAILABLE"}
+                ? "PLAY HIGH-QUALITY NEURAL VOICE"
+                : "NEURAL VOICE UNAVAILABLE · CONFIGURE BACKEND"}
           </button>
 
           <div className="mt-2 grid grid-cols-4 gap-2">
@@ -300,12 +307,34 @@ export function VoicesScreen() {
             SAVE / SHARE GENERATED AUDIO
           </button>
           <p className="mt-2 ps-mono text-[10px] tracking-[0.2em] text-white/50">{voiceStatus}</p>
-          <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
-            {getProfileTruthLabel(getVoiceProfile(voiceId), capabilities)}
+          <p
+            className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em]"
+            style={{
+              color: providerTtsAvailable && qualityPreference === "prefer-high-quality"
+                ? "rgba(57,255,20,0.85)"
+                : "rgba(255,255,255,0.55)",
+            }}
+          >
+            HEARING:{" "}
+            {providerTtsAvailable && qualityPreference === "prefer-high-quality"
+              ? "HIGH-QUALITY NEURAL VOICE"
+              : capabilities.nativeAndroidTtsAvailable
+                ? "ANDROID DEVICE TTS (STYLED FALLBACK)"
+                : capabilities.browserSpeechSupported
+                  ? "BROWSER SPEECH (STYLED FALLBACK)"
+                  : "NO ENGINE AVAILABLE"}
             {" · "}
-            speed, pitch, and volume drive the active preview engine where supported. Emotion is provider-style metadata
-            {providerTtsAvailable ? " applied by provider TTS." : "; provider TTS not active."}
+            {getProfileTruthLabel(getVoiceProfile(voiceId), capabilities)}
           </p>
+          <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
+            Speed, pitch, volume drive the active engine. Emotion is provider-style metadata
+            {providerTtsAvailable ? " applied by the neural voice." : "; neural voice is not active right now."}
+          </p>
+          {qualityPreference === "fallback-only" && providerTtsAvailable && (
+            <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,122,0,0.85)" }}>
+              VOICE QUALITY = FALLBACK ONLY · NEURAL VOICE AVAILABLE BUT SKIPPED · CHANGE IN SETTINGS → VOICE
+            </p>
+          )}
           {capabilities.nativeAndroidTtsAvailable && (
             <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em] text-white/35">
               ANDROID ENGINE VOICES: {capabilities.nativeAndroidVoiceCount || "UNKNOWN"}

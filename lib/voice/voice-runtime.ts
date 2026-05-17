@@ -52,6 +52,13 @@ import { getVoiceTruthLabel } from "./voiceUniqueness"
 
 export type VoicePreviewMode = "browser-speech" | "native-android" | "provider-tts" | "unavailable"
 
+/**
+ * Mirror of `AssistantSettings.voiceQualityPreference` — duplicated as a
+ * loose string type here so the voice runtime does not need to import the
+ * full assistant settings module (and to keep this layer renderer-agnostic).
+ */
+export type VoiceQualityPreference = "prefer-high-quality" | "fallback-only"
+
 export interface VoiceRuntimeCapabilities {
   /** Web Speech API (SpeechSynthesis) is present and usable. */
   browserSpeechSupported: boolean
@@ -81,6 +88,12 @@ export interface VoicePreviewRequest {
   params: VoiceParams
   /** Force a specific path; "auto" picks the best available. */
   mode?: "auto" | "browser-speech" | "native-android" | "provider-tts"
+  /**
+   * User's voice-quality preference. When `fallback-only`, the runtime
+   * will skip the provider path even if it is available. Default is
+   * `prefer-high-quality` (`undefined` is treated as the default).
+   */
+  qualityPreference?: VoiceQualityPreference
   onStateChange?: (snapshot: VoicePlaybackSnapshot) => void
 }
 
@@ -335,6 +348,8 @@ export async function previewVoice(
   request: VoicePreviewRequest,
 ): Promise<VoicePreviewResult> {
   const desiredMode = request.mode ?? "auto"
+  const qualityPreference: VoiceQualityPreference =
+    request.qualityPreference ?? "prefer-high-quality"
   const capabilities = await getVoiceRuntimeCapabilities(request.profile)
 
   if (request.profile.availability === "unavailable") {
@@ -347,10 +362,24 @@ export async function previewVoice(
     return { mode: "unavailable", ok: false, error: "Voice marked unavailable." }
   }
 
+  // Quality preference gate: when the user has opted to stay on the local
+  // fallback engine, we silently downgrade an "auto" decision that would
+  // otherwise pick provider TTS. Explicit `mode: "provider-tts"` still
+  // honors the caller — the setting is a preference for `auto` routing,
+  // not a hard prohibition.
+  const autoPreferredMode: VoicePreviewMode =
+    qualityPreference === "fallback-only" && capabilities.currentPreviewMode === "provider-tts"
+      ? capabilities.nativeAndroidTtsAvailable
+        ? "native-android"
+        : capabilities.browserSpeechSupported
+          ? "browser-speech"
+          : "unavailable"
+      : capabilities.currentPreviewMode
+
   // Provider-tts path
   if (
     desiredMode === "provider-tts" ||
-    (desiredMode === "auto" && capabilities.currentPreviewMode === "provider-tts")
+    (desiredMode === "auto" && autoPreferredMode === "provider-tts")
   ) {
     if (!capabilities.providerTtsAvailable) {
       const error = capabilities.remoteBackendConfigured
@@ -370,7 +399,7 @@ export async function previewVoice(
   // Native Android TextToSpeech path — the reliable local preview route for the Android app.
   if (
     desiredMode === "native-android" ||
-    (desiredMode === "auto" && capabilities.currentPreviewMode === "native-android")
+    (desiredMode === "auto" && autoPreferredMode === "native-android")
   ) {
     if (!capabilities.nativeAndroidTtsAvailable) {
       const error = "Android TTS engine is unavailable or not ready."
@@ -388,7 +417,7 @@ export async function previewVoice(
   // Browser-speech path
   if (
     desiredMode === "browser-speech" ||
-    (desiredMode === "auto" && capabilities.currentPreviewMode === "browser-speech")
+    (desiredMode === "auto" && autoPreferredMode === "browser-speech")
   ) {
     if (!capabilities.browserSpeechSupported) {
       const error = "Browser SpeechSynthesis is not supported in this WebView."
