@@ -5,6 +5,7 @@ import {
   Bell,
   Bot,
   Dices,
+  Gauge,
   History,
   Keyboard,
   Map,
@@ -29,7 +30,13 @@ import { NeonPanel } from "../neon-panel"
 import { RobotStage } from "../robot-stage"
 import { VoiceVisualizer } from "../voice-visualizer"
 import { QuickCommandChips } from "../quick-command-chips"
-import type { NetworkHealthSnapshot } from "@/lib/network/types"
+import type { NetworkHealthSnapshot, SpeedTestResult } from "@/lib/network/types"
+import {
+  NEO_PALETTE,
+  isDownloadDeltaSignificant,
+  isLatencyDeltaSignificant,
+  verdictAccentColor,
+} from "@/lib/network/speedTestThresholds"
 
 const RESPONSE_TEMPLATES: Record<string, string> = {
   "Tell a joke":
@@ -60,6 +67,7 @@ export function MainScreen() {
     networkAlerts,
     networkMonitorState,
     persistedNetworkSettings,
+    speedTestHistory,
     sendMessage,
   } = useApp()
 
@@ -97,6 +105,15 @@ export function MainScreen() {
     networkAssistantSnapshot?.status?.onlineDevices ??
     networkAssistantSnapshot?.devices.filter((device) => device.status === "online").length ??
     0
+  const latestSpeedRun = useMemo(
+    () => speedTestHistory.find((r) => r.success) ?? null,
+    [speedTestHistory],
+  )
+  const previousSpeedRun = useMemo(() => {
+    if (!latestSpeedRun) return null
+    const idx = speedTestHistory.indexOf(latestSpeedRun)
+    return speedTestHistory.slice(idx + 1).find((r) => r.success) ?? null
+  }, [latestSpeedRun, speedTestHistory])
   const networkContext = useMemo(
     () =>
       buildNetworkAssistantContext({
@@ -320,6 +337,13 @@ export function MainScreen() {
             value={topAlert ? topAlert.title : "CLEAR"}
             accent={topAlert ? "#ff2d9c" : "#39ff14"}
           />
+          <div className="col-span-2">
+            <SpeedTestSummary
+              latest={latestSpeedRun}
+              previous={previousSpeedRun}
+              onOpen={() => setScreen("speed")}
+            />
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -592,6 +616,109 @@ function MissionStat({
       </div>
       <p className="truncate ps-mono text-[12px] font-semibold tracking-wider text-white/90">{value}</p>
     </div>
+  )
+}
+
+function SpeedTestSummary({
+  latest,
+  previous,
+  onOpen,
+}: {
+  latest: SpeedTestResult | null
+  previous: SpeedTestResult | null
+  onOpen: () => void
+}) {
+  // verdictAccentColor combines download AND latency tiers (same grading
+  // the Speed Test verdict banner uses) so this dashboard glance never
+  // disagrees with the full result page. NEO_PALETTE is the shared
+  // neon palette — no duplicated hex strings here.
+  const accent = verdictAccentColor(latest)
+  if (!latest) {
+    return (
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.97 }}
+        onClick={onOpen}
+        className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-left"
+        style={{ boxShadow: `inset 0 0 0 1px ${accent}48` }}
+      >
+        <div className="flex items-center gap-2">
+          <Gauge
+            className="h-4 w-4"
+            style={{ color: accent, filter: `drop-shadow(0 0 6px ${accent})` }}
+          />
+          <div className="leading-tight">
+            <p className="ps-mono text-[9px] tracking-[0.22em] text-white/45">
+              SPEED_TEST
+            </p>
+            <p className="ps-mono text-[11px] tracking-wider text-white/85">
+              No probe yet — run one to baseline this link.
+            </p>
+          </div>
+        </div>
+        <ChevronRight className="h-4 w-4 text-white/45" />
+      </motion.button>
+    )
+  }
+  const dlDelta =
+    previous && previous.success ? latest.downloadMbps - previous.downloadMbps : null
+  const latDelta =
+    previous && previous.success ? latest.latencyMs - previous.latencyMs : null
+  const dlDeltaSignificant = isDownloadDeltaSignificant(dlDelta)
+  const latDeltaSignificant = isLatencyDeltaSignificant(latDelta)
+  return (
+    <motion.button
+      type="button"
+      whileTap={{ scale: 0.97 }}
+      onClick={onOpen}
+      className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-black/45 px-3 py-2.5 text-left"
+      style={{ boxShadow: `inset 0 0 0 1px ${accent}55` }}
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <Gauge
+          className="h-4 w-4 shrink-0"
+          style={{ color: accent, filter: `drop-shadow(0 0 6px ${accent})` }}
+        />
+        <div className="min-w-0 leading-tight">
+          <p className="ps-mono text-[9px] tracking-[0.22em] text-white/45">
+            SPEED_TEST · LAST_RUN
+          </p>
+          <p className="truncate ps-mono text-[12px] font-semibold tracking-wider" style={{ color: accent }}>
+            {latest.downloadMbps.toFixed(1)} Mbps DL · {Math.round(latest.latencyMs)} ms LAT
+            {latest.uploadMbps !== null ? ` · ${latest.uploadMbps.toFixed(1)} Mbps UL` : " · UL N/A"}
+          </p>
+          {(dlDeltaSignificant || latDeltaSignificant) && (
+            <p className="ps-mono text-[9px] tracking-[0.2em] text-white/60">
+              {dlDeltaSignificant && (
+                <span
+                  style={{
+                    color: (dlDelta ?? 0) > 0 ? NEO_PALETTE.green : NEO_PALETTE.pink,
+                  }}
+                >
+                  Δ DL {(dlDelta ?? 0) > 0 ? "+" : ""}
+                  {(dlDelta ?? 0).toFixed(1)} Mbps
+                </span>
+              )}
+              {dlDeltaSignificant && latDeltaSignificant && (
+                <span className="text-white/30"> · </span>
+              )}
+              {latDeltaSignificant && (
+                <span
+                  style={{
+                    // Latency: lower is better — invert the polarity.
+                    color: (latDelta ?? 0) < 0 ? NEO_PALETTE.green : NEO_PALETTE.pink,
+                  }}
+                >
+                  Δ LAT {(latDelta ?? 0) > 0 ? "+" : ""}
+                  {Math.round(latDelta ?? 0)} ms
+                </span>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+      <ChevronRight className="h-4 w-4 shrink-0 text-white/45" />
+    </motion.button>
   )
 }
 
