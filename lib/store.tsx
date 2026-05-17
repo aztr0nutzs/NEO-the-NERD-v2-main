@@ -186,6 +186,10 @@ const DEFAULT_SETTINGS: AssistantSettings = {
   reducedMotion: false,
   backgroundService: false,
   debugMode: false,
+  // Default: prefer the high-quality neural provider voice whenever it
+  // is reachable. Users can flip to fallback-only in Settings if they
+  // want strictly device-local TTS for cost / offline / privacy reasons.
+  voiceQualityPreference: "prefer-high-quality",
   permissions: {
     microphone: "unknown",
     notifications: "unknown",

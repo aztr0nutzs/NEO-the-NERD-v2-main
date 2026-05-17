@@ -26,7 +26,8 @@ const PREVIEW_RESET_MS = 2400
 const SAVED_BADGE_MS = 1800
 
 export function PersonalitiesScreen() {
-  const { personalityId, setPersonalityId, voiceId, setVoiceId, setScreen } = useApp()
+  const { personalityId, setPersonalityId, voiceId, setVoiceId, setScreen, settings } = useApp()
+  const qualityPreference = settings.voiceQualityPreference
   const [preview, setPreview] = useState<string | null>(null)
   const [custom, setCustom] = useState({
     humor: 60,
@@ -99,13 +100,22 @@ export function PersonalitiesScreen() {
         text: sampleResponse,
         params: voiceProfileToParams(voice.id),
         mode: "auto",
+        qualityPreference,
         onStateChange: (snapshot) => {
           if (snapshot.message) setPreviewMessage(snapshot.message)
         },
       })
       if (result.ok) {
         setPreviewState("done")
-        setPreviewMessage(`PLAYED VIA ${result.mode.replace("-", " ").toUpperCase()}`)
+        const friendlyMode =
+          result.mode === "provider-tts"
+            ? "HIGH-QUALITY NEURAL VOICE"
+            : result.mode === "native-android"
+              ? "ANDROID DEVICE TTS · STYLED FALLBACK"
+              : result.mode === "browser-speech"
+                ? "BROWSER SPEECH · STYLED FALLBACK"
+                : result.mode.replace("-", " ").toUpperCase()
+        setPreviewMessage(`HEARD VIA ${friendlyMode}`)
       } else {
         setPreviewState("error")
         setPreviewMessage((result.error ?? "AUDIO UNAVAILABLE").toUpperCase())

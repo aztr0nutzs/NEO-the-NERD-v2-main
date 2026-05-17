@@ -44,7 +44,9 @@ export function LibraryScreen() {
     voiceId,
     voiceParams,
     personalityId,
+    settings,
   } = useApp()
+  const qualityPreference = settings.voiceQualityPreference
 
   const importRef = useRef<HTMLInputElement>(null)
   const [filters, setFilters] = useState<ResponseFilterState>(DEFAULT_RESPONSE_FILTERS)
@@ -135,6 +137,7 @@ export function LibraryScreen() {
         text: responseDisplayText(response),
         params: voiceParams,
         mode: "auto",
+        qualityPreference,
         onStateChange: (snapshot) => setStatus(snapshot.message),
       })
     } finally {

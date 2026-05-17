@@ -84,16 +84,98 @@ export function buildStyledVoiceSpeech(
   return { text: spoken, rate: Number(rate.toFixed(2)), pitch: Number(pitch.toFixed(2)), volume: Number(volume.toFixed(2)) }
 }
 
+/**
+ * Re-shape spoken text per profile so that on the device fallback engine
+ * (Android TextToSpeech or browser SpeechSynthesis) the personality is
+ * still audibly distinct, even though the underlying timbre is shared.
+ *
+ * Strategy:
+ *   - Per-id micro-flavor (taglines, signatures) for the high-character
+ *     profiles where it makes the personality unmistakable.
+ *   - Per-tone cadence shaping that inserts ellipses, dashes, and
+ *     period density to force the engine to lengthen or shorten pauses.
+ *   - Punctuation is the cheapest reliable way to change cadence on
+ *     SpeechSynthesis / Android TTS; we exploit it deliberately.
+ *
+ * No new content is invented if the caller passes their own text — we
+ * only top-and-tail with character-appropriate framing where it reads
+ * naturally.
+ */
 function shapeSpeechTextForProfile(profile: VoiceProfile, text: string) {
   const normalized = text.replace(/\s+/g, " ").trim()
+  if (!normalized) return normalized
+
+  // Per-id flavor first. These match the canonical provider-distinct
+  // profiles and the most-played character voices; they always win
+  // over generic tone shaping below.
   const id = profile.id
-  if (id === "commander") return normalized.replace(/\. /g, ". ").replace(/\?$/g, ". Confirm.")
-  if (id === "prankster") return normalized.endsWith("!") ? `${normalized} ...probably.` : `${normalized}! ...probably.`
+  if (id === "commander") {
+    return normalized
+      .replace(/\?$/g, ". Confirm.")
+      .replace(/\. /g, ". ")
+      .replace(/!+/g, ".")
+  }
+  if (id === "prankster" || id === "snark") {
+    const punchline = id === "snark" ? "...obviously." : "...probably."
+    return normalized.endsWith("!") || normalized.endsWith(".")
+      ? `${normalized} ${punchline}`
+      : `${normalized}, ${punchline}`
+  }
   if (id === "droid") return `Unit ready. ${normalized}`
-  if (id === "arcade-announcer" || id === "hyperdrive-host") return `${normalized} — bonus round energy engaged!`
-  if (id === "midnight-narrator" || id === "deepcore") return `${normalized} ...and the room went quiet.`
-  if (profile.toneProfile === "calm") return normalized.replace(/!/g, ".").replace(/, /g, ", ... ")
-  return normalized
+  if (id === "neon-mentor" || id === "mentor") {
+    return normalized.replace(/, /g, ", ... ").replace(/\. /g, ". ... ")
+  }
+  if (id === "arcade-announcer" || id === "hyperdrive-host" || id === "sparky") {
+    const trimmed = normalized.replace(/[.!]+$/, "")
+    return `${trimmed}!`
+  }
+  if (id === "midnight-narrator" || id === "deepcore" || id === "villain") {
+    return `${normalized} ...and the room went quiet.`
+  }
+  if (id === "glitch") {
+    // Stutter a soft consonant on a single name — gentle so it does not
+    // garble numbers or sentences. The replacement is intentionally
+    // case-insensitive but keeps the canonical "Neo" spelling so the
+    // engine reads it as one word.
+    return normalized.replace(/\bneo\b/i, "N-N-Neo")
+  }
+  if (id === "nova") {
+    if (normalized.endsWith("!") || normalized.endsWith("?")) return normalized
+    const trimmed = normalized.replace(/[.]+$/, "")
+    return `${trimmed}!`
+  }
+  if (id === "retro") {
+    return normalized.replace(/\b(ready|go|start|level|score)\b/gi, "$1.").replace(/\.\./g, ".")
+  }
+
+  // Tone-driven cadence shaping for everything else. These rules only
+  // adjust punctuation; the actual words stay intact.
+  switch (profile.toneProfile) {
+    case "calm":
+      return normalized.replace(/!/g, ".").replace(/, /g, ", ... ").replace(/\? /g, "?... ")
+    case "dramatic":
+      return normalized.replace(/, /g, "... ").replace(/\. /g, ". ... ")
+    case "sarcastic":
+      return normalized.endsWith(".") || normalized.endsWith("!")
+        ? normalized
+        : `${normalized}.`
+    case "aggressive":
+      return normalized.replace(/\. /g, "! ").replace(/\?$/g, "?!")
+    case "energetic":
+    case "playful": {
+      // Strip a trailing period/exclamation before appending a new bang
+      // so we never produce `are.!` style awkward double punctuation.
+      const trimmed = normalized.replace(/[.!]+$/, "")
+      return `${trimmed}!`
+    }
+    case "robotic":
+      // Hard stop after every clause to amplify the metered robotic feel.
+      return normalized.replace(/, /g, ". ")
+    case "retro":
+      return normalized.replace(/\.\./g, ".")
+    default:
+      return normalized
+  }
 }
 
 const TONE_INSTRUCTION: Record<VoiceToneProfile, string> = {
