@@ -16,15 +16,38 @@ served at runtime as:
 /prankstar/sounds/<category_folder>/<filename>
 ```
 
-## Phase-1 status
+## Current asset coverage
 
-The 369-entry catalog ported from Prankstar Lab v2 has been integrated, but
-the actual binary `.mp3` / `.ogg` / `.wav` files are **not** bundled in this
-repository. They must be sourced and dropped here in the layout expected by
-the catalog before sounds will play.
+Run the validator at any time:
 
-The Sound Library preview panel in `Prankstar Protocol` honestly surfaces
-"asset missing" state for any entry whose file is not present.
+```
+node scripts/validate-prankstar-assets.cjs
+```
 
-See `docs/PRANKSTAR_PROTOCOL_PHASE1_INTEGRATION_REPORT.md` for the full
-asset validation report.
+It reports: total catalog entries, files matched on disk, files missing,
+extra uncataloged files, and a per-category breakdown.
+
+Latest snapshot (Phase 2):
+
+| Category         | Catalog entries | Files on disk |
+| ---------------- | --------------- | ------------- |
+| ambience         | 73              | 0             |
+| animal           | 38              | 20            |
+| cartoon          | 15              | 15            |
+| creepy           | 3               | 0             |
+| funny            | 17              | 7             |
+| misc             | 56              | 0             |
+| voice            | 122             | 107           |
+| voices_fighter   | 46              | 46            |
+
+The remaining missing assets (ambience, creepy, misc, partial animal/funny,
+plus the `voice/Male/` numeric set) were not part of the GitHub Android
+upload batches and need a follow-up sourcing pass.
+
+## Quarantined files
+
+`_unmatched/` holds loose-root audio files that arrived with the asset
+drop but did not correspond to a single catalog destination (e.g. the
+secondary copy of single-destination files like `hold.ogg`). They are kept
+out of the active library to avoid false positives in validation but
+preserved on disk in case they are needed later.

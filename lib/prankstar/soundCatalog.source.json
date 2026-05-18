@@ -2147,6 +2147,25 @@
     "previewLabel": "Tap to play"
   },
   {
+    "id": "sounds_cartoon_shrek_30_cartoon_hammer_answer_341914_mp3",
+    "name": "Cartoon Hammer Answer 2",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/shrek_30-cartoon-hammer-answer-341914.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
     "id": "sounds_cartoon_freesound_community_cartoon_scream_1_6835_mp3",
     "name": "Cartoon Scream 1",
     "category": "CARTOON",

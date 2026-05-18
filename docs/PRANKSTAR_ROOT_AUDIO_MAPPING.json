@@ -1,0 +1,1694 @@
+{
+  "generatedAt": "2026-05-18T15:26:08.934Z",
+  "totalLooseFilesProcessed": 199,
+  "moved": 193,
+  "skippedAlreadyExists": 0,
+  "quarantined": 6,
+  "movesPlan": [
+    {
+      "from": "1.ogg",
+      "to": "sounds/voices_fighter/1.ogg",
+      "id": "sounds_voices_fighter_1_ogg",
+      "confidence": "best_effort",
+      "basename": "1.ogg",
+      "sizeBytes": 27488
+    },
+    {
+      "from": "1 (2).ogg",
+      "to": "sounds/voice/Female/1.ogg",
+      "id": "sounds_voice_female_1_ogg",
+      "confidence": "best_effort",
+      "basename": "1.ogg",
+      "sizeBytes": 7348
+    },
+    {
+      "from": "10.ogg",
+      "to": "sounds/voices_fighter/10.ogg",
+      "id": "sounds_voices_fighter_10_ogg",
+      "confidence": "best_effort",
+      "basename": "10.ogg",
+      "sizeBytes": 25339
+    },
+    {
+      "from": "10 (2).ogg",
+      "to": "sounds/voice/Female/10.ogg",
+      "id": "sounds_voice_female_10_ogg",
+      "confidence": "best_effort",
+      "basename": "10.ogg",
+      "sizeBytes": 8165
+    },
+    {
+      "from": "11325622-cartoon-violin-sound-effect-241389.mp3",
+      "to": "sounds/cartoon/11325622-cartoon-violin-sound-effect-241389.mp3",
+      "id": "sounds_cartoon_11325622_cartoon_violin_sound_effect_241389_mp3",
+      "confidence": "exact",
+      "basename": "11325622-cartoon-violin-sound-effect-241389.mp3",
+      "sizeBytes": 122573
+    },
+    {
+      "from": "2.ogg",
+      "to": "sounds/voices_fighter/2.ogg",
+      "id": "sounds_voices_fighter_2_ogg",
+      "confidence": "best_effort",
+      "basename": "2.ogg",
+      "sizeBytes": 23914
+    },
+    {
+      "from": "2 (2).ogg",
+      "to": "sounds/voice/Female/2.ogg",
+      "id": "sounds_voice_female_2_ogg",
+      "confidence": "best_effort",
+      "basename": "2.ogg",
+      "sizeBytes": 8194
+    },
+    {
+      "from": "3.ogg",
+      "to": "sounds/voices_fighter/3.ogg",
+      "id": "sounds_voices_fighter_3_ogg",
+      "confidence": "best_effort",
+      "basename": "3.ogg",
+      "sizeBytes": 28910
+    },
+    {
+      "from": "3 (2).ogg",
+      "to": "sounds/voice/Female/3.ogg",
+      "id": "sounds_voice_female_3_ogg",
+      "confidence": "best_effort",
+      "basename": "3.ogg",
+      "sizeBytes": 8263
+    },
+    {
+      "from": "4.ogg",
+      "to": "sounds/voices_fighter/4.ogg",
+      "id": "sounds_voices_fighter_4_ogg",
+      "confidence": "best_effort",
+      "basename": "4.ogg",
+      "sizeBytes": 28907
+    },
+    {
+      "from": "4 (2).ogg",
+      "to": "sounds/voice/Female/4.ogg",
+      "id": "sounds_voice_female_4_ogg",
+      "confidence": "best_effort",
+      "basename": "4.ogg",
+      "sizeBytes": 9082
+    },
+    {
+      "from": "46268990-funny-cat-meow-246012.mp3",
+      "to": "sounds/animal/46268990-funny-cat-meow-246012.mp3",
+      "id": "sounds_animal_46268990_funny_cat_meow_246012_mp3",
+      "confidence": "exact",
+      "basename": "46268990-funny-cat-meow-246012.mp3",
+      "sizeBytes": 71597
+    },
+    {
+      "from": "5.ogg",
+      "to": "sounds/voices_fighter/5.ogg",
+      "id": "sounds_voices_fighter_5_ogg",
+      "confidence": "best_effort",
+      "basename": "5.ogg",
+      "sizeBytes": 26879
+    },
+    {
+      "from": "5 (2).ogg",
+      "to": "sounds/voice/Female/5.ogg",
+      "id": "sounds_voice_female_5_ogg",
+      "confidence": "best_effort",
+      "basename": "5.ogg",
+      "sizeBytes": 8178
+    },
+    {
+      "from": "6.ogg",
+      "to": "sounds/voices_fighter/6.ogg",
+      "id": "sounds_voices_fighter_6_ogg",
+      "confidence": "best_effort",
+      "basename": "6.ogg",
+      "sizeBytes": 27952
+    },
+    {
+      "from": "6 (2).ogg",
+      "to": "sounds/voice/Female/6.ogg",
+      "id": "sounds_voice_female_6_ogg",
+      "confidence": "best_effort",
+      "basename": "6.ogg",
+      "sizeBytes": 9054
+    },
+    {
+      "from": "7.ogg",
+      "to": "sounds/voices_fighter/7.ogg",
+      "id": "sounds_voices_fighter_7_ogg",
+      "confidence": "best_effort",
+      "basename": "7.ogg",
+      "sizeBytes": 28731
+    },
+    {
+      "from": "7 (2).ogg",
+      "to": "sounds/voice/Female/7.ogg",
+      "id": "sounds_voice_female_7_ogg",
+      "confidence": "best_effort",
+      "basename": "7.ogg",
+      "sizeBytes": 8737
+    },
+    {
+      "from": "8.ogg",
+      "to": "sounds/voices_fighter/8.ogg",
+      "id": "sounds_voices_fighter_8_ogg",
+      "confidence": "best_effort",
+      "basename": "8.ogg",
+      "sizeBytes": 22763
+    },
+    {
+      "from": "8 (2).ogg",
+      "to": "sounds/voice/Female/8.ogg",
+      "id": "sounds_voice_female_8_ogg",
+      "confidence": "best_effort",
+      "basename": "8.ogg",
+      "sizeBytes": 7655
+    },
+    {
+      "from": "9.ogg",
+      "to": "sounds/voices_fighter/9.ogg",
+      "id": "sounds_voices_fighter_9_ogg",
+      "confidence": "best_effort",
+      "basename": "9.ogg",
+      "sizeBytes": 31142
+    },
+    {
+      "from": "9 (2).ogg",
+      "to": "sounds/voice/Female/9.ogg",
+      "id": "sounds_voice_female_9_ogg",
+      "confidence": "best_effort",
+      "basename": "9.ogg",
+      "sizeBytes": 8645
+    },
+    {
+      "from": "adlibs_sfx-my-dude-youx27re-funny-sfx-332927.mp3",
+      "to": "sounds/voice/adlibs_sfx-my-dude-youx27re-funny-sfx-332927.mp3",
+      "id": "sounds_voice_adlibs_sfx_my_dude_youx27re_funny_sfx_332927_mp3",
+      "confidence": "exact",
+      "basename": "adlibs_sfx-my-dude-youx27re-funny-sfx-332927.mp3",
+      "sizeBytes": 324726
+    },
+    {
+      "from": "alanajordan-please-verify-you-are-a-human-spoken-264398.mp3",
+      "to": "sounds/voice/alanajordan-please-verify-you-are-a-human-spoken-264398.mp3",
+      "id": "sounds_voice_alanajordan_please_verify_you_are_a_human_spoken_264398_mp3",
+      "confidence": "exact",
+      "basename": "alanajordan-please-verify-you-are-a-human-spoken-264398.mp3",
+      "sizeBytes": 203050
+    },
+    {
+      "from": "alex_jauk-oh-my-god-185142.mp3",
+      "to": "sounds/voice/alex_jauk-oh-my-god-185142.mp3",
+      "id": "sounds_voice_alex_jauk_oh_my_god_185142_mp3",
+      "confidence": "exact",
+      "basename": "alex_jauk-oh-my-god-185142.mp3",
+      "sizeBytes": 119456
+    },
+    {
+      "from": "arcade_mode.ogg",
+      "to": "sounds/voices_fighter/arcade_mode.ogg",
+      "id": "sounds_voices_fighter_arcade_mode_ogg",
+      "confidence": "exact",
+      "basename": "arcade_mode.ogg",
+      "sizeBytes": 43025
+    },
+    {
+      "from": "arunangshubanerjee-kitten-calling-for-mother-cute-meowing-sound-332671.mp3",
+      "to": "sounds/animal/arunangshubanerjee-kitten-calling-for-mother-cute-meowing-sound-332671.mp3",
+      "id": "sounds_animal_arunangshubanerjee_kitten_calling_for_mother_cute_meowing_sound_332671_mp3",
+      "confidence": "exact",
+      "basename": "arunangshubanerjee-kitten-calling-for-mother-cute-meowing-sound-332671.mp3",
+      "sizeBytes": 443151
+    },
+    {
+      "from": "arunangshubanerjee-whispered-oh-no-in-a-funny-voice-comedic-reaction-sfx-366314.mp3",
+      "to": "sounds/voice/arunangshubanerjee-whispered-oh-no-in-a-funny-voice-comedic-reaction-sfx-366314.mp3",
+      "id": "sounds_voice_arunangshubanerjee_whispered_oh_no_in_a_funny_voice_comedic_reaction_sfx_366314_mp3",
+      "confidence": "exact",
+      "basename": "arunangshubanerjee-whispered-oh-no-in-a-funny-voice-comedic-reaction-sfx-366314.mp3",
+      "sizeBytes": 61938
+    },
+    {
+      "from": "audiopapkin-big-dog-barking-300504.mp3",
+      "to": "sounds/animal/audiopapkin-big-dog-barking-300504.mp3",
+      "id": "sounds_animal_audiopapkin_big_dog_barking_300504_mp3",
+      "confidence": "exact",
+      "basename": "audiopapkin-big-dog-barking-300504.mp3",
+      "sizeBytes": 1572109
+    },
+    {
+      "from": "battle_mode.ogg",
+      "to": "sounds/voices_fighter/battle_mode.ogg",
+      "id": "sounds_voices_fighter_battle_mode_ogg",
+      "confidence": "exact",
+      "basename": "battle_mode.ogg",
+      "sizeBytes": 39334
+    },
+    {
+      "from": "begin.ogg",
+      "to": "sounds/voices_fighter/begin.ogg",
+      "id": "sounds_voices_fighter_begin_ogg",
+      "confidence": "exact",
+      "basename": "begin.ogg",
+      "sizeBytes": 30526
+    },
+    {
+      "from": "betoelguapillo-cartoon-eating-sound-effect-427528.mp3",
+      "to": "sounds/cartoon/betoelguapillo-cartoon-eating-sound-effect-427528.mp3",
+      "id": "sounds_cartoon_betoelguapillo_cartoon_eating_sound_effect_427528_mp3",
+      "confidence": "exact",
+      "basename": "betoelguapillo-cartoon-eating-sound-effect-427528.mp3",
+      "sizeBytes": 169797
+    },
+    {
+      "from": "cartoon-music-soundtrack-angry-cat-meow-513483.mp3",
+      "to": "sounds/cartoon/cartoon-music-soundtrack-angry-cat-meow-513483.mp3",
+      "id": "sounds_cartoon_cartoon_music_soundtrack_angry_cat_meow_513483_mp3",
+      "confidence": "exact",
+      "basename": "cartoon-music-soundtrack-angry-cat-meow-513483.mp3",
+      "sizeBytes": 185308
+    },
+    {
+      "from": "cartoon-music-soundtrack-bear-snarl-short-516892.mp3",
+      "to": "sounds/cartoon/cartoon-music-soundtrack-bear-snarl-short-516892.mp3",
+      "id": "sounds_cartoon_cartoon_music_soundtrack_bear_snarl_short_516892_mp3",
+      "confidence": "exact",
+      "basename": "cartoon-music-soundtrack-bear-snarl-short-516892.mp3",
+      "sizeBytes": 321691
+    },
+    {
+      "from": "championship_mode.ogg",
+      "to": "sounds/voices_fighter/championship_mode.ogg",
+      "id": "sounds_voices_fighter_championship_mode_ogg",
+      "confidence": "exact",
+      "basename": "championship_mode.ogg",
+      "sizeBytes": 41858
+    },
+    {
+      "from": "choose_your_character.ogg",
+      "to": "sounds/voices_fighter/choose_your_character.ogg",
+      "id": "sounds_voices_fighter_choose_your_character_ogg",
+      "confidence": "exact",
+      "basename": "choose_your_character.ogg",
+      "sizeBytes": 48689
+    },
+    {
+      "from": "combo.ogg",
+      "to": "sounds/voices_fighter/combo.ogg",
+      "id": "sounds_voices_fighter_combo_ogg",
+      "confidence": "exact",
+      "basename": "combo.ogg",
+      "sizeBytes": 29973
+    },
+    {
+      "from": "combo_breaker.ogg",
+      "to": "sounds/voices_fighter/combo_breaker.ogg",
+      "id": "sounds_voices_fighter_combo_breaker_ogg",
+      "confidence": "exact",
+      "basename": "combo_breaker.ogg",
+      "sizeBytes": 38291
+    },
+    {
+      "from": "congratulations.ogg",
+      "to": "sounds/voice/Female/congratulations.ogg",
+      "id": "sounds_voice_female_congratulations_ogg",
+      "confidence": "strong",
+      "basename": "congratulations.ogg",
+      "sizeBytes": 22989
+    },
+    {
+      "from": "congratulations (2).ogg",
+      "to": "sounds/voice/Male/congratulations.ogg",
+      "id": "sounds_voice_male_congratulations_ogg",
+      "confidence": "strong",
+      "basename": "congratulations.ogg",
+      "sizeBytes": 13609
+    },
+    {
+      "from": "correct.ogg",
+      "to": "sounds/voice/Female/correct.ogg",
+      "id": "sounds_voice_female_correct_ogg",
+      "confidence": "strong",
+      "basename": "correct.ogg",
+      "sizeBytes": 14173
+    },
+    {
+      "from": "correct (2).ogg",
+      "to": "sounds/voice/Male/correct.ogg",
+      "id": "sounds_voice_male_correct_ogg",
+      "confidence": "strong",
+      "basename": "correct.ogg",
+      "sizeBytes": 8642
+    },
+    {
+      "from": "deathmatch.ogg",
+      "to": "sounds/voices_fighter/deathmatch.ogg",
+      "id": "sounds_voices_fighter_deathmatch_ogg",
+      "confidence": "exact",
+      "basename": "deathmatch.ogg",
+      "sizeBytes": 32417
+    },
+    {
+      "from": "digitalstore07-funny-laughing-430381.mp3",
+      "to": "sounds/funny/digitalstore07-funny-laughing-430381.mp3",
+      "id": "sounds_funny_digitalstore07_funny_laughing_430381_mp3",
+      "confidence": "exact",
+      "basename": "digitalstore07-funny-laughing-430381.mp3",
+      "sizeBytes": 108428
+    },
+    {
+      "from": "dragon-studio-cartoon-hyena-laugh-487674.mp3",
+      "to": "sounds/cartoon/dragon-studio-cartoon-hyena-laugh-487674.mp3",
+      "id": "sounds_cartoon_dragon_studio_cartoon_hyena_laugh_487674_mp3",
+      "confidence": "exact",
+      "basename": "dragon-studio-cartoon-hyena-laugh-487674.mp3",
+      "sizeBytes": 136572
+    },
+    {
+      "from": "dragon-studio-cat-purr-sfx-482870.mp3",
+      "to": "sounds/animal/dragon-studio-cat-purr-sfx-482870.mp3",
+      "id": "sounds_animal_dragon_studio_cat_purr_sfx_482870_mp3",
+      "confidence": "exact",
+      "basename": "dragon-studio-cat-purr-sfx-482870.mp3",
+      "sizeBytes": 286562
+    },
+    {
+      "from": "dragon-studio-creepy-laugh-2-401714.mp3",
+      "to": "sounds/funny/dragon-studio-creepy-laugh-2-401714.mp3",
+      "id": "sounds_funny_dragon_studio_creepy_laugh_2_401714_mp3",
+      "confidence": "exact",
+      "basename": "dragon-studio-creepy-laugh-2-401714.mp3",
+      "sizeBytes": 62570
+    },
+    {
+      "from": "dragon-studio-dog-bark-sound-450454.mp3",
+      "to": "sounds/animal/dragon-studio-dog-bark-sound-450454.mp3",
+      "id": "sounds_animal_dragon_studio_dog_bark_sound_450454_mp3",
+      "confidence": "exact",
+      "basename": "dragon-studio-dog-bark-sound-450454.mp3",
+      "sizeBytes": 307446
+    },
+    {
+      "from": "dragon-studio-dog-barking-406629.mp3",
+      "to": "sounds/animal/dragon-studio-dog-barking-406629.mp3",
+      "id": "sounds_animal_dragon_studio_dog_barking_406629_mp3",
+      "confidence": "exact",
+      "basename": "dragon-studio-dog-barking-406629.mp3",
+      "sizeBytes": 711278
+    },
+    {
+      "from": "dragon-studio-meowing-cat-401728.mp3",
+      "to": "sounds/animal/dragon-studio-meowing-cat-401728.mp3",
+      "id": "sounds_animal_dragon_studio_meowing_cat_401728_mp3",
+      "confidence": "exact",
+      "basename": "dragon-studio-meowing-cat-401728.mp3",
+      "sizeBytes": 676651
+    },
+    {
+      "from": "feedthestraycats-kitten-sound-2-354217.mp3",
+      "to": "sounds/animal/feedthestraycats-kitten-sound-2-354217.mp3",
+      "id": "sounds_animal_feedthestraycats_kitten_sound_2_354217_mp3",
+      "confidence": "exact",
+      "basename": "feedthestraycats-kitten-sound-2-354217.mp3",
+      "sizeBytes": 710251
+    },
+    {
+      "from": "fight.ogg",
+      "to": "sounds/voices_fighter/fight.ogg",
+      "id": "sounds_voices_fighter_fight_ogg",
+      "confidence": "exact",
+      "basename": "fight.ogg",
+      "sizeBytes": 25070
+    },
+    {
+      "from": "final_round.ogg",
+      "to": "sounds/voices_fighter/final_round.ogg",
+      "id": "sounds_voices_fighter_final_round_ogg",
+      "confidence": "best_effort",
+      "basename": "final_round.ogg",
+      "sizeBytes": 43223
+    },
+    {
+      "from": "final_round (2).ogg",
+      "to": "sounds/voice/Female/final_round.ogg",
+      "id": "sounds_voice_female_final_round_ogg",
+      "confidence": "best_effort",
+      "basename": "final_round.ogg",
+      "sizeBytes": 12026
+    },
+    {
+      "from": "flawless_victory.ogg",
+      "to": "sounds/voices_fighter/flawless_victory.ogg",
+      "id": "sounds_voices_fighter_flawless_victory_ogg",
+      "confidence": "exact",
+      "basename": "flawless_victory.ogg",
+      "sizeBytes": 43381
+    },
+    {
+      "from": "flutie8211-duh-duh-duh-458701.mp3",
+      "to": "sounds/voice/flutie8211-duh-duh-duh-458701.mp3",
+      "id": "sounds_voice_flutie8211_duh_duh_duh_458701_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-duh-duh-duh-458701.mp3",
+      "sizeBytes": 236337
+    },
+    {
+      "from": "flutie8211-just-look-at-that-with-laugh-451577.mp3",
+      "to": "sounds/voice/flutie8211-just-look-at-that-with-laugh-451577.mp3",
+      "id": "sounds_voice_flutie8211_just_look_at_that_with_laugh_451577_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-just-look-at-that-with-laugh-451577.mp3",
+      "sizeBytes": 314439
+    },
+    {
+      "from": "flutie8211-leopard-frogs-croaking-410123.mp3",
+      "to": "sounds/animal/flutie8211-leopard-frogs-croaking-410123.mp3",
+      "id": "sounds_animal_flutie8211_leopard_frogs_croaking_410123_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-leopard-frogs-croaking-410123.mp3",
+      "sizeBytes": 974621
+    },
+    {
+      "from": "flutie8211-monkey-chattering-494429.mp3",
+      "to": "sounds/animal/flutie8211-monkey-chattering-494429.mp3",
+      "id": "sounds_animal_flutie8211_monkey_chattering_494429_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-monkey-chattering-494429.mp3",
+      "sizeBytes": 450156
+    },
+    {
+      "from": "flutie8211-several-monkeys-chattering-version-1-502861.mp3",
+      "to": "sounds/animal/flutie8211-several-monkeys-chattering-version-1-502861.mp3",
+      "id": "sounds_animal_flutie8211_several_monkeys_chattering_version_1_502861_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-several-monkeys-chattering-version-1-502861.mp3",
+      "sizeBytes": 449989
+    },
+    {
+      "from": "flutie8211-well-duh-female-voice-473522.mp3",
+      "to": "sounds/voice/flutie8211-well-duh-female-voice-473522.mp3",
+      "id": "sounds_voice_flutie8211_well_duh_female_voice_473522_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-well-duh-female-voice-473522.mp3",
+      "sizeBytes": 242926
+    },
+    {
+      "from": "flutie8211-well-there-goes-the-neighborhood-455531.mp3",
+      "to": "sounds/voice/flutie8211-well-there-goes-the-neighborhood-455531.mp3",
+      "id": "sounds_voice_flutie8211_well_there_goes_the_neighborhood_455531_mp3",
+      "confidence": "exact",
+      "basename": "flutie8211-well-there-goes-the-neighborhood-455531.mp3",
+      "sizeBytes": 250290
+    },
+    {
+      "from": "freesound_community-a-little-bit-drunk-76464.mp3",
+      "to": "sounds/voice/freesound_community-a-little-bit-drunk-76464.mp3",
+      "id": "sounds_voice_freesound_community_a_little_bit_drunk_76464_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-a-little-bit-drunk-76464.mp3",
+      "sizeBytes": 499917
+    },
+    {
+      "from": "freesound_community-alien-voice-102709.mp3",
+      "to": "sounds/voice/freesound_community-alien-voice-102709.mp3",
+      "id": "sounds_voice_freesound_community_alien_voice_102709_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-alien-voice-102709.mp3",
+      "sizeBytes": 527479
+    },
+    {
+      "from": "freesound_community-brains-brains-101087.mp3",
+      "to": "sounds/voice/freesound_community-brains-brains-101087.mp3",
+      "id": "sounds_voice_freesound_community_brains_brains_101087_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-brains-brains-101087.mp3",
+      "sizeBytes": 215180
+    },
+    {
+      "from": "freesound_community-broke-my-window-88754.mp3",
+      "to": "sounds/voice/freesound_community-broke-my-window-88754.mp3",
+      "id": "sounds_voice_freesound_community_broke_my_window_88754_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-broke-my-window-88754.mp3",
+      "sizeBytes": 329527
+    },
+    {
+      "from": "freesound_community-cartoon-scream-1-6835.mp3",
+      "to": "sounds/cartoon/freesound_community-cartoon-scream-1-6835.mp3",
+      "id": "sounds_cartoon_freesound_community_cartoon_scream_1_6835_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-cartoon-scream-1-6835.mp3",
+      "sizeBytes": 62459
+    },
+    {
+      "from": "freesound_community-cartoon-spin-7120.mp3",
+      "to": "sounds/cartoon/freesound_community-cartoon-spin-7120.mp3",
+      "id": "sounds_cartoon_freesound_community_cartoon_spin_7120_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-cartoon-spin-7120.mp3",
+      "sizeBytes": 115879
+    },
+    {
+      "from": "freesound_community-elf-singing-89296.mp3",
+      "to": "sounds/voice/freesound_community-elf-singing-89296.mp3",
+      "id": "sounds_voice_freesound_community_elf_singing_89296_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-elf-singing-89296.mp3",
+      "sizeBytes": 321068
+    },
+    {
+      "from": "freesound_community-funniest-thing-001-85094.mp3",
+      "to": "sounds/voice/freesound_community-funniest-thing-001-85094.mp3",
+      "id": "sounds_voice_freesound_community_funniest_thing_001_85094_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-funniest-thing-001-85094.mp3",
+      "sizeBytes": 296437
+    },
+    {
+      "from": "freesound_community-funny-evil-cartoon-voice-with-laugh-14623.mp3",
+      "to": "sounds/cartoon/freesound_community-funny-evil-cartoon-voice-with-laugh-14623.mp3",
+      "id": "sounds_cartoon_freesound_community_funny_evil_cartoon_voice_with_laugh_14623_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-funny-evil-cartoon-voice-with-laugh-14623.mp3",
+      "sizeBytes": 216544
+    },
+    {
+      "from": "freesound_community-funny-kids-5-99755.mp3",
+      "to": "sounds/funny/freesound_community-funny-kids-5-99755.mp3",
+      "id": "sounds_funny_freesound_community_funny_kids_5_99755_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-funny-kids-5-99755.mp3",
+      "sizeBytes": 247439
+    },
+    {
+      "from": "freesound_community-funny-secrect-laughing-baby-40554.mp3",
+      "to": "sounds/funny/freesound_community-funny-secrect-laughing-baby-40554.mp3",
+      "id": "sounds_funny_freesound_community_funny_secrect_laughing_baby_40554_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-funny-secrect-laughing-baby-40554.mp3",
+      "sizeBytes": 47774
+    },
+    {
+      "from": "freesound_community-funny-yay-6273.mp3",
+      "to": "sounds/voice/freesound_community-funny-yay-6273.mp3",
+      "id": "sounds_voice_freesound_community_funny_yay_6273_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-funny-yay-6273.mp3",
+      "sizeBytes": 28507
+    },
+    {
+      "from": "freesound_community-funnyah-104839.mp3",
+      "to": "sounds/voice/freesound_community-funnyah-104839.mp3",
+      "id": "sounds_voice_freesound_community_funnyah_104839_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-funnyah-104839.mp3",
+      "sizeBytes": 53316
+    },
+    {
+      "from": "freesound_community-haters-80586.mp3",
+      "to": "sounds/voice/freesound_community-haters-80586.mp3",
+      "id": "sounds_voice_freesound_community_haters_80586_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-haters-80586.mp3",
+      "sizeBytes": 285638
+    },
+    {
+      "from": "freesound_community-helium04_j008b-107461.mp3",
+      "to": "sounds/voice/freesound_community-helium04_j008b-107461.mp3",
+      "id": "sounds_voice_freesound_community_helium04_j008b_107461_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-helium04_j008b-107461.mp3",
+      "sizeBytes": 168987
+    },
+    {
+      "from": "freesound_community-is-here-to-save-you-107519.mp3",
+      "to": "sounds/voice/freesound_community-is-here-to-save-you-107519.mp3",
+      "id": "sounds_voice_freesound_community_is_here_to_save_you_107519_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-is-here-to-save-you-107519.mp3",
+      "sizeBytes": 85593
+    },
+    {
+      "from": "freesound_community-laugh-that-was-funny-104610.mp3",
+      "to": "sounds/funny/freesound_community-laugh-that-was-funny-104610.mp3",
+      "id": "sounds_funny_freesound_community_laugh_that_was_funny_104610_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-laugh-that-was-funny-104610.mp3",
+      "sizeBytes": 92644
+    },
+    {
+      "from": "freesound_community-male-voice-bum-bum-104098.mp3",
+      "to": "sounds/voice/freesound_community-male-voice-bum-bum-104098.mp3",
+      "id": "sounds_voice_freesound_community_male_voice_bum_bum_104098_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-male-voice-bum-bum-104098.mp3",
+      "sizeBytes": 101206
+    },
+    {
+      "from": "freesound_community-random-voices-full-of-nothing-23083.mp3",
+      "to": "sounds/voice/freesound_community-random-voices-full-of-nothing-23083.mp3",
+      "id": "sounds_voice_freesound_community_random_voices_full_of_nothing_23083_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-random-voices-full-of-nothing-23083.mp3",
+      "sizeBytes": 3585183
+    },
+    {
+      "from": "freesound_community-sooo-funny-82640.mp3",
+      "to": "sounds/voice/freesound_community-sooo-funny-82640.mp3",
+      "id": "sounds_voice_freesound_community_sooo_funny_82640_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-sooo-funny-82640.mp3",
+      "sizeBytes": 199010
+    },
+    {
+      "from": "freesound_community-wowowowowowowow-103214.mp3",
+      "to": "sounds/voice/freesound_community-wowowowowowowow-103214.mp3",
+      "id": "sounds_voice_freesound_community_wowowowowowowow_103214_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-wowowowowowowow-103214.mp3",
+      "sizeBytes": 419259
+    },
+    {
+      "from": "freesound_community-yay-104840.mp3",
+      "to": "sounds/voice/freesound_community-yay-104840.mp3",
+      "id": "sounds_voice_freesound_community_yay_104840_mp3",
+      "confidence": "exact",
+      "basename": "freesound_community-yay-104840.mp3",
+      "sizeBytes": 84959
+    },
+    {
+      "from": "frequencyoasis-cartoon-sound-162895.mp3",
+      "to": "sounds/cartoon/frequencyoasis-cartoon-sound-162895.mp3",
+      "id": "sounds_cartoon_frequencyoasis_cartoon_sound_162895_mp3",
+      "confidence": "exact",
+      "basename": "frequencyoasis-cartoon-sound-162895.mp3",
+      "sizeBytes": 203696
+    },
+    {
+      "from": "game_over.ogg",
+      "to": "sounds/voices_fighter/game_over.ogg",
+      "id": "sounds_voices_fighter_game_over_ogg",
+      "confidence": "best_effort",
+      "basename": "game_over.ogg",
+      "sizeBytes": 40184
+    },
+    {
+      "from": "game_over (2).ogg",
+      "to": "sounds/voice/Female/game_over.ogg",
+      "id": "sounds_voice_female_game_over_ogg",
+      "confidence": "best_effort",
+      "basename": "game_over.ogg",
+      "sizeBytes": 13610
+    },
+    {
+      "from": "go.ogg",
+      "to": "sounds/voice/Female/go.ogg",
+      "id": "sounds_voice_female_go_ogg",
+      "confidence": "strong",
+      "basename": "go.ogg",
+      "sizeBytes": 13639
+    },
+    {
+      "from": "go (2).ogg",
+      "to": "sounds/voice/Male/go.ogg",
+      "id": "sounds_voice_male_go_ogg",
+      "confidence": "strong",
+      "basename": "go.ogg",
+      "sizeBytes": 8283
+    },
+    {
+      "from": "hold.ogg",
+      "to": "sounds/voice/Male/hold.ogg",
+      "id": "sounds_voice_male_hold_ogg",
+      "confidence": "best_effort",
+      "basename": "hold.ogg",
+      "sizeBytes": 12340
+    },
+    {
+      "from": "hurry_up.ogg",
+      "to": "sounds/voice/Female/hurry_up.ogg",
+      "id": "sounds_voice_female_hurry_up_ogg",
+      "confidence": "strong",
+      "basename": "hurry_up.ogg",
+      "sizeBytes": 15682
+    },
+    {
+      "from": "hurry_up (2).ogg",
+      "to": "sounds/voice/Male/hurry_up.ogg",
+      "id": "sounds_voice_male_hurry_up_ogg",
+      "confidence": "strong",
+      "basename": "hurry_up.ogg",
+      "sizeBytes": 9445
+    },
+    {
+      "from": "iedurodrigues-eagle-scream-112940.mp3",
+      "to": "sounds/animal/iedurodrigues-eagle-scream-112940.mp3",
+      "id": "sounds_animal_iedurodrigues_eagle_scream_112940_mp3",
+      "confidence": "exact",
+      "basename": "iedurodrigues-eagle-scream-112940.mp3",
+      "sizeBytes": 100347
+    },
+    {
+      "from": "its_a_tie.ogg",
+      "to": "sounds/voices_fighter/its_a_tie.ogg",
+      "id": "sounds_voices_fighter_it_s_a_tie_ogg",
+      "confidence": "best_effort",
+      "basename": "its_a_tie.ogg",
+      "sizeBytes": 17721
+    },
+    {
+      "from": "its_a_tie (2).ogg",
+      "to": "sounds/voice/Female/its_a_tie.ogg",
+      "id": "sounds_voice_female_its_a_tie_ogg",
+      "confidence": "best_effort",
+      "basename": "its_a_tie.ogg",
+      "sizeBytes": 10606
+    },
+    {
+      "from": "kakaist-crow-sfx-318131.mp3",
+      "to": "sounds/animal/kakaist-crow-sfx-318131.mp3",
+      "id": "sounds_animal_kakaist_crow_sfx_318131_mp3",
+      "confidence": "exact",
+      "basename": "kakaist-crow-sfx-318131.mp3",
+      "sizeBytes": 192918
+    },
+    {
+      "from": "kill_her.ogg",
+      "to": "sounds/voices_fighter/kill_her.ogg",
+      "id": "sounds_voices_fighter_kill_her_ogg",
+      "confidence": "exact",
+      "basename": "kill_her.ogg",
+      "sizeBytes": 29052
+    },
+    {
+      "from": "kill_him.ogg",
+      "to": "sounds/voices_fighter/kill_him.ogg",
+      "id": "sounds_voices_fighter_kill_him_ogg",
+      "confidence": "exact",
+      "basename": "kill_him.ogg",
+      "sizeBytes": 27677
+    },
+    {
+      "from": "kill_it.ogg",
+      "to": "sounds/voices_fighter/kill_it.ogg",
+      "id": "sounds_voices_fighter_kill_it_ogg",
+      "confidence": "exact",
+      "basename": "kill_it.ogg",
+      "sizeBytes": 25194
+    },
+    {
+      "from": "lazychillzone-owl-hooting-223549.mp3",
+      "to": "sounds/animal/lazychillzone-owl-hooting-223549.mp3",
+      "id": "sounds_animal_lazychillzone_owl_hooting_223549_mp3",
+      "confidence": "exact",
+      "basename": "lazychillzone-owl-hooting-223549.mp3",
+      "sizeBytes": 202948
+    },
+    {
+      "from": "level.ogg",
+      "to": "sounds/voice/Female/level.ogg",
+      "id": "sounds_voice_female_level_ogg",
+      "confidence": "strong",
+      "basename": "level.ogg",
+      "sizeBytes": 13316
+    },
+    {
+      "from": "level (2).ogg",
+      "to": "sounds/voice/Male/level.ogg",
+      "id": "sounds_voice_male_level_ogg",
+      "confidence": "strong",
+      "basename": "level.ogg",
+      "sizeBytes": 8174
+    },
+    {
+      "from": "level_up.ogg",
+      "to": "sounds/voice/Female/level_up.ogg",
+      "id": "sounds_voice_female_level_up_ogg",
+      "confidence": "strong",
+      "basename": "level_up.ogg",
+      "sizeBytes": 16211
+    },
+    {
+      "from": "level_up (2).ogg",
+      "to": "sounds/voice/Male/level_up.ogg",
+      "id": "sounds_voice_male_level_up_ogg",
+      "confidence": "strong",
+      "basename": "level_up.ogg",
+      "sizeBytes": 9796
+    },
+    {
+      "from": "loser.ogg",
+      "to": "sounds/voices_fighter/loser.ogg",
+      "id": "sounds_voices_fighter_loser_ogg",
+      "confidence": "exact",
+      "basename": "loser.ogg",
+      "sizeBytes": 38252
+    },
+    {
+      "from": "magiaz-clown_laughter-422540.mp3",
+      "to": "sounds/funny/magiaz-clown_laughter-422540.mp3",
+      "id": "sounds_funny_magiaz_clown_laughter_422540_mp3",
+      "confidence": "exact",
+      "basename": "magiaz-clown_laughter-422540.mp3",
+      "sizeBytes": 281304
+    },
+    {
+      "from": "mangaletp-funny-laughing-406018.mp3",
+      "to": "sounds/funny/mangaletp-funny-laughing-406018.mp3",
+      "id": "sounds_funny_mangaletp_funny_laughing_406018_mp3",
+      "confidence": "exact",
+      "basename": "mangaletp-funny-laughing-406018.mp3",
+      "sizeBytes": 62439
+    },
+    {
+      "from": "mission_completed.ogg",
+      "to": "sounds/voice/Female/mission_completed.ogg",
+      "id": "sounds_voice_female_mission_completed_ogg",
+      "confidence": "strong",
+      "basename": "mission_completed.ogg",
+      "sizeBytes": 23430
+    },
+    {
+      "from": "mission_completed (2).ogg",
+      "to": "sounds/voice/Male/mission_completed.ogg",
+      "id": "sounds_voice_male_mission_completed_ogg",
+      "confidence": "strong",
+      "basename": "mission_completed.ogg",
+      "sizeBytes": 13752
+    },
+    {
+      "from": "mission_failed.ogg",
+      "to": "sounds/voice/Female/mission_failed.ogg",
+      "id": "sounds_voice_female_mission_failed_ogg",
+      "confidence": "strong",
+      "basename": "mission_failed.ogg",
+      "sizeBytes": 21344
+    },
+    {
+      "from": "mission_failed (2).ogg",
+      "to": "sounds/voice/Male/mission_failed.ogg",
+      "id": "sounds_voice_male_mission_failed_ogg",
+      "confidence": "strong",
+      "basename": "mission_failed.ogg",
+      "sizeBytes": 12610
+    },
+    {
+      "from": "moutchitos-mario-grabish-14183.mp3",
+      "to": "sounds/voice/moutchitos-mario-grabish-14183.mp3",
+      "id": "sounds_voice_moutchitos_mario_grabish_14183_mp3",
+      "confidence": "exact",
+      "basename": "moutchitos-mario-grabish-14183.mp3",
+      "sizeBytes": 107149
+    },
+    {
+      "from": "multi_kill.ogg",
+      "to": "sounds/voices_fighter/multi_kill.ogg",
+      "id": "sounds_voices_fighter_multi_kill_ogg",
+      "confidence": "exact",
+      "basename": "multi_kill.ogg",
+      "sizeBytes": 34218
+    },
+    {
+      "from": "new_highscore.ogg",
+      "to": "sounds/voice/Female/new_highscore.ogg",
+      "id": "sounds_voice_female_new_highscore_ogg",
+      "confidence": "strong",
+      "basename": "new_highscore.ogg",
+      "sizeBytes": 20507
+    },
+    {
+      "from": "new_highscore (2).ogg",
+      "to": "sounds/voice/Male/new_highscore.ogg",
+      "id": "sounds_voice_male_new_highscore_ogg",
+      "confidence": "strong",
+      "basename": "new_highscore.ogg",
+      "sizeBytes": 12155
+    },
+    {
+      "from": "objective_achieved.ogg",
+      "to": "sounds/voice/Female/objective_achieved.ogg",
+      "id": "sounds_voice_female_objective_achieved_ogg",
+      "confidence": "strong",
+      "basename": "objective_achieved.ogg",
+      "sizeBytes": 23617
+    },
+    {
+      "from": "objective_achieved (2).ogg",
+      "to": "sounds/voice/Male/objective_achieved.ogg",
+      "id": "sounds_voice_male_objective_achieved_ogg",
+      "confidence": "strong",
+      "basename": "objective_achieved.ogg",
+      "sizeBytes": 13915
+    },
+    {
+      "from": "player_1.ogg",
+      "to": "sounds/voices_fighter/player_1.ogg",
+      "id": "sounds_voices_fighter_player_1_ogg",
+      "confidence": "exact",
+      "basename": "player_1.ogg",
+      "sizeBytes": 39459
+    },
+    {
+      "from": "player_2.ogg",
+      "to": "sounds/voices_fighter/player_2.ogg",
+      "id": "sounds_voices_fighter_player_2_ogg",
+      "confidence": "exact",
+      "basename": "player_2.ogg",
+      "sizeBytes": 31779
+    },
+    {
+      "from": "power_up.ogg",
+      "to": "sounds/voice/Female/power_up.ogg",
+      "id": "sounds_voice_female_power_up_ogg",
+      "confidence": "strong",
+      "basename": "power_up.ogg",
+      "sizeBytes": 15586
+    },
+    {
+      "from": "power_up (2).ogg",
+      "to": "sounds/voice/Male/power_up.ogg",
+      "id": "sounds_voice_male_power_up_ogg",
+      "confidence": "strong",
+      "basename": "power_up.ogg",
+      "sizeBytes": 9356
+    },
+    {
+      "from": "prepare_yourself.ogg",
+      "to": "sounds/voices_fighter/prepare_yourself.ogg",
+      "id": "sounds_voices_fighter_prepare_yourself_ogg",
+      "confidence": "exact",
+      "basename": "prepare_yourself.ogg",
+      "sizeBytes": 41732
+    },
+    {
+      "from": "ready.ogg",
+      "to": "sounds/voices_fighter/ready.ogg",
+      "id": "sounds_voices_fighter_ready_ogg",
+      "confidence": "best_effort",
+      "basename": "ready.ogg",
+      "sizeBytes": 29781
+    },
+    {
+      "from": "ready (2).ogg",
+      "to": "sounds/voice/Female/ready.ogg",
+      "id": "sounds_voice_female_ready_ogg",
+      "confidence": "best_effort",
+      "basename": "ready.ogg",
+      "sizeBytes": 7313
+    },
+    {
+      "from": "round.ogg",
+      "to": "sounds/voice/Female/round.ogg",
+      "id": "sounds_voice_female_round_ogg",
+      "confidence": "strong",
+      "basename": "round.ogg",
+      "sizeBytes": 14195
+    },
+    {
+      "from": "round (2).ogg",
+      "to": "sounds/voice/Male/round.ogg",
+      "id": "sounds_voice_male_round_ogg",
+      "confidence": "strong",
+      "basename": "round.ogg",
+      "sizeBytes": 8652
+    },
+    {
+      "from": "round_1.ogg",
+      "to": "sounds/voices_fighter/round_1.ogg",
+      "id": "sounds_voices_fighter_round_1_ogg",
+      "confidence": "exact",
+      "basename": "round_1.ogg",
+      "sizeBytes": 38015
+    },
+    {
+      "from": "round_2.ogg",
+      "to": "sounds/voices_fighter/round_2.ogg",
+      "id": "sounds_voices_fighter_round_2_ogg",
+      "confidence": "exact",
+      "basename": "round_2.ogg",
+      "sizeBytes": 39566
+    },
+    {
+      "from": "round_3.ogg",
+      "to": "sounds/voices_fighter/round_3.ogg",
+      "id": "sounds_voices_fighter_round_3_ogg",
+      "confidence": "exact",
+      "basename": "round_3.ogg",
+      "sizeBytes": 40622
+    },
+    {
+      "from": "round_4.ogg",
+      "to": "sounds/voices_fighter/round_4.ogg",
+      "id": "sounds_voices_fighter_round_4_ogg",
+      "confidence": "exact",
+      "basename": "round_4.ogg",
+      "sizeBytes": 39130
+    },
+    {
+      "from": "round_5.ogg",
+      "to": "sounds/voices_fighter/round_5.ogg",
+      "id": "sounds_voices_fighter_round_5_ogg",
+      "confidence": "exact",
+      "basename": "round_5.ogg",
+      "sizeBytes": 40325
+    },
+    {
+      "from": "scottishperson-sound-effect-dog-crying-05-367321.mp3",
+      "to": "sounds/animal/scottishperson-sound-effect-dog-crying-05-367321.mp3",
+      "id": "sounds_animal_scottishperson_sound_effect_dog_crying_05_367321_mp3",
+      "confidence": "exact",
+      "basename": "scottishperson-sound-effect-dog-crying-05-367321.mp3",
+      "sizeBytes": 491607
+    },
+    {
+      "from": "set.ogg",
+      "to": "sounds/voice/Female/set.ogg",
+      "id": "sounds_voice_female_set_ogg",
+      "confidence": "strong",
+      "basename": "set.ogg",
+      "sizeBytes": 12911
+    },
+    {
+      "from": "set (2).ogg",
+      "to": "sounds/voice/Male/set.ogg",
+      "id": "sounds_voice_male_set_ogg",
+      "confidence": "strong",
+      "basename": "set.ogg",
+      "sizeBytes": 7876
+    },
+    {
+      "from": "shrek_30-cartoon-hammer-answer-341914 (1).mp3",
+      "to": "sounds/cartoon/shrek_30-cartoon-hammer-answer-341914 (1).mp3",
+      "id": "sounds_cartoon_shrek_30_cartoon_hammer_answer_341914_1_mp3",
+      "confidence": "exact",
+      "basename": "shrek_30-cartoon-hammer-answer-341914 (1).mp3",
+      "sizeBytes": 551502
+    },
+    {
+      "from": "shrek_30-hide-from-the-clown-339207.mp3",
+      "to": "sounds/cartoon/shrek_30-hide-from-the-clown-339207.mp3",
+      "id": "sounds_cartoon_shrek_30_hide_from_the_clown_339207_mp3",
+      "confidence": "exact",
+      "basename": "shrek_30-hide-from-the-clown-339207.mp3",
+      "sizeBytes": 3273678
+    },
+    {
+      "from": "shut_up_ghost-cartoon-yay-140921.mp3",
+      "to": "sounds/cartoon/shut_up_ghost-cartoon-yay-140921.mp3",
+      "id": "sounds_cartoon_shut_up_ghost_cartoon_yay_140921_mp3",
+      "confidence": "exact",
+      "basename": "shut_up_ghost-cartoon-yay-140921.mp3",
+      "sizeBytes": 143644
+    },
+    {
+      "from": "sound_garage-cat-meow-8-fx-306184.mp3",
+      "to": "sounds/animal/sound_garage-cat-meow-8-fx-306184.mp3",
+      "id": "sounds_animal_sound_garage_cat_meow_8_fx_306184_mp3",
+      "confidence": "exact",
+      "basename": "sound_garage-cat-meow-8-fx-306184.mp3",
+      "sizeBytes": 48794
+    },
+    {
+      "from": "sound_garage-seagulls-squawking-7-fx-401397.mp3",
+      "to": "sounds/animal/sound_garage-seagulls-squawking-7-fx-401397.mp3",
+      "id": "sounds_animal_sound_garage_seagulls_squawking_7_fx_401397_mp3",
+      "confidence": "exact",
+      "basename": "sound_garage-seagulls-squawking-7-fx-401397.mp3",
+      "sizeBytes": 563086
+    },
+    {
+      "from": "soundreality-cat-meow-fx-461188.mp3",
+      "to": "sounds/animal/soundreality-cat-meow-fx-461188.mp3",
+      "id": "sounds_animal_soundreality_cat_meow_fx_461188_mp3",
+      "confidence": "exact",
+      "basename": "soundreality-cat-meow-fx-461188.mp3",
+      "sizeBytes": 94839
+    },
+    {
+      "from": "story_mode.ogg",
+      "to": "sounds/voices_fighter/story_mode.ogg",
+      "id": "sounds_voices_fighter_story_mode_ogg",
+      "confidence": "exact",
+      "basename": "story_mode.ogg",
+      "sizeBytes": 45515
+    },
+    {
+      "from": "sudden_death.ogg",
+      "to": "sounds/voices_fighter/sudden_death.ogg",
+      "id": "sounds_voices_fighter_sudden_death_ogg",
+      "confidence": "exact",
+      "basename": "sudden_death.ogg",
+      "sizeBytes": 36456
+    },
+    {
+      "from": "superv007-cartoon-stomach-growling-sfx-357010.mp3",
+      "to": "sounds/cartoon/superv007-cartoon-stomach-growling-sfx-357010.mp3",
+      "id": "sounds_cartoon_superv007_cartoon_stomach_growling_sfx_357010_mp3",
+      "confidence": "exact",
+      "basename": "superv007-cartoon-stomach-growling-sfx-357010.mp3",
+      "sizeBytes": 158258
+    },
+    {
+      "from": "survival_mode.ogg",
+      "to": "sounds/voices_fighter/survival_mode.ogg",
+      "id": "sounds_voices_fighter_survival_mode_ogg",
+      "confidence": "exact",
+      "basename": "survival_mode.ogg",
+      "sizeBytes": 44565
+    },
+    {
+      "from": "tie.ogg",
+      "to": "sounds/voices_fighter/tie.ogg",
+      "id": "sounds_voices_fighter_tie_ogg",
+      "confidence": "exact",
+      "basename": "tie.ogg",
+      "sizeBytes": 26997
+    },
+    {
+      "from": "tie_breaker.ogg",
+      "to": "sounds/voices_fighter/tie_breaker.ogg",
+      "id": "sounds_voices_fighter_tie_breaker_ogg",
+      "confidence": "exact",
+      "basename": "tie_breaker.ogg",
+      "sizeBytes": 32441
+    },
+    {
+      "from": "time.ogg",
+      "to": "sounds/voices_fighter/time.ogg",
+      "id": "sounds_voices_fighter_time_ogg",
+      "confidence": "exact",
+      "basename": "time.ogg",
+      "sizeBytes": 27947
+    },
+    {
+      "from": "time_over.ogg",
+      "to": "sounds/voice/Female/time_over.ogg",
+      "id": "sounds_voice_female_time_over_ogg",
+      "confidence": "strong",
+      "basename": "time_over.ogg",
+      "sizeBytes": 21448
+    },
+    {
+      "from": "time_over (2).ogg",
+      "to": "sounds/voice/Male/time_over.ogg",
+      "id": "sounds_voice_male_time_over_ogg",
+      "confidence": "strong",
+      "basename": "time_over.ogg",
+      "sizeBytes": 12749
+    },
+    {
+      "from": "universfield-cartoon-splat-310479.mp3",
+      "to": "sounds/cartoon/universfield-cartoon-splat-310479.mp3",
+      "id": "sounds_cartoon_universfield_cartoon_splat_310479_mp3",
+      "confidence": "exact",
+      "basename": "universfield-cartoon-splat-310479.mp3",
+      "sizeBytes": 75026
+    },
+    {
+      "from": "universfield-funny-dramatic-gasp-320975.mp3",
+      "to": "sounds/voice/universfield-funny-dramatic-gasp-320975.mp3",
+      "id": "sounds_voice_universfield_funny_dramatic_gasp_320975_mp3",
+      "confidence": "exact",
+      "basename": "universfield-funny-dramatic-gasp-320975.mp3",
+      "sizeBytes": 74634
+    },
+    {
+      "from": "universfield-no-no-no-03-276680.mp3",
+      "to": "sounds/voice/universfield-no-no-no-03-276680.mp3",
+      "id": "sounds_voice_universfield_no_no_no_03_276680_mp3",
+      "confidence": "exact",
+      "basename": "universfield-no-no-no-03-276680.mp3",
+      "sizeBytes": 174932
+    },
+    {
+      "from": "universfield-wherex27s-my-cat-352471.mp3",
+      "to": "sounds/voice/universfield-wherex27s-my-cat-352471.mp3",
+      "id": "sounds_voice_universfield_wherex27s_my_cat_352471_mp3",
+      "confidence": "exact",
+      "basename": "universfield-wherex27s-my-cat-352471.mp3",
+      "sizeBytes": 125450
+    },
+    {
+      "from": "universfield-you-stupid-cat-352692.mp3",
+      "to": "sounds/voice/universfield-you-stupid-cat-352692.mp3",
+      "id": "sounds_voice_universfield_you_stupid_cat_352692_mp3",
+      "confidence": "exact",
+      "basename": "universfield-you-stupid-cat-352692.mp3",
+      "sizeBytes": 113231
+    },
+    {
+      "from": "virtual_vibes-cat-meow-sound-383823.mp3",
+      "to": "sounds/animal/virtual_vibes-cat-meow-sound-383823.mp3",
+      "id": "sounds_animal_virtual_vibes_cat_meow_sound_383823_mp3",
+      "confidence": "exact",
+      "basename": "virtual_vibes-cat-meow-sound-383823.mp3",
+      "sizeBytes": 229789
+    },
+    {
+      "from": "voicebosch-cowabunga-voiced-165997.mp3",
+      "to": "sounds/voice/voicebosch-cowabunga-voiced-165997.mp3",
+      "id": "sounds_voice_voicebosch_cowabunga_voiced_165997_mp3",
+      "confidence": "exact",
+      "basename": "voicebosch-cowabunga-voiced-165997.mp3",
+      "sizeBytes": 159525
+    },
+    {
+      "from": "war_call_for_backup.ogg",
+      "to": "sounds/voice/Female/war_call_for_backup.ogg",
+      "id": "sounds_voice_female_war_call_for_backup_ogg",
+      "confidence": "strong",
+      "basename": "war_call_for_backup.ogg",
+      "sizeBytes": 17674
+    },
+    {
+      "from": "war_call_for_backup (2).ogg",
+      "to": "sounds/voice/Male/war_call_for_backup.ogg",
+      "id": "sounds_voice_male_war_call_for_backup_ogg",
+      "confidence": "strong",
+      "basename": "war_call_for_backup.ogg",
+      "sizeBytes": 10556
+    },
+    {
+      "from": "war_cover_me.ogg",
+      "to": "sounds/voice/Female/war_cover_me.ogg",
+      "id": "sounds_voice_female_war_cover_me_ogg",
+      "confidence": "strong",
+      "basename": "war_cover_me.ogg",
+      "sizeBytes": 12873
+    },
+    {
+      "from": "war_cover_me (2).ogg",
+      "to": "sounds/voice/Male/war_cover_me.ogg",
+      "id": "sounds_voice_male_war_cover_me_ogg",
+      "confidence": "strong",
+      "basename": "war_cover_me.ogg",
+      "sizeBytes": 7854
+    },
+    {
+      "from": "war_fire_in_the_hole.ogg",
+      "to": "sounds/voice/Female/war_fire_in_the_hole.ogg",
+      "id": "sounds_voice_female_war_fire_in_the_hole_ogg",
+      "confidence": "strong",
+      "basename": "war_fire_in_the_hole.ogg",
+      "sizeBytes": 17918
+    },
+    {
+      "from": "war_fire_in_the_hole (2).ogg",
+      "to": "sounds/voice/Male/war_fire_in_the_hole.ogg",
+      "id": "sounds_voice_male_war_fire_in_the_hole_ogg",
+      "confidence": "strong",
+      "basename": "war_fire_in_the_hole.ogg",
+      "sizeBytes": 10928
+    },
+    {
+      "from": "war_get_down.ogg",
+      "to": "sounds/voice/Female/war_get_down.ogg",
+      "id": "sounds_voice_female_war_get_down_ogg",
+      "confidence": "strong",
+      "basename": "war_get_down.ogg",
+      "sizeBytes": 14172
+    },
+    {
+      "from": "war_get_down (2).ogg",
+      "to": "sounds/voice/Male/war_get_down.ogg",
+      "id": "sounds_voice_male_war_get_down_ogg",
+      "confidence": "strong",
+      "basename": "war_get_down.ogg",
+      "sizeBytes": 8639
+    },
+    {
+      "from": "war_go_go_go.ogg",
+      "to": "sounds/voice/Female/war_go_go_go.ogg",
+      "id": "sounds_voice_female_war_go_go_go_ogg",
+      "confidence": "strong",
+      "basename": "war_go_go_go.ogg",
+      "sizeBytes": 20744
+    },
+    {
+      "from": "war_go_go_go (2).ogg",
+      "to": "sounds/voice/Male/war_go_go_go.ogg",
+      "id": "sounds_voice_male_war_go_go_go_ogg",
+      "confidence": "strong",
+      "basename": "war_go_go_go.ogg",
+      "sizeBytes": 12514
+    },
+    {
+      "from": "war_hold.ogg",
+      "to": "sounds/voice/Female/war_hold.ogg",
+      "id": "sounds_voice_female_war_hold_ogg",
+      "confidence": "best_effort",
+      "basename": "war_hold.ogg",
+      "sizeBytes": 12276
+    },
+    {
+      "from": "war_look_out.ogg",
+      "to": "sounds/voice/Female/war_look_out.ogg",
+      "id": "sounds_voice_female_war_look_out_ogg",
+      "confidence": "strong",
+      "basename": "war_look_out.ogg",
+      "sizeBytes": 14435
+    },
+    {
+      "from": "war_look_out (2).ogg",
+      "to": "sounds/voice/Male/war_look_out.ogg",
+      "id": "sounds_voice_male_war_look_out_ogg",
+      "confidence": "strong",
+      "basename": "war_look_out.ogg",
+      "sizeBytes": 8750
+    },
+    {
+      "from": "war_medic.ogg",
+      "to": "sounds/voice/Female/war_medic.ogg",
+      "id": "sounds_voice_female_war_medic_ogg",
+      "confidence": "strong",
+      "basename": "war_medic.ogg",
+      "sizeBytes": 14759
+    },
+    {
+      "from": "war_medic (2).ogg",
+      "to": "sounds/voice/Male/war_medic.ogg",
+      "id": "sounds_voice_male_war_medic_ogg",
+      "confidence": "strong",
+      "basename": "war_medic.ogg",
+      "sizeBytes": 8891
+    },
+    {
+      "from": "war_reloading.ogg",
+      "to": "sounds/voice/Female/war_reloading.ogg",
+      "id": "sounds_voice_female_war_reloading_ogg",
+      "confidence": "strong",
+      "basename": "war_reloading.ogg",
+      "sizeBytes": 14762
+    },
+    {
+      "from": "war_reloading (2).ogg",
+      "to": "sounds/voice/Male/war_reloading.ogg",
+      "id": "sounds_voice_male_war_reloading_ogg",
+      "confidence": "strong",
+      "basename": "war_reloading.ogg",
+      "sizeBytes": 9045
+    },
+    {
+      "from": "war_rpg.ogg",
+      "to": "sounds/voice/Female/war_rpg.ogg",
+      "id": "sounds_voice_female_war_rpg_ogg",
+      "confidence": "strong",
+      "basename": "war_rpg.ogg",
+      "sizeBytes": 16059
+    },
+    {
+      "from": "war_rpg (2).ogg",
+      "to": "sounds/voice/Male/war_rpg.ogg",
+      "id": "sounds_voice_male_war_rpg_ogg",
+      "confidence": "strong",
+      "basename": "war_rpg.ogg",
+      "sizeBytes": 9670
+    },
+    {
+      "from": "war_sniper.ogg",
+      "to": "sounds/voice/Female/war_sniper.ogg",
+      "id": "sounds_voice_female_war_sniper_ogg",
+      "confidence": "strong",
+      "basename": "war_sniper.ogg",
+      "sizeBytes": 15238
+    },
+    {
+      "from": "war_sniper (2).ogg",
+      "to": "sounds/voice/Male/war_sniper.ogg",
+      "id": "sounds_voice_male_war_sniper_ogg",
+      "confidence": "strong",
+      "basename": "war_sniper.ogg",
+      "sizeBytes": 9210
+    },
+    {
+      "from": "war_suppressing_fire.ogg",
+      "to": "sounds/voice/Male/war_suppressing_fire.ogg",
+      "id": "sounds_voice_male_war_suppressing_fire_ogg",
+      "confidence": "best_effort",
+      "basename": "war_suppressing_fire.ogg",
+      "sizeBytes": 19095
+    },
+    {
+      "from": "war_supressing_fire.ogg",
+      "to": "sounds/voice/Female/war_supressing_fire.ogg",
+      "id": "sounds_voice_female_war_supressing_fire_ogg",
+      "confidence": "best_effort",
+      "basename": "war_supressing_fire.ogg",
+      "sizeBytes": 21873
+    },
+    {
+      "from": "war_target_destroyed.ogg",
+      "to": "sounds/voice/Female/war_target_destroyed.ogg",
+      "id": "sounds_voice_female_war_target_destroyed_ogg",
+      "confidence": "strong",
+      "basename": "war_target_destroyed.ogg",
+      "sizeBytes": 23419
+    },
+    {
+      "from": "war_target_destroyed (2).ogg",
+      "to": "sounds/voice/Male/war_target_destroyed.ogg",
+      "id": "sounds_voice_male_war_target_destroyed_ogg",
+      "confidence": "strong",
+      "basename": "war_target_destroyed.ogg",
+      "sizeBytes": 13813
+    },
+    {
+      "from": "war_target_engaged.ogg",
+      "to": "sounds/voice/Female/war_target_engaged.ogg",
+      "id": "sounds_voice_female_war_target_engaged_ogg",
+      "confidence": "strong",
+      "basename": "war_target_engaged.ogg",
+      "sizeBytes": 20188
+    },
+    {
+      "from": "war_target_engaged (2).ogg",
+      "to": "sounds/voice/Male/war_target_engaged.ogg",
+      "id": "sounds_voice_male_war_target_engaged_ogg",
+      "confidence": "strong",
+      "basename": "war_target_engaged.ogg",
+      "sizeBytes": 12049
+    },
+    {
+      "from": "war_watch_my_back.ogg",
+      "to": "sounds/voice/Female/war_watch_my_back.ogg",
+      "id": "sounds_voice_female_war_watch_my_back_ogg",
+      "confidence": "strong",
+      "basename": "war_watch_my_back.ogg",
+      "sizeBytes": 16723
+    },
+    {
+      "from": "war_watch_my_back (2).ogg",
+      "to": "sounds/voice/Male/war_watch_my_back.ogg",
+      "id": "sounds_voice_male_war_watch_my_back_ogg",
+      "confidence": "strong",
+      "basename": "war_watch_my_back.ogg",
+      "sizeBytes": 10020
+    },
+    {
+      "from": "winner.ogg",
+      "to": "sounds/voices_fighter/winner.ogg",
+      "id": "sounds_voices_fighter_winner_ogg",
+      "confidence": "exact",
+      "basename": "winner.ogg",
+      "sizeBytes": 39290
+    },
+    {
+      "from": "wrong.ogg",
+      "to": "sounds/voice/Female/wrong.ogg",
+      "id": "sounds_voice_female_wrong_ogg",
+      "confidence": "strong",
+      "basename": "wrong.ogg",
+      "sizeBytes": 14245
+    },
+    {
+      "from": "wrong (2).ogg",
+      "to": "sounds/voice/Male/wrong.ogg",
+      "id": "sounds_voice_male_wrong_ogg",
+      "confidence": "strong",
+      "basename": "wrong.ogg",
+      "sizeBytes": 8695
+    },
+    {
+      "from": "x_bass6668-funny-meow-110120.mp3",
+      "to": "sounds/animal/x_bass6668-funny-meow-110120.mp3",
+      "id": "sounds_animal_x_bass6668_funny_meow_110120_mp3",
+      "confidence": "exact",
+      "basename": "x_bass6668-funny-meow-110120.mp3",
+      "sizeBytes": 99386
+    },
+    {
+      "from": "you_lose.ogg",
+      "to": "sounds/voices_fighter/you_lose.ogg",
+      "id": "sounds_voices_fighter_you_lose_ogg",
+      "confidence": "best_effort",
+      "basename": "you_lose.ogg",
+      "sizeBytes": 36249
+    },
+    {
+      "from": "you_lose (2).ogg",
+      "to": "sounds/voice/Female/you_lose.ogg",
+      "id": "sounds_voice_female_you_lose_ogg",
+      "confidence": "best_effort",
+      "basename": "you_lose.ogg",
+      "sizeBytes": 12277
+    },
+    {
+      "from": "you_win.ogg",
+      "to": "sounds/voices_fighter/you_win.ogg",
+      "id": "sounds_voices_fighter_you_win_ogg",
+      "confidence": "best_effort",
+      "basename": "you_win.ogg",
+      "sizeBytes": 30191
+    },
+    {
+      "from": "you_win (2).ogg",
+      "to": "sounds/voice/Female/you_win.ogg",
+      "id": "sounds_voice_female_you_win_ogg",
+      "confidence": "best_effort",
+      "basename": "you_win.ogg",
+      "sizeBytes": 10736
+    }
+  ],
+  "unresolved": [
+    {
+      "basename": "hold.ogg",
+      "files": [
+        "hold (2).ogg"
+      ],
+      "reason": "more file copies than catalog destinations"
+    },
+    {
+      "basename": "it's_a_tie.ogg",
+      "files": [
+        "it's_a_tie.ogg"
+      ]
+    },
+    {
+      "basename": "shrek_30-cartoon-hammer-answer-341914.mp3",
+      "files": [
+        "shrek_30-cartoon-hammer-answer-341914.mp3"
+      ]
+    },
+    {
+      "basename": "war_hold.ogg",
+      "files": [
+        "war_hold (2).ogg"
+      ],
+      "reason": "more file copies than catalog destinations"
+    },
+    {
+      "basename": "war_suppressing_fire.ogg",
+      "files": [
+        "war_suppressing_fire (2).ogg"
+      ],
+      "reason": "more file copies than catalog destinations"
+    },
+    {
+      "basename": "war_supressing_fire.ogg",
+      "files": [
+        "war_supressing_fire (2).ogg"
+      ],
+      "reason": "more file copies than catalog destinations"
+    }
+  ],
+  "missingDestinations": [
+    {
+      "basename": "1.ogg",
+      "destination": "sounds/voice/Male/1.ogg",
+      "id": "sounds_voice_male_1_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "10.ogg",
+      "destination": "sounds/voice/Male/10.ogg",
+      "id": "sounds_voice_male_10_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "2.ogg",
+      "destination": "sounds/voice/Male/2.ogg",
+      "id": "sounds_voice_male_2_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "3.ogg",
+      "destination": "sounds/voice/Male/3.ogg",
+      "id": "sounds_voice_male_3_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "4.ogg",
+      "destination": "sounds/voice/Male/4.ogg",
+      "id": "sounds_voice_male_4_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "5.ogg",
+      "destination": "sounds/voice/Male/5.ogg",
+      "id": "sounds_voice_male_5_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "6.ogg",
+      "destination": "sounds/voice/Male/6.ogg",
+      "id": "sounds_voice_male_6_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "7.ogg",
+      "destination": "sounds/voice/Male/7.ogg",
+      "id": "sounds_voice_male_7_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "8.ogg",
+      "destination": "sounds/voice/Male/8.ogg",
+      "id": "sounds_voice_male_8_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "9.ogg",
+      "destination": "sounds/voice/Male/9.ogg",
+      "id": "sounds_voice_male_9_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "final_round.ogg",
+      "destination": "sounds/voice/Male/final_round.ogg",
+      "id": "sounds_voice_male_final_round_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "game_over.ogg",
+      "destination": "sounds/voice/Male/game_over.ogg",
+      "id": "sounds_voice_male_game_over_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "its_a_tie.ogg",
+      "destination": "sounds/voice/Male/its_a_tie.ogg",
+      "id": "sounds_voice_male_its_a_tie_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "ready.ogg",
+      "destination": "sounds/voice/Male/ready.ogg",
+      "id": "sounds_voice_male_ready_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "you_lose.ogg",
+      "destination": "sounds/voice/Male/you_lose.ogg",
+      "id": "sounds_voice_male_you_lose_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    },
+    {
+      "basename": "you_win.ogg",
+      "destination": "sounds/voice/Male/you_win.ogg",
+      "id": "sounds_voice_male_you_win_ogg",
+      "reason": "fewer loose file copies than catalog destinations"
+    }
+  ],
+  "conflicts": []
+}
