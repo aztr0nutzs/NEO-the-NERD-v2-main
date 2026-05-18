@@ -1,0 +1,21 @@
+# Gradle assembleDebug log (re-summary)
+Captured: 2026-05-18T14:33:37Z
+## Result
+
+------------------------------------------------------------
+Tasks runnable from root project 'android'
+
+## Last assembleDebug summary
+BUILD SUCCESSFUL in 1m 54s — 244 actionable tasks: 244 executed
+
+## Lint summary
+(npm run lint: no errors — empty output from `eslint .`)
+
+## Next.js build summary
+Next.js 16.2.6 (Turbopack) — Compiled successfully in 7.3s, TypeScript OK, 6 static pages generated
+out/ populated; prepare-capacitor.mjs reported: 'Prepared Capacitor web assets in out/.'
+
+## Capacitor sync summary
+  Copying web assets from out to android/app/src/main/assets/public — OK
+  capacitor.config.json written to android/app/src/main/assets — OK
+  Plugins detected: @capacitor/{filesystem,local-notifications,network,preferences,share} (5)

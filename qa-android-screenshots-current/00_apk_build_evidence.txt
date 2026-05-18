@@ -1,0 +1,65 @@
+# Android Debug APK — Static Build Evidence
+Captured: 2026-05-18T14:33:11Z
+
+## File
+-rw-r--r-- 1 root root 65070923 May 18 14:31 /home/user/NEO-the-NERD-v2-main/android/app/build/outputs/apk/debug/app-debug.apk
+
+## SHA-256
+09783ca09679e638b169cc7aaafb4260ac489868a126f8d106d8715216f9d6fa  /home/user/NEO-the-NERD-v2-main/android/app/build/outputs/apk/debug/app-debug.apk
+
+## aapt2 dump badging (full)
+package: name='com.neothenerd.app' versionCode='1' versionName='1.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+minSdkVersion:'24'
+targetSdkVersion:'36'
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='android.permission.ACCESS_NETWORK_STATE'
+uses-permission: name='android.permission.ACCESS_WIFI_STATE'
+uses-permission: name='android.permission.RECORD_AUDIO'
+uses-permission: name='android.permission.POST_NOTIFICATIONS'
+uses-permission: name='android.permission.RECEIVE_BOOT_COMPLETED'
+uses-permission: name='android.permission.WAKE_LOCK'
+uses-permission: name='android.permission.FOREGROUND_SERVICE'
+uses-permission: name='com.neothenerd.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+application-label:'NEO the Nerd'
+application-icon-160:'res/mipmap-mdpi-v4/ic_launcher.png'
+application-icon-240:'res/mipmap-hdpi-v4/ic_launcher.png'
+application-icon-320:'res/mipmap-xhdpi-v4/ic_launcher.png'
+application-icon-480:'res/mipmap-xxhdpi-v4/ic_launcher.png'
+application-icon-640:'res/mipmap-xxxhdpi-v4/ic_launcher.png'
+application: label='NEO the Nerd' icon='res/mipmap-mdpi-v4/ic_launcher.png'
+application-debuggable
+launchable-activity: name='com.neothenerd.app.MainActivity'  label='NEO the Nerd' icon=''
+feature-group: label=''
+  uses-feature: name='android.hardware.faketouch'
+  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+  uses-feature: name='android.hardware.microphone'
+  uses-implied-feature: name='android.hardware.microphone' reason='requested android.permission.RECORD_AUDIO permission'
+  uses-feature: name='android.hardware.wifi'
+  uses-implied-feature: name='android.hardware.wifi' reason='requested android.permission.ACCESS_WIFI_STATE permission'
+main
+other-receivers
+other-services
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--' 'af' 'am' 'ar' 'as' 'az' 'be' 'bg' 'bn' 'bs' 'ca' 'cs' 'da' 'de' 'el' 'en-AU' 'en-CA' 'en-GB' 'en-IN' 'en-XC' 'es' 'es-US' 'et' 'eu' 'fa' 'fi' 'fr' 'fr-CA' 'gl' 'gu' 'hi' 'hr' 'hu' 'hy' 'in' 'is' 'it' 'iw' 'ja' 'ka' 'kk' 'km' 'kn' 'ko' 'ky' 'lo' 'lt' 'lv' 'mk' 'ml' 'mn' 'mr' 'ms' 'my' 'nb' 'ne' 'nl' 'or' 'pa' 'pl' 'pt' 'pt-BR' 'pt-PT' 'ro' 'ru' 'si' 'sk' 'sl' 'sq' 'sr' 'sr-Latn' 'sv' 'sw' 'ta' 'te' 'th' 'tl' 'tr' 'uk' 'ur' 'uz' 'vi' 'zh-CN' 'zh-HK' 'zh-TW' 'zu'
+densities: '160' '240' '320' '480' '640'
+
+## Web payload presence
+      125  1981-01-01 01:01   assets/capacitor.config.json
+        0  1981-01-01 01:01   assets/public/cordova.js
+    77407  1981-01-01 01:01   assets/public/index.html
+
+## Asset chunk count
+Total entries in APK: 510
+Entries under assets/public/: 57
+Entries under assets/public/_next/: 27
+
+## SDK / build tool versions used
+  - Android Gradle Plugin: 8.13.0 (android/build.gradle)
+  - compileSdkVersion: 36
+  - minSdkVersion: 24
+  - targetSdkVersion: 36
+  - Kotlin: 2.2.20
+  - Gradle: Gradle 8.14.3
+  - Java: openjdk version "21.0.10" 2026-01-20
+  - Capacitor android: 8.3.3
