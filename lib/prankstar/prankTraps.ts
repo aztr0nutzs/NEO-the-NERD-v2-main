@@ -124,7 +124,15 @@ class PrankTrapsManager {
       soundName = sound.name
       if (!label) label = `Sound · ${sound.name}`
     } else if (input.kind === "random-safe-sound") {
-      const pick = getSafeRandomSound()
+      // Honor the previewed pick when the caller passed a still-playable,
+      // safe-random-eligible sound id. The UI shows users a specific queued
+      // sound and may let them reroll; arming must lock in that exact sound,
+      // not silently re-roll. Fresh random selection happens only when no
+      // valid preselect was supplied (or it is no longer playable/safe).
+      let pick = soundId ? getSoundById(soundId) : undefined
+      if (!pick || !pick.isSafeForRandomMode) {
+        pick = getSafeRandomSound() ?? undefined
+      }
       if (!pick) {
         const failed: PrankTrap = {
           id,

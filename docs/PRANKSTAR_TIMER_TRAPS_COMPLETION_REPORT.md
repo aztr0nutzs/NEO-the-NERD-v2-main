@@ -14,9 +14,14 @@ out explicitly in the UI.
 
 - **Sound** — fires a user-selected entry from the playable catalog through
   `prankAudioRuntime.play(sound)`.
-- **Random Safe Sound** — selects a safe sound at arm time via
-  `getSafeRandomSound`, displays the queued pick, supports reroll, fires
-  through the same audio runtime.
+- **Random Safe Sound** — the screen picks a safe sound up front via
+  `getSafeRandomSound` and displays it as the queued pick with a reroll
+  control. Arming locks that exact previewed sound into the trap: the
+  manager validates the provided `soundId` (must still resolve via
+  `getSoundById` and satisfy `isSafeForRandomMode`) and only falls back to a
+  fresh `getSafeRandomSound` call if no valid preselect was supplied. The
+  trap therefore fires the same sound the user saw before arming; the
+  screen's post-arm preview reroll only refreshes the *next* queued pick.
 - **Spoken Message** — speaks a chosen / pasted prank line through
   `previewVoice` with the user's current voice profile, quality preference,
   and personality. Picks from favorites + history; falls back to a manual
@@ -32,9 +37,14 @@ out explicitly in the UI.
   and `useCountdownTick(200)` for smooth remaining-time labels.
 - Delays clamped to `[1s, 6h]`. Custom-seconds input validated at 1s
   minimum, 1h soft cap from the UI.
-- Re-render-safe: arming creates exactly one timer, cancel clears it,
-  firing removes the trap from the active map before invoking the runtime.
-  Cleanup on unmount is unnecessary because the manager is global.
+- Re-render-safe: arming creates exactly one timer, cancel clears it. When
+  the timer elapses the trap stays in the active map with `status =
+  "triggering"` while the audio or speech runtime is invoked, so the user
+  sees a visible "FIRING" state on the active card. Only after the runtime
+  promise resolves does the manager remove the trap from the active map and
+  push a `fired` or `failed` record into recent history (this transition
+  also clears the per-id `setTimeout` reference). Cleanup on unmount is
+  unnecessary because the manager is global.
 
 ## State transitions
 
