@@ -284,15 +284,15 @@ function ModuleCard({
         className="h-4 w-4"
         style={{ color: accent, filter: `drop-shadow(0 0 6px ${accent})` }}
       />
-      <p className="ps-mono text-[11px] tracking-[0.18em] text-white/90">
+      <span className="block ps-mono text-[11px] tracking-[0.18em] text-white/90">
         {label.toUpperCase()}
-      </p>
-      <p
-        className="ps-mono text-[8px] tracking-[0.25em]"
+      </span>
+      <span
+        className="block ps-mono text-[8px] tracking-[0.25em]"
         style={{ color: live ? accent : "rgba(255,255,255,0.4)" }}
       >
         {live ? "OPEN →" : "COMING NEXT PHASE"}
-      </p>
+      </span>
     </Tag>
   )
 }

@@ -15,7 +15,13 @@ import {
   Star,
   X,
 } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react"
 import { useApp } from "@/lib/store"
 import { NeonPanel } from "../neon-panel"
 import {
@@ -42,10 +48,31 @@ export function PrankLibraryScreen() {
   const audio = usePrankAudio()
 
   const [query, setQuery] = useState("")
+  const deferredQuery = useDeferredValue(query)
   const [category, setCategory] = useState<PrankCategory | typeof ALL_CATEGORY_ID>(
     ALL_CATEGORY_ID,
   )
   const [filterMode, setFilterMode] = useState<FilterMode>("all")
+
+  // Snapshot of the recent-play order at the moment the Recent filter was
+  // selected (or the screen mounted while Recent was already active). Without
+  // this, playing a sound from the list would reshuffle the visible rows
+  // mid-tap, which is jarring on touch. Cleared when the user leaves Recent.
+  // Implemented as a "previous filter mode" comparator-state pattern so the
+  // snapshot is captured during the render that flips into recent mode,
+  // without breaking the no-side-effects-during-render rule.
+  const [snapshotRecentIds, setSnapshotRecentIds] = useState<
+    readonly string[] | null
+  >(null)
+  const [trackedFilterMode, setTrackedFilterMode] = useState<FilterMode>(filterMode)
+  if (filterMode !== trackedFilterMode) {
+    setTrackedFilterMode(filterMode)
+    if (filterMode === "recent") {
+      setSnapshotRecentIds(recentPrankSoundIds)
+    } else if (snapshotRecentIds !== null) {
+      setSnapshotRecentIds(null)
+    }
+  }
 
   // Stop any playing sound when leaving the screen so navigating away does
   // not leave audio bleeding into the next screen.
@@ -55,10 +82,18 @@ export function PrankLibraryScreen() {
 
   const categoryCounts = useMemo(() => getCategoryCounts(), [])
 
+  const favoriteSet = useMemo(
+    () => new Set(prankSoundFavoriteIds),
+    [prankSoundFavoriteIds],
+  )
+
   const filteredSounds = useMemo<PrankSound[]>(() => {
-    const favoriteSet = new Set(prankSoundFavoriteIds)
+    const recentSource =
+      filterMode === "recent"
+        ? (snapshotRecentIds ?? recentPrankSoundIds)
+        : recentPrankSoundIds
     const recentOrder = new Map(
-      recentPrankSoundIds.map((id, index) => [id, index]),
+      recentSource.map((id, index) => [id, index] as const),
     )
 
     let pool: PrankSound[] = [...PRANKSTAR_SOUNDS]
@@ -73,7 +108,7 @@ export function PrankLibraryScreen() {
       pool = pool.filter((s) => s.category === category)
     }
 
-    const q = query.trim().toLowerCase()
+    const q = deferredQuery.trim().toLowerCase()
     if (q) {
       pool = pool.filter(
         (s) =>
@@ -97,10 +132,11 @@ export function PrankLibraryScreen() {
     return pool
   }, [
     category,
+    deferredQuery,
+    favoriteSet,
     filterMode,
-    prankSoundFavoriteIds,
-    query,
     recentPrankSoundIds,
+    snapshotRecentIds,
   ])
 
   const totalCatalog = PRANKSTAR_SOUNDS.length
@@ -284,7 +320,7 @@ export function PrankLibraryScreen() {
               const isPlaying = isActive && audio.status === "playing"
               const isLoading = isActive && audio.status === "loading"
               const isError = isActive && audio.status === "error"
-              const isFavorite = prankSoundFavoriteIds.includes(sound.id)
+              const isFavorite = favoriteSet.has(sound.id)
               return (
                 <li key={sound.id}>
                   <div
@@ -322,21 +358,23 @@ export function PrankLibraryScreen() {
                       type="button"
                       onClick={() => onPlay(sound)}
                       className="min-w-0 flex-1 text-left"
-                      aria-label={`Open ${sound.name}`}
+                      aria-label={
+                        isPlaying ? `Stop ${sound.name}` : `Play ${sound.name}`
+                      }
                     >
-                      <p className="truncate text-sm text-white/90">
+                      <span className="block truncate text-sm text-white/90">
                         {sound.name}
-                      </p>
-                      <p className="ps-mono text-[9px] tracking-[0.22em] text-white/45">
+                      </span>
+                      <span className="block ps-mono text-[9px] tracking-[0.22em] text-white/45">
                         {sound.category}
                         {sound.durationMs > 0
                           ? ` · ${(sound.durationMs / 1000).toFixed(1)}s`
                           : ""}
                         {sound.loopable ? " · LOOP" : ""}
                         {sound.isSafeForRandomMode ? "" : " · INTENSE"}
-                      </p>
+                      </span>
                       {sound.tags.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
+                        <span className="mt-1 flex flex-wrap gap-1">
                           {sound.tags.slice(0, 3).map((tag) => (
                             <span
                               key={tag}
@@ -345,7 +383,7 @@ export function PrankLibraryScreen() {
                               {tag}
                             </span>
                           ))}
-                        </div>
+                        </span>
                       )}
                     </button>
 
