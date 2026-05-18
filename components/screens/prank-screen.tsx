@@ -30,7 +30,8 @@ export function PrankScreen() {
   const { setScreen, recordPrankSoundPlay } = useApp()
   const audio = usePrankAudio()
   const featured = useMemo(() => getFeaturedPreviewSounds(8), [])
-  const totalCatalog = PRANKSTAR_SOUNDS.length
+  const totalPlayable = PRANKSTAR_SOUNDS.length
+  const totalDeferred = PRANKSTAR_CATALOG_DIAGNOSTICS.totalDeferred
 
   const onPlay = (sound: PrankSound) => {
     if (audio.currentSoundId === sound.id && audio.status === "playing") {
@@ -61,24 +62,29 @@ export function PrankScreen() {
           BRIEFING
         </p>
         <p className="mt-2 text-sm leading-relaxed text-white/85">
-          Prankstar Protocol is NEO&apos;s mischief subsystem — a curated
-          library of prank audio, ambient traps, and sound creation tools.
-          Phase 1 brings the sound catalog and playback engine online.
-          The full module suite arrives in upcoming integration phases.
+          Prankstar Protocol is NEO&apos;s mischief subsystem — curated prank
+          audio, generated mischief messages, and future timed traps.
+          The Sound Library and Prank Messages modules are live; further
+          modules arrive in upcoming phases.
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
-          <Stat label="CATALOG" value={String(totalCatalog)} accent="#ff2d9c" />
+          <Stat label="PLAYABLE" value={String(totalPlayable)} accent="#ff2d9c" />
           <Stat
             label="PREVIEW"
             value={String(featured.length)}
             accent="#00f0ff"
           />
           <Stat
-            label="PHASE"
-            value="01"
+            label="MODULES"
+            value="02"
             accent="#39ff14"
           />
         </div>
+        {totalDeferred > 0 && (
+          <p className="mt-2 ps-mono text-[9px] tracking-[0.22em] text-white/40">
+            +{totalDeferred} CATALOG ENTRIES DEFERRED · ASSETS PENDING
+          </p>
+        )}
       </NeonPanel>
 
       <div className="grid grid-cols-2 gap-2">
@@ -92,8 +98,9 @@ export function PrankScreen() {
         <ModuleCard
           icon={MessageSquareWarning}
           label="Prank Messages"
-          status="NEXT_PHASE"
+          status="LIVE"
           accent="#b829ff"
+          onClick={() => setScreen("prankMessages")}
         />
         <ModuleCard
           icon={TimerIcon}
@@ -201,7 +208,7 @@ export function PrankScreen() {
           onClick={() => setScreen("prankLibrary")}
           className="mt-3 flex w-full items-center justify-between rounded-lg border border-[#00f0ff]/40 bg-[#00f0ff]/10 px-3 py-2.5 ps-mono text-[10px] tracking-[0.22em] ps-text-cyan hover:bg-[#00f0ff]/20"
         >
-          OPEN_FULL_LIBRARY · {totalCatalog} SOUNDS
+          OPEN_FULL_LIBRARY · {totalPlayable} SOUNDS
           <ChevronRight className="h-4 w-4" />
         </button>
       </NeonPanel>

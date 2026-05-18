@@ -1,4 +1,5 @@
 import rawCatalog from "./soundCatalog.source.json"
+import playableManifest from "./playableSoundIds.generated.json"
 import type { PrankCategory, PrankSound } from "./types"
 
 /**
@@ -67,14 +68,34 @@ const NORMALIZED: PrankSound[] = (rawCatalog as RawEntry[])
   })
   .filter((s): s is PrankSound => s !== null)
 
-export const PRANKSTAR_SOUNDS: readonly PrankSound[] = NORMALIZED
+const PLAYABLE_ID_SET = new Set<string>(
+  (playableManifest as { playableIds: string[] }).playableIds,
+)
+
+/**
+ * Playable subset of the catalog — the canonical user-facing list. Entries
+ * whose audio files are not present on disk are excluded by the generated
+ * manifest (`playableSoundIds.generated.json`, refreshed by
+ * `scripts/validate-prankstar-assets.cjs`). Future asset drops re-include
+ * those entries automatically the next time the validator runs.
+ */
+const PLAYABLE: PrankSound[] = NORMALIZED.filter((s) => PLAYABLE_ID_SET.has(s.id))
+
+export const PRANKSTAR_SOUNDS: readonly PrankSound[] = PLAYABLE
+export const PRANKSTAR_ALL_CATALOG: readonly PrankSound[] = NORMALIZED
 
 export const PRANKSTAR_CATALOG_DIAGNOSTICS = {
   totalRaw: (rawCatalog as RawEntry[]).length,
   totalNormalized: NORMALIZED.length,
+  totalPlayable: PLAYABLE.length,
+  totalDeferred: NORMALIZED.length - PLAYABLE.length,
   duplicateIds,
   malformed,
 } as const
+
+export function isPlayableSoundId(id: string): boolean {
+  return PLAYABLE_ID_SET.has(id)
+}
 
 export function getAllSounds(): readonly PrankSound[] {
   return PRANKSTAR_SOUNDS

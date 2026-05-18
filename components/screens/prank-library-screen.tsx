@@ -25,6 +25,7 @@ import {
 import { useApp } from "@/lib/store"
 import { NeonPanel } from "../neon-panel"
 import {
+  PRANKSTAR_CATALOG_DIAGNOSTICS,
   PRANKSTAR_SOUNDS,
   getCategoryCounts,
   getSafeRandomSound,
@@ -182,8 +183,11 @@ export function PrankLibraryScreen() {
           <span className="text-white/90">LIBRARY</span>
         </h1>
         <p className="mt-1 ps-mono text-[10px] tracking-widest text-white/50">
-          {totalCatalog} CATALOG ENTRIES · {favoriteCount} FAVORITED ·{" "}
+          {totalCatalog} PLAYABLE · {favoriteCount} FAVORITED ·{" "}
           {recentCount} RECENT
+          {PRANKSTAR_CATALOG_DIAGNOSTICS.totalDeferred > 0
+            ? ` · +${PRANKSTAR_CATALOG_DIAGNOSTICS.totalDeferred} DEFERRED`
+            : ""}
         </p>
       </header>
 
@@ -434,8 +438,8 @@ export function PrankLibraryScreen() {
       </NeonPanel>
 
       <p className="ps-mono text-[9px] leading-relaxed tracking-[0.15em] text-white/40">
-        ASSETS RESOLVE FROM /prankstar/sounds/. MISSING FILES SURFACE AS ROW
-        ERRORS WITH THE ORIGINAL SOURCE PATH FOR DEBUGGING.
+        SOUND LIBRARY SHOWS CURRENTLY PLAYABLE ASSETS ONLY. ADDITIONAL CATALOG
+        ENTRIES REJOIN THE LIBRARY AUTOMATICALLY AS THEIR AUDIO FILES SHIP.
       </p>
     </div>
   )

@@ -23,6 +23,7 @@ import type {
   ChatMessage,
   ConversationMode,
   PersistedAppState,
+  PrankMessageRecord,
   RobotSource,
   SavedResponse,
   ScreenId,
@@ -46,6 +47,7 @@ import {
   appendNetworkEvents,
 } from "./network/networkEvents"
 import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
+import { isPlayableSoundId } from "./prankstar/soundCatalog"
 import {
   duplicateResponse,
   markResponseUsed,
@@ -85,6 +87,13 @@ interface AppState {
   recentPrankSoundIds: string[]
   togglePrankSoundFavorite: (id: string) => void
   recordPrankSoundPlay: (id: string) => void
+
+  prankMessageHistory: PrankMessageRecord[]
+  prankMessageFavorites: PrankMessageRecord[]
+  addPrankMessageToHistory: (m: PrankMessageRecord) => void
+  removePrankMessageFromHistory: (id: string) => void
+  clearPrankMessageHistory: () => void
+  togglePrankMessageFavorite: (m: PrankMessageRecord | string) => void
 
   personalityId: string
   setPersonalityId: (id: string) => void
@@ -352,6 +361,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [speedTestHistory, setSpeedTestHistory] = useState<SpeedTestResult[]>([])
   const [prankSoundFavoriteIds, setPrankSoundFavoriteIds] = useState<string[]>([])
   const [recentPrankSoundIds, setRecentPrankSoundIds] = useState<string[]>([])
+  const [prankMessageHistory, setPrankMessageHistory] = useState<PrankMessageRecord[]>([])
+  const [prankMessageFavorites, setPrankMessageFavorites] = useState<PrankMessageRecord[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -381,6 +392,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       speedTestHistory,
       prankSoundFavoriteIds,
       recentPrankSoundIds,
+      prankMessageHistory,
+      prankMessageFavorites,
     }),
     [
       accentColor,
@@ -397,6 +410,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       speedTestHistory,
       prankSoundFavoriteIds,
       recentPrankSoundIds,
+      prankMessageHistory,
+      prankMessageFavorites,
       personalityId,
       recentVoiceIds,
       responses,
@@ -461,10 +476,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (stored.networkAssistantSnapshot) setNetworkAssistantSnapshot(stored.networkAssistantSnapshot)
     if (stored.speedTestHistory?.length) setSpeedTestHistory(stored.speedTestHistory)
     if (stored.prankSoundFavoriteIds?.length) {
-      setPrankSoundFavoriteIds(stored.prankSoundFavoriteIds)
+      const filtered = stored.prankSoundFavoriteIds.filter(isPlayableSoundId)
+      if (filtered.length) setPrankSoundFavoriteIds(filtered)
     }
     if (stored.recentPrankSoundIds?.length) {
-      setRecentPrankSoundIds(stored.recentPrankSoundIds)
+      const filtered = stored.recentPrankSoundIds.filter(isPlayableSoundId)
+      if (filtered.length) setRecentPrankSoundIds(filtered)
+    }
+    if (stored.prankMessageHistory?.length) {
+      setPrankMessageHistory(stored.prankMessageHistory)
+    }
+    if (stored.prankMessageFavorites?.length) {
+      setPrankMessageFavorites(stored.prankMessageFavorites)
     }
   }, [])
 
@@ -570,6 +593,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return next.slice(0, 24)
     })
   }, [])
+
+  const addPrankMessageToHistory = useCallback((m: PrankMessageRecord) => {
+    setPrankMessageHistory((current) => {
+      const deduped = current.filter((existing) => existing.text !== m.text)
+      return [m, ...deduped].slice(0, 50)
+    })
+  }, [])
+
+  const removePrankMessageFromHistory = useCallback((id: string) => {
+    setPrankMessageHistory((current) => current.filter((m) => m.id !== id))
+  }, [])
+
+  const clearPrankMessageHistory = useCallback(() => {
+    setPrankMessageHistory([])
+  }, [])
+
+  const togglePrankMessageFavorite = useCallback(
+    (input: PrankMessageRecord | string) => {
+      if (typeof input === "string") {
+        setPrankMessageFavorites((current) =>
+          current.filter((m) => m.id !== input),
+        )
+        return
+      }
+      setPrankMessageFavorites((current) => {
+        const existingByText = current.find((m) => m.text === input.text)
+        if (existingByText) {
+          return current.filter((m) => m.id !== existingByText.id)
+        }
+        return [input, ...current].slice(0, 80)
+      })
+    },
+    [],
+  )
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -957,6 +1014,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             parsed.prankSoundFavoriteIds ?? prankSoundFavoriteIds,
           recentPrankSoundIds:
             parsed.recentPrankSoundIds ?? recentPrankSoundIds,
+          prankMessageHistory:
+            parsed.prankMessageHistory ?? prankMessageHistory,
+          prankMessageFavorites:
+            parsed.prankMessageFavorites ?? prankMessageFavorites,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -982,6 +1043,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       speedTestHistory,
       prankSoundFavoriteIds,
       recentPrankSoundIds,
+      prankMessageHistory,
+      prankMessageFavorites,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -1017,6 +1080,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSpeedTestHistory([])
     setPrankSoundFavoriteIds([])
     setRecentPrankSoundIds([])
+    setPrankMessageHistory([])
+    setPrankMessageFavorites([])
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -1051,6 +1116,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
       prankSoundFavoriteIds, recentPrankSoundIds,
       togglePrankSoundFavorite, recordPrankSoundPlay,
+      prankMessageHistory, prankMessageFavorites,
+      addPrankMessageToHistory, removePrankMessageFromHistory,
+      clearPrankMessageHistory, togglePrankMessageFavorite,
     }),
     [
       screen, mood, avatarReaction, voiceId, voiceFavoriteIds, recentVoiceIds, personalityId, voiceParams, conversationMode,
@@ -1079,6 +1147,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       exportSettings, importSettings, resetApp, playAvatarReaction, clearAvatarReaction, setPersonalityId,
       prankSoundFavoriteIds, recentPrankSoundIds,
       togglePrankSoundFavorite, recordPrankSoundPlay,
+      prankMessageHistory, prankMessageFavorites,
+      addPrankMessageToHistory, removePrankMessageFromHistory,
+      clearPrankMessageHistory, togglePrankMessageFavorite,
     ],
   )
 

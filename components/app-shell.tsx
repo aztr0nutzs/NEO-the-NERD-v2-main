@@ -15,6 +15,7 @@ import { NetworkScreen } from "./screens/network-screen"
 import { LibraryScreen } from "./screens/library-screen"
 import { PrankScreen } from "./screens/prank-screen"
 import { PrankLibraryScreen } from "./screens/prank-library-screen"
+import { PrankMessagesScreen } from "./screens/prank-messages-screen"
 import { SettingsScreen } from "./screens/settings-screen"
 import { SpeedTestScreen } from "./screens/speed-test-screen"
 import { NeoBackgroundScene } from "./background/neo-background-scene"
@@ -34,6 +35,7 @@ const SCREEN_MAP = {
   library: LibraryScreen,
   prank: PrankScreen,
   prankLibrary: PrankLibraryScreen,
+  prankMessages: PrankMessagesScreen,
   settings: SettingsScreen,
 } as const
 

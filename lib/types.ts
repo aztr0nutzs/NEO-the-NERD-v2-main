@@ -162,6 +162,17 @@ export interface PersistedAppState {
   speedTestHistory?: SpeedTestResult[]
   prankSoundFavoriteIds?: string[]
   recentPrankSoundIds?: string[]
+  prankMessageFavorites?: PrankMessageRecord[]
+  prankMessageHistory?: PrankMessageRecord[]
+}
+
+export interface PrankMessageRecord {
+  id: string
+  text: string
+  categoryId: string
+  toneId: string
+  personalityId?: string
+  createdAt: number
 }
 
 export type ConversationMode =
@@ -282,4 +293,5 @@ export type ScreenId =
   | "library"
   | "prank"
   | "prankLibrary"
+  | "prankMessages"
   | "settings"
