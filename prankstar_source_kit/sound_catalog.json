@@ -1,0 +1,7013 @@
+[
+  {
+    "id": "sounds_ambience_computernoise_000_ogg",
+    "name": "Computernoise 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/computerNoise_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_computernoise_001_ogg",
+    "name": "Computernoise 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/computerNoise_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_computernoise_002_ogg",
+    "name": "Computernoise 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/computerNoise_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_computernoise_003_ogg",
+    "name": "Computernoise 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/computerNoise_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_doorclose_000_ogg",
+    "name": "Doorclose 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/doorClose_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_doorclose_001_ogg",
+    "name": "Doorclose 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/doorClose_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_doorclose_002_ogg",
+    "name": "Doorclose 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/doorClose_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_dooropen_000_ogg",
+    "name": "Dooropen 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/doorOpen_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_dooropen_001_ogg",
+    "name": "Dooropen 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/doorOpen_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_dooropen_002_ogg",
+    "name": "Dooropen 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/doorOpen_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_enginecircular_000_ogg",
+    "name": "Enginecircular 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/engineCircular_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_enginecircular_001_ogg",
+    "name": "Enginecircular 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/engineCircular_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_enginecircular_002_ogg",
+    "name": "Enginecircular 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/engineCircular_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_enginecircular_003_ogg",
+    "name": "Enginecircular 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/engineCircular_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_enginecircular_004_ogg",
+    "name": "Enginecircular 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/engineCircular_004.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_explosioncrunch_000_ogg",
+    "name": "Explosioncrunch 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/explosionCrunch_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_explosioncrunch_001_ogg",
+    "name": "Explosioncrunch 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/explosionCrunch_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_explosioncrunch_002_ogg",
+    "name": "Explosioncrunch 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/explosionCrunch_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_explosioncrunch_003_ogg",
+    "name": "Explosioncrunch 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/explosionCrunch_003.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_explosioncrunch_004_ogg",
+    "name": "Explosioncrunch 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/explosionCrunch_004.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_forcefield_000_ogg",
+    "name": "Forcefield 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/forceField_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_forcefield_001_ogg",
+    "name": "Forcefield 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/forceField_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_forcefield_002_ogg",
+    "name": "Forcefield 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/forceField_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_forcefield_003_ogg",
+    "name": "Forcefield 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/forceField_003.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_forcefield_004_ogg",
+    "name": "Forcefield 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/forceField_004.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_impactmetal_000_ogg",
+    "name": "Impactmetal 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/impactMetal_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_impactmetal_001_ogg",
+    "name": "Impactmetal 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/impactMetal_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_impactmetal_002_ogg",
+    "name": "Impactmetal 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/impactMetal_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_impactmetal_003_ogg",
+    "name": "Impactmetal 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/impactMetal_003.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_impactmetal_004_ogg",
+    "name": "Impactmetal 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/impactMetal_004.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserlarge_000_ogg",
+    "name": "Laserlarge 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserLarge_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserlarge_001_ogg",
+    "name": "Laserlarge 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserLarge_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserlarge_002_ogg",
+    "name": "Laserlarge 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserLarge_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserlarge_003_ogg",
+    "name": "Laserlarge 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserLarge_003.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserlarge_004_ogg",
+    "name": "Laserlarge 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserLarge_004.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserretro_000_ogg",
+    "name": "Laserretro 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserRetro_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserretro_001_ogg",
+    "name": "Laserretro 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserRetro_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserretro_002_ogg",
+    "name": "Laserretro 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserRetro_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserretro_003_ogg",
+    "name": "Laserretro 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserRetro_003.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_laserretro_004_ogg",
+    "name": "Laserretro 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserRetro_004.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lasersmall_000_ogg",
+    "name": "Lasersmall 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserSmall_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lasersmall_001_ogg",
+    "name": "Lasersmall 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserSmall_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lasersmall_002_ogg",
+    "name": "Lasersmall 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserSmall_002.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lasersmall_003_ogg",
+    "name": "Lasersmall 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserSmall_003.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lasersmall_004_ogg",
+    "name": "Lasersmall 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/laserSmall_004.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lowfrequency_explosion_000_ogg",
+    "name": "Lowfrequency Explosion 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/lowFrequency_explosion_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_lowfrequency_explosion_001_ogg",
+    "name": "Lowfrequency Explosion 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/lowFrequency_explosion_001.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_slime_000_ogg",
+    "name": "Slime 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/slime_000.ogg",
+    "durationMs": 0,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_slime_001_ogg",
+    "name": "Slime 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/slime_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceengine_000_ogg",
+    "name": "Spaceengine 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngine_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceengine_001_ogg",
+    "name": "Spaceengine 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngine_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceengine_002_ogg",
+    "name": "Spaceengine 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngine_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceengine_003_ogg",
+    "name": "Spaceengine 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngine_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelarge_000_ogg",
+    "name": "Spaceenginelarge 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLarge_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelarge_001_ogg",
+    "name": "Spaceenginelarge 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLarge_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelarge_002_ogg",
+    "name": "Spaceenginelarge 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLarge_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelarge_003_ogg",
+    "name": "Spaceenginelarge 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLarge_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelarge_004_ogg",
+    "name": "Spaceenginelarge 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLarge_004.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelow_000_ogg",
+    "name": "Spaceenginelow 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLow_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelow_001_ogg",
+    "name": "Spaceenginelow 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLow_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelow_002_ogg",
+    "name": "Spaceenginelow 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLow_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelow_003_ogg",
+    "name": "Spaceenginelow 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLow_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginelow_004_ogg",
+    "name": "Spaceenginelow 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineLow_004.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginesmall_000_ogg",
+    "name": "Spaceenginesmall 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineSmall_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginesmall_001_ogg",
+    "name": "Spaceenginesmall 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineSmall_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginesmall_002_ogg",
+    "name": "Spaceenginesmall 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineSmall_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginesmall_003_ogg",
+    "name": "Spaceenginesmall 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineSmall_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_spaceenginesmall_004_ogg",
+    "name": "Spaceenginesmall 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/spaceEngineSmall_004.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_thrusterfire_000_ogg",
+    "name": "Thrusterfire 000",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/thrusterFire_000.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_thrusterfire_001_ogg",
+    "name": "Thrusterfire 001",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/thrusterFire_001.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_thrusterfire_002_ogg",
+    "name": "Thrusterfire 002",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/thrusterFire_002.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_thrusterfire_003_ogg",
+    "name": "Thrusterfire 003",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/thrusterFire_003.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_ambience_thrusterfire_004_ogg",
+    "name": "Thrusterfire 004",
+    "category": "AMBIENCE",
+    "packId": "ambience_pack",
+    "assetPath": "sounds/ambience/thrusterFire_004.wav",
+    "durationMs": 1200,
+    "tags": [
+      "ambience",
+      "tech_scifi"
+    ],
+    "loopable": true,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Ambience prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_audiopapkin_big_dog_barking_300504_mp3",
+    "name": "Big Dog Barking",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/audiopapkin-big-dog-barking-300504.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_sound_garage_cat_meow_8_fx_306184_mp3",
+    "name": "Cat Meow 8 Fx",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/sound_garage-cat-meow-8-fx-306184.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_soundreality_cat_meow_fx_461188_mp3",
+    "name": "Cat Meow Fx",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/soundreality-cat-meow-fx-461188.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_virtual_vibes_cat_meow_sound_383823_mp3",
+    "name": "Cat Meow Sound",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/virtual_vibes-cat-meow-sound-383823.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_digitalstore07_chicken_430403_mp3",
+    "name": "Chicken",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/digitalstore07-chicken-430403.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "chickens"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_ribhavagrawal_chicken_cluking_type_3_293320_mp3",
+    "name": "Chicken Cluking Type 3",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/ribhavagrawal-chicken-cluking-type-3-293320.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "chickens"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_kakaist_crow_sfx_318131_mp3",
+    "name": "Crow Sfx",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/kakaist-crow-sfx-318131.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_iedurodrigues_eagle_scream_112940_mp3",
+    "name": "Eagle Scream",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/iedurodrigues-eagle-scream-112940.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_46268990_funny_cat_meow_246012_mp3",
+    "name": "Funny Cat Meow",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/46268990-funny-cat-meow-246012.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_x_bass6668_funny_meow_110120_mp3",
+    "name": "Funny Meow",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/x_bass6668-funny-meow-110120.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_flutie8211_gorilla_roar_523007_mp3",
+    "name": "Gorilla Roar",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/flutie8211-gorilla-roar-523007.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_arunangshubanerjee_kitten_calling_for_mother_cute_meowing_sound_332671_mp3",
+    "name": "Kitten Calling For Mother Cute Meowing Sound",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/arunangshubanerjee-kitten-calling-for-mother-cute-meowing-sound-332671.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_feedthestraycats_kitten_sound_2_354217_mp3",
+    "name": "Kitten Sound 2",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/feedthestraycats-kitten-sound-2-354217.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_flutie8211_leopard_frogs_croaking_410123_mp3",
+    "name": "Leopard Frogs Croaking",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/flutie8211-leopard-frogs-croaking-410123.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_engyclick_lion_roaring_sound_effect_440951_mp3",
+    "name": "Lion Roaring Sound Effect",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/engyclick-lion-roaring-sound-effect-440951.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_flutie8211_monkey_chattering_494429_mp3",
+    "name": "Monkey Chattering",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/flutie8211-monkey-chattering-494429.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_audiopapkin_monster_footsteps_on_gravel_295850_mp3",
+    "name": "Monster Footsteps On Gravel",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/audiopapkin-monster-footsteps-on-gravel-295850.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_lazychillzone_owl_hooting_223549_mp3",
+    "name": "Owl Hooting",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/lazychillzone-owl-hooting-223549.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_oxidvideos_rooster_crowing_in_the_morning_513410_mp3",
+    "name": "Rooster Crowing In The Morning",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/oxidvideos-rooster-crowing-in-the-morning-513410.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "chickens"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_floraphonic_rubber_chicken_squeak_toy_1_181416_mp3",
+    "name": "Rubber Chicken Squeak Toy 1",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/floraphonic-rubber-chicken-squeak-toy-1-181416.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "chickens"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_u_kse9ncnirq_sea_monster_screaming_loudly_414878_mp3",
+    "name": "Sea Monster Screaming Loudly",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/u_kse9ncnirq-sea-monster-screaming-loudly-414878.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_sound_garage_seagulls_squawking_7_fx_401397_mp3",
+    "name": "Seagulls Squawking 7 Fx",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/sound_garage-seagulls-squawking-7-fx-401397.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_flutie8211_several_monkeys_chattering_version_1_502861_mp3",
+    "name": "Several Monkeys Chattering Version 1",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/flutie8211-several-monkeys-chattering-version-1-502861.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "birds_small_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_scottishperson_sound_effect_dog_crying_05_367321_mp3",
+    "name": "Sound Effect Dog Crying 05",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/scottishperson-sound-effect-dog-crying-05-367321.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_cat_purr_sfx_482870_mp3",
+    "name": "Studio Cat Purr Sfx",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-cat-purr-sfx-482870.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_chicken_sounds_487676_mp3",
+    "name": "Studio Chicken Sounds",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-chicken-sounds-487676.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "chickens"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_creepy_monster_growling_472378_mp3",
+    "name": "Studio Creepy Monster Growling",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-creepy-monster-growling-472378.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_dog_bark_sound_450454_mp3",
+    "name": "Studio Dog Bark Sound",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-dog-bark-sound-450454.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_dog_barking_406629_mp3",
+    "name": "Studio Dog Barking",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-dog-barking-406629.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_elephant_trumpeting_494313_mp3",
+    "name": "Studio Elephant Trumpeting",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-elephant-trumpeting-494313.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_goat_sound_390298_mp3",
+    "name": "Studio Goat Sound",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-goat-sound-390298.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_horse_neigh_515279_mp3",
+    "name": "Studio Horse Neigh",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-horse-neigh-515279.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_howling_wolves_515977_mp3",
+    "name": "Studio Howling Wolves",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-howling-wolves-515977.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_meowing_cat_401728_mp3",
+    "name": "Studio Meowing Cat",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-meowing-cat-401728.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "cats_dogs"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_monster_growl_390285_mp3",
+    "name": "Studio Monster Growl",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-monster-growl-390285.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_rooster_crowing_364473_mp3",
+    "name": "Studio Rooster Crowing",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-rooster-crowing-364473.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "chickens"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dragon_studio_wolf_howl_2_359870_mp3",
+    "name": "Studio Wolf Howl 2",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dragon-studio-wolf-howl-2-359870.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_animal_dffdv_tiger_attack_195840_mp3",
+    "name": "Tiger Attack",
+    "category": "ANIMAL",
+    "packId": "animal_pack",
+    "assetPath": "sounds/animal/dffdv-tiger-attack-195840.mp3",
+    "durationMs": 0,
+    "tags": [
+      "animal",
+      "big_animals"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Animal prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_betoelguapillo_cartoon_eating_sound_effect_427528_mp3",
+    "name": "Cartoon Eating Sound Effect",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/betoelguapillo-cartoon-eating-sound-effect-427528.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_shrek_30_cartoon_hammer_answer_341914_1_mp3",
+    "name": "Cartoon Hammer Answer",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/shrek_30-cartoon-hammer-answer-341914 (1).mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_freesound_community_cartoon_scream_1_6835_mp3",
+    "name": "Cartoon Scream 1",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/freesound_community-cartoon-scream-1-6835.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_frequencyoasis_cartoon_sound_162895_mp3",
+    "name": "Cartoon Sound",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/frequencyoasis-cartoon-sound-162895.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_freesound_community_cartoon_spin_7120_mp3",
+    "name": "Cartoon Spin",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/freesound_community-cartoon-spin-7120.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_universfield_cartoon_splat_310479_mp3",
+    "name": "Cartoon Splat",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/universfield-cartoon-splat-310479.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_superv007_cartoon_stomach_growling_sfx_357010_mp3",
+    "name": "Cartoon Stomach Growling Sfx",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/superv007-cartoon-stomach-growling-sfx-357010.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_11325622_cartoon_violin_sound_effect_241389_mp3",
+    "name": "Cartoon Violin Sound Effect",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/11325622-cartoon-violin-sound-effect-241389.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_shut_up_ghost_cartoon_yay_140921_mp3",
+    "name": "Cartoon Yay",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/shut_up_ghost-cartoon-yay-140921.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_freesound_community_funny_evil_cartoon_voice_with_laugh_14623_mp3",
+    "name": "Funny Evil Cartoon Voice With Laugh",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/freesound_community-funny-evil-cartoon-voice-with-laugh-14623.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_shrek_30_hide_from_the_clown_339207_mp3",
+    "name": "Hide From The Clown",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/shrek_30-hide-from-the-clown-339207.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_cartoon_music_soundtrack_angry_cat_meow_513483_mp3",
+    "name": "Music Soundtrack Angry Cat Meow",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/cartoon-music-soundtrack-angry-cat-meow-513483.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_cartoon_music_soundtrack_bear_snarl_short_516892_mp3",
+    "name": "Music Soundtrack Bear Snarl Short",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/cartoon-music-soundtrack-bear-snarl-short-516892.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_cartoon_dragon_studio_cartoon_hyena_laugh_487674_mp3",
+    "name": "Studio Cartoon Hyena Laugh",
+    "category": "CARTOON",
+    "packId": "cartoon_pack",
+    "assetPath": "sounds/cartoon/dragon-studio-cartoon-hyena-laugh-487674.mp3",
+    "durationMs": 0,
+    "tags": [
+      "cartoon",
+      "cartoons"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Cartoon prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_creepy_mpopovych_horror_3_447784_mp3",
+    "name": "Horror 3",
+    "category": "CREEPY",
+    "packId": "creepy_pack",
+    "assetPath": "sounds/creepy/mpopovych-horror-3-447784.mp3",
+    "durationMs": 0,
+    "tags": [
+      "creepy",
+      "horror"
+    ],
+    "loopable": false,
+    "intensityLevel": 3,
+    "isSafeForRandomMode": false,
+    "description": "Creepy prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "creepy",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_creepy_nebutas_japanese_scream_384854_mp3",
+    "name": "Japanese Scream",
+    "category": "CREEPY",
+    "packId": "creepy_pack",
+    "assetPath": "sounds/creepy/nebutas-japanese-scream-384854.mp3",
+    "durationMs": 0,
+    "tags": [
+      "creepy",
+      "horror"
+    ],
+    "loopable": false,
+    "intensityLevel": 3,
+    "isSafeForRandomMode": false,
+    "description": "Creepy prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "creepy",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_creepy_vanzetpictures_night_sounds_457907_mp3",
+    "name": "Night Sounds",
+    "category": "CREEPY",
+    "packId": "creepy_pack",
+    "assetPath": "sounds/creepy/vanzetpictures-night-sounds-457907.mp3",
+    "durationMs": 0,
+    "tags": [
+      "creepy",
+      "horror"
+    ],
+    "loopable": false,
+    "intensityLevel": 3,
+    "isSafeForRandomMode": false,
+    "description": "Creepy prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "creepy",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_bondage_clown_show_30915_mp3",
+    "name": "Bondage Clown Show",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-bondage-clown-show-30915.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "clowns"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_byronatoraustralia_circus_11794_mp3",
+    "name": "Circus",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/byronatoraustralia-circus-11794.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "clowns"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_pantoman_clown_come_here_487802_mp3",
+    "name": "Clown Come Here",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/pantoman-clown-come-here-487802.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "clowns"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_clown_horn_44595_mp3",
+    "name": "Clown Horn",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-clown-horn-44595.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "clowns"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_magiaz_clown_laughter_422540_mp3",
+    "name": "Clown Laughter",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/magiaz-clown_laughter-422540.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_funny_kids_5_99755_mp3",
+    "name": "Funny Kids 5",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-funny-kids-5-99755.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_digitalstore07_funny_laughing_430381_mp3",
+    "name": "Funny Laughing",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/digitalstore07-funny-laughing-430381.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_mangaletp_funny_laughing_406018_mp3",
+    "name": "Funny Laughing",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/mangaletp-funny-laughing-406018.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_yoursperfectguy_funny_minion_message_notification_sound_effect_sfx_334708_mp3",
+    "name": "Funny Minion Message Notification Sound Effect Sfx",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/yoursperfectguy-funny-minion-message-notification-sound-effect-sfx-334708.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "minions"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_yoursperfectguy_funny_minion_message_notification_sound_effect_sfx_2_337210_1_mp3",
+    "name": "Funny Minion Message Notification Sound Effect Sfx 2",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/yoursperfectguy-funny-minion-message-notification-sound-effect-sfx-2-337210 (1).mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "minions"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_funny_secrect_laughing_baby_40554_mp3",
+    "name": "Funny Secrect Laughing Baby",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-funny-secrect-laughing-baby-40554.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_grito_81340_mp3",
+    "name": "Grito",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-grito-81340.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "minions"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_laugh_that_was_funny_104610_mp3",
+    "name": "Laugh That Was Funny",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-laugh-that-was-funny-104610.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_minion_voicewav_14419_mp3",
+    "name": "Minion Voicewav",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-minion-voicewav-14419.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "minions"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_freesound_community_minion1_81343_mp3",
+    "name": "Minion1",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/freesound_community-minion1-81343.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "minions"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_dragon_studio_clown_car_horn_487659_mp3",
+    "name": "Studio Clown Car Horn",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/dragon-studio-clown-car-horn-487659.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "clowns"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_funny_dragon_studio_creepy_laugh_2_401714_mp3",
+    "name": "Studio Creepy Laugh 2",
+    "category": "FUNNY",
+    "packId": "funny_pack",
+    "assetPath": "sounds/funny/dragon-studio-creepy-laugh-2-401714.mp3",
+    "durationMs": 0,
+    "tags": [
+      "funny",
+      "laughing"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Funny prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_belthandle1_ogg",
+    "name": "Belthandle1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/beltHandle1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_belthandle2_ogg",
+    "name": "Belthandle2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/beltHandle2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookclose_ogg",
+    "name": "Bookclose",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookClose.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookflip1_ogg",
+    "name": "Bookflip1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookFlip1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookflip2_ogg",
+    "name": "Bookflip2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookFlip2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookflip3_ogg",
+    "name": "Bookflip3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookFlip3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookopen_ogg",
+    "name": "Bookopen",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookOpen.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookplace1_ogg",
+    "name": "Bookplace1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookPlace1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookplace2_ogg",
+    "name": "Bookplace2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookPlace2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_bookplace3_ogg",
+    "name": "Bookplace3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/bookPlace3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_chop_ogg",
+    "name": "Chop",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/chop.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_cloth1_ogg",
+    "name": "Cloth1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/cloth1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_cloth2_ogg",
+    "name": "Cloth2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/cloth2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_cloth3_ogg",
+    "name": "Cloth3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/cloth3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_cloth4_ogg",
+    "name": "Cloth4",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/cloth4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_clothbelt_ogg",
+    "name": "Clothbelt",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/clothBelt.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_clothbelt2_ogg",
+    "name": "Clothbelt2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/clothBelt2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_creak1_ogg",
+    "name": "Creak1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/creak1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_creak2_ogg",
+    "name": "Creak2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/creak2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_creak3_ogg",
+    "name": "Creak3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/creak3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_doorclose_1_ogg",
+    "name": "Doorclose 1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/doorClose_1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_doorclose_2_ogg",
+    "name": "Doorclose 2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/doorClose_2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_doorclose_3_ogg",
+    "name": "Doorclose 3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/doorClose_3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_doorclose_4_ogg",
+    "name": "Doorclose 4",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/doorClose_4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_dooropen_1_ogg",
+    "name": "Dooropen 1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/doorOpen_1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_dooropen_2_ogg",
+    "name": "Dooropen 2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/doorOpen_2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_drawknife1_ogg",
+    "name": "Drawknife1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/drawKnife1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_drawknife2_ogg",
+    "name": "Drawknife2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/drawKnife2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_drawknife3_ogg",
+    "name": "Drawknife3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/drawKnife3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_dropleather_ogg",
+    "name": "Dropleather",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/dropLeather.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_delon_boomkin_evil_organ_sting_medium_413771_mp3",
+    "name": "Evil Organ Sting Medium",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/delon_boomkin-evil-organ-sting-medium-413771.mp3",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "tones_effects"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep00_ogg",
+    "name": "Footstep00",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep00.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep01_ogg",
+    "name": "Footstep01",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep01.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep02_ogg",
+    "name": "Footstep02",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep02.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep03_ogg",
+    "name": "Footstep03",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep03.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep04_ogg",
+    "name": "Footstep04",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep04.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep05_ogg",
+    "name": "Footstep05",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep05.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep06_ogg",
+    "name": "Footstep06",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep06.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep07_ogg",
+    "name": "Footstep07",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep07.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep08_ogg",
+    "name": "Footstep08",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep08.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_footstep09_ogg",
+    "name": "Footstep09",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/footstep09.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_handlecoins_ogg",
+    "name": "Handlecoins",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/handleCoins.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_handlecoins2_ogg",
+    "name": "Handlecoins2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/handleCoins2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_handlesmallleather_ogg",
+    "name": "Handlesmallleather",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/handleSmallLeather.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_handlesmallleather2_ogg",
+    "name": "Handlesmallleather2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/handleSmallLeather2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_digitalstore07_horn_430368_mp3",
+    "name": "Horn",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/digitalstore07-horn-430368.mp3",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "tones_effects"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_knifeslice_ogg",
+    "name": "Knifeslice",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/knifeSlice.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_knifeslice2_ogg",
+    "name": "Knifeslice2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/knifeSlice2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_metalclick_ogg",
+    "name": "Metalclick",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/metalClick.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_metallatch_ogg",
+    "name": "Metallatch",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/metalLatch.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_metalpot1_ogg",
+    "name": "Metalpot1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/metalPot1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_metalpot2_ogg",
+    "name": "Metalpot2",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/metalPot2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_metalpot3_ogg",
+    "name": "Metalpot3",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/metalPot3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "rpg"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_freesound_community_squeaky_toy_1_6059_mp3",
+    "name": "Squeaky Toy 1",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/freesound_community-squeaky-toy-1-6059.mp3",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "tones_effects"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_digitalstore07_toy_430379_mp3",
+    "name": "Toy",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/digitalstore07-toy-430379.mp3",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "tones_effects"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_misc_delon_boomkin_wet_farts_meme_sound_effect_474222_mp3",
+    "name": "Wet Farts Meme Sound Effect",
+    "category": "MISC",
+    "packId": "misc_pack",
+    "assetPath": "sounds/misc/delon_boomkin-wet-farts-meme-sound-effect-474222.mp3",
+    "durationMs": 0,
+    "tags": [
+      "misc",
+      "tones_effects"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Misc prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_1_ogg",
+    "name": "1",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_1_ogg",
+    "name": "1",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_1_ogg",
+    "name": "1",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_10_ogg",
+    "name": "10",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/10.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_10_ogg",
+    "name": "10",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/10.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_10_ogg",
+    "name": "10",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/10.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_2_ogg",
+    "name": "2",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_2_ogg",
+    "name": "2",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_2_ogg",
+    "name": "2",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_3_ogg",
+    "name": "3",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_3_ogg",
+    "name": "3",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_3_ogg",
+    "name": "3",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_4_ogg",
+    "name": "4",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_4_ogg",
+    "name": "4",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_4_ogg",
+    "name": "4",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_5_ogg",
+    "name": "5",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/5.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_5_ogg",
+    "name": "5",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/5.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_5_ogg",
+    "name": "5",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/5.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_6_ogg",
+    "name": "6",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/6.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_6_ogg",
+    "name": "6",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/6.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_6_ogg",
+    "name": "6",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/6.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_7_ogg",
+    "name": "7",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/7.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_7_ogg",
+    "name": "7",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/7.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_7_ogg",
+    "name": "7",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/7.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_8_ogg",
+    "name": "8",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/8.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_8_ogg",
+    "name": "8",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/8.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_8_ogg",
+    "name": "8",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/8.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_9_ogg",
+    "name": "9",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/9.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_9_ogg",
+    "name": "9",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/9.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_9_ogg",
+    "name": "9",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/9.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_a_little_bit_drunk_76464_mp3",
+    "name": "A Little Bit Drunk",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-a-little-bit-drunk-76464.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_alien_voice_102709_mp3",
+    "name": "Alien Voice",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-alien-voice-102709.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_arcade_mode_ogg",
+    "name": "Arcade Mode",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/arcade_mode.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_battle_mode_ogg",
+    "name": "Battle Mode",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/battle_mode.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_begin_ogg",
+    "name": "Begin",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/begin.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_brains_brains_101087_mp3",
+    "name": "Brains Brains",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-brains-brains-101087.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_broke_my_window_88754_mp3",
+    "name": "Broke My Window",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-broke-my-window-88754.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_championship_mode_ogg",
+    "name": "Championship Mode",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/championship_mode.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_choose_your_character_ogg",
+    "name": "Choose Your Character",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/choose_your_character.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_combo_ogg",
+    "name": "Combo",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/combo.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_combo_breaker_ogg",
+    "name": "Combo Breaker",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/combo_breaker.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_congratulations_ogg",
+    "name": "Congratulations",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/congratulations.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_congratulations_ogg",
+    "name": "Congratulations",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/congratulations.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_correct_ogg",
+    "name": "Correct",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/correct.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_correct_ogg",
+    "name": "Correct",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/correct.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_voicebosch_cowabunga_voiced_165997_mp3",
+    "name": "Cowabunga Voiced",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/voicebosch-cowabunga-voiced-165997.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_deathmatch_ogg",
+    "name": "Deathmatch",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/deathmatch.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_flutie8211_duh_duh_duh_458701_mp3",
+    "name": "Duh Duh Duh",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/flutie8211-duh-duh-duh-458701.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_elf_singing_89296_mp3",
+    "name": "Elf Singing",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-elf-singing-89296.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_fight_ogg",
+    "name": "Fight",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/fight.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_final_round_ogg",
+    "name": "Final Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/final_round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_final_round_ogg",
+    "name": "Final Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/final_round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_final_round_ogg",
+    "name": "Final Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/final_round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_flawless_victory_ogg",
+    "name": "Flawless Victory",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/flawless_victory.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_funniest_thing_001_85094_mp3",
+    "name": "Funniest Thing 001",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-funniest-thing-001-85094.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_universfield_funny_dramatic_gasp_320975_mp3",
+    "name": "Funny Dramatic Gasp",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/universfield-funny-dramatic-gasp-320975.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_funny_yay_6273_mp3",
+    "name": "Funny Yay",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-funny-yay-6273.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_funnyah_104839_mp3",
+    "name": "Funnyah",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-funnyah-104839.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_game_over_ogg",
+    "name": "Game Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/game_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_game_over_ogg",
+    "name": "Game Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/game_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_game_over_ogg",
+    "name": "Game Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/game_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_go_ogg",
+    "name": "Go",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/go.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_go_ogg",
+    "name": "Go",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/go.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_haters_80586_mp3",
+    "name": "Haters",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-haters-80586.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_helium04_j008b_107461_mp3",
+    "name": "Helium04 J008B",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-helium04_j008b-107461.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_hold_ogg",
+    "name": "Hold",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/hold.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_hurry_up_ogg",
+    "name": "Hurry Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/hurry_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_hurry_up_ogg",
+    "name": "Hurry Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/hurry_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_is_here_to_save_you_107519_mp3",
+    "name": "Is Here To Save You",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-is-here-to-save-you-107519.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_it_s_a_tie_ogg",
+    "name": "It's A Tie",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/its_a_tie.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_its_a_tie_ogg",
+    "name": "Its A Tie",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/its_a_tie.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_its_a_tie_ogg",
+    "name": "Its A Tie",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/its_a_tie.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_flutie8211_just_look_at_that_with_laugh_451577_mp3",
+    "name": "Just Look At That With Laugh",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/flutie8211-just-look-at-that-with-laugh-451577.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_kill_her_ogg",
+    "name": "Kill Her",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/kill_her.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_kill_him_ogg",
+    "name": "Kill Him",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/kill_him.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_kill_it_ogg",
+    "name": "Kill It",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/kill_it.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_level_ogg",
+    "name": "Level",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/level.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_level_ogg",
+    "name": "Level",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/level.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_level_up_ogg",
+    "name": "Level Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/level_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_level_up_ogg",
+    "name": "Level Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/level_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_loser_ogg",
+    "name": "Loser",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/loser.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_male_voice_bum_bum_104098_mp3",
+    "name": "Male Voice Bum Bum",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-male-voice-bum-bum-104098.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_moutchitos_mario_grabish_14183_mp3",
+    "name": "Mario Grabish",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/moutchitos-mario-grabish-14183.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_mission_completed_ogg",
+    "name": "Mission Completed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/mission_completed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_mission_completed_ogg",
+    "name": "Mission Completed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/mission_completed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_mission_failed_ogg",
+    "name": "Mission Failed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/mission_failed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_mission_failed_ogg",
+    "name": "Mission Failed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/mission_failed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_multi_kill_ogg",
+    "name": "Multi Kill",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/multi_kill.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_adlibs_sfx_my_dude_youx27re_funny_sfx_332927_mp3",
+    "name": "My Dude Youx27Re Funny Sfx",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/adlibs_sfx-my-dude-youx27re-funny-sfx-332927.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_new_highscore_ogg",
+    "name": "New Highscore",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/new_highscore.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_new_highscore_ogg",
+    "name": "New Highscore",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/new_highscore.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_universfield_no_no_no_03_276680_mp3",
+    "name": "No No No 03",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/universfield-no-no-no-03-276680.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_objective_achieved_ogg",
+    "name": "Objective Achieved",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/objective_achieved.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_objective_achieved_ogg",
+    "name": "Objective Achieved",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/objective_achieved.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_alex_jauk_oh_my_god_185142_mp3",
+    "name": "Oh My God",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/alex_jauk-oh-my-god-185142.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_player_1_ogg",
+    "name": "Player 1",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/player_1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_player_2_ogg",
+    "name": "Player 2",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/player_2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_alanajordan_please_verify_you_are_a_human_spoken_264398_mp3",
+    "name": "Please Verify You Are A Human Spoken",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/alanajordan-please-verify-you-are-a-human-spoken-264398.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_power_up_ogg",
+    "name": "Power Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/power_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_power_up_ogg",
+    "name": "Power Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/power_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_prepare_yourself_ogg",
+    "name": "Prepare Yourself",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/prepare_yourself.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_random_voices_full_of_nothing_23083_mp3",
+    "name": "Random Voices Full Of Nothing",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-random-voices-full-of-nothing-23083.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_ready_ogg",
+    "name": "Ready",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/ready.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_ready_ogg",
+    "name": "Ready",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/ready.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_ready_ogg",
+    "name": "Ready",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/ready.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_round_ogg",
+    "name": "Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_round_ogg",
+    "name": "Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_round_1_ogg",
+    "name": "Round 1",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/round_1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_round_2_ogg",
+    "name": "Round 2",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/round_2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_round_3_ogg",
+    "name": "Round 3",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/round_3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_round_4_ogg",
+    "name": "Round 4",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/round_4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_round_5_ogg",
+    "name": "Round 5",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/round_5.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_set_ogg",
+    "name": "Set",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/set.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_set_ogg",
+    "name": "Set",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/set.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_sooo_funny_82640_mp3",
+    "name": "Sooo Funny",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-sooo-funny-82640.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_story_mode_ogg",
+    "name": "Story Mode",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/story_mode.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_sudden_death_ogg",
+    "name": "Sudden Death",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/sudden_death.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_survival_mode_ogg",
+    "name": "Survival Mode",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/survival_mode.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_tie_ogg",
+    "name": "Tie",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/tie.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_tie_breaker_ogg",
+    "name": "Tie Breaker",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/tie_breaker.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_time_ogg",
+    "name": "Time",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/time.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_time_over_ogg",
+    "name": "Time Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/time_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_time_over_ogg",
+    "name": "Time Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/time_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_call_for_backup_ogg",
+    "name": "War Call For Backup",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_call_for_backup.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_call_for_backup_ogg",
+    "name": "War Call For Backup",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_call_for_backup.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_cover_me_ogg",
+    "name": "War Cover Me",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_cover_me.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_cover_me_ogg",
+    "name": "War Cover Me",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_cover_me.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_fire_in_the_hole_ogg",
+    "name": "War Fire In The Hole",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_fire_in_the_hole.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_fire_in_the_hole_ogg",
+    "name": "War Fire In The Hole",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_fire_in_the_hole.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_get_down_ogg",
+    "name": "War Get Down",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_get_down.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_get_down_ogg",
+    "name": "War Get Down",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_get_down.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_go_go_go_ogg",
+    "name": "War Go Go Go",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_go_go_go.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_go_go_go_ogg",
+    "name": "War Go Go Go",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_go_go_go.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_hold_ogg",
+    "name": "War Hold",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_hold.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_look_out_ogg",
+    "name": "War Look Out",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_look_out.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_look_out_ogg",
+    "name": "War Look Out",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_look_out.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_medic_ogg",
+    "name": "War Medic",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_medic.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_medic_ogg",
+    "name": "War Medic",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_medic.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_reloading_ogg",
+    "name": "War Reloading",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_reloading.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_reloading_ogg",
+    "name": "War Reloading",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_reloading.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_rpg_ogg",
+    "name": "War Rpg",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_rpg.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_rpg_ogg",
+    "name": "War Rpg",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_rpg.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_sniper_ogg",
+    "name": "War Sniper",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_sniper.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_sniper_ogg",
+    "name": "War Sniper",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_sniper.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_suppressing_fire_ogg",
+    "name": "War Suppressing Fire",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_suppressing_fire.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_supressing_fire_ogg",
+    "name": "War Supressing Fire",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_supressing_fire.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_target_destroyed_ogg",
+    "name": "War Target Destroyed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_target_destroyed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_target_destroyed_ogg",
+    "name": "War Target Destroyed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_target_destroyed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_target_engaged_ogg",
+    "name": "War Target Engaged",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_target_engaged.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_target_engaged_ogg",
+    "name": "War Target Engaged",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_target_engaged.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_war_watch_my_back_ogg",
+    "name": "War Watch My Back",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/war_watch_my_back.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_watch_my_back_ogg",
+    "name": "War Watch My Back",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_watch_my_back.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_flutie8211_well_duh_female_voice_473522_mp3",
+    "name": "Well Duh Female Voice",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/flutie8211-well-duh-female-voice-473522.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_flutie8211_well_there_goes_the_neighborhood_455531_mp3",
+    "name": "Well There Goes The Neighborhood",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/flutie8211-well-there-goes-the-neighborhood-455531.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_universfield_wherex27s_my_cat_352471_mp3",
+    "name": "Wherex27S My Cat",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/universfield-wherex27s-my-cat-352471.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_arunangshubanerjee_whispered_oh_no_in_a_funny_voice_comedic_reaction_sfx_366314_mp3",
+    "name": "Whispered Oh No In A Funny Voice Comedic Reaction Sfx",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/arunangshubanerjee-whispered-oh-no-in-a-funny-voice-comedic-reaction-sfx-366314.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_winner_ogg",
+    "name": "Winner",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/winner.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_wowowowowowowow_103214_mp3",
+    "name": "Wowowowowowowow",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-wowowowowowowow-103214.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_wrong_ogg",
+    "name": "Wrong",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/wrong.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_wrong_ogg",
+    "name": "Wrong",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/wrong.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_freesound_community_yay_104840_mp3",
+    "name": "Yay",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/freesound_community-yay-104840.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_you_lose_ogg",
+    "name": "You Lose",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/you_lose.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_you_lose_ogg",
+    "name": "You Lose",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/you_lose.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_you_lose_ogg",
+    "name": "You Lose",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/you_lose.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_universfield_you_stupid_cat_352692_mp3",
+    "name": "You Stupid Cat",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/universfield-you-stupid-cat-352692.mp3",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_you_win_ogg",
+    "name": "You Win",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/you_win.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_you_win_ogg",
+    "name": "You Win",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/you_win.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voices_fighter_you_win_ogg",
+    "name": "You Win",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voices_fighter/you_win.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices_fighter"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  }
+]
