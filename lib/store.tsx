@@ -81,6 +81,11 @@ interface AppState {
   recentVoiceIds: string[]
   toggleVoiceFavorite: (id: string) => void
 
+  prankSoundFavoriteIds: string[]
+  recentPrankSoundIds: string[]
+  togglePrankSoundFavorite: (id: string) => void
+  recordPrankSoundPlay: (id: string) => void
+
   personalityId: string
   setPersonalityId: (id: string) => void
 
@@ -345,6 +350,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [networkAssistantSnapshot, setNetworkAssistantSnapshot] =
     useState<NetworkAssistantSnapshot | null>(null)
   const [speedTestHistory, setSpeedTestHistory] = useState<SpeedTestResult[]>([])
+  const [prankSoundFavoriteIds, setPrankSoundFavoriteIds] = useState<string[]>([])
+  const [recentPrankSoundIds, setRecentPrankSoundIds] = useState<string[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -372,6 +379,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkHealthSnapshots,
       networkAssistantSnapshot,
       speedTestHistory,
+      prankSoundFavoriteIds,
+      recentPrankSoundIds,
     }),
     [
       accentColor,
@@ -386,6 +395,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkHealthSnapshots,
       networkAssistantSnapshot,
       speedTestHistory,
+      prankSoundFavoriteIds,
+      recentPrankSoundIds,
       personalityId,
       recentVoiceIds,
       responses,
@@ -449,6 +460,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     if (stored.networkAssistantSnapshot) setNetworkAssistantSnapshot(stored.networkAssistantSnapshot)
     if (stored.speedTestHistory?.length) setSpeedTestHistory(stored.speedTestHistory)
+    if (stored.prankSoundFavoriteIds?.length) {
+      setPrankSoundFavoriteIds(stored.prankSoundFavoriteIds)
+    }
+    if (stored.recentPrankSoundIds?.length) {
+      setRecentPrankSoundIds(stored.recentPrankSoundIds)
+    }
   }, [])
 
   const recordSpeedTestStarted = useCallback((runId: string, provider: string) => {
@@ -538,6 +555,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     )
     playAvatarReaction("happy")
   }, [playAvatarReaction])
+
+  const togglePrankSoundFavorite = useCallback((id: string) => {
+    setPrankSoundFavoriteIds((current) =>
+      current.includes(id)
+        ? current.filter((soundId) => soundId !== id)
+        : [id, ...current],
+    )
+  }, [])
+
+  const recordPrankSoundPlay = useCallback((id: string) => {
+    setRecentPrankSoundIds((current) => {
+      const next = [id, ...current.filter((soundId) => soundId !== id)]
+      return next.slice(0, 24)
+    })
+  }, [])
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -921,6 +953,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           networkHealthSnapshots: parsed.networkHealthSnapshots ?? networkHealthSnapshots,
           networkAssistantSnapshot: parsed.networkAssistantSnapshot ?? networkAssistantSnapshot,
           speedTestHistory: parsed.speedTestHistory ?? speedTestHistory,
+          prankSoundFavoriteIds:
+            parsed.prankSoundFavoriteIds ?? prankSoundFavoriteIds,
+          recentPrankSoundIds:
+            parsed.recentPrankSoundIds ?? recentPrankSoundIds,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -944,6 +980,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       networkHealthSnapshots,
       networkAssistantSnapshot,
       speedTestHistory,
+      prankSoundFavoriteIds,
+      recentPrankSoundIds,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -977,6 +1015,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setNetworkHealthSnapshots([])
     setNetworkAssistantSnapshot(null)
     setSpeedTestHistory([])
+    setPrankSoundFavoriteIds([])
+    setRecentPrankSoundIds([])
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -1009,6 +1049,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       speedTestHistory, recordSpeedTestStarted, recordSpeedTestResult, clearSpeedTestHistory,
       notificationOpen, setNotificationOpen,
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
+      prankSoundFavoriteIds, recentPrankSoundIds,
+      togglePrankSoundFavorite, recordPrankSoundPlay,
     }),
     [
       screen, mood, avatarReaction, voiceId, voiceFavoriteIds, recentVoiceIds, personalityId, voiceParams, conversationMode,
@@ -1035,6 +1077,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateSettings, setVoiceId, setVoiceParams, toggleVoiceFavorite, acceptGameInvite, dismissGameInvite,
       refreshCapabilities, requestPermission,
       exportSettings, importSettings, resetApp, playAvatarReaction, clearAvatarReaction, setPersonalityId,
+      prankSoundFavoriteIds, recentPrankSoundIds,
+      togglePrankSoundFavorite, recordPrankSoundPlay,
     ],
   )
 

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import {
   AlertTriangle,
+  ChevronRight,
   Hammer,
   Loader2,
   Library as LibraryIcon,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useMemo } from "react"
+import { useApp } from "@/lib/store"
 import { NeonPanel } from "../neon-panel"
 import {
   PRANKSTAR_CATALOG_DIAGNOSTICS,
@@ -25,6 +27,7 @@ import { usePrankAudio } from "@/lib/prankstar/usePrankAudio"
 import type { PrankSound } from "@/lib/prankstar/types"
 
 export function PrankScreen() {
+  const { setScreen, recordPrankSoundPlay } = useApp()
   const audio = usePrankAudio()
   const featured = useMemo(() => getFeaturedPreviewSounds(8), [])
   const totalCatalog = PRANKSTAR_SOUNDS.length
@@ -34,7 +37,8 @@ export function PrankScreen() {
       prankAudioRuntime.stop()
       return
     }
-    prankAudioRuntime.play(sound)
+    void prankAudioRuntime.play(sound)
+    recordPrankSoundPlay(sound.id)
   }
 
   return (
@@ -81,8 +85,9 @@ export function PrankScreen() {
         <ModuleCard
           icon={LibraryIcon}
           label="Sound Library"
-          status="LIVE_PREVIEW"
+          status="LIVE"
           accent="#00f0ff"
+          onClick={() => setScreen("prankLibrary")}
         />
         <ModuleCard
           icon={MessageSquareWarning}
@@ -92,7 +97,7 @@ export function PrankScreen() {
         />
         <ModuleCard
           icon={TimerIcon}
-          label="Traps"
+          label="Timer Traps"
           status="NEXT_PHASE"
           accent="#ff7a00"
         />
@@ -107,7 +112,7 @@ export function PrankScreen() {
       <NeonPanel accent="cyan" glow="strong" className="p-4">
         <div className="flex items-center justify-between">
           <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-cyan">
-            SOUND_LIBRARY // PREVIEW
+            SOUND_LIBRARY // FEATURED
           </p>
           <button
             type="button"
@@ -191,11 +196,14 @@ export function PrankScreen() {
           })}
         </ul>
 
-        <p className="mt-3 ps-mono text-[9px] leading-relaxed tracking-[0.15em] text-white/45">
-          NOTE: BINARY AUDIO ASSETS ARE NOT BUNDLED IN THIS PHASE. SOUNDS
-          RESOLVE FROM /prankstar/sounds/ — DROP FILES THERE TO ENABLE
-          PLAYBACK. MISSING ASSETS SURFACE AS ERRORS ABOVE.
-        </p>
+        <button
+          type="button"
+          onClick={() => setScreen("prankLibrary")}
+          className="mt-3 flex w-full items-center justify-between rounded-lg border border-[#00f0ff]/40 bg-[#00f0ff]/10 px-3 py-2.5 ps-mono text-[10px] tracking-[0.22em] ps-text-cyan hover:bg-[#00f0ff]/20"
+        >
+          OPEN_FULL_LIBRARY · {totalCatalog} SOUNDS
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </NeonPanel>
 
       {PRANKSTAR_CATALOG_DIAGNOSTICS.duplicateIds.length > 0 && (
@@ -252,31 +260,39 @@ function ModuleCard({
   label,
   status,
   accent,
+  onClick,
 }: {
   icon: LucideIcon
   label: string
-  status: "LIVE_PREVIEW" | "NEXT_PHASE"
+  status: "LIVE" | "NEXT_PHASE"
   accent: string
+  onClick?: () => void
 }) {
-  const live = status === "LIVE_PREVIEW"
+  const live = status === "LIVE"
+  const interactive = live && onClick
+  const Tag = interactive ? "button" : "div"
   return (
-    <div
-      className="flex flex-col gap-2 rounded-xl border border-white/10 bg-black/55 p-3"
+    <Tag
+      {...(interactive
+        ? { type: "button" as const, onClick }
+        : {})}
+      className="flex flex-col gap-2 rounded-xl border border-white/10 bg-black/55 p-3 text-left disabled:opacity-60"
       style={{ boxShadow: `inset 0 0 0 1px ${accent}55, 0 0 14px ${accent}22` }}
+      {...(!interactive ? { "aria-disabled": true } : {})}
     >
       <Icon
         className="h-4 w-4"
         style={{ color: accent, filter: `drop-shadow(0 0 6px ${accent})` }}
       />
-      <p className="ps-mono text-[11px] tracking-[0.18em] text-white/90">
+      <span className="block ps-mono text-[11px] tracking-[0.18em] text-white/90">
         {label.toUpperCase()}
-      </p>
-      <p
-        className="ps-mono text-[8px] tracking-[0.25em]"
+      </span>
+      <span
+        className="block ps-mono text-[8px] tracking-[0.25em]"
         style={{ color: live ? accent : "rgba(255,255,255,0.4)" }}
       >
-        {live ? "LIVE PREVIEW BELOW" : "COMING NEXT PHASE"}
-      </p>
-    </div>
+        {live ? "OPEN →" : "COMING NEXT PHASE"}
+      </span>
+    </Tag>
   )
 }

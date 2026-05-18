@@ -105,6 +105,33 @@ export function searchSounds(query: string): PrankSound[] {
   )
 }
 
+export function getCategoryCounts(): Array<{
+  category: PrankCategory
+  count: number
+}> {
+  const map = new Map<PrankCategory, number>()
+  for (const s of PRANKSTAR_SOUNDS) {
+    map.set(s.category, (map.get(s.category) ?? 0) + 1)
+  }
+  return Array.from(map.entries())
+    .map(([category, count]) => ({ category, count }))
+    .sort((a, b) => a.category.localeCompare(b.category))
+}
+
+export function getSafeRandomSound(
+  excludeIds: readonly string[] = [],
+): PrankSound | null {
+  const pool = PRANKSTAR_SOUNDS.filter(
+    (s) => s.isSafeForRandomMode && !excludeIds.includes(s.id),
+  )
+  if (pool.length === 0) {
+    const fallback = PRANKSTAR_SOUNDS.filter((s) => s.isSafeForRandomMode)
+    if (fallback.length === 0) return null
+    return fallback[Math.floor(Math.random() * fallback.length)]
+  }
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
 /**
  * Curated preview slice — one representative sound per category, capped, so
  * the landing-screen preview panel renders a focused demo set rather than the

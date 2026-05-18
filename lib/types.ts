@@ -160,6 +160,8 @@ export interface PersistedAppState {
   networkHealthSnapshots?: NetworkHealthSnapshot[]
   networkAssistantSnapshot?: NetworkAssistantSnapshot | null
   speedTestHistory?: SpeedTestResult[]
+  prankSoundFavoriteIds?: string[]
+  recentPrankSoundIds?: string[]
 }
 
 export type ConversationMode =
@@ -279,4 +281,5 @@ export type ScreenId =
   | "speed"
   | "library"
   | "prank"
+  | "prankLibrary"
   | "settings"
