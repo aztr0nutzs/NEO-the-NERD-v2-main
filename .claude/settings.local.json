@@ -7,7 +7,10 @@
       "Bash(where ffprobe *)",
       "Bash(ffprobe -v error -show_entries stream=width,height,duration,codec_type,codec_name -of default=noprint_wrappers=1 \"c:/Users/Aztr0nutZs/Desktop/NEO-the-NERD-v2-main/neo_backround.mp4\")",
       "Bash(grep -nC2 \"Record<NetworkEventType\" \"c:/Users/Aztr0nutZs/Desktop/NEO-the-NERD-v2-main/components/network/NetworkTimelinePanel.tsx\")",
-      "Bash(npx tsx *)"
+      "Bash(npx tsx *)",
+      "Bash(grep -c '^\\\\s*{$' \"c:/Users/Aztr0nutZs/Desktop/NEO-the-NERD-v2-main/prankstar_source_kit/src/data/sounds.ts\")",
+      "Bash(node scripts/validate-prankstar-assets.cjs)",
+      "Bash(echo \"exit:$?\")"
     ]
   }
 }

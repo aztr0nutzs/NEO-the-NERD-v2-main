@@ -8,6 +8,7 @@ import {
   Library,
   MessageSquare,
   Mic2,
+  PartyPopper,
   Radar,
   Settings,
   SlidersHorizontal,
@@ -40,6 +41,7 @@ const ITEMS: DockItem[] = [
   { id: "games", label: "Games", icon: Gamepad2, accent: "#ff7a00" },
   { id: "controls", label: "Ctrl", icon: SlidersHorizontal, accent: "#00f0ff" },
   { id: "library", label: "Library", icon: Library, accent: "#b829ff" },
+  { id: "prank", label: "Prank", icon: PartyPopper, accent: "#ff2d9c" },
   { id: "settings", label: "Set", icon: Settings, accent: "#ff2d9c" },
 ]
 
@@ -90,7 +92,7 @@ export function BottomDock() {
 
         <ul
           ref={listRef}
-          className="grid auto-cols-[4.75rem] grid-flow-col overflow-x-auto scroll-smooth px-1 py-1.5 [scrollbar-width:none] sm:grid-cols-10 sm:auto-cols-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+          className="grid auto-cols-[4.75rem] grid-flow-col overflow-x-auto scroll-smooth px-1 py-1.5 [scrollbar-width:none] sm:grid-cols-11 sm:auto-cols-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
         >
           {ITEMS.map((item) => {
             const active = screen === item.id

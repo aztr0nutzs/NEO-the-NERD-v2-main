@@ -278,4 +278,5 @@ export type ScreenId =
   | "network"
   | "speed"
   | "library"
+  | "prank"
   | "settings"

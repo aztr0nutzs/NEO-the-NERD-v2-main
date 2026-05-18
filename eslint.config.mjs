@@ -8,6 +8,7 @@ const eslintConfig = [
       "android/app/src/main/assets/public/**",
       "node_modules/**",
       "out/**",
+      "prankstar_source_kit/**",
     ],
   },
   ...nextVitals,

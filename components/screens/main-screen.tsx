@@ -10,6 +10,7 @@ import {
   Keyboard,
   Map,
   Mic,
+  PartyPopper,
   Sparkles,
   X,
   Gamepad2,
@@ -524,6 +525,46 @@ export function MainScreen() {
                 color: "#39ff14",
                 filter: "drop-shadow(0 0 6px #39ff14)",
               }}
+            />
+          </div>
+        </NeonPanel>
+      </button>
+
+      {/* Prankstar Protocol shortcut — Mission Control entry to the new Prank
+          Lab subsystem. Sits next to the existing Network shortcut card so
+          discovery is guaranteed even when the dock entry scrolls offscreen. */}
+      <button
+        type="button"
+        onClick={() => setScreen("prank")}
+        className="block w-full text-left"
+        aria-label="Open Prankstar Protocol — mischief audio and prank tools"
+      >
+        <NeonPanel accent="pink" glow="strong" scanlines className="p-4">
+          <div className="flex items-center gap-3">
+            <div
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
+              style={{
+                background: "rgba(255,45,156,0.12)",
+                boxShadow:
+                  "inset 0 0 0 1px rgba(255,45,156,0.55), 0 0 18px rgba(255,45,156,0.35)",
+              }}
+            >
+              <PartyPopper
+                className="h-5 w-5"
+                style={{ color: "#ff2d9c", filter: "drop-shadow(0 0 6px #ff2d9c)" }}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-pink">
+                PRANKSTAR_PROTOCOL // PRANK LAB
+              </p>
+              <p className="ps-mono mt-0.5 text-[12px] tracking-[0.18em] text-white/85">
+                Mischief audio · timed traps · sound forge
+              </p>
+            </div>
+            <ChevronRight
+              className="h-5 w-5 shrink-0"
+              style={{ color: "#ff2d9c", filter: "drop-shadow(0 0 6px #ff2d9c)" }}
             />
           </div>
         </NeonPanel>
