@@ -11,6 +11,7 @@ import {
   Share2,
   Sparkles,
   Star,
+  Timer as TimerIcon,
   Trash2,
   Volume2,
   VolumeX,
@@ -49,6 +50,7 @@ export function PrankMessagesScreen() {
     togglePrankMessageFavorite,
     removePrankMessageFromHistory,
     clearPrankMessageHistory,
+    setTrapIntent,
   } = useApp()
 
   const [categoryId, setCategoryId] = useState<string>(PRANK_MESSAGE_CATEGORIES[0].id)
@@ -336,6 +338,21 @@ export function PrankMessagesScreen() {
               active={currentIsFavorite}
             />
           </div>
+        )}
+
+        {current && (
+          <button
+            type="button"
+            onClick={() => {
+              stopVoicePreview()
+              setTrapIntent({ kind: "spoken-message", messageText: current.text })
+              setScreen("prankTraps")
+            }}
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#ff7a00]/55 bg-[#ff7a00]/15 px-3 py-2 ps-mono text-[10px] tracking-[0.25em] ps-text-orange hover:bg-[#ff7a00]/25"
+          >
+            <TimerIcon className="h-3.5 w-3.5" />
+            USE_AS_TIMED_TRAP
+          </button>
         )}
 
         {current && (

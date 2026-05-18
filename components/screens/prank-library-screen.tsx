@@ -13,6 +13,7 @@ import {
   Search,
   Shuffle,
   Star,
+  Timer as TimerIcon,
   X,
 } from "lucide-react"
 import {
@@ -45,6 +46,7 @@ export function PrankLibraryScreen() {
     togglePrankSoundFavorite,
     recentPrankSoundIds,
     recordPrankSoundPlay,
+    setTrapIntent,
   } = useApp()
   const audio = usePrankAudio()
 
@@ -400,6 +402,18 @@ export function PrankLibraryScreen() {
                         aria-hidden="true"
                       />
                     )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTrapIntent({ kind: "sound", soundId: sound.id })
+                        setScreen("prankTraps")
+                      }}
+                      aria-label={`Use ${sound.name} in a Timer Trap`}
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#ff7a00]/50 bg-[#ff7a00]/10 hover:bg-[#ff7a00]/20"
+                    >
+                      <TimerIcon className="h-4 w-4 ps-text-orange" />
+                    </button>
 
                     <button
                       type="button"

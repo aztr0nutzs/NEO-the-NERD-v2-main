@@ -76,7 +76,7 @@ export function PrankScreen() {
           />
           <Stat
             label="MODULES"
-            value="02"
+            value="03"
             accent="#39ff14"
           />
         </div>
@@ -105,8 +105,9 @@ export function PrankScreen() {
         <ModuleCard
           icon={TimerIcon}
           label="Timer Traps"
-          status="NEXT_PHASE"
+          status="LIVE"
           accent="#ff7a00"
+          onClick={() => setScreen("prankTraps")}
         />
         <ModuleCard
           icon={Hammer}

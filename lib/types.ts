@@ -164,6 +164,7 @@ export interface PersistedAppState {
   recentPrankSoundIds?: string[]
   prankMessageFavorites?: PrankMessageRecord[]
   prankMessageHistory?: PrankMessageRecord[]
+  prankTrapsHistory?: PrankTrap[]
 }
 
 export interface PrankMessageRecord {
@@ -173,6 +174,40 @@ export interface PrankMessageRecord {
   toneId: string
   personalityId?: string
   createdAt: number
+}
+
+export type PrankTrapKind = "sound" | "random-safe-sound" | "spoken-message"
+
+export type PrankTrapStatus =
+  | "armed"
+  | "counting-down"
+  | "triggering"
+  | "fired"
+  | "cancelled"
+  | "failed"
+
+export interface PrankTrap {
+  id: string
+  kind: PrankTrapKind
+  label: string
+  createdAt: number
+  triggerAt: number
+  delayMs: number
+  status: PrankTrapStatus
+  soundId?: string
+  soundName?: string
+  messageText?: string
+  voiceId?: string
+  voiceQualityPreference?: VoiceQualityPreference
+  personalityId?: string
+  lastError?: string
+  firedAt?: number
+}
+
+export interface TrapIntent {
+  kind: PrankTrapKind
+  soundId?: string
+  messageText?: string
 }
 
 export type ConversationMode =
@@ -294,4 +329,5 @@ export type ScreenId =
   | "prank"
   | "prankLibrary"
   | "prankMessages"
+  | "prankTraps"
   | "settings"

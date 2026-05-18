@@ -24,6 +24,8 @@ import type {
   ConversationMode,
   PersistedAppState,
   PrankMessageRecord,
+  PrankTrap,
+  TrapIntent,
   RobotSource,
   SavedResponse,
   ScreenId,
@@ -48,6 +50,7 @@ import {
 } from "./network/networkEvents"
 import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
 import { isPlayableSoundId } from "./prankstar/soundCatalog"
+import { prankTrapsManager } from "./prankstar/prankTraps"
 import {
   duplicateResponse,
   markResponseUsed,
@@ -94,6 +97,11 @@ interface AppState {
   removePrankMessageFromHistory: (id: string) => void
   clearPrankMessageHistory: () => void
   togglePrankMessageFavorite: (m: PrankMessageRecord | string) => void
+
+  prankTrapsRecent: PrankTrap[]
+  syncPrankTrapsRecent: (recent: readonly PrankTrap[]) => void
+  trapIntent: TrapIntent | null
+  setTrapIntent: (intent: TrapIntent | null) => void
 
   personalityId: string
   setPersonalityId: (id: string) => void
@@ -363,6 +371,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [recentPrankSoundIds, setRecentPrankSoundIds] = useState<string[]>([])
   const [prankMessageHistory, setPrankMessageHistory] = useState<PrankMessageRecord[]>([])
   const [prankMessageFavorites, setPrankMessageFavorites] = useState<PrankMessageRecord[]>([])
+  const [prankTrapsRecent, setPrankTrapsRecent] = useState<PrankTrap[]>([])
+  const [trapIntent, setTrapIntent] = useState<TrapIntent | null>(null)
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -394,6 +404,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       recentPrankSoundIds,
       prankMessageHistory,
       prankMessageFavorites,
+      prankTrapsHistory: prankTrapsRecent,
     }),
     [
       accentColor,
@@ -412,6 +423,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       recentPrankSoundIds,
       prankMessageHistory,
       prankMessageFavorites,
+      prankTrapsRecent,
       personalityId,
       recentVoiceIds,
       responses,
@@ -488,6 +500,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     if (stored.prankMessageFavorites?.length) {
       setPrankMessageFavorites(stored.prankMessageFavorites)
+    }
+    if (stored.prankTrapsHistory?.length) {
+      const recent = stored.prankTrapsHistory.filter(
+        (t) => t.status === "fired" || t.status === "cancelled" || t.status === "failed",
+      )
+      setPrankTrapsRecent(recent)
+      prankTrapsManager.hydrateRecent(recent)
     }
   }, [])
 
@@ -607,6 +626,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const clearPrankMessageHistory = useCallback(() => {
     setPrankMessageHistory([])
+  }, [])
+
+  const syncPrankTrapsRecent = useCallback((recent: readonly PrankTrap[]) => {
+    setPrankTrapsRecent([...recent])
+  }, [])
+
+  // Mirror the trap manager's recent-history slice into store state so it
+  // participates in the persistence pipeline alongside other Prankstar
+  // history. Active armed traps live in the manager only and are NOT
+  // persisted — closed-app firing is not supported in this build.
+  useEffect(() => {
+    return prankTrapsManager.subscribe((snap) => {
+      setPrankTrapsRecent([...snap.recent])
+    })
   }, [])
 
   const togglePrankMessageFavorite = useCallback(
@@ -1018,6 +1051,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             parsed.prankMessageHistory ?? prankMessageHistory,
           prankMessageFavorites:
             parsed.prankMessageFavorites ?? prankMessageFavorites,
+          prankTrapsHistory:
+            parsed.prankTrapsHistory ?? prankTrapsRecent,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -1045,6 +1080,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       recentPrankSoundIds,
       prankMessageHistory,
       prankMessageFavorites,
+      prankTrapsRecent,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -1082,6 +1118,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRecentPrankSoundIds([])
     setPrankMessageHistory([])
     setPrankMessageFavorites([])
+    prankTrapsManager.cancelAll()
+    prankTrapsManager.clearHistory()
+    setPrankTrapsRecent([])
+    setTrapIntent(null)
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -1119,6 +1159,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageHistory, prankMessageFavorites,
       addPrankMessageToHistory, removePrankMessageFromHistory,
       clearPrankMessageHistory, togglePrankMessageFavorite,
+      prankTrapsRecent, syncPrankTrapsRecent,
+      trapIntent, setTrapIntent,
     }),
     [
       screen, mood, avatarReaction, voiceId, voiceFavoriteIds, recentVoiceIds, personalityId, voiceParams, conversationMode,
@@ -1150,6 +1192,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageHistory, prankMessageFavorites,
       addPrankMessageToHistory, removePrankMessageFromHistory,
       clearPrankMessageHistory, togglePrankMessageFavorite,
+      prankTrapsRecent, syncPrankTrapsRecent,
+      trapIntent,
     ],
   )
 
