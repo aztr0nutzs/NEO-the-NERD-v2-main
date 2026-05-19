@@ -1331,8 +1331,7 @@ export function NetworkDiscoveryFeature() {
 
   const effectiveAdapterStatus = resolveNetworkUiAdapterStatus(settings, adapterStatus);
   const isDemoMode = settings.demoMode || effectiveAdapterStatus.isDemo;
-  const effectivePanelSettings =
-    (effectiveAdapterStatus.mode === "native-unavailable" || effectiveAdapterStatus.mode === "scan-failed") ? { ...settings, demoMode: true } : settings;
+  const effectivePanelSettings = settings;
   const newIdentityDevices = devices.filter((device) => device.isNewIdentity && !device.dismissedForNow);
   const latestHealthSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
 
@@ -1377,16 +1376,24 @@ export function NetworkDiscoveryFeature() {
                     {effectiveAdapterStatus.label}
                   </span>
                 )}
+                {!isDemoMode && effectiveAdapterStatus.mode === "native-unavailable" && (
+                  <span className="flex items-center gap-1.5 rounded-full border border-yellow-500/50 bg-yellow-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-yellow-300">
+                    <AlertTriangle className="h-3 w-3" />
+                    LIVE UNAVAILABLE // NO DEMO DATA LOADED
+                  </span>
+                )}
                 <span className={`flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
                   effectiveAdapterStatus.mode === "native-android"
                     ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                    : "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                    : effectiveAdapterStatus.mode === "native-unavailable"
+                      ? "border-yellow-500/50 bg-yellow-500/10 text-yellow-300"
+                      : "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
                 }`}>
                   <Cpu className="h-3 w-3" />
                   {effectiveAdapterStatus.label === "LIVE_ANDROID_DISCOVERY"
                     ? "LIVE ANDROID DISCOVERY"
                     : effectiveAdapterStatus.mode === "native-unavailable"
-                      ? "LIMITED DATA"
+                      ? "LIVE DISCOVERY UNAVAILABLE"
                       : effectiveAdapterStatus.mode === "native-android"
                         ? "LIVE LOCAL ANDROID DISCOVERY"
                         : "SIMULATED BROWSER PREVIEW"}

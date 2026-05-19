@@ -933,8 +933,8 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
         className="hud-mono px-2 pb-4 text-center text-[9px] font-bold opacity-60"
         style={{ color: "rgba(255,255,255,0.65)", letterSpacing: "0.10em" }}
       >
-        MEASURES HTTPS REQUEST LATENCY & REAL DOWNLOAD THROUGHPUT FROM THE CONFIGURED ENDPOINT.
-        RESULTS REFLECT INTERNET-PATH PERFORMANCE, NOT LAN-INTERNAL DEVICE SPEEDS.
+        MEASURES REAL DOWNLOAD + REQUEST LATENCY + JITTER. UPLOAD IS MEASURED ONLY WHEN A POST
+        UPLOAD ENDPOINT IS CONFIGURED. RESULTS REFLECT INTERNET-PATH PERFORMANCE, NOT LAN-INTERNAL DEVICE SPEEDS.
       </p>
     </div>
   )
@@ -1013,6 +1013,14 @@ function RecentResultsPanel({
                     style={{ color: NEO.green, letterSpacing: "0.12em" }}
                   >
                     {isBestDl ? "BEST DL" : "BEST LAT"}
+                  </span>
+                )}
+                {!(run.uploadMeasured ?? run.uploadMbps !== null) && (
+                  <span
+                    className="hud-mono mt-0.5 text-[8px] font-black"
+                    style={{ color: NEO.yellow, letterSpacing: "0.12em" }}
+                  >
+                    PARTIAL
                   </span>
                 )}
               </div>
@@ -1619,7 +1627,7 @@ function VerdictBanner({
           className="hud-mono mt-2 text-[9px] font-bold"
           style={{ color: rgba(NEO.yellow, 0.85), letterSpacing: "0.08em" }}
         >
-          UL_NOT_MEASURED · UPLOAD ENDPOINT NOT CONFIGURED
+          PARTIAL TEST · DOWNLOAD/LATENCY/JITTER MEASURED · UPLOAD NOT MEASURED
         </p>
       )}
     </div>
@@ -1833,28 +1841,28 @@ function computeVerdict(result: SpeedTestResult): {
   const latTier = gradeLatency(lat)
   if (dlTier === "strong" && latTier === "strong") {
     return {
-      label: "EXCELLENT",
-      detail: `Internet path is fast and responsive — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+      label: result.uploadMeasured ? "EXCELLENT" : "EXCELLENT (PARTIAL)",
+      detail: `${result.uploadMeasured ? "Internet path is fast and responsive" : "Internet path download/latency is fast and responsive; upload was not measured"} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
       color: NEO.green,
     }
   }
   if (dlTier !== "weak" && latTier !== "weak") {
     return {
-      label: "GOOD",
-      detail: `Stable internet path — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+      label: result.uploadMeasured ? "GOOD" : "GOOD (PARTIAL)",
+      detail: `${result.uploadMeasured ? "Stable internet path" : "Stable download/latency path; upload was not measured"} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
       color: NEO.cyan,
     }
   }
   if (dlTier !== "weak" || latTier !== "weak") {
     return {
-      label: "USABLE",
-      detail: `Throughput is adequate but latency or jitter may impact realtime use (${dl.toFixed(1)} Mbps · ${Math.round(lat)} ms).`,
+      label: result.uploadMeasured ? "USABLE" : "USABLE (PARTIAL)",
+      detail: `${result.uploadMeasured ? "Throughput is adequate but latency or jitter may impact realtime use" : "Download/latency readings are usable but incomplete without upload measurement"} (${dl.toFixed(1)} Mbps · ${Math.round(lat)} ms).`,
       color: NEO.yellow,
     }
   }
   return {
-    label: "DEGRADED",
-    detail: `Throughput is low — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+    label: result.uploadMeasured ? "DEGRADED" : "DEGRADED (PARTIAL)",
+    detail: `${result.uploadMeasured ? "Throughput is low" : "Download/latency probe is degraded; upload was not measured"} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
     color: NEO.pink,
   }
 }

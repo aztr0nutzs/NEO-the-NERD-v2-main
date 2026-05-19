@@ -5,6 +5,7 @@ import type {
   HealthRow,
   NetworkReport,
   NetworkReportSection,
+  SpeedTestRow,
 } from "./network-report"
 
 export type ExportFormat = "json" | "csv" | "text"
@@ -89,6 +90,21 @@ const HEALTH_HEADERS: Array<keyof HealthRow> = [
   "topFactor",
 ]
 
+const SPEED_TEST_HEADERS: Array<keyof SpeedTestRow> = [
+  "id",
+  "startedAt",
+  "completedAt",
+  "provider",
+  "downloadMbps",
+  "uploadMbps",
+  "latencyMs",
+  "jitterMs",
+  "success",
+  "failureReason",
+  "uploadMeasured",
+  "completeness",
+]
+
 function multiCsv(report: NetworkReport): string {
   const summary = rowsToCsv(
     [
@@ -128,6 +144,10 @@ function multiCsv(report: NetworkReport): string {
   const events = rowsToCsv(EVENT_HEADERS as string[], report.events.items as unknown as Array<Record<string, unknown>>)
   const alerts = rowsToCsv(ALERT_HEADERS as string[], report.alerts.items as unknown as Array<Record<string, unknown>>)
   const health = rowsToCsv(HEALTH_HEADERS as string[], report.health.items as unknown as Array<Record<string, unknown>>)
+  const speedTests = rowsToCsv(
+    SPEED_TEST_HEADERS as string[],
+    report.speedTests.items as unknown as Array<Record<string, unknown>>,
+  )
 
   return [
     "# NEO Network Report — CSV bundle",
@@ -150,6 +170,9 @@ function multiCsv(report: NetworkReport): string {
     "",
     `## health (count=${report.health.count})`,
     health,
+    "",
+    `## speed_tests (count=${report.speedTests.count})`,
+    speedTests,
     "",
   ].join("\n")
 }

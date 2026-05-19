@@ -99,6 +99,8 @@ export type VerdictTier = "excellent" | "good" | "usable" | "degraded" | "failed
 
 export function gradeVerdict(result: SpeedTestResult): VerdictTier {
   if (!result.success) return "failed"
+  // Partial runs (upload not measured) must never be treated as fully complete.
+  if (!result.uploadMeasured) return "usable"
   const dl = gradeDownload(result.downloadMbps)
   const lat = gradeLatency(result.latencyMs)
   if (dl === "strong" && lat === "strong") return "excellent"

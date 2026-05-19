@@ -91,9 +91,9 @@ export function resolveNetworkAdapterStatus({
 
   return {
     mode: "native-unavailable",
-    label: "SIMULATED NETWORK DATA",
-    isDemo: true,
-        message:
+    label: "LIVE_UNAVAILABLE",
+    isDemo: false,
+    message:
       fallbackReason ??
       "Native Android discovery is unavailable or failed to initialize. Retry live discovery, or choose Demo Preview explicitly.",
   };
