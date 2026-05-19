@@ -74,8 +74,12 @@ export function NetworkExportPanel() {
 
   const adapterLabel = persistedNetworkSettings?.demoMode
     ? "DEMO_NETWORK_DATA"
-    : "LIVE_NETWORK_ADAPTER"
-  const adapterIsDemo = Boolean(persistedNetworkSettings?.demoMode ?? true)
+    : networkAssistantSnapshot?.status?.networkName === "Unavailable"
+      ? "LIVE_DISCOVERY_UNAVAILABLE_NO_DEMO_FALLBACK"
+      : networkAssistantSnapshot?.status
+      ? "LIVE_ANDROID_DISCOVERY"
+      : "LIVE_PARTIAL_OR_UNVERIFIED"
+  const adapterIsDemo = Boolean(persistedNetworkSettings?.demoMode ?? false)
 
   const reportPreview = useMemo(
     () =>
