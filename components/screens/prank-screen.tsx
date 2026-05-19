@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import {
   AlertTriangle,
   ChevronRight,
+  Dices,
   Hammer,
   Loader2,
   Library as LibraryIcon,
@@ -76,7 +77,7 @@ export function PrankScreen() {
           />
           <Stat
             label="MODULES"
-            value="03"
+            value="04"
             accent="#39ff14"
           />
         </div>
@@ -108,6 +109,13 @@ export function PrankScreen() {
           status="LIVE"
           accent="#ff7a00"
           onClick={() => setScreen("prankTraps")}
+        />
+        <ModuleCard
+          icon={Dices}
+          label="Chaos Console"
+          status="LIVE"
+          accent="#ff2d9c"
+          onClick={() => setScreen("prankChaos")}
         />
         <ModuleCard
           icon={Hammer}
@@ -229,7 +237,7 @@ export function PrankScreen() {
       <NeonPanel accent="purple" glow="soft" className="p-3">
         <div className="flex items-center gap-2 ps-mono text-[10px] tracking-[0.25em] text-white/70">
           <Wand2 className="h-3.5 w-3.5 ps-text-purple" />
-          <span>NEXT PHASE: FULL LIBRARY · TRAPS · FORGE</span>
+          <span>NEXT PHASE: SOUND FORGE</span>
         </div>
       </NeonPanel>
     </div>

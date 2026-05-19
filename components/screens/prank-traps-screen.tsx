@@ -153,8 +153,9 @@ export function PrankTrapsScreen() {
     }
     if (kind === "sound") input.soundId = selectedSoundId ?? undefined
     if (kind === "random-safe-sound") {
-      // Re-pick at arm time to honor the previewed random sound so the user
-      // sees what they queued. Manager will refresh internally if needed.
+      // Pass the exact sound the user is previewing so the manager can lock
+      // it in. The manager only falls back to a fresh random pick if this
+      // id no longer resolves to a playable, safe-random sound.
       input.soundId = randomPreview?.id
     }
     if (kind === "spoken-message") input.messageText = messageText.trim()
