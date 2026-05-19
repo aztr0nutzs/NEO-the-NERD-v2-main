@@ -19,6 +19,7 @@ import type {
   AssistantMood,
   CapabilityId,
   CapabilityState,
+  ChaosHistoryEntry,
   ChatSendState,
   ChatMessage,
   ConversationMode,
@@ -51,6 +52,7 @@ import {
 import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
 import { isPlayableSoundId } from "./prankstar/soundCatalog"
 import { prankTrapsManager } from "./prankstar/prankTraps"
+import { chaosManager } from "./prankstar/chaosRandomizer"
 import {
   duplicateResponse,
   markResponseUsed,
@@ -102,6 +104,8 @@ interface AppState {
   syncPrankTrapsRecent: (recent: readonly PrankTrap[]) => void
   trapIntent: TrapIntent | null
   setTrapIntent: (intent: TrapIntent | null) => void
+
+  prankChaosHistory: ChaosHistoryEntry[]
 
   personalityId: string
   setPersonalityId: (id: string) => void
@@ -373,6 +377,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [prankMessageFavorites, setPrankMessageFavorites] = useState<PrankMessageRecord[]>([])
   const [prankTrapsRecent, setPrankTrapsRecent] = useState<PrankTrap[]>([])
   const [trapIntent, setTrapIntent] = useState<TrapIntent | null>(null)
+  const [prankChaosHistory, setPrankChaosHistory] = useState<ChaosHistoryEntry[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -405,6 +410,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageHistory,
       prankMessageFavorites,
       prankTrapsHistory: prankTrapsRecent,
+      prankChaosHistory,
     }),
     [
       accentColor,
@@ -424,6 +430,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageHistory,
       prankMessageFavorites,
       prankTrapsRecent,
+      prankChaosHistory,
       personalityId,
       recentVoiceIds,
       responses,
@@ -507,6 +514,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       )
       setPrankTrapsRecent(recent)
       prankTrapsManager.hydrateRecent(recent)
+    }
+    if (stored.prankChaosHistory?.length) {
+      setPrankChaosHistory(stored.prankChaosHistory)
+      chaosManager.hydrateHistory(stored.prankChaosHistory)
     }
   }, [])
 
@@ -639,6 +650,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     return prankTrapsManager.subscribe((snap) => {
       setPrankTrapsRecent([...snap.recent])
+    })
+  }, [])
+
+  // Mirror the chaos manager's history slice into store state so it
+  // participates in the persistence pipeline. The in-flight `current` action
+  // lives in the manager only and is NOT persisted — closed-app execution
+  // is not supported.
+  useEffect(() => {
+    return chaosManager.subscribe((snap) => {
+      setPrankChaosHistory([...snap.history])
     })
   }, [])
 
@@ -1053,6 +1074,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             parsed.prankMessageFavorites ?? prankMessageFavorites,
           prankTrapsHistory:
             parsed.prankTrapsHistory ?? prankTrapsRecent,
+          prankChaosHistory:
+            parsed.prankChaosHistory ?? prankChaosHistory,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -1081,6 +1104,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageHistory,
       prankMessageFavorites,
       prankTrapsRecent,
+      prankChaosHistory,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -1122,6 +1146,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     prankTrapsManager.clearHistory()
     setPrankTrapsRecent([])
     setTrapIntent(null)
+    chaosManager.cancel()
+    chaosManager.clearHistory()
+    setPrankChaosHistory([])
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -1161,6 +1188,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearPrankMessageHistory, togglePrankMessageFavorite,
       prankTrapsRecent, syncPrankTrapsRecent,
       trapIntent, setTrapIntent,
+      prankChaosHistory,
     }),
     [
       screen, mood, avatarReaction, voiceId, voiceFavoriteIds, recentVoiceIds, personalityId, voiceParams, conversationMode,
@@ -1194,6 +1222,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearPrankMessageHistory, togglePrankMessageFavorite,
       prankTrapsRecent, syncPrankTrapsRecent,
       trapIntent,
+      prankChaosHistory,
     ],
   )
 

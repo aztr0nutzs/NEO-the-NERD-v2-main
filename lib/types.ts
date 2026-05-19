@@ -165,6 +165,7 @@ export interface PersistedAppState {
   prankMessageFavorites?: PrankMessageRecord[]
   prankMessageHistory?: PrankMessageRecord[]
   prankTrapsHistory?: PrankTrap[]
+  prankChaosHistory?: ChaosHistoryEntry[]
 }
 
 export interface PrankMessageRecord {
@@ -206,6 +207,45 @@ export interface PrankTrap {
 
 export interface TrapIntent {
   kind: PrankTrapKind
+  soundId?: string
+  messageText?: string
+}
+
+export type ChaosActionKind =
+  | "random-sound"
+  | "safe-random-sound"
+  | "random-message"
+  | "spoken-message"
+  | "sound-plus-message"
+  | "sequence"
+
+export type ChaosIntensity = "mild" | "goofy" | "chaotic" | "maximum"
+
+export type ChaosPoolFilter = "playable-all" | "safe-only"
+
+export type ChaosExecutionStatus =
+  | "idle"
+  | "ready"
+  | "playing"
+  | "speaking"
+  | "running-sequence"
+  | "complete"
+  | "cancelled"
+  | "failed"
+
+export interface ChaosHistoryEntry {
+  id: string
+  kind: ChaosActionKind
+  intensity: ChaosIntensity
+  summary: string
+  status: "complete" | "cancelled" | "failed"
+  createdAt: number
+  completedAt?: number
+  error?: string
+}
+
+export interface ChaosIntent {
+  kind?: ChaosActionKind
   soundId?: string
   messageText?: string
 }
@@ -330,4 +370,5 @@ export type ScreenId =
   | "prankLibrary"
   | "prankMessages"
   | "prankTraps"
+  | "prankChaos"
   | "settings"
