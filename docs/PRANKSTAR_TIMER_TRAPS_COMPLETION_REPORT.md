@@ -38,13 +38,14 @@ out explicitly in the UI.
 - Delays clamped to `[1s, 6h]`. Custom-seconds input validated at 1s
   minimum, 1h soft cap from the UI.
 - Re-render-safe: arming creates exactly one timer, cancel clears it. When
-  the timer elapses the trap stays in the active map with `status =
-  "triggering"` while the audio or speech runtime is invoked, so the user
-  sees a visible "FIRING" state on the active card. Only after the runtime
-  promise resolves does the manager remove the trap from the active map and
-  push a `fired` or `failed` record into recent history (this transition
-  also clears the per-id `setTimeout` reference). Cleanup on unmount is
-  unnecessary because the manager is global.
+  the timer elapses, the manager drops the per-id `setTimeout` entry from
+  its bookkeeping map (the timer has already fired) and updates the trap's
+  status to `"triggering"` while the audio or speech runtime is invoked.
+  The trap stays in the active map during this window so the user sees a
+  visible "FIRING" state on the active card. Only after the runtime promise
+  resolves does the manager remove the trap from the active map and push a
+  `fired` (or `failed`, on runtime error) record into recent history.
+  Cleanup on unmount is unnecessary because the manager is global.
 
 ## State transitions
 
