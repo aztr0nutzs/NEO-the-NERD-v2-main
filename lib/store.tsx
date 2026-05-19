@@ -26,6 +26,8 @@ import type {
   PersistedAppState,
   PrankMessageRecord,
   PrankTrap,
+  SoundForgeIntent,
+  SoundForgeSequence,
   TrapIntent,
   RobotSource,
   SavedResponse,
@@ -53,6 +55,11 @@ import { PERSONALITIES, SAVED_RESPONSES, VOICES } from "./data"
 import { isPlayableSoundId } from "./prankstar/soundCatalog"
 import { prankTrapsManager } from "./prankstar/prankTraps"
 import { chaosManager } from "./prankstar/chaosRandomizer"
+import {
+  SOUND_FORGE_SEQUENCES_CAP,
+  normalizeStoredSequences,
+  soundForgeManager,
+} from "./prankstar/soundForge"
 import {
   duplicateResponse,
   markResponseUsed,
@@ -106,6 +113,15 @@ interface AppState {
   setTrapIntent: (intent: TrapIntent | null) => void
 
   prankChaosHistory: ChaosHistoryEntry[]
+
+  prankSoundForgeSequences: SoundForgeSequence[]
+  saveSoundForgeSequence: (sequence: SoundForgeSequence) => void
+  deleteSoundForgeSequence: (id: string) => void
+  duplicateSoundForgeSequence: (id: string) => SoundForgeSequence | null
+  toggleSoundForgeFavorite: (id: string) => void
+  markSoundForgeSequencePlayed: (id: string) => void
+  soundForgeIntent: SoundForgeIntent | null
+  setSoundForgeIntent: (intent: SoundForgeIntent | null) => void
 
   personalityId: string
   setPersonalityId: (id: string) => void
@@ -378,6 +394,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [prankTrapsRecent, setPrankTrapsRecent] = useState<PrankTrap[]>([])
   const [trapIntent, setTrapIntent] = useState<TrapIntent | null>(null)
   const [prankChaosHistory, setPrankChaosHistory] = useState<ChaosHistoryEntry[]>([])
+  const [prankSoundForgeSequences, setPrankSoundForgeSequences] = useState<
+    SoundForgeSequence[]
+  >([])
+  const [soundForgeIntent, setSoundForgeIntent] = useState<SoundForgeIntent | null>(null)
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -411,6 +431,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageFavorites,
       prankTrapsHistory: prankTrapsRecent,
       prankChaosHistory,
+      prankSoundForgeSequences,
     }),
     [
       accentColor,
@@ -431,6 +452,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageFavorites,
       prankTrapsRecent,
       prankChaosHistory,
+      prankSoundForgeSequences,
       personalityId,
       recentVoiceIds,
       responses,
@@ -518,6 +540,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (stored.prankChaosHistory?.length) {
       setPrankChaosHistory(stored.prankChaosHistory)
       chaosManager.hydrateHistory(stored.prankChaosHistory)
+    }
+    if (stored.prankSoundForgeSequences?.length) {
+      const normalized = normalizeStoredSequences(stored.prankSoundForgeSequences)
+      if (normalized.length) setPrankSoundForgeSequences(normalized)
     }
   }, [])
 
@@ -661,6 +687,59 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return chaosManager.subscribe((snap) => {
       setPrankChaosHistory([...snap.history])
     })
+  }, [])
+
+  const saveSoundForgeSequence = useCallback((sequence: SoundForgeSequence) => {
+    setPrankSoundForgeSequences((current) => {
+      const filtered = current.filter((s) => s.id !== sequence.id)
+      return [sequence, ...filtered].slice(0, SOUND_FORGE_SEQUENCES_CAP)
+    })
+  }, [])
+
+  const deleteSoundForgeSequence = useCallback((id: string) => {
+    setPrankSoundForgeSequences((current) => current.filter((s) => s.id !== id))
+  }, [])
+
+  const duplicateSoundForgeSequence = useCallback(
+    (id: string): SoundForgeSequence | null => {
+      const source = prankSoundForgeSequences.find((s) => s.id === id)
+      if (!source) return null
+      const now = Date.now()
+      const copy: SoundForgeSequence = {
+        ...source,
+        id: `sf-seq-${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+        name: `${source.name} (Copy)`.slice(0, 60),
+        createdAt: now,
+        updatedAt: now,
+        favorite: false,
+        lastPlayedAt: undefined,
+        steps: source.steps.map((step) => ({
+          ...step,
+          id: `sf-step-${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+        })),
+      }
+      setPrankSoundForgeSequences((current) =>
+        [copy, ...current].slice(0, SOUND_FORGE_SEQUENCES_CAP),
+      )
+      return copy
+    },
+    [prankSoundForgeSequences],
+  )
+
+  const toggleSoundForgeFavorite = useCallback((id: string) => {
+    setPrankSoundForgeSequences((current) =>
+      current.map((seq) =>
+        seq.id === id ? { ...seq, favorite: !seq.favorite } : seq,
+      ),
+    )
+  }, [])
+
+  const markSoundForgeSequencePlayed = useCallback((id: string) => {
+    setPrankSoundForgeSequences((current) =>
+      current.map((seq) =>
+        seq.id === id ? { ...seq, lastPlayedAt: Date.now() } : seq,
+      ),
+    )
   }, [])
 
   const togglePrankMessageFavorite = useCallback(
@@ -1076,6 +1155,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             parsed.prankTrapsHistory ?? prankTrapsRecent,
           prankChaosHistory:
             parsed.prankChaosHistory ?? prankChaosHistory,
+          prankSoundForgeSequences:
+            parsed.prankSoundForgeSequences ?? prankSoundForgeSequences,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -1105,6 +1186,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageFavorites,
       prankTrapsRecent,
       prankChaosHistory,
+      prankSoundForgeSequences,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -1149,6 +1231,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     chaosManager.cancel()
     chaosManager.clearHistory()
     setPrankChaosHistory([])
+    soundForgeManager.reset()
+    setPrankSoundForgeSequences([])
+    setSoundForgeIntent(null)
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -1189,6 +1274,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankTrapsRecent, syncPrankTrapsRecent,
       trapIntent, setTrapIntent,
       prankChaosHistory,
+      prankSoundForgeSequences,
+      saveSoundForgeSequence,
+      deleteSoundForgeSequence,
+      duplicateSoundForgeSequence,
+      toggleSoundForgeFavorite,
+      markSoundForgeSequencePlayed,
+      soundForgeIntent,
+      setSoundForgeIntent,
     }),
     [
       screen, mood, avatarReaction, voiceId, voiceFavoriteIds, recentVoiceIds, personalityId, voiceParams, conversationMode,
@@ -1223,6 +1316,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankTrapsRecent, syncPrankTrapsRecent,
       trapIntent,
       prankChaosHistory,
+      prankSoundForgeSequences,
+      saveSoundForgeSequence,
+      deleteSoundForgeSequence,
+      duplicateSoundForgeSequence,
+      toggleSoundForgeFavorite,
+      markSoundForgeSequencePlayed,
+      soundForgeIntent,
     ],
   )
 

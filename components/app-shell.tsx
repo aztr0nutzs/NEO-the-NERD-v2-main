@@ -18,6 +18,7 @@ import { PrankLibraryScreen } from "./screens/prank-library-screen"
 import { PrankMessagesScreen } from "./screens/prank-messages-screen"
 import { PrankTrapsScreen } from "./screens/prank-traps-screen"
 import { PrankChaosScreen } from "./screens/prank-chaos-screen"
+import { PrankSoundForgeScreen } from "./screens/prank-sound-forge-screen"
 import { SettingsScreen } from "./screens/settings-screen"
 import { SpeedTestScreen } from "./screens/speed-test-screen"
 import { NeoBackgroundScene } from "./background/neo-background-scene"
@@ -40,6 +41,7 @@ const SCREEN_MAP = {
   prankMessages: PrankMessagesScreen,
   prankTraps: PrankTrapsScreen,
   prankChaos: PrankChaosScreen,
+  prankSoundForge: PrankSoundForgeScreen,
   settings: SettingsScreen,
 } as const
 

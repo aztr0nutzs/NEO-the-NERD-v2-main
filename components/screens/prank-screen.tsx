@@ -64,9 +64,8 @@ export function PrankScreen() {
         </p>
         <p className="mt-2 text-sm leading-relaxed text-white/85">
           Prankstar Protocol is NEO&apos;s mischief subsystem — curated prank
-          audio, generated mischief messages, and future timed traps.
-          The Sound Library and Prank Messages modules are live; further
-          modules arrive in upcoming phases.
+          audio, generated mischief messages, timed traps, chaos randomization,
+          and the Sound Forge sequence builder. All five modules are live.
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           <Stat label="PLAYABLE" value={String(totalPlayable)} accent="#ff2d9c" />
@@ -77,7 +76,7 @@ export function PrankScreen() {
           />
           <Stat
             label="MODULES"
-            value="04"
+            value="05"
             accent="#39ff14"
           />
         </div>
@@ -120,8 +119,9 @@ export function PrankScreen() {
         <ModuleCard
           icon={Hammer}
           label="Sound Forge"
-          status="NEXT_PHASE"
+          status="LIVE"
           accent="#39ff14"
+          onClick={() => setScreen("prankSoundForge")}
         />
       </div>
 
@@ -237,7 +237,7 @@ export function PrankScreen() {
       <NeonPanel accent="purple" glow="soft" className="p-3">
         <div className="flex items-center gap-2 ps-mono text-[10px] tracking-[0.25em] text-white/70">
           <Wand2 className="h-3.5 w-3.5 ps-text-purple" />
-          <span>NEXT PHASE: SOUND FORGE</span>
+          <span>ALL PRANKSTAR MODULES LIVE</span>
         </div>
       </NeonPanel>
     </div>

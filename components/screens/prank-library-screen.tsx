@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   Clock,
   Filter,
+  Hammer,
   Loader2,
   Music2,
   Pause,
@@ -47,6 +48,7 @@ export function PrankLibraryScreen() {
     recentPrankSoundIds,
     recordPrankSoundPlay,
     setTrapIntent,
+    setSoundForgeIntent,
   } = useApp()
   const audio = usePrankAudio()
 
@@ -413,6 +415,18 @@ export function PrankLibraryScreen() {
                       className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#ff7a00]/50 bg-[#ff7a00]/10 hover:bg-[#ff7a00]/20"
                     >
                       <TimerIcon className="h-4 w-4 ps-text-orange" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSoundForgeIntent({ soundId: sound.id })
+                        setScreen("prankSoundForge")
+                      }}
+                      aria-label={`Add ${sound.name} to Sound Forge`}
+                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#39ff14]/50 bg-[#39ff14]/10 hover:bg-[#39ff14]/20"
+                    >
+                      <Hammer className="h-4 w-4" style={{ color: "#39ff14" }} />
                     </button>
 
                     <button

@@ -166,6 +166,7 @@ export interface PersistedAppState {
   prankMessageHistory?: PrankMessageRecord[]
   prankTrapsHistory?: PrankTrap[]
   prankChaosHistory?: ChaosHistoryEntry[]
+  prankSoundForgeSequences?: SoundForgeSequence[]
 }
 
 export interface PrankMessageRecord {
@@ -248,6 +249,38 @@ export interface ChaosIntent {
   kind?: ChaosActionKind
   soundId?: string
   messageText?: string
+}
+
+export interface SoundForgeStep {
+  id: string
+  soundId: string
+  soundName: string
+  category: string
+  delayAfterMs: number
+  note?: string
+}
+
+export interface SoundForgeSequence {
+  id: string
+  name: string
+  createdAt: number
+  updatedAt: number
+  steps: SoundForgeStep[]
+  estimatedDurationMs?: number
+  favorite?: boolean
+  lastPlayedAt?: number
+}
+
+export type SoundForgePlaybackStatus =
+  | "idle"
+  | "previewing"
+  | "stopped"
+  | "complete"
+  | "failed"
+
+export interface SoundForgeIntent {
+  soundId?: string
+  loadSequenceId?: string
 }
 
 export type ConversationMode =
@@ -371,4 +404,5 @@ export type ScreenId =
   | "prankMessages"
   | "prankTraps"
   | "prankChaos"
+  | "prankSoundForge"
   | "settings"
