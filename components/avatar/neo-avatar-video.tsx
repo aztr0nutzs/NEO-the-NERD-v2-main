@@ -116,8 +116,19 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
   ) {
     const rootRef = useRef<HTMLDivElement | null>(null)
     const videoRef = useRef<HTMLVideoElement | null>(null)
-    const lastReactionRef = useRef<number | null>(null)
-    const [currentKey, setCurrentKey] = useState<AvatarClipKey>(baseKey)
+    // If the component is mounted with a one-shot reaction already queued
+    // (the common post-boot path: AppShell fires `playAvatarReaction("wakeup")`
+    // before the avatar tree mounts), start the <video> element on that
+    // reaction clip directly. Otherwise the first render mounts
+    // `<video src=idle.mp4 preload>` — an 18 MB asset — only to throw it
+    // away one effect tick later when the reaction takes over. Seeding the
+    // initial key avoids that wasted preload entirely.
+    const lastReactionRef = useRef<number | null>(
+      reactionKey !== null && reactionId !== null ? reactionId : null,
+    )
+    const [currentKey, setCurrentKey] = useState<AvatarClipKey>(
+      reactionKey !== null && reactionId !== null ? reactionKey : baseKey,
+    )
     const [pageVisible, setPageVisible] = useState(true)
     const [onscreen, setOnscreen] = useState(true)
     const currentEntry = AVATAR_MEDIA[currentKey]
@@ -254,7 +265,15 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
           muted
           playsInline
           loop={currentEntry.playback === "loop"}
-          preload={currentEntry.state === "base" ? "auto" : "metadata"}
+          // Always `metadata`, never `auto`. The base idle clip is 18 MB —
+          // an `auto` preload pulls the whole asset into the WebView's
+          // memory the moment the element mounts, which competes with both
+          // the boot intro decoder (during the cinematic handoff frame) and
+          // the ambient background loop (immediately after). `metadata`
+          // lets the demuxer prep the file and start streaming on play()
+          // without the greedy whole-file fetch, and the visible playback
+          // start is still effectively instant because we are autoplaying.
+          preload="metadata"
           aria-label={ariaLabel}
           onEnded={returnToIdle}
           onError={returnToIdle}
