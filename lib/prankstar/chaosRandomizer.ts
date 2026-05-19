@@ -37,7 +37,11 @@ import { getVoiceProfile } from "@/lib/voice/voiceProfiles"
 import { voiceProfileToParams } from "@/lib/voice/voicePresets"
 
 export interface ChaosStep {
-  kind: "sound" | "spoken-message"
+  // `text-message` is intentionally distinct from `spoken-message`: it carries
+  // a generated mischief line but is NEVER routed through the NEO voice
+  // runtime. It exists so Random Message mode can stage a real action that
+  // surfaces text without faking playback.
+  kind: "sound" | "spoken-message" | "text-message"
   soundId?: string
   soundName?: string
   messageText?: string
@@ -160,7 +164,11 @@ function summaryFor(kind: ChaosActionKind, steps: ChaosStep[]): string {
     const step = steps[0]
     if (step.kind === "sound") return `Sound · ${step.soundName ?? "?"}`
     const head = (step.messageText ?? "").slice(0, 60)
-    return `Speak · ${head}${(step.messageText?.length ?? 0) > 60 ? "…" : ""}`
+    const trailing = (step.messageText?.length ?? 0) > 60 ? "…" : ""
+    if (step.kind === "text-message") {
+      return `Message · ${head}${trailing}`
+    }
+    return `Speak · ${head}${trailing}`
   }
   return `${labelForKind(kind)} · ${steps.length} steps`
 }
@@ -323,14 +331,15 @@ class ChaosManager {
         return [{ kind: "sound", soundId: sound.id, soundName: sound.name }]
       }
       case "random-message": {
-        // Random message with no NEO voice playback — generated text only,
-        // surfaced to UI. Kept distinct from `spoken-message` so users can
-        // grab a fresh prank line without triggering speech.
+        // Random message is text-only: the generated line IS the result.
+        // Uses the `text-message` step kind so the execute pipeline never
+        // hands it to the NEO voice runtime. Spoken Message remains the
+        // distinct audible mode.
         const generated = generateRandomMessage(intensity, opts.personalityId)
         if (!generated) return []
         return [
           {
-            kind: "spoken-message",
+            kind: "text-message",
             messageText: generated.text,
             messageCategoryId: generated.categoryId,
             messageToneId: generated.toneId,
@@ -455,6 +464,15 @@ class ChaosManager {
     if (action.status === "failed") return
     this.cancelRequested = false
 
+    // Text-only actions (Random Message mode) are complete the moment they
+    // are generated — there is no audio / voice runtime to invoke. We settle
+    // as `complete` immediately so the action is honestly recorded in history
+    // without ever calling `previewVoice` or the sound runtime.
+    if (action.steps.every((s) => s.kind === "text-message")) {
+      this.settle("complete")
+      return
+    }
+
     const [gapLo, gapHi] = SEQUENCE_GAP_MS_BY_INTENSITY[action.intensity]
     const startStatus: ChaosExecutionStatus =
       action.steps.length > 1
@@ -478,9 +496,11 @@ class ChaosManager {
         }
         if (step.kind === "sound") {
           await this.runSoundStep(step)
-        } else {
+        } else if (step.kind === "spoken-message") {
           await this.runSpokenStep(step, opts)
         }
+        // text-message steps are display-only; the loop intentionally
+        // skips them and never touches the voice runtime.
         if (this.cancelRequested) {
           this.settle("cancelled")
           return
@@ -697,4 +717,14 @@ export function describeChaosStep(step: ChaosStep): string {
   if (step.kind === "sound") return step.soundName ?? "Sound"
   const head = (step.messageText ?? "").slice(0, 60)
   return `“${head}${(step.messageText?.length ?? 0) > 60 ? "…" : ""}”`
+}
+
+/**
+ * True when every step in the action is a text-only step. Used by the Chaos
+ * Console UI to swap in text-appropriate controls (Copy / Save) instead of
+ * the misleading EXECUTE_NOW playback button.
+ */
+export function isChaosActionTextOnly(action: ChaosAction | null): boolean {
+  if (!action || action.steps.length === 0) return false
+  return action.steps.every((s) => s.kind === "text-message")
 }

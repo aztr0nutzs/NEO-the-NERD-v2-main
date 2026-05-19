@@ -4,7 +4,9 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
+  ClipboardCopy,
   Dices,
+  Inbox,
   Layers,
   Music2,
   MessageSquareWarning,
@@ -26,6 +28,7 @@ import {
   CHAOS_POOLS,
   chaosManager,
   describeChaosStep,
+  isChaosActionTextOnly,
 } from "@/lib/prankstar/chaosRandomizer"
 import { useChaosRandomizer } from "@/lib/prankstar/useChaosRandomizer"
 import type {
@@ -78,13 +81,28 @@ function isRunning(status: ChaosExecutionStatus | undefined): boolean {
 }
 
 export function PrankChaosScreen() {
-  const { setScreen, voiceId, personalityId, settings } = useApp()
+  const {
+    setScreen,
+    voiceId,
+    personalityId,
+    settings,
+    addPrankMessageToHistory,
+  } = useApp()
   const { current, history } = useChaosRandomizer()
 
   const [kind, setKind] = useState<ChaosActionKind>("random-sound")
   const [intensity, setIntensity] = useState<ChaosIntensity>("goofy")
   const [pool, setPool] = useState<ChaosPoolFilter>("playable-all")
   const [notice, setNotice] = useState<string | null>(null)
+
+  const isTextOnly = useMemo(() => isChaosActionTextOnly(current), [current])
+  const currentMessageStep = useMemo(() => {
+    if (!current) return null
+    return (
+      current.steps.find((s) => s.kind === "text-message" && s.messageText) ??
+      null
+    )
+  }, [current])
 
   // Auto-generate an initial preview so the result panel is never empty on
   // first paint — gives a clear "this is what would fire" view.
@@ -122,10 +140,66 @@ export function PrankChaosScreen() {
     chaosManager.cancel()
   }, [])
 
+  const onCopyMessage = useCallback(async () => {
+    const text = currentMessageStep?.messageText?.trim()
+    if (!text) {
+      setNotice("Nothing to copy.")
+      return
+    }
+    try {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+        setNotice("Message copied to clipboard.")
+        return
+      }
+    } catch {
+      // Fall through to the fallback below.
+    }
+    setNotice("Copy not available — long-press the message text instead.")
+  }, [currentMessageStep])
+
+  const onSendToPrankMessages = useCallback(() => {
+    if (!current || !currentMessageStep?.messageText) {
+      setNotice("Generate a message first.")
+      return
+    }
+    const text = currentMessageStep.messageText
+    addPrankMessageToHistory({
+      id: `chaos-${current.id}`,
+      text,
+      categoryId: currentMessageStep.messageCategoryId ?? "chaos",
+      toneId: currentMessageStep.messageToneId ?? "goofy",
+      personalityId,
+      createdAt: Date.now(),
+    })
+    // Honestly settle the chaos action as complete via the normal pipeline.
+    // execute() short-circuits text-only actions and pushes a "complete"
+    // history entry without invoking any audio / voice runtime.
+    void chaosManager.execute({
+      voiceId,
+      voiceQualityPreference: settings.voiceQualityPreference,
+      personalityId,
+    })
+    setNotice("Saved to Prank Messages.")
+  }, [
+    addPrankMessageToHistory,
+    current,
+    currentMessageStep,
+    personalityId,
+    settings.voiceQualityPreference,
+    voiceId,
+  ])
+
   const runningNow = isRunning(current?.status)
   const canExecute =
-    !!current && current.status === "ready" && current.steps.length > 0
+    !!current &&
+    current.status === "ready" &&
+    current.steps.length > 0 &&
+    !isTextOnly
   const canGenerate = !runningNow
+  const canCommitText =
+    !!current && current.status === "ready" && isTextOnly
+  const canCopyMessage = !!currentMessageStep?.messageText
 
   return (
     <div className="space-y-4 pb-2">
@@ -310,9 +384,18 @@ export function PrankChaosScreen() {
             </p>
             <ol className="space-y-2">
               {current.steps.map((step, idx) => {
-                const accent =
-                  step.kind === "sound" ? "#00f0ff" : "#ff2d9c"
-                const Icon = step.kind === "sound" ? Music2 : Volume2
+                const stepVisual =
+                  step.kind === "sound"
+                    ? { accent: "#00f0ff", icon: Music2, label: "SOUND" }
+                    : step.kind === "text-message"
+                      ? {
+                          accent: "#b829ff",
+                          icon: MessageSquareWarning,
+                          label: "MESSAGE",
+                        }
+                      : { accent: "#ff2d9c", icon: Volume2, label: "SPEECH" }
+                const Icon = stepVisual.icon
+                const accent = stepVisual.accent
                 return (
                   <li
                     key={`${current.id}-${idx}`}
@@ -328,9 +411,15 @@ export function PrankChaosScreen() {
                         className="ps-mono text-[9px] tracking-[0.2em]"
                         style={{ color: accent }}
                       >
-                        STEP {idx + 1} · {step.kind === "sound" ? "SOUND" : "SPEECH"}
+                        STEP {idx + 1} · {stepVisual.label}
                       </p>
-                      <p className="mt-0.5 truncate text-sm text-white/90">
+                      <p
+                        className={
+                          step.kind === "text-message"
+                            ? "mt-0.5 whitespace-pre-wrap break-words text-sm text-white/90"
+                            : "mt-0.5 truncate text-sm text-white/90"
+                        }
+                      >
                         {describeChaosStep(step)}
                       </p>
                     </div>
@@ -358,26 +447,54 @@ export function PrankChaosScreen() {
           </div>
         )}
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={onExecute}
-            disabled={!canExecute}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#ff2d9c]/55 bg-[#ff2d9c]/15 px-3 py-2.5 ps-mono text-[11px] tracking-[0.25em] ps-text-pink hover:bg-[#ff2d9c]/25 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Play className="h-4 w-4" />
-            EXECUTE_NOW
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={!runningNow}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-black/55 px-3 py-2.5 ps-mono text-[11px] tracking-[0.25em] text-white/85 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <StopCircle className="h-4 w-4" />
-            STOP_CHAOS
-          </button>
-        </div>
+        {isTextOnly ? (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onCopyMessage}
+              disabled={!canCopyMessage}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#b829ff]/55 bg-[#b829ff]/15 px-3 py-2.5 ps-mono text-[11px] tracking-[0.25em] ps-text-purple hover:bg-[#b829ff]/25 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ClipboardCopy className="h-4 w-4" />
+              COPY_MESSAGE
+            </button>
+            <button
+              type="button"
+              onClick={onSendToPrankMessages}
+              disabled={!canCommitText}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#39ff14]/55 bg-[#39ff14]/15 px-3 py-2.5 ps-mono text-[11px] tracking-[0.25em] text-[#39ff14] hover:bg-[#39ff14]/25 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Inbox className="h-4 w-4" />
+              SEND_TO_MESSAGES
+            </button>
+          </div>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onExecute}
+              disabled={!canExecute}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#ff2d9c]/55 bg-[#ff2d9c]/15 px-3 py-2.5 ps-mono text-[11px] tracking-[0.25em] ps-text-pink hover:bg-[#ff2d9c]/25 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Play className="h-4 w-4" />
+              EXECUTE_NOW
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={!runningNow}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-black/55 px-3 py-2.5 ps-mono text-[11px] tracking-[0.25em] text-white/85 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <StopCircle className="h-4 w-4" />
+              STOP_CHAOS
+            </button>
+          </div>
+        )}
+        {isTextOnly && (
+          <p className="mt-2 ps-mono text-[9px] leading-relaxed tracking-[0.18em] text-white/55">
+            RANDOM MESSAGE IS TEXT ONLY — NEO WILL NOT SPEAK THIS LINE.
+          </p>
+        )}
       </NeonPanel>
 
       <NeonPanel accent="cyan" glow="soft" className="p-3">
