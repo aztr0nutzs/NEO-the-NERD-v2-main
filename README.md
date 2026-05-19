@@ -36,9 +36,9 @@
 This repo uses **npm** as the canonical package manager. The lockfile of record is `package-lock.json`. Alternative lockfiles (`pnpm-lock.yaml`, `yarn.lock`) are gitignored to prevent drift.
 
 ### Prerequisites
-- Node.js 20+ (Next.js 16 requirement)
+- Node.js 22+ (Capacitor 8 CLI requirement)
 - npm 10+
-- For Android builds: Android Studio with the Capacitor toolchain (Java 17+, Android SDK 34+)
+- For Android builds: Android Studio with the Capacitor toolchain (Java 17+, Android SDK platform-tools/`adb`, Android SDK Build-Tools 35.0.0, and Android SDK Platform 36). Accept SDK licenses via `sdkmanager --licenses` before running Gradle builds.
 
 ### Install
 ```bash
