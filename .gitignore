@@ -23,13 +23,24 @@ yarn.lock
 .DS_Store
 Thumbs.db
 
-# Editor / IDE swap files (already-tracked .idea/ folders are left alone;
-# this just prevents stray editor scratch files from drifting into commits)
+# Editor / IDE swap files
 *.swp
 *.swo
 
-# Local Android dev artifacts not covered by android/.gitignore
+# JetBrains / Android Studio IDE metadata (machine-specific; never commit).
+# Tracking these caused recurring "Invalid Gradle JDK configuration" problems
+# because each clone's JDK path / gradleJvm differs.
+.idea/
+**/.idea/
+*.iml
+
+# Gradle local caches / wrapper state (machine-specific)
+.gradle/
+**/.gradle/
+
+# Local Android SDK / NDK paths (machine-specific)
 local.properties
+**/local.properties
 
 # Logs
 *.log

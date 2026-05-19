@@ -61,6 +61,15 @@ npx cap sync android          # sync native plugins
 npx cap open android          # open the Android project in Android Studio
 ```
 
+#### Android Studio JDK setup (portable)
+Gradle JDK selection is **per-machine** and must not be committed. After cloning:
+
+1. Open **Settings → Build, Execution, Deployment → Build Tools → Gradle**.
+2. Set **Gradle JDK** to `#GRADLE_LOCAL_JAVA_HOME` (preferred, reads from each machine's `~/.gradle/config.properties`) or to the IDE's bundled JDK (e.g. `jbr-21`).
+3. Do **not** set `org.gradle.java.home` in `android/gradle.properties` — leaving it unset lets Gradle pick the local JDK and keeps the repo portable across machines.
+
+Machine-specific IDE metadata (`.idea/`, `*.iml`, `local.properties`, `.gradle/`) is gitignored and must never be committed. Tracking these previously caused recurring "Invalid Gradle JDK configuration" errors on fresh clones.
+
 ### Environment
 Copy `.env.example` to `.env.local` and populate any keys you need (TTS provider, etc.). Without those, the app runs against the in-browser local response engine.
 
