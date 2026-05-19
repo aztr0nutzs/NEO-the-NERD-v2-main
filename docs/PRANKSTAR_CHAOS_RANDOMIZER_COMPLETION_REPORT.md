@@ -25,9 +25,13 @@ a persisted recent-history slice. All execution is open-app only.
 - **Safe Random** — one curated safe-mode sound (forced to the safe pool
   regardless of pool filter, mirrors Timer Traps' contract).
 - **Random Message** — one generated mischief line from the existing
-  `generatePrankMessage` template engine. Text only — does not speak.
+  `generatePrankMessage` template engine. **Text only**: the engine
+  stages a `text-message` step that is never routed through the voice
+  runtime, and the Chaos Console exposes Copy / Send-to-Prank-Messages
+  controls instead of an EXECUTE_NOW playback button.
 - **Spoken Message** — random line piped through NEO's voice runtime via
   the same `previewVoice` path that Prank Messages and Timer Traps use.
+  This is the distinct audible mode.
 - **Sound + Message** — sound first, then NEO speaks the punchline (setup
   → payoff pattern, documented and consistent).
 - **Chaos Sequence** — 2–4 alternating sound / spoken-message steps with
@@ -104,6 +108,25 @@ implementation was created.
 `stopVoicePreview()` is wired to `cancel()` so the speech runtime is
 torn down even mid-sentence.
 
+## Random Message (text-only) integration
+
+`random-message` is the deliberately text-only counterpart to Spoken
+Message. The engine stages a step with `kind: "text-message"`, which is
+a first-class member of the `ChaosStep` union. The execute pipeline
+short-circuits any action whose steps are all `text-message`: it calls
+`settle("complete")` immediately without invoking `previewVoice`,
+`prankAudioRuntime`, or any other playback path. A defensive
+`text-message` skip is also placed inside the step loop so the voice
+runtime can never be reached even if a future change generates a
+`text-message` step inside a sequence.
+
+The Chaos Console screen detects text-only actions via
+`isChaosActionTextOnly(action)` and renders Random-Message-appropriate
+controls — `COPY_MESSAGE` (clipboard) and `SEND_TO_MESSAGES` (commits
+the generated line into `prankMessageHistory` via
+`addPrankMessageToHistory` and settles the chaos action as `complete`).
+The misleading `EXECUTE_NOW` playback button is hidden for this mode.
+
 ## Combo / sequence execution rules
 
 - **Combo**: sound first, then spoken message. The sound step waits for
@@ -166,9 +189,16 @@ past actions at boot would replay stale chaos.
 - **GENERATE_CHAOS** primary action.
 - **STAGED** result panel: shows the chosen kind, intensity, summary,
   and an ordered step list (icon + step kind + payload preview).
-- **EXECUTE_NOW** + **STOP_CHAOS** buttons. Execute is disabled until
-  a staged action exists with `status: "ready"`; Stop is disabled
-  unless a step is actually running.
+- **EXECUTE_NOW** + **STOP_CHAOS** buttons for playback modes (Random
+  Sound / Safe Random / Spoken Message / Sound + Message / Chaos
+  Sequence). Execute is disabled until a staged action exists with
+  `status: "ready"`; Stop is disabled unless a step is actually running.
+- **COPY_MESSAGE** + **SEND_TO_MESSAGES** buttons replace the playback
+  row when the staged action is text-only (Random Message). A small
+  helper banner — *"RANDOM MESSAGE IS TEXT ONLY — NEO WILL NOT SPEAK
+  THIS LINE."* — sits under the row so the contract is visible to the
+  user. `SEND_TO_MESSAGES` adds the generated line to
+  `prankMessageHistory` and settles the chaos action as `complete`.
 - **RECENT** panel: capped at 12 visible rows, status icon (check /
   X / alert), short summary, error string when relevant. Clear-history
   control.
@@ -224,7 +254,10 @@ type ChaosExecutionStatus =
   | "failed"
 
 interface ChaosStep {
-  kind: "sound" | "spoken-message"
+  // `text-message` is intentionally distinct from `spoken-message` so
+  // Random Message mode can stage a real action that never reaches the
+  // NEO voice runtime.
+  kind: "sound" | "spoken-message" | "text-message"
   soundId?: string
   soundName?: string
   messageText?: string
@@ -296,6 +329,20 @@ interface ChaosHistoryEntry {
 - Interactive runtime testing was not performed in this pass — the
   remote execution environment has no UI surface; build / type / lint
   receipts above are the verification.
+
+### Random Message / Spoken Message split — corrective pass
+
+A targeted follow-up corrected a behavior inconsistency where the
+`random-message` mode was building a `spoken-message` step under the
+hood and therefore triggering `previewVoice` on execute. After the fix:
+
+- `random-message` builds a `text-message` step and never reaches any
+  audio / voice runtime.
+- `spoken-message` continues to use the existing `previewVoice` flow.
+- The Chaos Console swaps in `COPY_MESSAGE` / `SEND_TO_MESSAGES` for the
+  Random Message mode so the action row matches the actual behavior.
+- History entries for Random Message report a `Message · …` summary so
+  the distinction is visible in the recent-history list.
 
 ## Recommended next Prankstar phase
 
