@@ -166,6 +166,7 @@ export function NetworkDiscoveryFeature() {
   const [selectedDevice, setSelectedDevice] = useState<DiscoveredDevice | null>(null);
   const [selectedMode, setSelectedMode] = useState<ScanMode>("balanced");
   const [scanProgress, setScanProgress] = useState(0);
+  const [lastScanCompletion, setLastScanCompletion] = useState<import("@/lib/network/types").ScanCompletionResult | null>(null);
   const [activeTab, setActiveTab] = useState("map");
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<string[]>([]);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
@@ -325,11 +326,62 @@ export function NetworkDiscoveryFeature() {
         controlModeResult,
       ] = settled;
 
-      const status = pick<NetworkStatus>(statusResult, { ...MOCK_NETWORK_STATUS }, "network_status");
+      // Determine the user's intended mode BEFORE picking fallbacks. When the
+      // user is NOT in demo mode, an unexpected adapter throw must NOT leak
+      // mock data into the UI — surface empty/unavailable state instead.
+      const intendedDemoMode =
+        persistedNetworkSettingsRef.current?.demoMode ??
+        DEFAULT_NETWORK_SETTINGS.demoMode;
+      const unavailableStatusStub: NetworkStatus = {
+        networkName: "Unavailable",
+        gatewayIp: "Unavailable",
+        localIp: "Unavailable",
+        subnet: "Unavailable",
+        connectionType: "unknown",
+        scanState: "idle",
+        lastScanAt: null,
+        devicesFound: 0,
+        onlineDevices: 0,
+        unknownDevices: 0,
+        flaggedDevices: 0,
+      };
+      const unavailableRouterStub: RouterStatus = {
+        name: "Unavailable",
+        model: "Unavailable",
+        gatewayIp: "Unavailable",
+        firmwareVersion: "Unavailable",
+        connectionStatus: "unknown",
+        uptime: "Unavailable",
+        wanIp: "Unavailable",
+        dnsServers: [],
+        guestNetworkEnabled: false,
+        qosEnabled: false,
+        firewallEnabled: false,
+        rebootAvailable: false,
+        readOnlyMode: true,
+      };
+
+      const status = pick<NetworkStatus>(
+        statusResult,
+        intendedDemoMode ? { ...MOCK_NETWORK_STATUS } : unavailableStatusStub,
+        "network_status"
+      );
       const deviceList = pick<DiscoveredDevice[]>(devicesResult, [], "discovered_devices");
-      const router = pick<RouterStatus>(routerResult, { ...MOCK_ROUTER_STATUS }, "router_status");
-      const insights = pick<SecurityInsight[]>(insightsResult, [...MOCK_SECURITY_INSIGHTS], "security_insights");
-      const history = pick<ScanHistoryEntry[]>(historyResult, [...MOCK_SCAN_HISTORY], "scan_history");
+      const router = pick<RouterStatus>(
+        routerResult,
+        intendedDemoMode ? { ...MOCK_ROUTER_STATUS } : unavailableRouterStub,
+        "router_status"
+      );
+      const insights = pick<SecurityInsight[]>(
+        insightsResult,
+        intendedDemoMode ? [...MOCK_SECURITY_INSIGHTS] : [],
+        "security_insights"
+      );
+      const history = pick<ScanHistoryEntry[]>(
+        historyResult,
+        intendedDemoMode ? [...MOCK_SCAN_HISTORY] : [],
+        "scan_history"
+      );
       const networkSettings = pick<NetworkSettings>(
         settingsResult,
         { ...DEFAULT_NETWORK_SETTINGS },
@@ -425,13 +477,49 @@ export function NetworkDiscoveryFeature() {
       if (cancelled) return;
       // Last-resort safety net — should not be reachable because every
       // adapter call above is wrapped in allSettled, but if something
-      // throws synchronously we still escape the spinner.
-      setNetworkStatus((current) => current ?? { ...MOCK_NETWORK_STATUS });
-      setRouterStatus((current) => current ?? { ...MOCK_ROUTER_STATUS });
+      // throws synchronously we still escape the spinner. Only fall back
+      // to mock data when the user has explicitly chosen demo mode.
+      const demo =
+        persistedNetworkSettingsRef.current?.demoMode ??
+        DEFAULT_NETWORK_SETTINGS.demoMode;
+      const networkStatusStub: NetworkStatus = demo
+        ? { ...MOCK_NETWORK_STATUS }
+        : {
+            networkName: "Unavailable",
+            gatewayIp: "Unavailable",
+            localIp: "Unavailable",
+            subnet: "Unavailable",
+            connectionType: "unknown",
+            scanState: "idle",
+            lastScanAt: null,
+            devicesFound: 0,
+            onlineDevices: 0,
+            unknownDevices: 0,
+            flaggedDevices: 0,
+          };
+      const routerStub: RouterStatus = demo
+        ? { ...MOCK_ROUTER_STATUS }
+        : {
+            name: "Unavailable",
+            model: "Unavailable",
+            gatewayIp: "Unavailable",
+            firmwareVersion: "Unavailable",
+            connectionStatus: "unknown",
+            uptime: "Unavailable",
+            wanIp: "Unavailable",
+            dnsServers: [],
+            guestNetworkEnabled: false,
+            qosEnabled: false,
+            firewallEnabled: false,
+            rebootAvailable: false,
+            readOnlyMode: true,
+          };
+      setNetworkStatus((current) => current ?? networkStatusStub);
+      setRouterStatus((current) => current ?? routerStub);
       setSettings((current) => current ?? { ...DEFAULT_NETWORK_SETTINGS });
       setAdapterStatus(
         resolveNetworkAdapterStatus({
-          demoMode: false,
+          demoMode: demo,
           nativePluginAvailable: false,
           fallbackReason: error instanceof Error ? error.message : "Native discovery unavailable",
         })
@@ -454,140 +542,252 @@ export function NetworkDiscoveryFeature() {
     setInitAttempt((value) => value + 1);
   }, []);
 
-  // Scan progress polling
+  // Scan progress + lifecycle polling. The TS-side completion detection is
+  // single-source-of-truth via the adapter's `getLastScanResult()`. Late
+  // results from a cancelled or superseded scan are filtered out by the
+  // generation counter inside the adapter, so we never apply stale device
+  // lists or generate phantom comparison events.
   useEffect(() => {
     if (networkStatus?.scanState !== "scanning") {
       return;
     }
 
+    let cancelled = false;
+    const initialResult = networkAdapter.getLastScanResult?.() ?? null;
+    const initialGeneration = initialResult?.generation ?? null;
+    const scanStartedAt = new Date().toISOString();
+
     const interval = setInterval(() => {
+      if (cancelled) return;
       const progress = networkAdapter.getScanProgress();
       setScanProgress(progress);
 
-      if (progress >= 100) {
-        clearInterval(interval);
-        // Refresh data after scan completes. progress=100 covers BOTH
-        // success and explicit failure paths in the native adapter, so
-        // detect the failed state here and surface a real error alert.
-        networkAdapter.getNetworkStatus().then((status) => {
-          appendEvents(compareNetworkContext(previousNetworkStatusRef.current, status));
-          previousNetworkStatusRef.current = status;
-          setNetworkStatus(status);
-          if (status.scanState === "failed") {
-            const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
-            const failureEvent = createScanFailedEvent(
-              scanId,
-              selectedMode,
-              "Native local discovery returned no result. No backend is required for local LAN scanning — retry from the Scan tab."
-            );
-            appendEvents([failureEvent]);
-            appendAlerts([
-              {
-                id: `alert-${failureEvent.id}`,
-                eventId: failureEvent.id,
-                timestamp: failureEvent.timestamp,
-                title: "Native discovery failed",
-                message: failureEvent.title,
-                severity: "high",
-                status: "unread",
-              },
-            ]).catch(() => undefined);
-            setScanProgress(0);
-            playAvatarReaction("angry");
-          }
+      const latestResult = networkAdapter.getLastScanResult?.() ?? null;
+      const nativeReported =
+        latestResult !== null &&
+        (initialGeneration === null || latestResult.generation !== initialGeneration);
+      // Demo adapter doesn't emit a ScanCompletionResult — detect demo
+      // completion via the adapter facade's scanning flag dropping to false
+      // while progress has reached 100. This covers both demo and native.
+      const demoCompleted =
+        latestResult === null &&
+        !networkAdapter.getIsScanning() &&
+        progress >= 100;
+
+      if (!nativeReported && !demoCompleted) return;
+
+      clearInterval(interval);
+      if (cancelled) return;
+
+      const resolvedResult: import("@/lib/network/types").ScanCompletionResult =
+        latestResult && nativeReported
+          ? latestResult
+          : {
+              status: "complete",
+              scanMode: selectedMode,
+              startedAt: scanStartedAt,
+              finishedAt: new Date().toISOString(),
+              durationMs: Date.now() - new Date(scanStartedAt).getTime(),
+              coverage: null,
+              failureReason: null,
+              generation: 0,
+            };
+
+      const scanId = currentScanIdRef.current ?? `scan-${resolvedResult.generation}`;
+      const status = resolvedResult.status;
+      const latestResultForBranches = resolvedResult;
+      setLastScanCompletion(resolvedResult);
+
+      // CANCELLED — silent; do not generate a failure event, do not touch
+      // device lists, do not write scan history. The user asked to stop.
+      if (status === "cancelled") {
+        networkAdapter.getNetworkStatus().then((next) => {
+          if (cancelled) return;
+          setNetworkStatus(next);
         }).catch(() => undefined);
-        networkAdapter.getAdapterStatus().then(setAdapterStatus).catch(() => undefined);
-        networkAdapter.getDiscoveredDevices().then((rawUpdatedDevices) => {
-          const updatedDevices = mergeIdentitiesForDevices(rawUpdatedDevices);
-          const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
-          const previousDevices = previousDevicesRef.current;
-          const comparison = compareScanDevices({
-            previousDevices,
-            currentDevices: updatedDevices,
-            scanId,
-          });
-          const previousIds = new Set(previousDevices.map((device) => device.id));
-          const previousOnlineIds = new Set(
-            previousDevices.filter((device) => device.status === "online").map((device) => device.id)
-          );
-          const newDevices = updatedDevices.filter((device) => !previousIds.has(device.id));
-          const offlineDevices = updatedDevices.filter(
-            (device) => device.status === "offline" && previousOnlineIds.has(device.id)
-          );
-          previousDevicesRef.current = updatedDevices;
-          setDevices(updatedDevices);
-          setLastNetworkScanDelta(comparison.summary);
-          appendEvents(comparison.events);
-          const activeSettings = settingsRef.current;
-          if (activeSettings) {
-            appendAlerts(
-              buildAlertsForScanEvents({
-                events: comparison.events,
-                devices: updatedDevices,
-                settings: activeSettings,
-                summary: comparison.summary,
-              })
-            ).catch(() => undefined);
-          }
-          setNetworkMonitorState((current) => ({
-            ...current,
-            enabled: Boolean(activeSettings?.autoScanEnabled),
-            lastCompletedAt: new Date().toISOString(),
-            schedulerStatus: activeSettings?.autoScanEnabled ? "scheduled" : "idle",
-            nextRunAt: activeSettings?.autoScanEnabled ? computeNextAutoScanAt(activeSettings) : null,
-            lastIssue: null,
-          }));
-          const previousHealth = selectLatestHealthSnapshot(networkHealthSnapshots);
-          const healthSnapshot = calculateNetworkHealth({
-            status: networkStatus ?? {
-              networkName: "Unknown",
-              gatewayIp: "",
-              localIp: "",
-              subnet: "",
-              connectionType: "unknown",
-              scanState: "complete",
-              lastScanAt: null,
-              devicesFound: updatedDevices.length,
-              onlineDevices: updatedDevices.filter((device) => device.status === "online").length,
-              unknownDevices: updatedDevices.filter((device) => device.deviceType === "unknown").length,
-              flaggedDevices: updatedDevices.filter((device) => device.trustLevel !== "trusted").length,
-            },
-            routerStatus: previousRouterStatusRef.current,
-            devices: updatedDevices,
-            events: appendNetworkEvents(networkEventsRef.current, comparison.events),
-            alerts: networkAlerts,
-            lastScanDelta: comparison.summary,
-            diagnostics: latestDiagnostics,
-            previousSnapshot: previousHealth,
-            source: "scan",
-          });
-          setNetworkHealthSnapshots((current) => retainHealthSnapshots([healthSnapshot, ...current]));
-          const hasAttentionDevice = updatedDevices.some(
-            (device) =>
-              device.trustLevel === "new" ||
-              device.trustLevel === "watch" ||
-              device.deviceType === "unknown"
-          );
-          if (settings?.notifyNewDevices && newDevices.length > 0) {
-            setRobotMessage(`${newDevices.length} new network device${newDevices.length === 1 ? "" : "s"} detected.`);
-            setTimeout(() => setRobotMessage(null), 4500);
-          } else if (settings?.notifyOfflineDevices && offlineDevices.length > 0) {
-            setRobotMessage(`${offlineDevices.length} device${offlineDevices.length === 1 ? "" : "s"} went offline.`);
-            setTimeout(() => setRobotMessage(null), 4500);
-          }
-          playAvatarReaction(hasAttentionDevice ? "surprised" : "happy");
-        });
-        networkAdapter.getScanHistory().then(setScanHistory).catch(() => undefined);
-        networkAdapter.getSecurityInsights().then(setSecurityInsights).catch(() => undefined);
-        networkAdapter.getRouterStatus().then((router) => {
-          appendEvents(compareRouterStatus(previousRouterStatusRef.current, router));
-          previousRouterStatusRef.current = router;
-          setRouterStatus(router);
+        networkAdapter.getAdapterStatus().then((next) => {
+          if (cancelled) return;
+          setAdapterStatus(next);
         }).catch(() => undefined);
+        setScanProgress(0);
+        setNetworkMonitorState((current) => ({
+          ...current,
+          schedulerStatus: settingsRef.current?.autoScanEnabled ? "scheduled" : "idle",
+          lastIssue: null,
+        }));
+        return;
       }
+
+      // FAILED — generate a single failure event/alert; preserve previous
+      // devices and history so the UI doesn't silently lose context.
+      if (status === "failed") {
+        const failureReason =
+          latestResultForBranches.failureReason ??
+          "Native local discovery did not return a result.";
+        const failureEvent = createScanFailedEvent(scanId, latestResultForBranches.scanMode, failureReason);
+        appendEvents([failureEvent]);
+        appendAlerts([
+          {
+            id: `alert-${failureEvent.id}`,
+            eventId: failureEvent.id,
+            timestamp: failureEvent.timestamp,
+            title: "Network scan failed",
+            message: failureReason,
+            severity: "high",
+            status: "unread",
+          },
+        ]).catch(() => undefined);
+
+        networkAdapter.getNetworkStatus().then((next) => {
+          if (cancelled) return;
+          appendEvents(compareNetworkContext(previousNetworkStatusRef.current, next));
+          previousNetworkStatusRef.current = next;
+          setNetworkStatus(next);
+        }).catch(() => undefined);
+        networkAdapter.getAdapterStatus().then((next) => {
+          if (cancelled) return;
+          setAdapterStatus(next);
+        }).catch(() => undefined);
+        setScanProgress(0);
+        setNetworkMonitorState((current) => ({
+          ...current,
+          schedulerStatus: "error",
+          lastIssue: failureReason,
+        }));
+        playAvatarReaction("angry");
+        return;
+      }
+
+      // COMPLETE — real success path. Apply device list updates, diff events,
+      // scan history, health snapshot, and notification alerts.
+      networkAdapter.getNetworkStatus().then((next) => {
+        if (cancelled) return;
+        appendEvents(compareNetworkContext(previousNetworkStatusRef.current, next));
+        previousNetworkStatusRef.current = next;
+        setNetworkStatus(next);
+      }).catch(() => undefined);
+      networkAdapter.getAdapterStatus().then((next) => {
+        if (cancelled) return;
+        setAdapterStatus(next);
+      }).catch(() => undefined);
+
+      networkAdapter.getDiscoveredDevices().then((rawUpdatedDevices) => {
+        if (cancelled) return;
+        const updatedDevices = mergeIdentitiesForDevices(rawUpdatedDevices);
+        const previousDevices = previousDevicesRef.current;
+        const comparison = compareScanDevices({
+          previousDevices,
+          currentDevices: updatedDevices,
+          scanId,
+        });
+        const previousIds = new Set(previousDevices.map((device) => device.id));
+        const previousOnlineIds = new Set(
+          previousDevices.filter((device) => device.status === "online").map((device) => device.id)
+        );
+        const newDevices = updatedDevices.filter((device) => !previousIds.has(device.id));
+        const offlineDevices = updatedDevices.filter(
+          (device) => device.status === "offline" && previousOnlineIds.has(device.id)
+        );
+        // Only advance previousDevicesRef on a SUCCESSFUL scan — otherwise
+        // a failed/cancelled scan would erase the prior reference list and
+        // trigger phantom "new device" events on the next successful scan.
+        previousDevicesRef.current = updatedDevices;
+        setDevices(updatedDevices);
+        setLastNetworkScanDelta(comparison.summary);
+        appendEvents(comparison.events);
+        const activeSettings = settingsRef.current;
+        if (activeSettings) {
+          appendAlerts(
+            buildAlertsForScanEvents({
+              events: comparison.events,
+              devices: updatedDevices,
+              settings: activeSettings,
+              summary: comparison.summary,
+            })
+          ).catch(() => undefined);
+        }
+        setNetworkMonitorState((current) => ({
+          ...current,
+          enabled: Boolean(activeSettings?.autoScanEnabled),
+          lastCompletedAt: latestResultForBranches.finishedAt,
+          schedulerStatus: activeSettings?.autoScanEnabled ? "scheduled" : "idle",
+          nextRunAt: activeSettings?.autoScanEnabled ? computeNextAutoScanAt(activeSettings) : null,
+          lastIssue: null,
+        }));
+        const previousHealth = selectLatestHealthSnapshot(networkHealthSnapshots);
+        const healthSnapshot = calculateNetworkHealth({
+          status: networkStatus ?? {
+            networkName: "Unknown",
+            gatewayIp: "",
+            localIp: "",
+            subnet: "",
+            connectionType: "unknown",
+            scanState: "complete",
+            lastScanAt: latestResultForBranches.finishedAt,
+            devicesFound: updatedDevices.length,
+            onlineDevices: updatedDevices.filter((device) => device.status === "online").length,
+            unknownDevices: updatedDevices.filter((device) => device.deviceType === "unknown").length,
+            flaggedDevices: updatedDevices.filter((device) => device.trustLevel !== "trusted").length,
+          },
+          routerStatus: previousRouterStatusRef.current,
+          devices: updatedDevices,
+          events: appendNetworkEvents(networkEventsRef.current, comparison.events),
+          alerts: networkAlerts,
+          lastScanDelta: comparison.summary,
+          diagnostics: latestDiagnostics,
+          previousSnapshot: previousHealth,
+          source: "scan",
+        });
+        setNetworkHealthSnapshots((current) => retainHealthSnapshots([healthSnapshot, ...current]));
+        const hasAttentionDevice = updatedDevices.some(
+          (device) =>
+            device.trustLevel === "new" ||
+            device.trustLevel === "watch" ||
+            device.deviceType === "unknown"
+        );
+        if (settings?.notifyNewDevices && newDevices.length > 0) {
+          setRobotMessage(`${newDevices.length} new network device${newDevices.length === 1 ? "" : "s"} detected.`);
+          setTimeout(() => setRobotMessage(null), 4500);
+        } else if (settings?.notifyOfflineDevices && offlineDevices.length > 0) {
+          setRobotMessage(`${offlineDevices.length} device${offlineDevices.length === 1 ? "" : "s"} went offline.`);
+          setTimeout(() => setRobotMessage(null), 4500);
+        }
+
+        if (latestResultForBranches.coverage) {
+          const { scannedHosts, subnetTotalHosts, fullCoverage, scanDeadlineExceeded, subnetCidr } = latestResultForBranches.coverage;
+          if (!fullCoverage || scanDeadlineExceeded) {
+            const detail = subnetCidr
+              ? `Scanned ${scannedHosts} of ${subnetTotalHosts} hosts on ${subnetCidr}.`
+              : `Scanned ${scannedHosts} of ${subnetTotalHosts} hosts.`;
+            setRobotMessage(scanDeadlineExceeded
+              ? `${detail} Native scan stopped at the time budget.`
+              : `${detail} Some hosts outside the scanned slice were not probed.`);
+            setTimeout(() => setRobotMessage(null), 5500);
+          }
+        }
+        playAvatarReaction(hasAttentionDevice ? "surprised" : "happy");
+      }).catch(() => undefined);
+
+      networkAdapter.getScanHistory().then((history) => {
+        if (cancelled) return;
+        setScanHistory(history);
+      }).catch(() => undefined);
+      networkAdapter.getSecurityInsights().then((insights) => {
+        if (cancelled) return;
+        setSecurityInsights(insights);
+      }).catch(() => undefined);
+      networkAdapter.getRouterStatus().then((router) => {
+        if (cancelled) return;
+        appendEvents(compareRouterStatus(previousRouterStatusRef.current, router));
+        previousRouterStatusRef.current = router;
+        setRouterStatus(router);
+      }).catch(() => undefined);
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [
     mergeIdentitiesForDevices,
     networkStatus?.scanState,
@@ -622,6 +822,8 @@ export function NetworkDiscoveryFeature() {
       playAvatarReaction("thinking");
       const scanId = `scan-${Date.now()}`;
       currentScanIdRef.current = scanId;
+      // Clear any prior completion record so the panel reflects the new scan's lifecycle.
+      setLastScanCompletion(null);
       appendEvents([createScanStartedEvent(scanId, selectedMode)]);
       setNetworkMonitorState((current) => ({
         ...current,
@@ -636,17 +838,21 @@ export function NetworkDiscoveryFeature() {
       setNetworkStatus(status);
       setAdapterStatus(currentAdapterStatus);
       setScanProgress(0);
-    } catch {
+    } catch (error) {
       const scanId = currentScanIdRef.current ?? `scan-${Date.now()}`;
-      const failedEvent = createScanFailedEvent(scanId, selectedMode, "Live scan unavailable in current runtime.");
+      const failureReason =
+        error instanceof Error && error.message
+          ? error.message
+          : "Live scan unavailable in current runtime.";
+      const failedEvent = createScanFailedEvent(scanId, selectedMode, failureReason);
       appendEvents([failedEvent]);
       appendAlerts([
         {
           id: `alert-${failedEvent.id}`,
           eventId: failedEvent.id,
           timestamp: failedEvent.timestamp,
-          title: "Monitoring issue",
-          message: failedEvent.title,
+          title: "Network scan failed",
+          message: failureReason,
           severity: "high",
           status: "unread",
         },
@@ -654,14 +860,26 @@ export function NetworkDiscoveryFeature() {
       setNetworkMonitorState((current) => ({
         ...current,
         schedulerStatus: "error",
-        lastIssue: "Live scan unavailable in current runtime.",
+        lastIssue: failureReason,
       }));
       setAdapterStatus(resolveNetworkAdapterStatus({
         demoMode: false,
         nativePluginAvailable: false,
-        fallbackReason: "Live scan unavailable in current runtime.",
-      }))
+        fallbackReason: failureReason,
+      }));
       setNetworkStatus((current) => current ? { ...current, scanState: "failed" } : current);
+      // Surface the failure to the Scan panel via a synthetic completion record.
+      const now = new Date().toISOString();
+      setLastScanCompletion({
+        status: "failed",
+        scanMode: selectedMode,
+        startedAt: now,
+        finishedAt: now,
+        durationMs: 0,
+        coverage: null,
+        failureReason,
+        generation: -1,
+      });
       playAvatarReaction("angry");
     }
   }, [appendAlerts, appendEvents, playAvatarReaction, selectedMode, setNetworkMonitorState]);
@@ -1313,6 +1531,7 @@ export function NetworkDiscoveryFeature() {
                   onStopScan={handleStopScan}
                   isDemoMode={isDemoMode}
                   lastScanDelta={lastNetworkScanDelta}
+                  lastScanResult={lastScanCompletion}
                 />
                 <div className="h-[400px]">
                   <SecurityInsightsPanel

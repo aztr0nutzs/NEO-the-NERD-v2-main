@@ -24,6 +24,8 @@ import type {
   NetworkAdapterInterface,
   NetworkAdapterStatus,
   NetworkTopologyGraph,
+  ScanCompletionResult,
+  ScanCoverageInfo,
 } from "./types";
 import type { NativeScanResult } from "./native-network-types";
 
@@ -518,19 +520,57 @@ class DemoNetworkAdapter implements NetworkAdapterInterface {
   }
 }
 
-// Native scan hard timeout — if the plugin promise neither resolves nor rejects within
-// this bound, treat the scan as failed instead of leaving the spinner up forever.
-const NATIVE_SCAN_TIMEOUT_MS: Record<ScanMode, number> = {
-  quick: 15_000,
-  balanced: 25_000,
-  deep: 45_000,
+// Native-side scan time budget (Java plugin enforces a deadline within this bound).
+// The native plugin caps its own runtime; these values must stay >= the native budget.
+const NATIVE_SCAN_BUDGET_MS: Record<ScanMode, number> = {
+  quick: 20_000,
+  balanced: 60_000,
+  deep: 150_000,
 };
+
+// JS-side hard timeout — strictly greater than native budget so we never declare
+// failure while the native plugin is still doing legitimate work. If the native
+// promise has neither resolved nor rejected after this bound, we assume the
+// plugin really is hung and surface a timeout-failure to the UI.
+const NATIVE_SCAN_TIMEOUT_MS: Record<ScanMode, number> = {
+  quick: NATIVE_SCAN_BUDGET_MS.quick + 15_000,
+  balanced: NATIVE_SCAN_BUDGET_MS.balanced + 20_000,
+  deep: NATIVE_SCAN_BUDGET_MS.deep + 30_000,
+};
+
+// Progress curve target — wall-clock duration we expect each mode to take in
+// a healthy run. Used only to drive the progress bar; completion is detected by
+// the actual native promise resolving, not by this timer reaching 100%.
+const PROGRESS_TARGET_MS: Record<ScanMode, number> = {
+  quick: 8_000,
+  balanced: 25_000,
+  deep: 75_000,
+};
+
+function buildCoverageFromNativeScan(scan: NativeScanResult | null): ScanCoverageInfo | null {
+  if (!scan) return null;
+  const scannedHosts = scan.scannedHosts ?? 0;
+  const discoveredHosts = scan.discoveredHosts ?? 0;
+  const subnetTotalHosts = scan.subnetTotalHosts ?? null;
+  const subnetCidr =
+    scan.subnetCidr ??
+    (scan.localContext?.subnet ?? null);
+  const fullCoverage = subnetTotalHosts !== null && scannedHosts >= subnetTotalHosts;
+  return {
+    scannedHosts,
+    discoveredHosts,
+    subnetTotalHosts: subnetTotalHosts ?? scannedHosts,
+    subnetCidr,
+    fullCoverage,
+    scanDeadlineExceeded: Boolean(scan.scanDeadlineExceeded),
+  };
+}
 
 class NativeNetworkAdapter implements NetworkAdapterInterface {
   private isScanning = false;
   private scanProgress = 0;
   private scanStartedAt = 0;
-  private scanDurationMs = 6000;
+  private scanProgressTargetMs = PROGRESS_TARGET_MS.balanced;
   private actionHistory: NetworkAction[] = [];
   private settings: NetworkSettings = { ...DEFAULT_NETWORK_SETTINGS, demoMode: false };
   private lastNativeScan: NativeScanResult | null = null;
@@ -538,6 +578,20 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   private lastScanFailureReason: string | null = null;
   private lastScanFinishedAt: string | null = null;
   private scanTimeoutHandle: ReturnType<typeof setTimeout> | null = null;
+  // Monotonic counter: every startNetworkScan() bumps this. The native promise
+  // callbacks capture the generation they were issued under and discard their
+  // result if a newer scan has started or the scan was cancelled.
+  private scanGeneration = 0;
+  // The generation currently in flight (0 means "no scan running").
+  private activeGeneration = 0;
+  private currentScanMode: ScanMode = "balanced";
+  private currentScanStartedAt: string | null = null;
+  private lastScanResult: ScanCompletionResult | null = null;
+  // Resolvers waiting on awaitScanCompletion().
+  private pendingCompletionResolvers: Array<{
+    generation: number;
+    resolve: (result: ScanCompletionResult | null) => void;
+  }> = [];
 
   private clearScanTimeout(): void {
     if (this.scanTimeoutHandle !== null) {
@@ -546,21 +600,95 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
     }
   }
 
-  private markScanFinished(success: boolean, reason: string | null = null): void {
+  private resolvePendingCompletions(result: ScanCompletionResult): void {
+    const pending = this.pendingCompletionResolvers;
+    this.pendingCompletionResolvers = [];
+    for (const entry of pending) {
+      // Only resolve waiters that are watching this exact generation OR
+      // waiters that did not pin a generation (they want the next event).
+      if (entry.generation === 0 || entry.generation === result.generation) {
+        entry.resolve(result);
+      } else {
+        this.pendingCompletionResolvers.push(entry);
+      }
+    }
+  }
+
+  private finalizeScan(
+    generation: number,
+    status: ScanCompletionResult["status"],
+    options: { reason?: string | null; nativeScan?: NativeScanResult | null } = {}
+  ): ScanCompletionResult {
+    // Late callbacks must never clobber a newer scan or a cancelled scan.
+    if (generation !== this.activeGeneration && this.activeGeneration !== 0) {
+      // Stale result — discard. Return a synthetic record for any waiter on this generation.
+      const stale: ScanCompletionResult = {
+        status: "cancelled",
+        scanMode: this.currentScanMode,
+        startedAt: this.currentScanStartedAt ?? new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        durationMs: 0,
+        coverage: null,
+        failureReason: "Result superseded by a newer scan or cancellation.",
+        generation,
+      };
+      this.resolvePendingCompletions(stale);
+      return stale;
+    }
+
+    const now = new Date();
+    const startedAt = this.currentScanStartedAt ?? now.toISOString();
+    const finishedAt = now.toISOString();
+    const durationMs = now.getTime() - new Date(startedAt).getTime();
+
+    if (status === "complete" && options.nativeScan) {
+      this.lastNativeScan = options.nativeScan;
+    }
+    // On failure or cancellation we MUST NOT overwrite the last successful
+    // scan results — the React layer still needs them to render the most
+    // recent good device list.
+    if (status === "failed") {
+      this.lastScanFailed = true;
+      this.lastScanFailureReason = options.reason ?? "Native scan failed.";
+    } else if (status === "cancelled") {
+      this.lastScanFailed = false;
+      this.lastScanFailureReason = options.reason ?? null;
+    } else {
+      this.lastScanFailed = false;
+      this.lastScanFailureReason = null;
+    }
+    this.lastScanFinishedAt = finishedAt;
+
     this.clearScanTimeout();
     this.isScanning = false;
-    // Always pin progress to 100 so the React-side completion poller can
-    // observe scan termination regardless of success/failure path.
-    this.scanProgress = 100;
-    this.lastScanFailed = !success;
-    this.lastScanFailureReason = success ? null : reason;
-    this.lastScanFinishedAt = new Date().toISOString();
+    // Pin progress to 100 for completion so any legacy progress-poll path observes termination.
+    this.scanProgress = status === "cancelled" ? this.scanProgress : 100;
+    this.activeGeneration = 0;
+
+    const coverage =
+      status === "complete"
+        ? buildCoverageFromNativeScan(options.nativeScan ?? null)
+        : null;
+
+    const result: ScanCompletionResult = {
+      status,
+      scanMode: this.currentScanMode,
+      startedAt,
+      finishedAt,
+      durationMs,
+      coverage,
+      failureReason: this.lastScanFailureReason,
+      generation,
+    };
+    this.lastScanResult = result;
+    this.resolvePendingCompletions(result);
+    return result;
   }
 
   private updateProgressFromClock(): number {
     if (!this.isScanning) return this.scanProgress;
     const elapsed = Date.now() - this.scanStartedAt;
-    this.scanProgress = Math.min((elapsed / this.scanDurationMs) * 100, 95);
+    this.scanProgress = Math.min((elapsed / this.scanProgressTargetMs) * 100, 95);
     return this.scanProgress;
   }
 
@@ -605,19 +733,22 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
     const nativeContext = await getNativeLocalNetworkContext();
     if (nativeContext) {
       const nativeDevices = this.lastNativeScan ? this.nativeScanToDevices(this.lastNativeScan) : [];
+      const scanState: NetworkStatus["scanState"] = this.isScanning
+        ? "scanning"
+        : this.lastScanResult?.status === "failed"
+          ? "failed"
+          : this.lastScanResult?.status === "cancelled"
+            ? "cancelled"
+            : this.lastNativeScan
+              ? "complete"
+              : "idle";
       return {
         networkName: nativeContext.networkName ?? "Unavailable",
         gatewayIp: nativeContext.gatewayIp ?? "Unavailable",
         localIp: nativeContext.localIp ?? "Unavailable",
         subnet: nativeContext.subnet ?? "Unavailable",
         connectionType: nativeContext.connectionType ?? "unknown",
-        scanState: this.isScanning
-          ? "scanning"
-          : this.lastScanFailed
-            ? "failed"
-            : this.lastNativeScan
-              ? "complete"
-              : "idle",
+        scanState,
         lastScanAt: this.lastScanFinishedAt,
         devicesFound: nativeDevices.length,
         onlineDevices: nativeDevices.filter((device) => device.status === "online").length,
@@ -632,59 +763,88 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   }
 
   async startNetworkScan(mode: ScanMode): Promise<void> {
-    const durations: Record<ScanMode, number> = {
-      quick: 3000,
-      balanced: 6000,
-      deep: 12000,
-    };
+    // Cancel any prior in-flight scan first. The native plugin's own background
+    // work continues until it returns, but we discard its result via generation.
+    if (this.activeGeneration !== 0) {
+      // Mark the previously active generation as cancelled so any pending
+      // awaiter observes the transition before the new scan starts.
+      this.finalizeScan(this.activeGeneration, "cancelled", {
+        reason: "Superseded by a newer scan request.",
+      });
+    }
 
-    // Cancel any prior pending timeout before starting a new scan attempt.
+    const generation = ++this.scanGeneration;
+    this.activeGeneration = generation;
+
     this.clearScanTimeout();
     this.isScanning = true;
     this.scanProgress = 0;
     this.scanStartedAt = Date.now();
-    this.scanDurationMs = durations[mode];
-    this.lastScanFailed = false;
-    this.lastScanFailureReason = null;
+    this.scanProgressTargetMs = PROGRESS_TARGET_MS[mode];
+    this.currentScanMode = mode;
+    this.currentScanStartedAt = new Date().toISOString();
 
-    // Hard timeout — make sure UI never freezes on a hung native promise.
+    // Hard JS timeout — guards against a wedged native promise. Strictly
+    // greater than the native budget so we never declare failure mid-flight.
     this.scanTimeoutHandle = setTimeout(() => {
-      if (!this.isScanning) return;
-      this.markScanFinished(
-        false,
-        "Native scan did not complete within the expected window. The Android plugin may be busy or unavailable."
-      );
+      if (this.activeGeneration !== generation) return;
+      this.finalizeScan(generation, "failed", {
+        reason:
+          "Native scan exceeded the JS-side hard timeout. The plugin appears unresponsive. Restart the app and retry.",
+      });
     }, NATIVE_SCAN_TIMEOUT_MS[mode]);
 
     void runNativeSubnetScan({ scanMode: mode })
       .then((nativeScan) => {
+        // The native promise may resolve after a cancellation/timeout/new scan.
+        // Generation check guards against late results clobbering newer state.
+        if (this.activeGeneration !== generation) return;
+
         if (nativeScan) {
-          this.lastNativeScan = nativeScan;
-          this.markScanFinished(true);
+          this.finalizeScan(generation, "complete", { nativeScan });
         } else {
-          // A null result means the native bridge is not active on this
-          // runtime (e.g. browser preview). Treat as an explicit failure
-          // so the scan UI surfaces a real failure instead of stalling.
-          this.markScanFinished(
-            false,
-            "Native scan returned no result. Install/run the Android app for live local LAN discovery."
-          );
+          // null = native bridge not active (e.g. browser preview).
+          this.finalizeScan(generation, "failed", {
+            reason:
+              "Native scan returned no result. Install/run the Android app for live local LAN discovery.",
+          });
         }
       })
       .catch((error) => {
-        this.markScanFinished(false, getErrorMessage(error));
+        if (this.activeGeneration !== generation) return;
+        this.finalizeScan(generation, "failed", { reason: getErrorMessage(error) });
       });
   }
 
   async stopNetworkScan(): Promise<void> {
-    // Local LAN scanning is owned by the Android plugin; there is no
-    // backend stop endpoint. We simply mark the React-visible state as
-    // not scanning so the controls re-enable. The plugin's own scan
-    // continues until completion in the background, which is fine —
-    // its result will be ignored if a newer scan supersedes it.
-    this.clearScanTimeout();
-    this.isScanning = false;
+    if (this.activeGeneration === 0) {
+      this.clearScanTimeout();
+      this.isScanning = false;
+      this.scanProgress = 0;
+      return;
+    }
+    // Mark the scan as cancelled — the native plugin's background work
+    // continues but its result will be discarded by the generation check.
+    this.finalizeScan(this.activeGeneration, "cancelled", {
+      reason: "User stopped the scan.",
+    });
     this.scanProgress = 0;
+  }
+
+  async awaitScanCompletion(generation = 0): Promise<ScanCompletionResult | null> {
+    // If we already have a recorded result for the requested generation, return it.
+    if (this.lastScanResult && (generation === 0 || generation === this.lastScanResult.generation)) {
+      // If a scan is not in flight, the lastScanResult IS the next event.
+      if (this.activeGeneration === 0) return this.lastScanResult;
+    }
+    if (this.activeGeneration === 0 && !this.lastScanResult) return null;
+    return new Promise<ScanCompletionResult | null>((resolve) => {
+      this.pendingCompletionResolvers.push({ generation, resolve });
+    });
+  }
+
+  getLastScanResult(): ScanCompletionResult | null {
+    return this.lastScanResult;
   }
 
   async getDiscoveredDevices(): Promise<DiscoveredDevice[]> {
@@ -706,6 +866,11 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   async getRouterStatus(): Promise<RouterStatus> {
     const nativeGateway = await getNativeGatewayInfo();
     if (nativeGateway) {
+      // We can ONLY truthfully report reachability and the gateway IP.
+      // Everything else (firmware, uptime, WAN IP, DNS, firewall, QoS,
+      // guest-net state) is opaque to generic LAN discovery — we MUST NOT
+      // fabricate values. Return "Unavailable" / false consistently and let
+      // the UI render it as truly unknown.
       return {
         name: "Local Gateway",
         model: "Unavailable",
@@ -717,7 +882,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
         dnsServers: [],
         guestNetworkEnabled: false,
         qosEnabled: false,
-        firewallEnabled: true,
+        firewallEnabled: false,
         rebootAvailable: false,
         readOnlyMode: true,
       };
@@ -817,6 +982,40 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
   }
 }
 
+function createUnavailableNetworkStatus(): NetworkStatus {
+  return {
+    networkName: "Unavailable",
+    gatewayIp: "Unavailable",
+    localIp: "Unavailable",
+    subnet: "Unavailable",
+    connectionType: "unknown",
+    scanState: "idle",
+    lastScanAt: null,
+    devicesFound: 0,
+    onlineDevices: 0,
+    unknownDevices: 0,
+    flaggedDevices: 0,
+  };
+}
+
+function createUnavailableRouterStatus(): RouterStatus {
+  return {
+    name: "Unavailable",
+    model: "Unavailable",
+    gatewayIp: "Unavailable",
+    firmwareVersion: "Unavailable",
+    connectionStatus: "unknown",
+    uptime: "Unavailable",
+    wanIp: "Unavailable",
+    dnsServers: [],
+    guestNetworkEnabled: false,
+    qosEnabled: false,
+    firewallEnabled: false,
+    rebootAvailable: false,
+    readOnlyMode: true,
+  };
+}
+
 class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   private activeMode: NetworkAdapterStatus["mode"] = "demo-browser";
   private fallbackReason: string | null = null;
@@ -832,19 +1031,22 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   /**
-   * Attempt native first when the user has not explicitly chosen demo mode.
-   * On native failure, transparently serve the demo adapter so the UI keeps
-   * working — and surface the reason via adapter status. The screen must
-   * never get stuck because the native plugin is missing or threw.
+   * Run the operation against the appropriate adapter based on the user's
+   * chosen mode. CRITICAL: when demo mode is OFF and the native adapter
+   * fails, we DO NOT fall back to demo/mock data. Mock data must never
+   * masquerade as live discovery results. Instead, the caller-supplied
+   * `unavailableValue` is returned and the adapter status is flipped to
+   * `native-unavailable` so the UI can surface the failure honestly.
    */
-  private async withFallback<T>(
+  private async withNativeOrUnavailable<T>(
     operation: (adapter: NativeNetworkAdapter) => Promise<T>,
-    fallback: (adapter: DemoNetworkAdapter) => Promise<T>
+    demoFallback: (adapter: DemoNetworkAdapter) => Promise<T>,
+    unavailableValue: T | ((reason: string) => T)
   ): Promise<T> {
     if (await this.shouldUseDemo()) {
       this.activeMode = "demo-browser";
       this.fallbackReason = null;
-      return fallback(this.demoAdapter);
+      return demoFallback(this.demoAdapter);
     }
 
     try {
@@ -853,9 +1055,12 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
       this.fallbackReason = null;
       return result;
     } catch (error) {
+      const reason = getErrorMessage(error);
       this.activeMode = "native-unavailable";
-      this.fallbackReason = getErrorMessage(error);
-      return fallback(this.demoAdapter);
+      this.fallbackReason = reason;
+      return typeof unavailableValue === "function"
+        ? (unavailableValue as (reason: string) => T)(reason)
+        : unavailableValue;
     }
   }
 
@@ -883,58 +1088,111 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   async getNetworkStatus(): Promise<NetworkStatus> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<NetworkStatus>(
       (adapter) => adapter.getNetworkStatus(),
-      (adapter) => adapter.getNetworkStatus()
+      (adapter) => adapter.getNetworkStatus(),
+      () => createUnavailableNetworkStatus()
     );
   }
 
   async startNetworkScan(mode: ScanMode): Promise<void> {
-    return this.withFallback(
-      (adapter) => adapter.startNetworkScan(mode),
-      (adapter) => adapter.startNetworkScan(mode)
-    );
+    if (await this.shouldUseDemo()) {
+      this.activeMode = "demo-browser";
+      this.fallbackReason = null;
+      return this.demoAdapter.startNetworkScan(mode);
+    }
+
+    // Live scan path: do NOT silently substitute demo data. If the native
+    // adapter cannot start a scan, the failure must propagate to the UI.
+    try {
+      await this.nativeNetworkAdapter.startNetworkScan(mode);
+      this.activeMode = "native-android";
+      this.fallbackReason = null;
+    } catch (error) {
+      this.activeMode = "native-unavailable";
+      this.fallbackReason = getErrorMessage(error);
+      throw error;
+    }
   }
 
   async stopNetworkScan(): Promise<void> {
-    return this.withFallback(
-      (adapter) => adapter.stopNetworkScan(),
-      (adapter) => adapter.stopNetworkScan()
-    );
+    if (await this.shouldUseDemo()) {
+      return this.demoAdapter.stopNetworkScan();
+    }
+    return this.nativeNetworkAdapter.stopNetworkScan();
+  }
+
+  async awaitScanCompletion(generation?: number): Promise<ScanCompletionResult | null> {
+    if (await this.shouldUseDemo()) {
+      // Demo adapter has no scan completion result type — synthesize from
+      // demo progress so callers can await uniformly.
+      return new Promise<ScanCompletionResult | null>((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (!this.demoAdapter.getIsScanning()) {
+            clearInterval(checkInterval);
+            resolve({
+              status: "complete",
+              scanMode: "balanced",
+              startedAt: new Date().toISOString(),
+              finishedAt: new Date().toISOString(),
+              durationMs: 0,
+              coverage: null,
+              failureReason: null,
+              generation: generation ?? 0,
+            });
+          }
+        }, 100);
+        // Safety: don't wait forever.
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          resolve(null);
+        }, 30_000);
+      });
+    }
+    return this.nativeNetworkAdapter.awaitScanCompletion(generation);
+  }
+
+  getLastScanResult(): ScanCompletionResult | null {
+    return this.nativeNetworkAdapter.getLastScanResult();
   }
 
   async getDiscoveredDevices(): Promise<DiscoveredDevice[]> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<DiscoveredDevice[]>(
       (adapter) => adapter.getDiscoveredDevices(),
-      (adapter) => adapter.getDiscoveredDevices()
+      (adapter) => adapter.getDiscoveredDevices(),
+      []
     );
   }
 
   async getDeviceDetails(deviceId: string): Promise<DiscoveredDevice | null> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<DiscoveredDevice | null>(
       (adapter) => adapter.getDeviceDetails(deviceId),
-      (adapter) => adapter.getDeviceDetails(deviceId)
+      (adapter) => adapter.getDeviceDetails(deviceId),
+      null
     );
   }
 
   async getRouterStatus(): Promise<RouterStatus> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<RouterStatus>(
       (adapter) => adapter.getRouterStatus(),
-      (adapter) => adapter.getRouterStatus()
+      (adapter) => adapter.getRouterStatus(),
+      createUnavailableRouterStatus()
     );
   }
 
   async getRouterCapabilities(): Promise<RouterCapability[]> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<RouterCapability[]>(
       (adapter) => adapter.getRouterCapabilities(),
-      (adapter) => adapter.getRouterCapabilities()
+      (adapter) => adapter.getRouterCapabilities(),
+      []
     );
   }
 
   async getRouterControlMode(): Promise<RouterControlMode> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<RouterControlMode>(
       (adapter) => adapter.getRouterControlMode(),
-      (adapter) => adapter.getRouterControlMode()
+      (adapter) => adapter.getRouterControlMode(),
+      "read-only"
     );
   }
 
@@ -942,9 +1200,15 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
     action: RouterActionResult["action"],
     payload?: { enabled?: boolean }
   ): Promise<RouterActionResult> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<RouterActionResult>(
       (adapter) => adapter.executeRouterAction(action, payload),
-      (adapter) => adapter.executeRouterAction(action, payload)
+      (adapter) => adapter.executeRouterAction(action, payload),
+      (reason) => ({
+        action,
+        status: "failed",
+        message: `Router action could not be executed: ${reason}`,
+        timestamp: new Date().toISOString(),
+      })
     );
   }
 
@@ -970,16 +1234,18 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   async getActionHistory(): Promise<NetworkAction[]> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<NetworkAction[]>(
       (adapter) => adapter.getActionHistory(),
-      (adapter) => adapter.getActionHistory()
+      (adapter) => adapter.getActionHistory(),
+      []
     );
   }
 
   async getScanHistory(): Promise<ScanHistoryEntry[]> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<ScanHistoryEntry[]>(
       (adapter) => adapter.getScanHistory(),
-      (adapter) => adapter.getScanHistory()
+      (adapter) => adapter.getScanHistory(),
+      []
     );
   }
 
@@ -1027,16 +1293,20 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   async getSecurityInsights(): Promise<SecurityInsight[]> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<SecurityInsight[]>(
       (adapter) => adapter.getSecurityInsights(),
-      (adapter) => adapter.getSecurityInsights()
+      (adapter) => adapter.getSecurityInsights(),
+      []
     );
   }
 
   async getNetworkTopology(): Promise<NetworkTopologyGraph> {
-    return this.withFallback(
+    return this.withNativeOrUnavailable<NetworkTopologyGraph>(
       (adapter) => adapter.getNetworkTopology(),
-      (adapter) => adapter.getNetworkTopology()
+      (adapter) => adapter.getNetworkTopology(),
+      // No mock topology when live discovery is unavailable — return an
+      // empty estimated graph so the map can render an empty state honestly.
+      buildTopologyGraphFromDevices([], "estimated")
     );
   }
 
@@ -1046,15 +1316,21 @@ class NetworkDiscoveryAdapter implements NetworkAdapterInterface {
   }
 
   getScanProgress(): number {
+    // Prefer the adapter that is actively scanning so progress is observed
+    // regardless of whether activeMode has been updated by a subsequent call.
+    if (this.nativeNetworkAdapter.getIsScanning()) {
+      return this.nativeNetworkAdapter.getScanProgress();
+    }
+    if (this.demoAdapter.getIsScanning()) {
+      return this.demoAdapter.getScanProgress();
+    }
     return this.activeMode === "native-android"
       ? this.nativeNetworkAdapter.getScanProgress()
       : this.demoAdapter.getScanProgress();
   }
 
   getIsScanning(): boolean {
-    return this.activeMode === "native-android"
-      ? this.nativeNetworkAdapter.getIsScanning()
-      : this.demoAdapter.getIsScanning();
+    return this.nativeNetworkAdapter.getIsScanning() || this.demoAdapter.getIsScanning();
   }
 }
 
