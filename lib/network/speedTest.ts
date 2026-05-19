@@ -91,6 +91,8 @@ export async function runSpeedTest(config: SpeedTestConfig): Promise<SpeedTestRe
     sampleCount: samples.length,
     success: downloaded > 0,
     failureReason: downloaded > 0 ? undefined : "download failed",
+    uploadMeasured: Boolean(config.uploadUrl && uploaded > 0),
+    completeness: config.uploadUrl && uploaded > 0 ? "full" : "partial-no-upload",
     phases,
     samples,
     environmentNotes: config.environmentNotes ?? "Browser HTTPS request-based throughput test",

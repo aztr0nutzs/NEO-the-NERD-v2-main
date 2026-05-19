@@ -314,6 +314,8 @@ export interface SpeedTestResult {
   sampleCount: number;
   success: boolean;
   failureReason?: string;
+  uploadMeasured: boolean;
+  completeness: "partial-no-upload" | "full";
   phases: SpeedTestPhase[];
   samples: ThroughputSample[];
   environmentNotes: string;

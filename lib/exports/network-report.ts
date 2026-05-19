@@ -95,6 +95,8 @@ export interface SpeedTestRow {
   jitterMs: number
   success: boolean
   failureReason: string
+  uploadMeasured: boolean
+  completeness: "partial-no-upload" | "full"
 }
 
 export interface HealthRow {
@@ -175,6 +177,8 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
     jitterMs: Number(run.jitterMs.toFixed(2)),
     success: run.success,
     failureReason: run.failureReason ?? "",
+    uploadMeasured: run.uploadMeasured ?? run.uploadMbps !== null,
+    completeness: run.completeness ?? (run.uploadMbps === null ? "partial-no-upload" : "full"),
   }))
 
   const deviceRows = devices.map((device) => deviceRow(device, newIds, offlineIds))
@@ -249,7 +253,11 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
           latestSpeedTestRun.uploadMbps === null
             ? "up n/a"
             : `up ${latestSpeedTestRun.uploadMbps.toFixed(2)} Mbps`
-        } · lat ${Math.round(latestSpeedTestRun.latencyMs)}ms · ${latestSpeedTestRun.provider}`
+        } · lat ${Math.round(latestSpeedTestRun.latencyMs)}ms · ${latestSpeedTestRun.provider} · ${
+          (latestSpeedTestRun.uploadMeasured ?? latestSpeedTestRun.uploadMbps !== null)
+            ? "FULL_TEST"
+            : "PARTIAL_NO_UPLOAD"
+        }`
       : latestHealth?.diagnostics.find((probe) => probe.key === "throughput")?.value ?? null,
   }
 
@@ -289,7 +297,7 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
     speedTests: {
       title: "Speed test history",
       description:
-        "Up to 30 most recent throughput runs. download/upload Mbps are from real transferred bytes; latency is HTTPS request round-trip, not ICMP.",
+        "Up to 30 most recent throughput runs. download Mbps + latency/jitter are measured each run; upload is measured only when an upload POST endpoint is configured. completeness marks partial vs full tests.",
       count: speedTestRows.length,
       items: speedTestRows,
     },
