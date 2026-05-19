@@ -6,7 +6,36 @@
  * All real network functionality must go through the adapter layer.
  */
 
-export type ScanState = "idle" | "scanning" | "complete" | "failed";
+export type ScanState = "idle" | "scanning" | "complete" | "failed" | "cancelled";
+
+export type ScanCompletionStatus = "complete" | "failed" | "cancelled";
+
+export interface ScanCoverageInfo {
+  // Total addressable hosts on the discovered subnet (excludes network/broadcast)
+  subnetTotalHosts: number;
+  // Number of hosts the native scan actually probed
+  scannedHosts: number;
+  // Hosts that responded (open port, ARP, gateway, SSDP, etc.)
+  discoveredHosts: number;
+  // True when scanning covered the full subnet (scanned >= subnetTotalHosts)
+  fullCoverage: boolean;
+  // True when native scan hit its time budget and stopped early
+  scanDeadlineExceeded: boolean;
+  // The detected subnet in CIDR form (e.g. "192.168.1.0/24") or null
+  subnetCidr: string | null;
+}
+
+export interface ScanCompletionResult {
+  status: ScanCompletionStatus;
+  scanMode: ScanMode;
+  startedAt: string;
+  finishedAt: string;
+  durationMs: number;
+  coverage: ScanCoverageInfo | null;
+  failureReason: string | null;
+  // Monotonic generation set when the scan started; results with a stale generation must be discarded
+  generation: number;
+}
 
 export type DeviceType =
   | "phone"
@@ -631,4 +660,8 @@ export interface NetworkAdapterInterface {
   getTopologySummary(): Promise<NetworkTopologyGraph["summary"]>;
   getScanProgress(): number;
   getIsScanning(): boolean;
+  // Resolves the next scan completion event (success, failure, or cancellation).
+  // Returns null when called outside an active scan lifecycle.
+  awaitScanCompletion?(generation?: number): Promise<ScanCompletionResult | null>;
+  getLastScanResult?(): ScanCompletionResult | null;
 }

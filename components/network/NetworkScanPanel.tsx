@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Radar, Square, Clock, Zap, Scale, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { NetworkStatus, ScanComparisonSummary, ScanMode } from "@/lib/network/types";
+import type { NetworkStatus, ScanComparisonSummary, ScanCompletionResult, ScanMode } from "@/lib/network/types";
 
 interface NetworkScanPanelProps {
   status: NetworkStatus;
@@ -14,6 +14,7 @@ interface NetworkScanPanelProps {
   onStopScan: () => void;
   isDemoMode: boolean;
   lastScanDelta?: ScanComparisonSummary | null;
+  lastScanResult?: ScanCompletionResult | null;
 }
 
 const SCAN_MODES: { mode: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
@@ -46,8 +47,12 @@ export function NetworkScanPanel({
   onStopScan,
   isDemoMode,
   lastScanDelta,
+  lastScanResult,
 }: NetworkScanPanelProps) {
   const isScanning = status.scanState === "scanning";
+  const scanFailed = status.scanState === "failed";
+  const scanCancelled = status.scanState === "cancelled";
+  const coverage = lastScanResult?.coverage ?? null;
 
   const formatLastScan = (timestamp: string | null) => {
     if (!timestamp) return "Never";
@@ -156,7 +161,50 @@ export function NetworkScanPanel({
         )}
       </div>
 
-      {lastScanDelta && !isScanning && (
+      {/* Last scan failure indicator — only when no scan is in progress */}
+      {!isScanning && scanFailed && lastScanResult?.failureReason && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3">
+          <p className="font-mono text-xs font-bold uppercase tracking-wider text-red-300">
+            LAST_SCAN_FAILED
+          </p>
+          <p className="mt-1 font-mono text-[10px] leading-relaxed text-red-200/85">
+            {lastScanResult.failureReason}
+          </p>
+        </div>
+      )}
+
+      {!isScanning && scanCancelled && (
+        <div className="rounded-lg border border-yellow-500/40 bg-yellow-500/5 p-3">
+          <p className="font-mono text-xs font-bold uppercase tracking-wider text-yellow-300">
+            LAST_SCAN_CANCELLED
+          </p>
+          <p className="mt-1 font-mono text-[10px] leading-relaxed text-yellow-200/85">
+            Scan was stopped before completion. No new results were recorded.
+          </p>
+        </div>
+      )}
+
+      {/* Coverage report from the most recent successful scan */}
+      {!isScanning && coverage && !isDemoMode && (
+        <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-cyan-300">
+              SCAN COVERAGE
+            </p>
+            <span className={`font-mono text-[10px] uppercase tracking-wider ${coverage.fullCoverage && !coverage.scanDeadlineExceeded ? "text-emerald-300" : "text-yellow-300"}`}>
+              {coverage.fullCoverage && !coverage.scanDeadlineExceeded ? "FULL" : "PARTIAL"}
+            </span>
+          </div>
+          <p className="mt-1 font-mono text-[10px] leading-relaxed text-gray-300/90">
+            Scanned {coverage.scannedHosts} of {coverage.subnetTotalHosts} addressable hosts
+            {coverage.subnetCidr ? ` on ${coverage.subnetCidr}` : ""}. Found {coverage.discoveredHosts}.
+            {coverage.scanDeadlineExceeded && " Native scan stopped at the time budget — partial coverage."}
+            {!coverage.fullCoverage && !coverage.scanDeadlineExceeded && " Subnet exceeds the scan host cap; some hosts outside the slice were not probed."}
+          </p>
+        </div>
+      )}
+
+      {lastScanDelta && !isScanning && !scanFailed && !scanCancelled && (
         <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 p-3">
           <div className="mb-2 flex items-center justify-between gap-2">
             <p className="font-mono text-xs font-bold uppercase tracking-wider text-purple-300">

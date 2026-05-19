@@ -137,7 +137,9 @@ public class NeoNetworkPlugin extends Plugin {
     int maxHosts = profile.maxHosts;
     int timeoutMs = profile.timeoutMs;
     List<Integer> commonPorts = profile.ports;
-    Log.d(TAG, "scanLocalSubnet started scanMode=" + scanMode + " maxHosts=" + maxHosts + " timeoutMs=" + timeoutMs);
+    long scanStartMs = System.currentTimeMillis();
+    long scanDeadlineMs = scanStartMs + profile.overallBudgetMs;
+    Log.d(TAG, "scanLocalSubnet started scanMode=" + scanMode + " maxHosts=" + maxHosts + " timeoutMs=" + timeoutMs + " budgetMs=" + profile.overallBudgetMs);
 
     JSObject context = buildLocalNetworkContext();
     String localIp = context.getString("localIp");
@@ -147,43 +149,117 @@ public class NeoNetworkPlugin extends Plugin {
     response.put("scanMode", scanMode);
     response.put("adapterStatus", "active");
     response.put("limitedData", false);
+    response.put("scanDeadlineExceeded", false);
 
     if (localIp == null || prefixLength == null || prefixLength < 16 || prefixLength > 30) {
       response.put("hosts", new JSArray());
       response.put("limitedData", true);
+      response.put("scannedHosts", 0);
+      response.put("discoveredHosts", 0);
+      response.put("subnetTotalHosts", 0);
+      response.put("subnetCidr", null);
+      response.put("durationMs", System.currentTimeMillis() - scanStartMs);
       response.put("message", "Local subnet unavailable for safe bounded scan.");
       Log.d(TAG, "scanLocalSubnet limited-data scanMode=" + scanMode + " reason=local-subnet-unavailable");
       call.resolve(response);
       return;
     }
 
-    List<String> targets = enumerateSubnet(localIp, prefixLength, maxHosts);
+    int subnetTotalHosts = computeSubnetTotalHosts(prefixLength);
+    String subnetCidr = computeSubnetCidr(localIp, prefixLength);
+    List<String> targets = enumerateSubnetCentered(localIp, prefixLength, maxHosts);
+    // Read ARP cache once up front; we'll re-read after the TCP probes have
+    // had a chance to warm the kernel cache with newly-resolved entries.
     Map<String, String> arpCache = readArpCache();
-    int concurrency = Math.min(24, Math.max(4, profile.concurrency));
+    int concurrency = Math.min(32, Math.max(4, profile.concurrency));
 
     ExecutorService executor = Executors.newFixedThreadPool(concurrency);
-    List<Future<JSObject>> futures = new ArrayList<>();
+    List<HostProbeFuture> futures = new ArrayList<>();
 
     for (String ip : targets) {
-      futures.add(executor.submit(new HostProbe(ip, timeoutMs, commonPorts, arpCache, profile.useArpCache, profile.resolveHostname, context.getString("gatewayIp"))));
+      Callable<JSObject> probe = new HostProbe(
+        ip, timeoutMs, commonPorts, arpCache, profile.useArpCache,
+        profile.resolveHostname, context.getString("gatewayIp")
+      );
+      futures.add(new HostProbeFuture(ip, executor.submit(probe)));
     }
 
+    boolean scanDeadlineExceeded = false;
     Map<String, JSObject> discoveredByIp = new HashMap<>();
-    for (Future<JSObject> future : futures) {
+    for (HostProbeFuture entry : futures) {
+      long now = System.currentTimeMillis();
+      long remainingBudget = scanDeadlineMs - now;
+      if (remainingBudget <= 0) {
+        scanDeadlineExceeded = true;
+        entry.future.cancel(true);
+        continue;
+      }
+      // Per-host wait: bounded by the probe's own per-port timing AND by
+      // the remaining overall scan budget. Whichever is tighter wins.
+      long perHostBudget = Math.min(
+        (long) timeoutMs * Math.max(1, commonPorts.size()) + 600L,
+        remainingBudget
+      );
       try {
-        JSObject host = future.get(timeoutMs + 350L, TimeUnit.MILLISECONDS);
+        JSObject host = entry.future.get(perHostBudget, TimeUnit.MILLISECONDS);
         if (host != null) {
           mergeHost(discoveredByIp, host);
         }
+      } catch (java.util.concurrent.TimeoutException timeout) {
+        entry.future.cancel(true);
       } catch (Exception ignored) {
       }
     }
 
     executor.shutdownNow();
 
-    if (profile.useSsdp) {
-      for (JSObject host : discoverSsdpDevices(localIp, prefixLength, arpCache, profile)) {
+    // After the TCP probes the kernel ARP table is typically warmer than
+    // it was at scan start. Re-read and add hosts that now have a MAC entry
+    // but were not surfaced by the TCP-probe phase (e.g. printers, IoT
+    // devices that don't expose any of the probed ports).
+    if (profile.useArpCache && !scanDeadlineExceeded) {
+      Map<String, String> arpAfter = readArpCache();
+      String gatewayIp = context.getString("gatewayIp");
+      for (Map.Entry<String, String> e : arpAfter.entrySet()) {
+        String ip = e.getKey();
+        if (ip == null) continue;
+        if (!isIpInSubnet(ip, localIp, prefixLength)) continue;
+        if (ip.equals(localIp)) continue;
+        if (discoveredByIp.containsKey(ip)) {
+          // Promote MAC if the existing record was missing it.
+          JSObject existing = discoveredByIp.get(ip);
+          if (existing != null && existing.getString("macAddress", null) == null) {
+            String mac = normalizeMac(e.getValue());
+            if (mac != null) existing.put("macAddress", mac);
+          }
+          continue;
+        }
+        String mac = normalizeMac(e.getValue());
+        if (mac == null) continue;
+        JSObject host = buildArpOnlyHost(ip, mac, gatewayIp, profile.resolveHostname);
+        discoveredByIp.put(ip, host);
+      }
+    }
+
+    // SSDP is independent of the TCP scan and operates within whatever
+    // budget remains; if exceeded we skip it rather than running over.
+    if (profile.useSsdp && System.currentTimeMillis() < scanDeadlineMs) {
+      long ssdpBudget = Math.min(profile.ssdpBudgetMs, scanDeadlineMs - System.currentTimeMillis());
+      for (JSObject host : discoverSsdpDevices(localIp, prefixLength, arpCache, profile, ssdpBudget)) {
         mergeHost(discoveredByIp, host);
+      }
+    }
+
+    // Always ensure the gateway itself is represented when reachable, even
+    // if no probe phase surfaced it (some routers reject every probed port).
+    String gatewayIp = context.getString("gatewayIp");
+    if (gatewayIp != null && !discoveredByIp.containsKey(gatewayIp)) {
+      boolean gwReachable = isHostReachable(gatewayIp, 80, 400)
+        || isHostReachable(gatewayIp, 443, 400)
+        || isHostReachable(gatewayIp, 53, 400);
+      if (gwReachable) {
+        JSObject host = buildGatewayHost(gatewayIp, readArpCache().get(gatewayIp), profile.resolveHostname);
+        discoveredByIp.put(gatewayIp, host);
       }
     }
 
@@ -195,13 +271,34 @@ public class NeoNetworkPlugin extends Plugin {
       hosts.put(host);
     }
 
+    long durationMs = System.currentTimeMillis() - scanStartMs;
     response.put("hosts", hosts);
     response.put("localContext", context);
     response.put("scannedHosts", targets.size());
     response.put("discoveredHosts", discovered.size());
-    response.put("message", "Bounded local subnet scan complete.");
-    Log.d(TAG, "scanLocalSubnet completed scanMode=" + scanMode + " scannedHosts=" + targets.size() + " discoveredHosts=" + discovered.size());
+    response.put("subnetTotalHosts", subnetTotalHosts);
+    response.put("subnetCidr", subnetCidr);
+    response.put("scanDeadlineExceeded", scanDeadlineExceeded);
+    response.put("durationMs", durationMs);
+    response.put("message", scanDeadlineExceeded
+      ? "Native scan stopped at the time budget; partial coverage."
+      : "Local subnet scan complete.");
+    Log.d(TAG, "scanLocalSubnet completed scanMode=" + scanMode
+      + " scannedHosts=" + targets.size()
+      + " discoveredHosts=" + discovered.size()
+      + " subnetTotalHosts=" + subnetTotalHosts
+      + " durationMs=" + durationMs
+      + " deadlineExceeded=" + scanDeadlineExceeded);
     call.resolve(response);
+  }
+
+  private static class HostProbeFuture {
+    final String ip;
+    final Future<JSObject> future;
+    HostProbeFuture(String ip, Future<JSObject> future) {
+      this.ip = ip;
+      this.future = future;
+    }
   }
 
   private JSObject buildLocalNetworkContext() {
@@ -311,8 +408,17 @@ public class NeoNetworkPlugin extends Plugin {
     final boolean useArpCache;
     final boolean useSsdp;
     final List<Integer> ports;
+    // Overall scan time budget — once exceeded, in-flight per-host probes are
+    // cancelled and the scan returns whatever has been discovered so far with
+    // scanDeadlineExceeded=true. This must stay LESS THAN the JS-side hard
+    // timeout in lib/network/networkDiscoveryAdapter.ts so the JS guard rail
+    // never fires while the native plugin is doing legitimate work.
+    final long overallBudgetMs;
+    final long ssdpBudgetMs;
 
-    ScanProfile(int maxHosts, int timeoutMs, int concurrency, boolean resolveHostname, boolean useArpCache, boolean useSsdp, List<Integer> ports) {
+    ScanProfile(int maxHosts, int timeoutMs, int concurrency, boolean resolveHostname,
+                boolean useArpCache, boolean useSsdp, List<Integer> ports,
+                long overallBudgetMs, long ssdpBudgetMs) {
       this.maxHosts = maxHosts;
       this.timeoutMs = timeoutMs;
       this.concurrency = concurrency;
@@ -320,43 +426,77 @@ public class NeoNetworkPlugin extends Plugin {
       this.useArpCache = useArpCache;
       this.useSsdp = useSsdp;
       this.ports = ports;
+      this.overallBudgetMs = overallBudgetMs;
+      this.ssdpBudgetMs = ssdpBudgetMs;
     }
   }
 
   private ScanProfile getScanProfile(String scanMode, PluginCall call) {
     if ("quick".equals(scanMode)) {
+      // Quick: shallow-probe a small bounded slice. Designed to complete in
+      // a few seconds — useful for "is anything alive here?" sweeps.
       return new ScanProfile(
-        call.getInt("maxHosts", 48),
-        call.getInt("timeoutMs", 320),
-        8,
+        call.getInt("maxHosts", 64),
+        call.getInt("timeoutMs", 240),
+        16,
         false,
+        true,    // ARP cache is essentially free, always enable it
         false,
-        false,
-        parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443))
+        parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443)),
+        15_000L,
+        0L
       );
     }
 
     if ("deep".equals(scanMode)) {
+      // Deep: full /24 coverage with the widest port list. The overall
+      // budget here is the largest value we expect a typical home LAN
+      // scan to need — anything past this is treated as "the plugin is
+      // taking too long" and returned with partial coverage flagged.
       return new ScanProfile(
-        call.getInt("maxHosts", 220),
-        call.getInt("timeoutMs", 1400),
-        18,
+        call.getInt("maxHosts", 254),
+        call.getInt("timeoutMs", 420),
+        24,
         true,
         true,
         true,
-        parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443, 53, 22, 445, 8080, 8443, 139))
+        parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443, 53, 22, 445, 8080, 8443, 139)),
+        140_000L,
+        3_500L
       );
     }
 
+    // Balanced: full /24 coverage with a tighter port list and faster timeout.
+    // Designed to complete inside ~25-40s on a typical home subnet.
     return new ScanProfile(
-      call.getInt("maxHosts", 128),
-      call.getInt("timeoutMs", 700),
-      12,
+      call.getInt("maxHosts", 254),
+      call.getInt("timeoutMs", 280),
+      24,
       true,
       true,
       true,
-      parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443, 53, 22, 445, 8080))
+      parsePorts(call.getArray("commonPorts"), Arrays.asList(80, 443, 22, 8080)),
+      55_000L,
+      2_600L
     );
+  }
+
+  private int computeSubnetTotalHosts(int prefixLength) {
+    if (prefixLength < 0 || prefixLength > 32) return 0;
+    if (prefixLength >= 31) return 0;
+    long total = (1L << (32 - prefixLength)) - 2L;
+    return (int) Math.max(0, Math.min(total, Integer.MAX_VALUE));
+  }
+
+  private String computeSubnetCidr(String localIp, int prefixLength) {
+    try {
+      long ipLong = ipv4ToLong(localIp);
+      long mask = prefixLength == 0 ? 0 : 0xffffffffL << (32 - prefixLength);
+      long network = ipLong & mask;
+      return longToIpv4(network) + "/" + prefixLength;
+    } catch (Exception ex) {
+      return null;
+    }
   }
 
   private List<Integer> parsePorts(JSArray portArray, List<Integer> defaults) {
@@ -405,21 +545,101 @@ public class NeoNetworkPlugin extends Plugin {
     return "low";
   }
 
-  private List<String> enumerateSubnet(String localIp, int prefixLength, int maxHosts) {
+  /**
+   * Enumerate hosts in the local subnet up to {@code maxHosts}. When the
+   * subnet is small enough to be fully covered by {@code maxHosts}, returns
+   * every host. When the subnet exceeds the cap, returns a centered slice
+   * around {@code localIp} so we don't blindly miss devices "to the right"
+   * of the local IP — which is what the old "start from network+1" approach
+   * did when the local IP was high in the range (the original bounded-coverage bug).
+   */
+  private List<String> enumerateSubnetCentered(String localIp, int prefixLength, int maxHosts) {
     try {
       long ipLong = ipv4ToLong(localIp);
       long mask = prefixLength == 0 ? 0 : 0xffffffffL << (32 - prefixLength);
       long network = ipLong & mask;
       long broadcast = network | ~mask & 0xffffffffL;
+      long firstHost = network + 1;
+      long lastHost = broadcast - 1;
+      long totalHosts = Math.max(0, lastHost - firstHost + 1);
+
       List<String> ips = new ArrayList<>();
-      for (long host = network + 1; host < broadcast && ips.size() < maxHosts; host++) {
-        String candidate = longToIpv4(host);
-        if (!candidate.equals(localIp)) ips.add(candidate);
+      if (totalHosts <= 0) return ips;
+
+      if (totalHosts <= maxHosts) {
+        for (long host = firstHost; host <= lastHost; host++) {
+          if (host == ipLong) continue;
+          ips.add(longToIpv4(host));
+        }
+        return ips;
+      }
+
+      // Subnet larger than cap (e.g. /22, /16). Center the slice around the
+      // local IP so we cover both directions from where the device actually sits.
+      long half = maxHosts / 2;
+      long sliceStart = Math.max(firstHost, ipLong - half);
+      long sliceEnd = sliceStart + maxHosts; // exclusive upper bound (we may overshoot lastHost; clamp below)
+      if (sliceEnd > lastHost + 1) {
+        sliceEnd = lastHost + 1;
+        sliceStart = Math.max(firstHost, sliceEnd - maxHosts);
+      }
+      for (long host = sliceStart; host < sliceEnd && ips.size() < maxHosts; host++) {
+        if (host == ipLong) continue;
+        ips.add(longToIpv4(host));
       }
       return ips;
     } catch (Exception ex) {
       return Collections.emptyList();
     }
+  }
+
+  private JSObject buildArpOnlyHost(String ip, String macAddress, String gatewayIp, boolean resolveHostnameEnabled) {
+    Set<String> discoverySources = new HashSet<>();
+    discoverySources.add("arp");
+    if (ip != null && ip.equals(gatewayIp)) discoverySources.add("gateway");
+    String hostname = resolveHostnameEnabled ? resolveHostname(ip) : null;
+    if (hostname != null) discoverySources.add("hostname");
+
+    JSObject host = new JSObject();
+    host.put("ipAddress", ip);
+    host.put("status", "online");
+    host.put("hostname", hostname);
+    host.put("macAddress", macAddress);
+    host.put("vendor", "Unavailable");
+    host.put("openPorts", new JSArray());
+    host.put("services", new JSArray());
+    JSArray sourceArray = new JSArray();
+    for (String source : discoverySources) sourceArray.put(source);
+    host.put("discoverySources", sourceArray);
+    host.put("confidence", confidenceFor(discoverySources, new JSONArray(), hostname, macAddress));
+    host.put("lastScanSource", "arp");
+    host.put("dataLimited", true);
+    return host;
+  }
+
+  private JSObject buildGatewayHost(String ip, String macAddress, boolean resolveHostnameEnabled) {
+    Set<String> discoverySources = new HashSet<>();
+    discoverySources.add("gateway");
+    String normalizedMac = normalizeMac(macAddress);
+    if (normalizedMac != null) discoverySources.add("arp");
+    String hostname = resolveHostnameEnabled ? resolveHostname(ip) : null;
+    if (hostname != null) discoverySources.add("hostname");
+
+    JSObject host = new JSObject();
+    host.put("ipAddress", ip);
+    host.put("status", "online");
+    host.put("hostname", hostname);
+    host.put("macAddress", normalizedMac);
+    host.put("vendor", "Unavailable");
+    host.put("openPorts", new JSArray());
+    host.put("services", new JSArray());
+    JSArray sourceArray = new JSArray();
+    for (String source : discoverySources) sourceArray.put(source);
+    host.put("discoverySources", sourceArray);
+    host.put("confidence", confidenceFor(discoverySources, new JSONArray(), hostname, normalizedMac));
+    host.put("lastScanSource", "gateway");
+    host.put("dataLimited", normalizedMac == null);
+    return host;
   }
 
   private long ipv4ToLong(String ip) {
@@ -456,15 +676,15 @@ public class NeoNetworkPlugin extends Plugin {
     }
   }
 
-  private List<JSObject> discoverSsdpDevices(String localIp, int prefixLength, Map<String, String> arpCache, ScanProfile profile) {
+  private List<JSObject> discoverSsdpDevices(String localIp, int prefixLength, Map<String, String> arpCache, ScanProfile profile, long ssdpBudgetMs) {
     List<JSObject> hosts = new ArrayList<>();
     String request = "M-SEARCH * HTTP/1.1\r\n" +
       "HOST: 239.255.255.250:1900\r\n" +
       "MAN: \"ssdp:discover\"\r\n" +
       "MX: 1\r\n" +
       "ST: ssdp:all\r\n\r\n";
-    int timeoutMs = Math.min(2600, Math.max(900, profile.timeoutMs * 2));
-    long deadline = System.currentTimeMillis() + timeoutMs;
+    long effectiveBudget = ssdpBudgetMs > 0 ? ssdpBudgetMs : Math.min(2600L, Math.max(900L, profile.timeoutMs * 2L));
+    long deadline = System.currentTimeMillis() + effectiveBudget;
 
     try (DatagramSocket socket = new DatagramSocket()) {
       socket.setSoTimeout(350);

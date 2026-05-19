@@ -33,6 +33,14 @@ export interface NativeScanResult {
   localContext?: NativeLocalNetworkContext;
   scannedHosts: number;
   discoveredHosts: number;
+  // Total addressable hosts on the local subnet (omits network/broadcast).
+  // Older plugin builds may omit this field; treat as null when missing.
+  subnetTotalHosts?: number | null;
+  subnetCidr?: string | null;
+  // True when the native scan hit its internal time budget and stopped early.
+  scanDeadlineExceeded?: boolean;
+  // Wall-clock duration the native scan actually took in milliseconds.
+  durationMs?: number;
   hosts: NativeHostRecord[];
   message?: string;
 }
