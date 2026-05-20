@@ -74,6 +74,7 @@ export function VoicesScreen() {
   const [voiceStatus, setVoiceStatus] = useState("VOICE PREVIEW READY")
   const [distinctOnly, setDistinctOnly] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
+  const [oneVoiceModeExpanded, setOneVoiceModeExpanded] = useState(false)
   const browserSpeechSupported = capabilities.browserSpeechSupported
   const providerTtsAvailable = capabilities.providerTtsAvailable
   const runtimeBanner = useMemo(() => getVoiceRuntimeMode(capabilities), [capabilities])
@@ -490,31 +491,47 @@ export function VoicesScreen() {
         </p>
       </NeonPanel>
 
-      <VoiceRail title="FEATURED_VOICES" voices={featuredVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
-      <VoiceRail title="PERSONALITY_MATCHES" voices={recommendedVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
-      {recentVoices.length > 0 && (
-        <VoiceRail title="RECENTLY_USED" voices={recentVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
-      )}
-
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-        {filteredVoices.map((voice) => (
-          <div key={voice.id} className="relative">
-            <VoiceCard
-              voice={voice}
-              selected={voice.id === voiceId}
-              favorite={voiceFavoriteIds.includes(voice.id)}
-              capabilities={capabilities}
-              onSelect={applyVoice}
-              onPreview={handlePreview}
-              onDetails={setDetailVoice}
-              onToggleFavorite={toggleVoiceFavorite}
+      {runtimeBanner.collapsed && runtimeBanner.mode === "android-collapsed" && !oneVoiceModeExpanded ? (
+        <OneVoiceModeCard
+          banner={runtimeBanner}
+          activeVoiceName={getVoiceProfile(voiceId).name}
+          onExpand={() => setOneVoiceModeExpanded(true)}
+        />
+      ) : (
+        <>
+          {runtimeBanner.collapsed && runtimeBanner.mode === "android-collapsed" && (
+            <OneVoiceModeAcknowledgement
+              banner={runtimeBanner}
+              onCollapse={() => setOneVoiceModeExpanded(false)}
             />
-            {previewId === voice.id && (
-              <div className="pointer-events-none absolute inset-0 rounded-xl" style={{ boxShadow: "0 0 0 2px #00f0ff, 0 0 32px #00f0ff" }} />
-            )}
+          )}
+          <VoiceRail title="FEATURED_VOICES" voices={featuredVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
+          <VoiceRail title="PERSONALITY_MATCHES" voices={recommendedVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
+          {recentVoices.length > 0 && (
+            <VoiceRail title="RECENTLY_USED" voices={recentVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
+          )}
+
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {filteredVoices.map((voice) => (
+              <div key={voice.id} className="relative">
+                <VoiceCard
+                  voice={voice}
+                  selected={voice.id === voiceId}
+                  favorite={voiceFavoriteIds.includes(voice.id)}
+                  capabilities={capabilities}
+                  onSelect={applyVoice}
+                  onPreview={handlePreview}
+                  onDetails={setDetailVoice}
+                  onToggleFavorite={toggleVoiceFavorite}
+                />
+                {previewId === voice.id && (
+                  <div className="pointer-events-none absolute inset-0 rounded-xl" style={{ boxShadow: "0 0 0 2px #00f0ff, 0 0 32px #00f0ff" }} />
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       {detailVoice && (
         <VoiceDetailPanel
@@ -690,6 +707,102 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     <button type="button" onClick={onClick} className="shrink-0 rounded-full px-3 py-1.5 ps-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: active ? "#00f0ff" : "rgba(255,255,255,0.64)", background: active ? "rgba(0,240,255,0.12)" : "rgba(255,255,255,0.04)", boxShadow: active ? "inset 0 0 0 1px #00f0ff, 0 0 10px rgba(0,240,255,0.35)" : "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
       {label}
     </button>
+  )
+}
+
+function OneVoiceModeCard({
+  banner,
+  activeVoiceName,
+  onExpand,
+}: {
+  banner: VoiceRuntimeBanner
+  activeVoiceName: string
+  onExpand: () => void
+}) {
+  const color = bannerToneColor(banner.tone)
+  return (
+    <NeonPanel accent="pink" glow="strong" className="p-4">
+      <p className="ps-mono text-[10px] tracking-[0.3em]" style={{ color }}>
+        ONE-VOICE FALLBACK MODE
+      </p>
+      <h3
+        className="mt-1 ps-heading text-xl leading-tight"
+        style={{ color, textShadow: `0 0 8px ${color}` }}
+      >
+        ONLY 1 DEVICE VOICE AVAILABLE
+      </h3>
+      <p className="mt-2 text-[12px] leading-snug text-white/80 text-pretty">
+        This device exposes only one usable Android TTS voice and the high-quality provider backend
+        is not reachable. Every profile in the library will route through{" "}
+        <span style={{ color }}>{banner.engineLabel}</span> — so multiple profile cards may sound
+        identical. The full catalog still exists as styling/personality presets, not as guaranteed
+        distinct timbres in this runtime.
+      </p>
+      <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+        <DiagPill label="Active profile" value={activeVoiceName} />
+        <DiagPill label="Engine" value={banner.engineLabel} />
+        <DiagPill label="Distinct realizable" value={`${banner.distinctRealizableCount} / ${banner.totalProfiles}`} />
+        <DiagPill label="Mode" value="ANDROID-COLLAPSED" />
+      </div>
+      <p className="mt-3 text-[11px] text-white/65 text-pretty">
+        To unlock the full library of distinct voices, configure the provider backend
+        (<span className="ps-mono text-[10px]">NEXT_PUBLIC_NEO_BACKEND_BASE_URL</span>) so neural
+        TTS becomes reachable. Until then, choose any preset below for personality, but expect
+        timbre to remain the same.
+      </p>
+      <button
+        type="button"
+        onClick={onExpand}
+        className="mt-3 w-full rounded-lg py-2.5 ps-mono text-[11px] tracking-[0.28em]"
+        style={{
+          color: "#000",
+          background: `linear-gradient(180deg, ${color}, ${color}AA)`,
+          boxShadow: `inset 0 0 0 1px ${color}, 0 0 16px ${color}88`,
+        }}
+      >
+        SHOW ALL PROFILE PRESETS ANYWAY
+      </button>
+    </NeonPanel>
+  )
+}
+
+function OneVoiceModeAcknowledgement({
+  banner,
+  onCollapse,
+}: {
+  banner: VoiceRuntimeBanner
+  onCollapse: () => void
+}) {
+  const color = bannerToneColor(banner.tone)
+  return (
+    <div
+      className="flex items-center justify-between gap-2 rounded-lg px-3 py-2"
+      style={{
+        background: `${color}11`,
+        boxShadow: `inset 0 0 0 1px ${color}88`,
+      }}
+    >
+      <span className="ps-mono text-[10px] uppercase tracking-[0.22em]" style={{ color }}>
+        ONE-VOICE MODE · STYLING PRESETS BELOW MAY SOUND IDENTICAL
+      </span>
+      <button
+        type="button"
+        onClick={onCollapse}
+        className="ps-mono text-[10px] uppercase tracking-[0.22em] text-white/80"
+        style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18)", padding: "4px 8px", borderRadius: 6 }}
+      >
+        COLLAPSE
+      </button>
+    </div>
+  )
+}
+
+function DiagPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline gap-2 rounded-md bg-black/40 px-2 py-1.5" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
+      <span className="ps-mono text-[9px] uppercase tracking-[0.22em] text-white/45 shrink-0">{label}</span>
+      <span className="ps-mono text-[10px] tracking-[0.18em] text-white/85 truncate">{value}</span>
+    </div>
   )
 }
 
