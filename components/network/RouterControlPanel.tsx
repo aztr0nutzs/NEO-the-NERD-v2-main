@@ -72,19 +72,41 @@ export function RouterControlPanel({
   const canToggleGuest = !routerStatus.readOnlyMode && guestCapability?.status === "available";
   const canToggleQos = !routerStatus.readOnlyMode && qosCapability?.status === "available";
   const canReboot = !routerStatus.readOnlyMode && rebootCapability?.status === "available";
+  // Truth-driven mode. The panel is a *control* surface only when the runtime
+  // can actually execute control actions — anything else is status-only.
+  const isControlMode = routerControlMode === "connector-backed" && !routerStatus.readOnlyMode;
+  const isDemoControl = routerControlMode === "demo";
+  const titleText = isControlMode ? "ROUTER_CONTROL" : "ROUTER_STATUS";
+  const subtitleText = isControlMode
+    ? null
+    : routerStatus.readOnlyMode
+      ? "READ ONLY · CONNECTOR REQUIRED FOR CONTROL"
+      : isDemoControl
+        ? "DEMO ADAPTER · SIMULATED CONTROL"
+        : null;
+  const titleColor = isControlMode ? "text-emerald-400" : "text-cyan-300";
+  const borderColor = isControlMode ? "border-emerald-500/30" : "border-cyan-500/30";
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   return (
     <>
-      <div className="space-y-4 rounded-lg border border-emerald-500/30 bg-black/60 p-4 backdrop-blur-sm">
+      <div className={`space-y-4 rounded-lg border ${borderColor} bg-black/60 p-4 backdrop-blur-sm`}>
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Router className="h-5 w-5 text-emerald-400" />
-            <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-emerald-400">
-              ROUTER_CONTROL
-            </h3>
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Router className={`h-5 w-5 ${titleColor}`} />
+              <h3 className={`font-mono text-sm font-bold uppercase tracking-wider ${titleColor}`}>
+                {titleText}
+              </h3>
+            </div>
+            {subtitleText && (
+              <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-orange-300/90">
+                {subtitleText}
+              </p>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 font-mono text-[10px] text-cyan-300">
               MODE: {routerControlMode.toUpperCase()}
             </span>
@@ -165,7 +187,7 @@ export function RouterControlPanel({
           </div>
         </div>
 
-        {/* Status Toggles */}
+        {/* Status / Toggles — only writable when isControlMode is true */}
         <div className="grid gap-3 sm:grid-cols-3">
           <StatusCard
             icon={Shield}
@@ -179,16 +201,16 @@ export function RouterControlPanel({
             label="GUEST_NETWORK"
             enabled={routerStatus.guestNetworkEnabled}
             color="text-purple-400"
-            onToggle={canToggleGuest ? onToggleGuest : undefined}
-            readOnly={!canToggleGuest}
+            onToggle={isControlMode && canToggleGuest ? onToggleGuest : undefined}
+            readOnly={!isControlMode || !canToggleGuest}
           />
           <StatusCard
             icon={Gauge}
             label="QOS"
             enabled={routerStatus.qosEnabled}
             color="text-pink-400"
-            onToggle={canToggleQos ? onToggleQoS : undefined}
-            readOnly={!canToggleQos}
+            onToggle={isControlMode && canToggleQos ? onToggleQoS : undefined}
+            readOnly={!isControlMode || !canToggleQos}
           />
         </div>
 
@@ -207,7 +229,8 @@ export function RouterControlPanel({
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Refresh is always available — it only re-reads status. Reboot/guest/QoS
+            live under an explicit advanced block when control is not wired. */}
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={handleRefresh}
@@ -217,10 +240,10 @@ export function RouterControlPanel({
             className="flex-1 border-cyan-500/50 bg-cyan-500/10 font-mono text-xs uppercase text-cyan-400 hover:bg-cyan-500/20 sm:flex-none"
           >
             <RefreshCcw className={`mr-2 h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-            REFRESH
+            REFRESH STATUS
           </Button>
 
-          {routerStatus.rebootAvailable && canReboot && (
+          {isControlMode && routerStatus.rebootAvailable && canReboot && (
             <Button
               onClick={() => setConfirmReboot(true)}
               variant="outline"
@@ -233,24 +256,50 @@ export function RouterControlPanel({
           )}
         </div>
 
-        {/* Demo / Read-Only Notice */}
-        {(isDemoMode || routerStatus.readOnlyMode) && (
-          <div className="flex items-start gap-2 rounded border border-orange-500/30 bg-orange-500/5 p-3 font-mono text-[10px] text-orange-400">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            <div>
-              {routerStatus.readOnlyMode && (
-                <p className="mb-1">
-                  READ_ONLY_MODE: Router control actions require a separate router connector. Local
-                  LAN discovery is unaffected.
+        {!isControlMode && (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 rounded border border-orange-500/30 bg-orange-500/5 p-3 font-mono text-[10px] text-orange-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <div className="space-y-1">
+                <p className="font-bold uppercase tracking-[0.18em] text-orange-400">
+                  ROUTER CONTROL REQUIRES CONNECTOR
                 </p>
-              )}
-              {isDemoMode && (
                 <p>
-                  DEMO_ADAPTER: Toggle actions are simulated. Real router control requires a separate
-                  router connector; live Android discovery does not require one.
+                  Local LAN discovery and status reads are live in this runtime. Reboot, guest
+                  Wi-Fi, and QoS execute only when a vendor/connector backend is configured —
+                  none ships in the current build.
                 </p>
-              )}
+                {isDemoMode && (
+                  <p className="text-orange-300/80">
+                    DEMO ADAPTER: any control attempt below is simulated only.
+                  </p>
+                )}
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setAdvancedOpen((current) => !current)}
+              aria-expanded={advancedOpen}
+              className="flex w-full items-center justify-between rounded border border-gray-700 bg-gray-900/40 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-gray-300 hover:bg-gray-900/70"
+            >
+              <span>ADVANCED ROUTER CONTROLS · CONNECTOR REQUIRED</span>
+              <span className="text-gray-500">{advancedOpen ? "HIDE" : "SHOW"}</span>
+            </button>
+            {advancedOpen && (
+              <div className="space-y-2 rounded border border-gray-800 bg-gray-900/30 p-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400">
+                  Disabled in this runtime. These actions execute only with a connector-backed
+                  adapter; the current native/demo adapter returns{" "}
+                  <span className="text-orange-300">requires-connector</span>.
+                </p>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <DisabledControl icon={Power} label="REBOOT" />
+                  <DisabledControl icon={Users} label="GUEST_NETWORK" />
+                  <DisabledControl icon={Gauge} label="QOS" />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -286,6 +335,22 @@ export function RouterControlPanel({
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+function DisabledControl({ icon: Icon, label }: { icon: typeof Power; label: string }) {
+  return (
+    <div className="flex items-center justify-between rounded border border-gray-800 bg-black/40 px-2 py-1.5 opacity-60">
+      <div className="flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5 text-gray-500" />
+        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400">
+          {label}
+        </span>
+      </div>
+      <span className="rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-orange-300/80">
+        REQUIRES_CONNECTOR
+      </span>
+    </div>
   );
 }
 
