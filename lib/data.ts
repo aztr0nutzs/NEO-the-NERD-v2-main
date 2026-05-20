@@ -47,16 +47,16 @@ export const PERSONALITIES: Personality[] = [
 ]
 
 export const GAMES: GameDef[] = [
-  { id: "tictactoe", title: "Tic Tac Toe", difficulty: "Easy", estTime: "2 min", behavior: "Plays fair, gloats hard", multiplayer: "Turn-based", accent: "cyan", playable: true },
-  { id: "rps", title: "Rock Paper Scissors", difficulty: "Easy", estTime: "1 min", behavior: "Dramatic reveal animations", multiplayer: "Quick duel", accent: "pink", playable: true },
-  { id: "memory", title: "Memory Match", difficulty: "Medium", estTime: "5 min", behavior: "Gentle hints if you struggle", multiplayer: "You vs Robot", accent: "purple", playable: true },
-  { id: "reaction", title: "Reaction Tap", difficulty: "Medium", estTime: "1 min", behavior: "Talks trash about your reflexes", multiplayer: "Quick duel", accent: "orange", playable: true },
-  { id: "guess", title: "Guess the Number", difficulty: "Easy", estTime: "2 min", behavior: "Hot/cold hints with attitude", multiplayer: "You vs Robot", accent: "green", playable: true },
-  { id: "trivia", title: "Trivia Duel", difficulty: "Hard", estTime: "5 min", behavior: "Quizmaster persona, dramatic timer", multiplayer: "Quick duel", accent: "cyan", playable: true },
-  { id: "scramble", title: "Word Scramble", difficulty: "Medium", estTime: "3 min", behavior: "Gives cryptic hints", multiplayer: "Turn-based", accent: "purple", playable: true },
-  { id: "emoji", title: "Emoji Decode", difficulty: "Medium", estTime: "3 min", behavior: "Sneaky misdirection", multiplayer: "Quick duel", accent: "pink", playable: true },
-  { id: "rapidfire", title: "Rapid Fire Questions", difficulty: "Hard", estTime: "2 min", behavior: "No mercy, no pauses", multiplayer: "Party mode", accent: "orange", playable: true },
-  { id: "wyr", title: "Would You Rather", difficulty: "Easy", estTime: "Open", behavior: "Asks weird futuristic dilemmas", multiplayer: "Party mode", accent: "green", playable: true },
+  { id: "tictactoe", title: "Tic Tac Toe", difficulty: "Easy", estTime: "2 min", behavior: "Plays fair, gloats hard", multiplayer: "Turn-based", accent: "cyan", playable: true, category: "strategy", skillType: "logic", supportsScore: true, supportsTimer: false, supportsStreakMode: true, recommendedDifficulty: "EASY" },
+  { id: "rps", title: "Rock Paper Scissors", difficulty: "Easy", estTime: "1 min", behavior: "Dramatic reveal animations", multiplayer: "Quick duel", accent: "pink", playable: true, category: "party", skillType: "reaction", supportsScore: true, supportsTimer: true, supportsStreakMode: true, recommendedDifficulty: "EASY" },
+  { id: "memory", title: "Memory Match", difficulty: "Medium", estTime: "5 min", behavior: "Gentle hints if you struggle", multiplayer: "You vs Robot", accent: "purple", playable: true, category: "puzzle", skillType: "memory", supportsScore: true, supportsTimer: false, supportsStreakMode: false, recommendedDifficulty: "ADAPTIVE" },
+  { id: "reaction", title: "Reaction Tap", difficulty: "Medium", estTime: "1 min", behavior: "Talks trash about your reflexes", multiplayer: "Quick duel", accent: "orange", playable: true, category: "reflex", skillType: "reaction", supportsScore: true, supportsTimer: true, supportsStreakMode: true, recommendedDifficulty: "ADAPTIVE" },
+  { id: "guess", title: "Guess the Number", difficulty: "Easy", estTime: "2 min", behavior: "Hot/cold hints with attitude", multiplayer: "You vs Robot", accent: "green", playable: true, category: "strategy", skillType: "logic", supportsScore: true, supportsTimer: false, supportsStreakMode: false, recommendedDifficulty: "EASY" },
+  { id: "trivia", title: "Trivia Duel", difficulty: "Hard", estTime: "5 min", behavior: "Quizmaster persona, dramatic timer", multiplayer: "Quick duel", accent: "cyan", playable: true, category: "trivia", skillType: "logic", supportsScore: true, supportsTimer: true, supportsStreakMode: true, recommendedDifficulty: "HARD" },
+  { id: "scramble", title: "Word Scramble", difficulty: "Medium", estTime: "3 min", behavior: "Gives cryptic hints", multiplayer: "Turn-based", accent: "purple", playable: true, category: "puzzle", skillType: "language", supportsScore: true, supportsTimer: false, supportsStreakMode: false, recommendedDifficulty: "ADAPTIVE" },
+  { id: "emoji", title: "Emoji Decode", difficulty: "Medium", estTime: "3 min", behavior: "Sneaky misdirection", multiplayer: "Quick duel", accent: "pink", playable: true, category: "puzzle", skillType: "logic", supportsScore: true, supportsTimer: true, supportsStreakMode: false, recommendedDifficulty: "ADAPTIVE" },
+  { id: "rapidfire", title: "Rapid Fire Questions", difficulty: "Hard", estTime: "2 min", behavior: "No mercy, no pauses", multiplayer: "Party mode", accent: "orange", playable: true, category: "trivia", skillType: "reaction", supportsScore: true, supportsTimer: true, supportsStreakMode: true, recommendedDifficulty: "HARD" },
+  { id: "wyr", title: "Would You Rather", difficulty: "Easy", estTime: "Open", behavior: "Asks weird futuristic dilemmas", multiplayer: "Party mode", accent: "green", playable: true, category: "party", skillType: "social", supportsScore: false, supportsTimer: false, supportsStreakMode: false, recommendedDifficulty: "EASY" },
 ]
 
 export const SAVED_RESPONSES = SYSTEM_RESPONSE_LIBRARY
