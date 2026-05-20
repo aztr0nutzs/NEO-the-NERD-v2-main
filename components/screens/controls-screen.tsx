@@ -90,11 +90,10 @@ export function ControlsScreen() {
       >
         <Toggle
           label="Memory enabled"
-          description="Preference persists; cross-session memory not yet active"
+          description="Active: when on, the chat conversation is persisted across app restarts and reloaded on launch. When off, persistence is suppressed — saved messages are cleared on the next write and not restored from storage."
           value={settings.memoryEnabled}
           onChange={(v) => updateSettings({ memoryEnabled: v })}
           color="#00f0ff"
-          planned
         />
         <Toggle
           label="Random game invites"
