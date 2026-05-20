@@ -14,12 +14,9 @@
       "Bash(node \"c:/Users/Aztr0nutZs/Desktop/NEO-the-NERD-v2-main/scripts/validate-prankstar-assets.cjs\")",
       "Bash(npx tsc *)",
       "Bash(git checkout *)",
-      "Bash(git restore *)",
+      "Bash(git stash *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)",
-      "Bash(gh pr create --title 'Make voice runtime truth dominant on Voices screen' --body ' *)",
-      "Bash(where gh.exe)",
-      "Bash(powershell -Command \"Get-Command gh -ErrorAction SilentlyContinue | Select-Object Source\")"
+      "Bash(git push *)"
     ]
   }
 }
