@@ -125,11 +125,19 @@ export function NetworkSettingsPanel({
           </SettingGroup>
 
           {/* Auto Scan */}
-          <SettingGroup title="AUTO_SCAN" icon={Clock}>
+          <SettingGroup title="AUTO_SCAN · FOREGROUND ONLY" icon={Clock}>
             <div className="space-y-4">
+              <div className="flex items-start gap-2 rounded border border-orange-500/30 bg-orange-500/5 p-2.5">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-300" />
+                <p className="font-mono text-[10px] leading-relaxed text-orange-300">
+                  <span className="font-bold uppercase tracking-[0.18em]">FOREGROUND ONLY</span> ·
+                  Recurring network scans run only while N.E.O. is open and the Network module is
+                  active. Closed-app background scans are not enabled in this build.
+                </p>
+              </div>
               <SettingToggle
                 label="ENABLE_AUTO_SCAN"
-                description="Active in-app scheduler; persists next run while N.E.O. is open or restarted"
+                description="Foreground-only: in-app scheduler runs while N.E.O. is open; persists next run across app restarts but does not scan when the app is closed."
                 checked={settings.autoScanEnabled}
                 onCheckedChange={(checked) => onUpdateSettings({ autoScanEnabled: checked })}
               />
@@ -156,7 +164,8 @@ export function NetworkSettingsPanel({
                   </Select>
                   <p className="mt-1 font-mono text-[10px] text-gray-500">
                     Next run: {monitorState?.nextRunAt ? new Date(monitorState.nextRunAt).toLocaleString() : "pending scheduler update"}.
-                    Android closed-app WorkManager scans are not active in this build.
+                    Interval only elapses while N.E.O. is open — closed-app WorkManager scans are not
+                    active in this build.
                   </p>
                 </div>
               )}
@@ -164,17 +173,22 @@ export function NetworkSettingsPanel({
           </SettingGroup>
 
           {/* Notifications */}
-          <SettingGroup title="NOTIFICATIONS" icon={Bell}>
+          <SettingGroup title="NOTIFICATIONS · FOREGROUND ONLY" icon={Bell}>
             <div className="space-y-3">
+              <p className="font-mono text-[10px] leading-relaxed text-orange-300/90">
+                <span className="font-bold uppercase tracking-[0.18em]">FOREGROUND ONLY</span> ·
+                Alerts fire only when a scan executes while N.E.O. is open. This is not persistent
+                background surveillance.
+              </p>
               <SettingToggle
                 label="NEW_DEVICE_ALERTS"
-                description="Active: in-app alert center plus local notification when platform permission is available"
+                description="Foreground-only: in-app alert center plus a local notification when platform permission is available. No closed-app monitoring."
                 checked={settings.notifyNewDevices}
                 onCheckedChange={(checked) => onUpdateSettings({ notifyNewDevices: checked })}
               />
               <SettingToggle
                 label="OFFLINE_DEVICE_ALERTS"
-                description="Active for trusted devices: alert center plus local notification when available"
+                description="Foreground-only for trusted devices: alert center plus local notification when available. Closed-app surveillance is not active."
                 checked={settings.notifyOfflineDevices}
                 onCheckedChange={(checked) => onUpdateSettings({ notifyOfflineDevices: checked })}
               />
