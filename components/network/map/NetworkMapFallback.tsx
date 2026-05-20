@@ -29,9 +29,32 @@ export function NetworkMapFallback({ message, topologyGraph }: NetworkMapFallbac
         </div>
       )}
 
-      <div className="mt-5 flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-cyan-300">
-        <Network className="h-3 w-3" />
-        TOPOLOGY SUMMARY FALLBACK
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+        <div className="flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+          <Network className="h-3 w-3" />
+          TOPOLOGY SUMMARY FALLBACK
+        </div>
+        {topologyGraph && (
+          <span
+            className={`rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${
+              topologyGraph.topologyMode === "backend-confirmed" && topologyGraph.relationshipsConfirmed
+                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
+                : "border-orange-500/50 bg-orange-500/10 text-orange-300"
+            }`}
+            title={
+              topologyGraph.topologyMode === "backend-confirmed" && topologyGraph.relationshipsConfirmed
+                ? "Relationships confirmed by backend probe."
+                : "Relationships inferred from the current device list. Not a verified topology probe."
+            }
+          >
+            CONFIDENCE:{" "}
+            {topologyGraph.topologyMode === "backend-confirmed" && topologyGraph.relationshipsConfirmed
+              ? "CONFIRMED"
+              : topologyGraph.topologyMode === "demo"
+                ? "DEMO"
+                : "ESTIMATED"}
+          </span>
+        )}
       </div>
     </div>
   );

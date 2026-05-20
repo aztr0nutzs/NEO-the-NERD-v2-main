@@ -270,12 +270,31 @@ export function NetworkMap3D({
   }, [deviceStateSignature]);
 
   const topologyMode = topologyGraph?.topologyMode;
+  const relationshipsConfirmed = Boolean(topologyGraph?.relationshipsConfirmed);
   const truthBadge =
     topologyMode === "demo"
       ? "DEMO TOPOLOGY VIEW"
       : topologyMode === "estimated"
         ? "ESTIMATED LOGICAL TOPOLOGY"
         : "BACKEND CONFIRMED TOPOLOGY";
+  const confidenceLabel =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "CONFIDENCE: CONFIRMED"
+      : topologyMode === "demo"
+        ? "CONFIDENCE: DEMO"
+        : "CONFIDENCE: ESTIMATED";
+  const confidenceClasses =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
+      : "border-orange-500/50 bg-orange-500/10 text-orange-300";
+  const confidenceTooltip =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "Relationships were confirmed by a backend-side topology probe."
+      : "Relationships are inferred from the current device list. This is not a verified topology probe — gateway links are estimated.";
+  const subtitleText =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "Interactive logical map of discovered devices and confirmed gateway relationships."
+      : "Logical map inferred from the current device list — gateway relationships are estimated, not probed.";
 
   return (
     <div className="rounded-lg border border-cyan-500/30 bg-black/60 p-4 shadow-[0_0_35px_rgba(34,211,238,0.08)] backdrop-blur-sm">
@@ -288,14 +307,20 @@ export function NetworkMap3D({
           <h2 className="font-mono text-xl font-black uppercase italic tracking-tight text-cyan-300 sm:text-2xl">
             3D NETWORK TOPOLOGY
           </h2>
-          <p className="mt-1 font-mono text-xs text-gray-500 sm:text-sm">
-            Interactive logical map of discovered devices and gateway relationships.
+          <p className="mt-1 font-mono text-xs text-gray-500 sm:text-sm" title={confidenceTooltip}>
+            {subtitleText}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1.5 rounded-full border border-orange-500/50 bg-orange-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-orange-400">
+          <span
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${confidenceClasses}`}
+            title={confidenceTooltip}
+          >
             <Radar className="h-3 w-3" />
+            {confidenceLabel}
+          </span>
+          <span className="flex items-center gap-1.5 rounded-full border border-orange-500/50 bg-orange-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-orange-400">
             {truthBadge}
           </span>
         </div>
