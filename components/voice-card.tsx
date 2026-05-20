@@ -40,12 +40,31 @@ function runtimeIndicator(voice: VoiceProfile, capabilities?: VoiceRuntimeCapabi
   if (voice.availability === "unavailable") return "OFFLINE"
   const category = getVoiceUniquenessCategory(voice, capabilities)
   if (category === "unavailable") return "OFFLINE"
+  // Special case: Android runtime collapsed to a single device voice — every
+  // profile shares the same underlying timbre regardless of authored intent.
+  if (
+    !capabilities.providerTtsAvailable &&
+    capabilities.nativeAndroidTtsAvailable &&
+    capabilities.nativeAndroidVoiceCount <= 1
+  ) {
+    return "LIMITED"
+  }
   // Authored intent realized → LIVE; otherwise the runtime is delivering a
   // lower category than authored → FALLBACK (engine swap) or LIMITED (engine
   // is correct but can't reach distinct timbre).
   if (voice.timbreSource === category) return "LIVE"
   if (voice.timbreSource === "provider-distinct" && category === "styled-variant" && capabilities.providerTtsAvailable) return "LIMITED"
   return "FALLBACK"
+}
+
+function collapsedSubtext(capabilities?: VoiceRuntimeCapabilities | null): string | null {
+  if (!capabilities) return null
+  if (capabilities.providerTtsAvailable) return null
+  if (!capabilities.nativeAndroidTtsAvailable) return null
+  if (capabilities.nativeAndroidVoiceCount > 1) return null
+  return capabilities.selectedAndroidVoiceName
+    ? `SHARED DEVICE VOICE · ${capabilities.selectedAndroidVoiceName}`
+    : "SHARED DEVICE VOICE"
 }
 
 const ACCENT_HEX: Record<VoiceProfile["accent"], string> = {
@@ -152,6 +171,18 @@ export function VoiceCard({
                 )}
               </div>
             )
+          })()}
+          {(() => {
+            const collapsed = collapsedSubtext(capabilities)
+            return collapsed ? (
+              <p
+                className="mt-1 ps-mono text-[9px] tracking-[0.22em]"
+                style={{ color: "#ff7a00" }}
+                title="This runtime can only produce one underlying voice. All profiles will share this same timbre with pitch/rate/style adjustments on top."
+              >
+                {collapsed}
+              </p>
+            ) : null
           })()}
         </div>
 

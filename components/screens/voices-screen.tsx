@@ -32,10 +32,13 @@ import { inferSpeechIntent } from "@/lib/voice/speechIntent"
 import {
   getUniquenessSummary,
   getVoiceAvailabilityExplanation,
+  getVoiceUniquenessCategory,
   runtimeTimbreLabel,
 } from "@/lib/voice/voiceUniqueness"
+import { bannerToneColor, getVoiceRuntimeMode } from "@/lib/voice/voiceRuntimeMode"
 import type { VoiceFilterState, VoiceProfile } from "@/lib/voice/types"
 import { IDLE_PLAYBACK_SNAPSHOT, type VoicePlaybackSnapshot } from "@/lib/voice/voicePlayback"
+import type { VoiceRuntimeBanner } from "@/lib/voice/voiceRuntimeMode"
 import { getRecommendedPersonalityNamesForVoice, getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
 
 export function VoicesScreen() {
@@ -69,8 +72,11 @@ export function VoicesScreen() {
     mimeType: string
   } | null>(null)
   const [voiceStatus, setVoiceStatus] = useState("VOICE PREVIEW READY")
+  const [distinctOnly, setDistinctOnly] = useState(false)
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
   const browserSpeechSupported = capabilities.browserSpeechSupported
   const providerTtsAvailable = capabilities.providerTtsAvailable
+  const runtimeBanner = useMemo(() => getVoiceRuntimeMode(capabilities), [capabilities])
 
   useEffect(() => {
     let cancelled = false
@@ -84,8 +90,21 @@ export function VoicesScreen() {
   }, [voiceId])
 
   const filteredVoices = useMemo(
-    () => filterVoiceProfiles(VOICE_PROFILES, filters, voiceFavoriteIds).filter((voice, index, list) => list.findIndex((item) => item.id === voice.id) === index),
-    [filters, voiceFavoriteIds],
+    () => {
+      const base = filterVoiceProfiles(VOICE_PROFILES, filters, voiceFavoriteIds).filter(
+        (voice, index, list) => list.findIndex((item) => item.id === voice.id) === index,
+      )
+      if (!distinctOnly) return base
+      // "Distinct only" surfaces just the profiles that can deliver a genuinely
+      // different underlying timbre in the *current runtime*. Everything else
+      // is hidden so the deck cannot pretend there are 40 unique voices when
+      // the runtime can produce one or two.
+      return base.filter((voice) => {
+        const cat = getVoiceUniquenessCategory(voice, capabilities)
+        return cat === "provider-distinct" || cat === "native-distinct"
+      })
+    },
+    [filters, voiceFavoriteIds, distinctOnly, capabilities],
   )
   const featuredVoices = useMemo(() => VOICE_PROFILES.filter((voice) => voice.featured), [])
   const recentVoices = useMemo(
@@ -194,9 +213,24 @@ export function VoicesScreen() {
           <span className="text-white/80">LIBRARY</span>
         </h2>
         <p className="mt-1 text-[12px] text-white/55 text-pretty">
-          {VOICE_PROFILES.length} profiles loaded. <span style={{ color: "#39ff14" }}>High-quality neural voices</span> require a configured backend and sound the most realistic. Without it, NEO routes to the local Android engine — same words, but the underlying timbre is whatever your device ships with.
+          {runtimeBanner.totalProfiles} profiles authored ·{" "}
+          <span style={{ color: bannerToneColor(runtimeBanner.tone) }}>
+            {runtimeBanner.distinctRealizableCount} can deliver a distinct timbre right now
+          </span>
+          . The rest are styled variants that adjust pitch, rate, and delivery on top of whichever underlying voice the active engine exposes.
         </p>
       </header>
+
+      <RuntimeTruthBanner banner={runtimeBanner} />
+
+      <RuntimeDiagnosticsPanel
+        open={diagnosticsOpen}
+        onToggle={() => setDiagnosticsOpen((current) => !current)}
+        capabilities={capabilities}
+        banner={runtimeBanner}
+        activeVoiceId={voiceId}
+        playback={playback}
+      />
 
       <NeonPanel accent="cyan" glow="soft" className="p-3">
         <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-cyan mb-2">
@@ -206,8 +240,22 @@ export function VoicesScreen() {
           <ControlSlider label="Speed" value={voiceParams.speed} onChange={(v) => setVoiceParams({ speed: v })} color="#00f0ff" />
           <ControlSlider label="Pitch" value={voiceParams.pitch} onChange={(v) => setVoiceParams({ pitch: v })} color="#b829ff" />
           <ControlSlider label="Volume (playback)" value={voiceParams.volume} onChange={(v) => setVoiceParams({ volume: v })} color="#ff2d9c" />
-          <ControlSlider label="Emotion (style)" value={voiceParams.emotion} onChange={(v) => setVoiceParams({ emotion: v })} color="#ff7a00" />
+          <ControlSlider
+            label={providerTtsAvailable ? "Emotion (style)" : "Emotion (provider-only)"}
+            value={voiceParams.emotion}
+            onChange={(v) => setVoiceParams({ emotion: v })}
+            color={providerTtsAvailable ? "#ff7a00" : "rgba(255,122,0,0.55)"}
+          />
         </div>
+        <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.2em] text-white/45">
+          {providerTtsAvailable
+            ? "ALL FOUR SLIDERS ACTIVE · EMOTION IS SENT AS A PROVIDER STYLE INSTRUCTION."
+            : capabilities.nativeAndroidTtsAvailable
+              ? "SPEED · PITCH · VOLUME APPLIED BY ANDROID ENGINE. EMOTION HAS NO AUDIBLE EFFECT IN THE FALLBACK PATH."
+              : capabilities.browserSpeechSupported
+                ? "SPEED · PITCH · VOLUME APPLIED BY BROWSER SPEECH. EMOTION HAS NO AUDIBLE EFFECT IN THE FALLBACK PATH."
+                : "NO ENGINE AVAILABLE — SLIDERS HAVE NO AUDIBLE EFFECT."}
+        </p>
 
         <div className="mt-3">
           <p className="ps-mono text-[10px] tracking-[0.25em] text-white/55 mb-1.5">PREVIEW_TEXT</p>
@@ -397,6 +445,26 @@ export function VoicesScreen() {
             <Star className="h-4 w-4" fill={filters.favoritesOnly ? "#ff7a00" : "transparent"} />
           </button>
         </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setDistinctOnly((current) => !current)}
+            className="shrink-0 rounded-full px-3 py-1.5 ps-mono text-[10px] uppercase tracking-[0.2em]"
+            style={{
+              color: distinctOnly ? "#39ff14" : "rgba(255,255,255,0.7)",
+              background: distinctOnly ? "rgba(57,255,20,0.12)" : "rgba(255,255,255,0.04)",
+              boxShadow: distinctOnly
+                ? "inset 0 0 0 1px #39ff14, 0 0 10px rgba(57,255,20,0.35)"
+                : "inset 0 0 0 1px rgba(255,255,255,0.14)",
+            }}
+            title="Show only profiles that can deliver a genuinely distinct underlying timbre in the current runtime."
+          >
+            {distinctOnly ? "DISTINCT-ONLY · ON" : "DISTINCT-ONLY · OFF"}
+          </button>
+          <span className="ps-mono text-[9px] uppercase tracking-[0.2em] text-white/40">
+            REALIZABLE DISTINCT: {runtimeBanner.distinctRealizableCount}/{runtimeBanner.totalProfiles}
+          </span>
+        </div>
         <div className="mt-3 flex gap-2 overflow-x-auto ps-no-scrollbar">
           {(["All", ...VOICE_CATEGORIES] as const).map((category) => (
             <FilterChip
@@ -422,10 +490,10 @@ export function VoicesScreen() {
         </p>
       </NeonPanel>
 
-      <VoiceRail title="FEATURED_VOICES" voices={featuredVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
-      <VoiceRail title="PERSONALITY_MATCHES" voices={recommendedVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
+      <VoiceRail title="FEATURED_VOICES" voices={featuredVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
+      <VoiceRail title="PERSONALITY_MATCHES" voices={recommendedVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
       {recentVoices.length > 0 && (
-        <VoiceRail title="RECENTLY_USED" voices={recentVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
+        <VoiceRail title="RECENTLY_USED" voices={recentVoices} voiceId={voiceId} favorites={voiceFavoriteIds} previewId={previewId} capabilities={capabilities} onSelect={applyVoice} onPreview={handlePreview} onDetails={setDetailVoice} onToggleFavorite={toggleVoiceFavorite} />
       )}
 
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -469,6 +537,7 @@ function VoiceRail({
   voiceId,
   favorites,
   previewId,
+  capabilities,
   onSelect,
   onPreview,
   onDetails,
@@ -479,6 +548,7 @@ function VoiceRail({
   voiceId: string
   favorites: string[]
   previewId: string | null
+  capabilities?: VoiceRuntimeCapabilities | null
   onSelect: (id: string) => void
   onPreview: (id: string) => void
   onDetails: (voice: VoiceProfile) => void
@@ -494,6 +564,7 @@ function VoiceRail({
               voice={voice}
               selected={voice.id === voiceId}
               favorite={favorites.includes(voice.id)}
+              capabilities={capabilities}
               onSelect={onSelect}
               onPreview={onPreview}
               onDetails={onDetails}
@@ -619,6 +690,96 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
     <button type="button" onClick={onClick} className="shrink-0 rounded-full px-3 py-1.5 ps-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: active ? "#00f0ff" : "rgba(255,255,255,0.64)", background: active ? "rgba(0,240,255,0.12)" : "rgba(255,255,255,0.04)", boxShadow: active ? "inset 0 0 0 1px #00f0ff, 0 0 10px rgba(0,240,255,0.35)" : "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
       {label}
     </button>
+  )
+}
+
+function RuntimeTruthBanner({ banner }: { banner: VoiceRuntimeBanner }) {
+  const color = bannerToneColor(banner.tone)
+  return (
+    <div
+      role={banner.tone === "ok" ? "status" : "alert"}
+      className="rounded-xl p-3"
+      style={{
+        background: `linear-gradient(135deg, ${color}22, ${color}05)`,
+        boxShadow: `inset 0 0 0 1.5px ${color}, 0 0 22px ${color}55`,
+      }}
+    >
+      <p className="ps-mono text-[10px] tracking-[0.3em]" style={{ color }}>
+        RUNTIME TRUTH
+      </p>
+      <p
+        className="mt-1 ps-heading text-[15px] sm:text-base leading-tight"
+        style={{ color, textShadow: `0 0 8px ${color}` }}
+      >
+        {banner.headline}
+      </p>
+      <p className="mt-1.5 text-[12px] leading-snug text-white/80 text-pretty">{banner.detail}</p>
+      <p className="mt-1.5 ps-mono text-[9px] uppercase tracking-[0.22em] text-white/55">
+        ENGINE: {banner.engineLabel.toUpperCase()} · DISTINCT REALIZABLE: {banner.distinctRealizableCount}/{banner.totalProfiles}
+      </p>
+    </div>
+  )
+}
+
+function RuntimeDiagnosticsPanel({
+  open,
+  onToggle,
+  capabilities,
+  banner,
+  activeVoiceId,
+  playback,
+}: {
+  open: boolean
+  onToggle: () => void
+  capabilities: VoiceRuntimeCapabilities
+  banner: VoiceRuntimeBanner
+  activeVoiceId: string
+  playback: VoicePlaybackSnapshot
+}) {
+  return (
+    <div className="rounded-xl ps-glass p-3" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between"
+        aria-expanded={open}
+      >
+        <span className="ps-mono text-[10px] uppercase tracking-[0.3em] text-white/65">
+          VOICE RUNTIME DIAGNOSTICS
+        </span>
+        <span className="ps-mono text-[10px] uppercase tracking-[0.22em] text-white/45">
+          {open ? "HIDE" : "SHOW"}
+        </span>
+      </button>
+      {open && (
+        <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+          <DiagRow label="Runtime mode" value={banner.mode.toUpperCase()} />
+          <DiagRow label="Active preview path" value={capabilities.currentPreviewMode.toUpperCase()} />
+          <DiagRow label="Backend configured" value={capabilities.remoteBackendConfigured ? "YES" : "NO"} />
+          <DiagRow label="Provider TTS reachable" value={capabilities.providerTtsAvailable ? "YES" : "NO"} />
+          <DiagRow label="Native Android TTS" value={capabilities.nativeAndroidTtsAvailable ? "READY" : "OFF"} />
+          <DiagRow label="Native voice count" value={String(capabilities.nativeAndroidVoiceCount)} />
+          <DiagRow label="Selected Android voice" value={capabilities.selectedAndroidVoiceName ?? "—"} />
+          <DiagRow label="Browser speech" value={capabilities.browserSpeechSupported ? "SUPPORTED" : "OFF"} />
+          <DiagRow label="Selected profile ID" value={activeVoiceId} />
+          <DiagRow label="Distinct realizable" value={`${banner.distinctRealizableCount} / ${banner.totalProfiles}`} />
+          <DiagRow label="Last playback state" value={playback.state.toUpperCase()} />
+          <DiagRow label="Last playback source" value={(playback.source ?? "—").toString().toUpperCase()} />
+          <div className="sm:col-span-2">
+            <DiagRow label="Last status message" value={playback.message || "—"} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DiagRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline gap-2 rounded-md bg-black/30 px-2 py-1.5" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)" }}>
+      <span className="ps-mono text-[9px] uppercase tracking-[0.22em] text-white/45 shrink-0">{label}</span>
+      <span className="ps-mono text-[10px] tracking-[0.18em] text-white/85 truncate">{value}</span>
+    </div>
   )
 }
 
