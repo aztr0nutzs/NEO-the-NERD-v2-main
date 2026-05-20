@@ -40,20 +40,48 @@ interface NetworkMapHudProps {
 }
 
 export function NetworkMapHud(props: NetworkMapHudProps) {
+  const topologyMode = props.topologyGraph?.topologyMode;
+  const relationshipsConfirmed = Boolean(props.topologyGraph?.relationshipsConfirmed);
+  const confidenceLabel =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "CONFIRMED"
+      : topologyMode === "demo"
+        ? "DEMO"
+        : "ESTIMATED";
+  const confidenceClasses =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
+      : "border-orange-500/50 bg-orange-500/10 text-orange-300";
+  const confidenceFootnote =
+    topologyMode === "backend-confirmed" && relationshipsConfirmed
+      ? "Relationships confirmed by backend probe."
+      : "Relationships inferred from the current device list. Not a verified topology probe.";
+
   return (
     <aside className="rounded-lg border border-purple-500/20 bg-gray-950/70 p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <GitBranch className="h-4 w-4 text-purple-400" />
-        <h3 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-purple-300">
-          MAP_HUD
-        </h3>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <GitBranch className="h-4 w-4 text-purple-400" />
+          <h3 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-purple-300">
+            MAP_HUD
+          </h3>
+        </div>
+        <span
+          className={`rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] ${confidenceClasses}`}
+          title={confidenceFootnote}
+        >
+          {confidenceLabel}
+        </span>
       </div>
 
-      <div className="mb-4 grid grid-cols-3 gap-2 2xl:grid-cols-1">
+      <div className="mb-2 grid grid-cols-3 gap-2 2xl:grid-cols-1">
         <HudMetric label="NODES" value={props.topologyGraph?.summary.totalNodes ?? "--"} />
         <HudMetric label="LINKS" value={props.showLinks ? props.topologyGraph?.summary.totalEdges ?? "--" : "OFF"} />
         <HudMetric label="FLAGS" value={props.topologyGraph?.summary.flaggedNodes ?? "--"} />
       </div>
+      <p className="mb-4 font-mono text-[9px] leading-relaxed text-orange-300/80">
+        {confidenceFootnote}
+      </p>
 
       <details className="group rounded border border-cyan-500/20 bg-black/30 p-3" open>
         <summary className="flex cursor-pointer list-none items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300">
