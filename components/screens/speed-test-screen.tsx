@@ -718,17 +718,53 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
                 {dlValue}
               </span>
             </Pill>
-            <Pill border={rgba(NEO.pink, 0.32)}>
-              <span className="hud-mono text-[9px] font-black" style={{ color: NEO.pink }}>
-                UL:
-              </span>
-              <span
-                className="hud-text-tight text-[12px] font-black italic"
-                style={{ color: NEO.yellow }}
-              >
-                {ulValue}
-              </span>
-            </Pill>
+            {(() => {
+              const ulFailed = ulValue === "FAIL"
+              const ulNotConfigured = !uploadConfigured && (ulValue === "N/A" || ulValue === "--")
+              const ulPillBorder = ulFailed
+                ? rgba(NEO.pink, 0.6)
+                : ulNotConfigured
+                  ? rgba(NEO.yellow, 0.45)
+                  : rgba(NEO.pink, 0.32)
+              if (ulNotConfigured) {
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setUploadConfigOpen(true)}
+                    aria-label="Configure upload endpoint"
+                    title="Upload was not measured. Configure an upload endpoint below to enable upload testing."
+                    className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5"
+                    style={{
+                      borderColor: ulPillBorder,
+                      background: rgba(NEO.yellow, 0.05),
+                    }}
+                  >
+                    <span className="hud-mono text-[9px] font-black" style={{ color: NEO.yellow }}>
+                      UL:
+                    </span>
+                    <span
+                      className="hud-mono text-[9px] font-black italic"
+                      style={{ color: NEO.yellow, letterSpacing: "0.06em" }}
+                    >
+                      NOT CONFIGURED
+                    </span>
+                  </button>
+                )
+              }
+              return (
+                <Pill border={ulPillBorder}>
+                  <span className="hud-mono text-[9px] font-black" style={{ color: NEO.pink }}>
+                    UL:
+                  </span>
+                  <span
+                    className="hud-text-tight text-[12px] font-black italic"
+                    style={{ color: ulFailed ? NEO.pink : NEO.yellow }}
+                  >
+                    {ulFailed ? "FAILED" : ulValue}
+                  </span>
+                </Pill>
+              )
+            })()}
           </div>
         </div>
       </div>
@@ -1033,13 +1069,13 @@ function RecentResultsPanel({
               />
               <MetricWithDelta
                 label="UL"
-                value={run.uploadMbps === null ? "N/A" : run.uploadMbps.toFixed(1)}
+                value={run.uploadMbps === null ? "NOT MEASURED" : run.uploadMbps.toFixed(1)}
                 delta={
                   prior && prior.uploadMbps !== null && run.uploadMbps !== null
                     ? run.uploadMbps - prior.uploadMbps
                     : null
                 }
-                color={NEO.pink}
+                color={run.uploadMbps === null ? NEO.yellow : NEO.pink}
                 higherIsBetter
               />
               <MetricWithDelta

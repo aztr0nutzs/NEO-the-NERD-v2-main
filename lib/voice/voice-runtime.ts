@@ -282,7 +282,9 @@ export function playProviderAudio(options: ProviderAudioPlaybackOptions) {
       state: "playing",
       source: "provider",
       voiceId: options.voiceId,
-      message: "PROVIDER AUDIO PLAYING",
+      message: options.voiceId
+        ? `PLAYING PROVIDER VOICE: ${options.voiceId.toUpperCase()}`
+        : "PLAYING PROVIDER VOICE",
     })
   }
   audio.onpause = () => {
@@ -496,11 +498,18 @@ async function previewViaNativeAndroidTts(
     return { mode: "native-android", ok: false, error }
   }
 
+  // Surface the exact native voice name in the status — "PLAYING ANDROID TTS
+  // VOICE: en-us-x-..." — so the user can verify which device voice was
+  // actually used and tell whether multiple profiles collapse to the same one.
+  const resolvedName = result.voiceName ?? null
+  const message = resolvedName
+    ? `PLAYING ANDROID TTS VOICE: ${resolvedName.toUpperCase()}`
+    : "PLAYING SHARED FALLBACK DEVICE VOICE"
   request.onStateChange?.({
     state: "playing",
     source: "native-android",
     voiceId: request.profile.id,
-    message: "ANDROID TTS PREVIEW PLAYING",
+    message,
   })
   return { mode: "native-android", ok: true }
 }

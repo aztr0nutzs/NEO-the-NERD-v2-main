@@ -80,9 +80,14 @@ export function NetworkAlertsPanel({
           )}
         </div>
         <div className="rounded-lg border border-gray-800 bg-gray-900/30 p-3">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500">
-            MONITOR_STATUS
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500">
+              MONITOR_STATUS
+            </p>
+            <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-orange-300">
+              FOREGROUND ONLY
+            </span>
+          </div>
           <p className="mt-1 font-mono text-xs text-gray-300">
             {monitorState.schedulerStatus.toUpperCase()} / {monitorState.backgroundCapability}
           </p>
@@ -91,6 +96,10 @@ export function NetworkAlertsPanel({
           </p>
           <p className="mt-1 font-mono text-[10px] text-gray-500">
             Notifications: {monitorState.notificationCapability}
+          </p>
+          <p className="mt-2 font-mono text-[9px] leading-relaxed text-orange-300/80">
+            Recurring scans run only while N.E.O. is open and this module is active. Closed-app
+            background scans are not enabled in this build.
           </p>
         </div>
       </div>

@@ -40,12 +40,78 @@ function runtimeIndicator(voice: VoiceProfile, capabilities?: VoiceRuntimeCapabi
   if (voice.availability === "unavailable") return "OFFLINE"
   const category = getVoiceUniquenessCategory(voice, capabilities)
   if (category === "unavailable") return "OFFLINE"
+  // Special case: Android runtime collapsed to a single device voice — every
+  // profile shares the same underlying timbre regardless of authored intent.
+  if (
+    !capabilities.providerTtsAvailable &&
+    capabilities.nativeAndroidTtsAvailable &&
+    capabilities.nativeAndroidVoiceCount <= 1
+  ) {
+    return "LIMITED"
+  }
   // Authored intent realized → LIVE; otherwise the runtime is delivering a
   // lower category than authored → FALLBACK (engine swap) or LIMITED (engine
   // is correct but can't reach distinct timbre).
   if (voice.timbreSource === category) return "LIVE"
   if (voice.timbreSource === "provider-distinct" && category === "styled-variant" && capabilities.providerTtsAvailable) return "LIMITED"
   return "FALLBACK"
+}
+
+function collapsedSubtext(capabilities?: VoiceRuntimeCapabilities | null): string | null {
+  if (!capabilities) return null
+  if (capabilities.providerTtsAvailable) return null
+  if (!capabilities.nativeAndroidTtsAvailable) return null
+  if (capabilities.nativeAndroidVoiceCount > 1) return null
+  return capabilities.selectedAndroidVoiceName
+    ? `SHARED DEVICE VOICE · ${capabilities.selectedAndroidVoiceName}`
+    : "SHARED DEVICE VOICE"
+}
+
+type RuntimeTruthCategory =
+  | "provider-distinct"
+  | "provider-styled"
+  | "native-distinct"
+  | "native-shared"
+  | "browser-fallback"
+  | "unavailable"
+
+interface RuntimeTruthClassification {
+  category: RuntimeTruthCategory
+  label: string
+  color: string
+}
+
+function classifyRuntimeTruth(
+  voice: VoiceProfile,
+  capabilities?: VoiceRuntimeCapabilities | null,
+): RuntimeTruthClassification | null {
+  if (!capabilities) return null
+  if (voice.availability === "unavailable") {
+    return { category: "unavailable", label: "UNAVAILABLE IN CURRENT RUNTIME", color: "#ff2d9c" }
+  }
+  const cat = getVoiceUniquenessCategory(voice, capabilities)
+  if (cat === "unavailable") {
+    return { category: "unavailable", label: "UNAVAILABLE IN CURRENT RUNTIME", color: "#ff2d9c" }
+  }
+  if (capabilities.providerTtsAvailable) {
+    if (cat === "provider-distinct") {
+      return { category: "provider-distinct", label: "PROVIDER DISTINCT VOICE", color: "#39ff14" }
+    }
+    return { category: "provider-styled", label: "PROVIDER STYLED VARIANT", color: "#00f0ff" }
+  }
+  if (capabilities.nativeAndroidTtsAvailable) {
+    if (capabilities.nativeAndroidVoiceCount <= 1) {
+      return { category: "native-shared", label: "SHARED FALLBACK DEVICE VOICE", color: "#ff7a00" }
+    }
+    if (cat === "native-distinct") {
+      return { category: "native-distinct", label: "NATIVE DISTINCT DEVICE VOICE", color: "#b829ff" }
+    }
+    return { category: "native-shared", label: "SHARED FALLBACK DEVICE VOICE", color: "#ff7a00" }
+  }
+  if (capabilities.browserSpeechSupported) {
+    return { category: "browser-fallback", label: "BROWSER SPEECH FALLBACK", color: "#ff7a00" }
+  }
+  return { category: "unavailable", label: "UNAVAILABLE IN CURRENT RUNTIME", color: "#ff2d9c" }
 }
 
 const ACCENT_HEX: Record<VoiceProfile["accent"], string> = {
@@ -152,6 +218,30 @@ export function VoiceCard({
                 )}
               </div>
             )
+          })()}
+          {(() => {
+            const truth = classifyRuntimeTruth(voice, capabilities)
+            return truth ? (
+              <p
+                className="mt-1 ps-mono text-[9px] tracking-[0.22em]"
+                style={{ color: truth.color, textShadow: `0 0 4px ${truth.color}55` }}
+                title="Runtime classification: how this profile is actually delivered right now, not its authored intent."
+              >
+                RUNTIME: {truth.label}
+              </p>
+            ) : null
+          })()}
+          {(() => {
+            const collapsed = collapsedSubtext(capabilities)
+            return collapsed ? (
+              <p
+                className="mt-0.5 ps-mono text-[9px] tracking-[0.22em]"
+                style={{ color: "#ff7a00" }}
+                title="This runtime can only produce one underlying voice. All profiles will share this same timbre with pitch/rate/style adjustments on top."
+              >
+                {collapsed}
+              </p>
+            ) : null
           })()}
         </div>
 
