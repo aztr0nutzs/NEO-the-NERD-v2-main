@@ -15,6 +15,9 @@ import { WouldYouRatherGame } from "./would-you-rather"
 import { NeonCodebreakerGame } from "./neon-codebreaker"
 import { SignalSequenceGame } from "./signal-sequence"
 import { FirewallBreachGame } from "./firewall-breach"
+import { CyberHeistGame } from "./cyber-heist"
+import { DroneDodgeGame } from "./drone-dodge"
+import { CircuitBuilderGame } from "./circuit-builder"
 import type { Difficulty, SessionResult, UpdatePayload } from "./types"
 
 const TRASH = ["NEO logs this for calibration. Mostly for comedy.", "Bold move. The arcade cabinet is judging respectfully.", "Your reflexes filed a support ticket."]
@@ -46,5 +49,8 @@ export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exc
     {game === "codebreaker" && <NeonCodebreakerGame difficulty={difficulty} update={update} />}
     {game === "signal" && <SignalSequenceGame difficulty={difficulty} update={update} />}
     {game === "firewall" && <FirewallBreachGame difficulty={difficulty} update={update} />}
+    {game === "heist" && <CyberHeistGame difficulty={difficulty} update={update} />}
+    {game === "dodge" && <DroneDodgeGame difficulty={difficulty} update={update} />}
+    {game === "circuit" && <CircuitBuilderGame difficulty={difficulty} update={update} />}
   </ArcadeGameShell>
 }

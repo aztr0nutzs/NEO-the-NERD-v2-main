@@ -19,6 +19,9 @@ const ACCENT: Record<GameId, "cyan" | "purple" | "pink" | "green" | "orange"> = 
   codebreaker: "green",
   signal: "cyan",
   firewall: "pink",
+  heist: "purple",
+  dodge: "orange",
+  circuit: "green",
 }
 
 const HEX = {
@@ -43,6 +46,9 @@ const TITLES: Record<GameId, string> = {
   codebreaker: "NEON_CODEBREAKER",
   signal: "SIGNAL_SEQUENCE",
   firewall: "FIREWALL_BREACH",
+  heist: "CYBER_HEIST",
+  dodge: "DRONE_DODGE",
+  circuit: "CIRCUIT_BUILDER",
 }
 
 export function ArcadeGameShell({ game, session, onReset, onClose, children }: {

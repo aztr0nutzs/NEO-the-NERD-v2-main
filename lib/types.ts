@@ -298,6 +298,9 @@ export type GameId =
   | "codebreaker"
   | "signal"
   | "firewall"
+  | "heist"
+  | "dodge"
+  | "circuit"
 
 
 export interface GameProgressionStats {
