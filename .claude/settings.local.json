@@ -12,7 +12,10 @@
       "Bash(node scripts/validate-prankstar-assets.cjs)",
       "Bash(echo \"exit:$?\")",
       "Bash(node \"c:/Users/Aztr0nutZs/Desktop/NEO-the-NERD-v2-main/scripts/validate-prankstar-assets.cjs\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)"
     ]
   }
 }
