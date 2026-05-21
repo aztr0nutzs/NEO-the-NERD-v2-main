@@ -73,7 +73,8 @@ import {
 import { DEFAULT_ENTITLEMENT_STATE } from "./entitlements/tiers"
 import { generateAssistantReply } from "@/lib/assistant/assistant-runtime"
 import { buildNetworkAssistantContext } from "@/lib/network/networkAssistantContext"
-import { applyGameProgression, createDefaultArcadeProgression } from "./game-progression"
+import { applyGameProgressionWithEvents, createDefaultArcadeProgression, type Celebration } from "./game-progression"
+import { ensureDailyChallenge } from "./games/daily-challenge"
 
 interface AppState {
   screen: ScreenId
@@ -184,6 +185,9 @@ interface AppState {
   dismissGameInvite: () => void
   arcadeProgression: ArcadeProgressionState
   recordGameResult: (params: { game: GameId; result: "win" | "lose" | "draw"; difficulty: "EASY" | "ADAPTIVE" | "HARD"; score?: number; completionTimeMs?: number; reactionTimeMs?: number; streak?: number }) => void
+  pendingCelebrations: Celebration[]
+  dismissCelebration: (id: string) => void
+  refreshDailyChallenge: () => void
 }
 
 const Ctx = createContext<AppState | null>(null)
@@ -384,6 +388,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [trapIntent, setTrapIntent] = useState<TrapIntent | null>(null)
   const [prankChaosHistory, setPrankChaosHistory] = useState<ChaosHistoryEntry[]>([])
   const [arcadeProgression, setArcadeProgression] = useState<ArcadeProgressionState>(createDefaultArcadeProgression())
+  const [pendingCelebrations, setPendingCelebrations] = useState<Celebration[]>([])
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -1016,7 +1021,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [hydrated, refreshCapabilities])
 
   const recordGameResult = useCallback((params: { game: GameId; result: "win" | "lose" | "draw"; difficulty: "EASY" | "ADAPTIVE" | "HARD"; score?: number; completionTimeMs?: number; reactionTimeMs?: number; streak?: number }) => {
-    setArcadeProgression((prev) => applyGameProgression(prev, params))
+    setArcadeProgression((prev) => {
+      const { state, celebrations } = applyGameProgressionWithEvents(prev, params, { personalityId, trashTalk: settings.trashTalk })
+      if (celebrations.length > 0) setPendingCelebrations((c) => [...c, ...celebrations])
+      return state
+    })
+  }, [personalityId, settings.trashTalk])
+
+  const dismissCelebration = useCallback((id: string) => {
+    setPendingCelebrations((c) => c.filter((x) => x.id !== id))
+  }, [])
+
+  const refreshDailyChallenge = useCallback(() => {
+    setArcadeProgression((prev) => ensureDailyChallenge(prev))
   }, [])
 
   const acceptGameInvite = useCallback((g: string) => {
@@ -1197,7 +1214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       speedTestHistory, recordSpeedTestStarted, recordSpeedTestResult, clearSpeedTestHistory,
       notificationOpen, setNotificationOpen,
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
-      arcadeProgression, recordGameResult,
+      arcadeProgression, recordGameResult, pendingCelebrations, dismissCelebration, refreshDailyChallenge,
       prankSoundFavoriteIds, recentPrankSoundIds,
       togglePrankSoundFavorite, recordPrankSoundPlay,
       prankMessageHistory, prankMessageFavorites,
@@ -1241,6 +1258,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       trapIntent,
       prankChaosHistory,
       arcadeProgression,
+      pendingCelebrations,
+      recordGameResult,
+      dismissCelebration,
+      refreshDailyChallenge,
     ],
   )
 

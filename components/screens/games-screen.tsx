@@ -9,6 +9,10 @@ import { GameCard } from "../game-card"
 import { TicTacToeGame } from "../games/tic-tac-toe"
 import { RockPaperScissorsGame } from "../games/rock-paper-scissors"
 import { ArcadeGame } from "../games/arcade-games"
+import { DailyChallengeCard } from "../games/daily-challenge-card"
+import { AchievementsStrip } from "../games/achievements-strip"
+import { CelebrationToast } from "../games/celebration-toast"
+import { todayKey } from "@/lib/games/daily-challenge"
 import type { GameDef, GameId } from "@/lib/types"
 
 type CategoryFilter = "all" | GameDef["category"]
@@ -25,7 +29,7 @@ const CATEGORIES: { id: CategoryFilter; label: string }[] = [
 const PLAYABLE_GAMES = GAMES.filter((g) => g.playable)
 
 export function GamesScreen() {
-  const { acceptedGameInvite, settings, arcadeProgression } = useApp()
+  const { acceptedGameInvite, settings, arcadeProgression, refreshDailyChallenge } = useApp()
   const [active, setActive] = useState<GameId | null>(null)
   const [category, setCategory] = useState<CategoryFilter>("all")
   const [featured, setFeatured] = useState<GameId>(() => PLAYABLE_GAMES[0].id)
@@ -33,6 +37,11 @@ export function GamesScreen() {
   useEffect(() => {
     if (acceptedGameInvite) setActive(acceptedGameInvite as GameId)
   }, [acceptedGameInvite])
+
+  // Ensure today's daily challenge exists when the screen mounts or the day rolls over.
+  useEffect(() => {
+    refreshDailyChallenge()
+  }, [refreshDailyChallenge])
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -120,8 +129,11 @@ export function GamesScreen() {
   const playableCount = PLAYABLE_GAMES.length
   const filteredPlayable = filtered.filter((g) => g.playable).length
 
+  const daily = arcadeProgression.dailyChallenge?.dayKey === todayKey() ? arcadeProgression.dailyChallenge : null
+
   return (
     <div className="space-y-3">
+      <CelebrationToast />
       <header className="px-1">
         <p className="ps-mono text-[10px] tracking-[0.4em] text-white/50">NEO // ARCADE_HUB</p>
         <h2 className="ps-heading text-2xl">
@@ -159,6 +171,15 @@ export function GamesScreen() {
           <span>{bestGame ? `TOP: ${bestGame.g.title.toUpperCase()}` : totalRuns === 0 ? "NO RUNS LOGGED" : "TOP: --"}</span>
         </div>
       </NeonPanel>
+
+      {/* Daily Challenge */}
+      {daily && (
+        <DailyChallengeCard
+          challenge={daily}
+          stats={arcadeProgression.perGame[daily.gameId]}
+          onLaunch={(id) => setActive(id)}
+        />
+      )}
 
       {/* Featured Challenge */}
       <NeonPanel accent="orange" glow="strong" className="p-3">
@@ -288,6 +309,9 @@ export function GamesScreen() {
               />
             ))}
           </div>
+
+          {/* Achievements */}
+          <AchievementsStrip achievements={arcadeProgression.achievements} />
         </>
       )}
     </div>
