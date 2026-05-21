@@ -295,6 +295,9 @@ export type GameId =
   | "emoji"
   | "rapidfire"
   | "wyr"
+  | "codebreaker"
+  | "signal"
+  | "firewall"
 
 
 export interface GameProgressionStats {

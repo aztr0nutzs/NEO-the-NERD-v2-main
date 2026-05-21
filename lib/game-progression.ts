@@ -8,7 +8,7 @@ export function createDefaultArcadeProgression(): ArcadeProgressionState {
   return {
     totalGamesPlayed: 0, totalWins: 0, totalLosses: 0, totalDraws: 0, arcadeXp: 0, arcadeLevel: 1,
     currentWinStreak: 0, longestWinStreak: 0, achievements: [], dailyChallengeHistory: [],
-    perGame: { tictactoe: createDefaultGameStats(), rps: createDefaultGameStats(), memory: createDefaultGameStats(), reaction: createDefaultGameStats(), guess: createDefaultGameStats(), trivia: createDefaultGameStats(), scramble: createDefaultGameStats(), emoji: createDefaultGameStats(), rapidfire: createDefaultGameStats(), wyr: createDefaultGameStats() },
+    perGame: { tictactoe: createDefaultGameStats(), rps: createDefaultGameStats(), memory: createDefaultGameStats(), reaction: createDefaultGameStats(), guess: createDefaultGameStats(), trivia: createDefaultGameStats(), scramble: createDefaultGameStats(), emoji: createDefaultGameStats(), rapidfire: createDefaultGameStats(), wyr: createDefaultGameStats(), codebreaker: createDefaultGameStats(), signal: createDefaultGameStats(), firewall: createDefaultGameStats() },
   }
 }
 
