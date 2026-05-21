@@ -25,7 +25,10 @@ export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exc
     if (result === "win") playAvatarReaction("ecstatic")
     if (result === "lose") playAvatarReaction("angry")
     if (result === "draw") playAvatarReaction("surprised")
-    if (result === "win" || result === "lose" || result === "draw") recordGameResult({ game, result, difficulty, score: payload?.score, completionTimeMs: payload?.completionTimeMs, reactionTimeMs: payload?.reactionTimeMs, streak: payload?.streak })
+    if (result === "win" || result === "lose" || result === "draw" || payload?.forceProgression) {
+      const progressionResult = result === "win" || result === "lose" || result === "draw" ? result : "draw"
+      recordGameResult({ game, result: progressionResult, difficulty, score: payload?.score, completionTimeMs: payload?.completionTimeMs, reactionTimeMs: payload?.reactionTimeMs, streak: payload?.streak })
+    }
     setSession((cur) => ({ ...cur, result, robotResponse: `${robotResponse}${trash(trashTalk)}`, round: cur.round + 1, score: { you: cur.score.you + (payload?.score ?? 0), neo: cur.score.neo + (payload?.neoScore ?? 0) } }))
   }
   return <ArcadeGameShell game={game} session={session} onReset={() => setSession(makeSession(game))} onClose={onClose}>
