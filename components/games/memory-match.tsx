@@ -1,12 +1,19 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ArcadeGameButton } from "./arcade-game-button"
 import type { ArcadeGameComponentProps } from "./types"
+import { quip } from "@/lib/games/quips"
 
 const ICONS = ["⚡", "◆", "▲", "●", "★", "✚", "◇", "☽"]
 const pairsFor = (d: ArcadeGameComponentProps["difficulty"]) =>
   d === "HARD" ? 8 : d === "ADAPTIVE" ? 6 : 4
+
+const GRADE_TIME_MS: Record<ArcadeGameComponentProps["difficulty"], number> = {
+  EASY: 25000,
+  ADAPTIVE: 50000,
+  HARD: 90000,
+}
 
 export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps) {
   const pairCount = pairsFor(difficulty)
@@ -16,6 +23,7 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
   const [moves, setMoves] = useState(0)
   const [startAt, setStartAt] = useState<number | null>(null)
   const [timeMs, setTimeMs] = useState(0)
+  const recordedRef = useRef(false)
 
   useEffect(() => {
     const p = ICONS.slice(0, pairCount)
@@ -25,6 +33,7 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
     setMoves(0)
     setStartAt(Date.now())
     setTimeMs(0)
+    recordedRef.current = false
   }, [pairCount])
 
   useEffect(() => {
@@ -38,12 +47,13 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
     [matched.length, moves],
   )
 
+  const timeBudget = GRADE_TIME_MS[difficulty]
   const grade = useMemo(() => {
-    if (accuracy > 85 && timeMs < 45000) return "S"
-    if (accuracy > 70) return "A"
-    if (accuracy > 55) return "B"
+    if (accuracy >= 90 && timeMs < timeBudget) return "S"
+    if (accuracy >= 75 && timeMs < timeBudget * 1.5) return "A"
+    if (accuracy >= 60) return "B"
     return "C"
-  }, [accuracy, timeMs])
+  }, [accuracy, timeMs, timeBudget])
 
   const complete = deck.length > 0 && matched.length === deck.length
 
@@ -60,10 +70,12 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
       if (ok) {
         const all = [...matched, ...nextOpen]
         setMatched(all)
-        if (all.length === deck.length) {
+        if (all.length === deck.length && !recordedRef.current) {
+          recordedRef.current = true
+          const seconds = Math.ceil(timeMs / 1000)
           update(
             "win",
-            `Grid cleared in ${Math.ceil(timeMs / 1000)}s // ACC ${accuracy}% // GRADE ${grade}`,
+            `${quip("memory", "win")} // ${seconds}s · ACC ${accuracy}% · GRADE ${grade}`,
             {
               score: Math.max(1, 100 - moves),
               completionTimeMs: timeMs,
@@ -74,7 +86,7 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
           update("playing", "Pair locked.")
         }
       } else {
-        update("playing", "Mismatch. Pattern drift detected.")
+        update("playing", quip("memory", "lose"))
       }
       setOpen([])
     }, 600)
@@ -82,12 +94,13 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-3 gap-2 text-[10px] ps-mono tracking-[0.2em] text-white/75">
+      <div className="grid grid-cols-4 gap-2 text-[10px] ps-mono tracking-[0.2em] text-white/75">
         <p>MOVES {moves}</p>
         <p>TIME {Math.ceil(timeMs / 1000)}S</p>
         <p>ACC {accuracy}%</p>
+        <p className="text-right">PAIRS {matched.length / 2}/{pairCount}</p>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className={pairCount >= 8 ? "grid grid-cols-4 gap-2" : "grid grid-cols-4 gap-2"}>
         {deck.map((v, i) => (
           <ArcadeGameButton
             key={`${v}-${i}`}
@@ -98,8 +111,9 @@ export function MemoryMatchGame({ difficulty, update }: ArcadeGameComponentProps
         ))}
       </div>
       {complete && (
-        <div className="rounded-lg bg-black/50 px-3 py-2 ps-mono text-[10px] tracking-[0.2em] text-white/80">
-          COMPLETION {"//"} GRADE {grade} {"//"} {Math.ceil(timeMs / 1000)}S {"//"} ACC {accuracy}%
+        <div className="rounded-lg bg-black/50 px-3 py-2 space-y-1">
+          <p className="ps-mono text-[11px] tracking-[0.25em] text-white/85">GRID CLEARED · GRADE {grade}</p>
+          <p className="ps-mono text-[9px] tracking-[0.2em] text-white/60">{Math.ceil(timeMs / 1000)}S · {moves} MOVES · ACC {accuracy}% · {difficulty}</p>
         </div>
       )}
     </div>
