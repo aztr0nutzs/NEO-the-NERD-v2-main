@@ -31,6 +31,8 @@ import type {
   SavedResponse,
   ScreenId,
   VoiceParams,
+  ArcadeProgressionState,
+  GameId,
 } from "./types"
 import type { DeviceIdentityRecord } from "./network/types"
 import type {
@@ -71,6 +73,7 @@ import {
 import { DEFAULT_ENTITLEMENT_STATE } from "./entitlements/tiers"
 import { generateAssistantReply } from "@/lib/assistant/assistant-runtime"
 import { buildNetworkAssistantContext } from "@/lib/network/networkAssistantContext"
+import { applyGameProgression, createDefaultArcadeProgression } from "./game-progression"
 
 interface AppState {
   screen: ScreenId
@@ -179,6 +182,8 @@ interface AppState {
   acceptedGameInvite: string | null
   acceptGameInvite: (g: string) => void
   dismissGameInvite: () => void
+  arcadeProgression: ArcadeProgressionState
+  recordGameResult: (params: { game: GameId; result: "win" | "lose" | "draw"; difficulty: "EASY" | "ADAPTIVE" | "HARD"; score?: number; completionTimeMs?: number; reactionTimeMs?: number; streak?: number }) => void
 }
 
 const Ctx = createContext<AppState | null>(null)
@@ -378,6 +383,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [prankTrapsRecent, setPrankTrapsRecent] = useState<PrankTrap[]>([])
   const [trapIntent, setTrapIntent] = useState<TrapIntent | null>(null)
   const [prankChaosHistory, setPrankChaosHistory] = useState<ChaosHistoryEntry[]>([])
+  const [arcadeProgression, setArcadeProgression] = useState<ArcadeProgressionState>(createDefaultArcadeProgression())
 
   const avatarReactionIdRef = useRef(0)
   const skipNextPersist = useRef(false)
@@ -431,6 +437,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageFavorites,
       prankTrapsRecent,
       prankChaosHistory,
+      arcadeProgression,
       personalityId,
       recentVoiceIds,
       responses,
@@ -519,6 +526,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setPrankChaosHistory(stored.prankChaosHistory)
       chaosManager.hydrateHistory(stored.prankChaosHistory)
     }
+    if (stored.arcadeProgression) setArcadeProgression(stored.arcadeProgression)
   }, [])
 
   const recordSpeedTestStarted = useCallback((runId: string, provider: string) => {
@@ -1007,6 +1015,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     })
   }, [hydrated, refreshCapabilities])
 
+  const recordGameResult = useCallback((params: { game: GameId; result: "win" | "lose" | "draw"; difficulty: "EASY" | "ADAPTIVE" | "HARD"; score?: number; completionTimeMs?: number; reactionTimeMs?: number; streak?: number }) => {
+    setArcadeProgression((prev) => applyGameProgression(prev, params))
+  }, [])
+
   const acceptGameInvite = useCallback((g: string) => {
     setAcceptedGameInvite(g)
     setNotificationOpen(false)
@@ -1076,6 +1088,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             parsed.prankTrapsHistory ?? prankTrapsRecent,
           prankChaosHistory:
             parsed.prankChaosHistory ?? prankChaosHistory,
+          arcadeProgression:
+            parsed.arcadeProgression ?? arcadeProgression,
           messages:
             parsed.settings?.memoryEnabled === false
               ? []
@@ -1105,6 +1119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankMessageFavorites,
       prankTrapsRecent,
       prankChaosHistory,
+      arcadeProgression,
       recentVoiceIds,
       responses,
       voiceFavoriteIds,
@@ -1149,6 +1164,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     chaosManager.cancel()
     chaosManager.clearHistory()
     setPrankChaosHistory([])
+    setArcadeProgression(createDefaultArcadeProgression())
   }, [setPersonalityId])
 
   const value = useMemo<AppState>(
@@ -1181,6 +1197,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       speedTestHistory, recordSpeedTestStarted, recordSpeedTestResult, clearSpeedTestHistory,
       notificationOpen, setNotificationOpen,
       acceptedGameInvite, acceptGameInvite, dismissGameInvite,
+      arcadeProgression, recordGameResult,
       prankSoundFavoriteIds, recentPrankSoundIds,
       togglePrankSoundFavorite, recordPrankSoundPlay,
       prankMessageHistory, prankMessageFavorites,
@@ -1223,6 +1240,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prankTrapsRecent, syncPrankTrapsRecent,
       trapIntent,
       prankChaosHistory,
+      arcadeProgression,
     ],
   )
 

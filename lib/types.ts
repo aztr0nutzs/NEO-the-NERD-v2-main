@@ -166,6 +166,7 @@ export interface PersistedAppState {
   prankMessageHistory?: PrankMessageRecord[]
   prankTrapsHistory?: PrankTrap[]
   prankChaosHistory?: ChaosHistoryEntry[]
+  arcadeProgression?: ArcadeProgressionState
 }
 
 export interface PrankMessageRecord {
@@ -295,6 +296,46 @@ export type GameId =
   | "rapidfire"
   | "wyr"
 
+
+export interface GameProgressionStats {
+  playCount: number
+  wins: number
+  losses: number
+  draws: number
+  bestScore: number
+  bestStreak: number
+  fastestCompletionMs: number | null
+  averageReactionMs: number | null
+  reactionSamples: number
+  lastPlayedAt: number | null
+}
+
+export interface ArcadeAchievement {
+  id: string
+  unlockedAt: number
+}
+
+export interface DailyChallengeRecord {
+  dayKey: string
+  gameId: GameId
+  completed: boolean
+  completedAt?: number
+}
+
+export interface ArcadeProgressionState {
+  totalGamesPlayed: number
+  totalWins: number
+  totalLosses: number
+  totalDraws: number
+  perGame: Record<GameId, GameProgressionStats>
+  arcadeXp: number
+  arcadeLevel: number
+  currentWinStreak: number
+  longestWinStreak: number
+  achievements: ArcadeAchievement[]
+  dailyChallengeHistory: DailyChallengeRecord[]
+}
+
 export interface GameDef {
   id: GameId
   title: string
@@ -304,6 +345,13 @@ export interface GameDef {
   multiplayer: "You vs Robot" | "Turn-based" | "Quick duel" | "Party mode"
   accent: "cyan" | "purple" | "pink" | "green" | "orange"
   playable?: boolean
+  category: "strategy" | "reflex" | "puzzle" | "trivia" | "party"
+  skillType: "logic" | "memory" | "reaction" | "language" | "social"
+  supportsScore: boolean
+  supportsTimer: boolean
+  supportsStreakMode: boolean
+  recommendedDifficulty: "EASY" | "ADAPTIVE" | "HARD"
+  unlockRequirement?: { minLevel?: number; achievementId?: string }
 }
 
 export interface GameSessionState {
