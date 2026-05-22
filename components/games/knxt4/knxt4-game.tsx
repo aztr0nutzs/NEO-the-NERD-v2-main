@@ -18,12 +18,12 @@ import {
 } from "./knxt4-core"
 import type { Board, ModeDef, ModeId, Player, PowerId } from "./knxt4-core"
 import { Knxt4Board } from "./knxt4-board"
-import type { ArcadeGameComponentProps, Difficulty } from "../types"
+import { useApp } from "@/lib/store"
 
 type Phase = "hub" | "play" | "over"
 type EndReason = "win" | "lose" | "draw"
 
-const difficultyToMode = (d: Difficulty): ModeId =>
+const difficultyToMode = (d: "EASY" | "ADAPTIVE" | "HARD"): ModeId =>
   d === "EASY" ? "quick" : d === "HARD" ? "challenge" : "classic"
 
 interface PowerState {
@@ -60,7 +60,9 @@ function fmtTime(seconds: number) {
   return `${m}:${pad2(s)}`
 }
 
-export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
+export function Knxt4Game({ onClose }: { onClose?: () => void }) {
+  const { settings, recordGameResult, playAvatarReaction } = useApp()
+  const difficulty = settings.gameDifficulty
   const [phase, setPhase] = useState<Phase>("hub")
   const [mode, setMode] = useState<ModeDef>(
     () => MODES.find((m) => m.id === difficultyToMode(difficulty)) ?? MODES[0],
@@ -143,29 +145,26 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
       setPhase("over")
       if (result === "win") setScores((s) => ({ ...s, p1: s.p1 + 1 }))
       else if (result === "lose") setScores((s) => ({ ...s, p2: s.p2 + 1 }))
-      const aiName = AI_LEVELS[mode.ai].name
-      const summary =
-        result === "win"
-          ? `REACTOR LOCKED · BEAT ${aiName} · ${moves + 1} MOVES`
-          : result === "lose"
-            ? `${aiName} WINS THE CORE · ${moves + 1} MOVES`
-            : `GRID FULL · STANDOFF · ${moves + 1} MOVES`
       const score =
         result === "win"
           ? Math.max(10, 240 - moves * 5 - Math.floor(elapsed / 2000))
           : result === "draw"
             ? 25
             : 5
-      update(result, summary, {
-        score: result === "win" ? score : 0,
-        neoScore: result === "lose" ? 1 : 0,
+      if (result === "win") playAvatarReaction("ecstatic")
+      else if (result === "lose") playAvatarReaction("angry")
+      else playAvatarReaction("surprised")
+      recordGameResult({
+        game: "knxt4",
+        result,
+        difficulty,
+        score: result === "win" ? score : undefined,
         completionTimeMs: elapsed,
-        forceProgression: true,
       })
       const w = findWin(finalBoard)
       if (w) setWinCells(w.cells)
     },
-    [mode.ai, moves, startedAt, update],
+    [difficulty, moves, playAvatarReaction, recordGameResult, startedAt],
   )
 
   /* TIMED countdown */
@@ -361,9 +360,16 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
             <b>N.E.O.</b>
             <span>/ MODES</span>
           </div>
-          <span className="k-chip">
-            <span className="k-chip__dot" />0{MODES.length} MODES
-          </span>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <span className="k-chip">
+              <span className="k-chip__dot" />0{MODES.length} MODES
+            </span>
+            {onClose && (
+              <button type="button" className="k-chip k-chip--mag" onClick={onClose} aria-label="Exit">
+                <span className="k-chip__dot" />EXIT
+              </button>
+            )}
+          </div>
         </div>
 
         {/* CLASSIC hero card */}
@@ -401,10 +407,17 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
           <b>N.E.O.</b>
           <span>CONNECT</span>
         </div>
-        <span className={`k-chip k-chip--${MODE_BADGE[mode.id].tone}`}>
-          <span className="k-chip__dot" />
-          {mode.name}
-        </span>
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <span className={`k-chip k-chip--${MODE_BADGE[mode.id].tone}`}>
+            <span className="k-chip__dot" />
+            {mode.name}
+          </span>
+          {onClose && (
+            <button type="button" className="k-chip k-chip--mag" onClick={onClose} aria-label="Exit">
+              <span className="k-chip__dot" />EXIT
+            </button>
+          )}
+        </div>
       </div>
 
       {/* HUD */}

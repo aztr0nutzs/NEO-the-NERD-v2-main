@@ -9,6 +9,7 @@ import { GameCard } from "../game-card"
 import { TicTacToeGame } from "../games/tic-tac-toe"
 import { RockPaperScissorsGame } from "../games/rock-paper-scissors"
 import { ArcadeGame } from "../games/arcade-games"
+import { Knxt4Game } from "../games/knxt4/knxt4-game"
 import { DailyChallengeCard } from "../games/daily-challenge-card"
 import { AchievementsStrip } from "../games/achievements-strip"
 import { CelebrationToast } from "../games/celebration-toast"
@@ -222,7 +223,8 @@ export function GamesScreen() {
       {/* Active game */}
       {active === "tictactoe" && <TicTacToeGame onClose={() => setActive(null)} />}
       {active === "rps" && <RockPaperScissorsGame onClose={() => setActive(null)} />}
-      {active && active !== "tictactoe" && active !== "rps" && (
+      {active === "knxt4" && <Knxt4Game onClose={() => setActive(null)} />}
+      {active && active !== "tictactoe" && active !== "rps" && active !== "knxt4" && (
         <ArcadeGame
           game={active}
           difficulty={settings.gameDifficulty}

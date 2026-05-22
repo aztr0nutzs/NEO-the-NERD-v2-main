@@ -22,7 +22,16 @@
       "Bash(unzip -l \"Knxt 4.zip\")",
       "Bash(mkdir -p /tmp/knxt4-extract)",
       "Bash(unzip -q \"Knxt 4.zip\" -d /tmp/knxt4-extract)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/01-lab-reactor-v7.png /tmp/sshot1.png)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/02-modes.png /tmp/sshot2.png)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/01-hub-hero.png /tmp/sshot3.png)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/01-game-enhanced.png /tmp/sshot4.png)",
+      "Read(//c/tmp/**)",
+      "Bash(cp /tmp/sshot1.png ./screenshot-reactor.png)",
+      "Bash(cp /tmp/sshot2.png ./screenshot-modes.png)",
+      "Bash(cp /tmp/sshot3.png ./screenshot-hub.png)",
+      "Bash(cp /tmp/sshot4.png ./screenshot-game.png)"
     ]
   }
 }
