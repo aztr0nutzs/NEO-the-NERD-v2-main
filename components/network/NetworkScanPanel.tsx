@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Radar, Square, Clock, Zap, Scale, Search } from "lucide-react";
+import { Radar, Square, Clock, Zap, Scale, Search, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { NetworkStatus, ScanComparisonSummary, ScanCompletionResult, ScanMode } from "@/lib/network/types";
 
@@ -12,7 +11,10 @@ interface NetworkScanPanelProps {
   onModeChange: (mode: ScanMode) => void;
   onStartScan: () => void;
   onStopScan: () => void;
+  onRequestPermissions?: () => void;
   isDemoMode: boolean;
+  permissionDenied?: boolean;
+  isRequestingPermissions?: boolean;
   lastScanDelta?: ScanComparisonSummary | null;
   lastScanResult?: ScanCompletionResult | null;
 }
@@ -45,7 +47,10 @@ export function NetworkScanPanel({
   onModeChange,
   onStartScan,
   onStopScan,
+  onRequestPermissions,
   isDemoMode,
+  permissionDenied = false,
+  isRequestingPermissions = false,
   lastScanDelta,
   lastScanResult,
 }: NetworkScanPanelProps) {
@@ -141,7 +146,16 @@ export function NetworkScanPanel({
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        {!isScanning ? (
+        {!isScanning && permissionDenied && !isDemoMode ? (
+          <Button
+            onClick={onRequestPermissions}
+            disabled={isRequestingPermissions}
+            className="flex-1 border border-yellow-500/50 bg-yellow-500/15 font-mono text-sm font-bold tracking-wider text-yellow-300 transition-all hover:bg-yellow-500/25"
+          >
+            <Wifi className="mr-2 h-4 w-4" />
+            {isRequestingPermissions ? "REQUESTING_PERMISSION..." : "Tap to grant Wi-Fi/Location permission"}
+          </Button>
+        ) : !isScanning ? (
           <Button
             onClick={onStartScan}
             className="flex-1 border border-cyan-500/50 bg-cyan-500/20 font-mono text-sm font-bold uppercase tracking-wider text-cyan-400 transition-all hover:bg-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/20"
@@ -160,6 +174,12 @@ export function NetworkScanPanel({
           </Button>
         )}
       </div>
+
+      {!isScanning && permissionDenied && !isDemoMode && (
+        <p className="font-mono text-[10px] leading-relaxed text-yellow-100/80">
+          Required so NEO can read your local network&apos;s gateway and Wi-Fi peers.
+        </p>
+      )}
 
       {/* Last scan failure indicator — only when no scan is in progress */}
       {!isScanning && scanFailed && lastScanResult?.failureReason && (

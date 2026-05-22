@@ -9,14 +9,18 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
@@ -51,10 +55,60 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-@CapacitorPlugin(name = "NeoNetwork")
+@CapacitorPlugin(name = "NeoNetwork", permissions = {
+  @Permission(alias = "location", strings = {
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.ACCESS_COARSE_LOCATION"
+  }),
+  @Permission(alias = "wifi", strings = {
+    "android.permission.NEARBY_WIFI_DEVICES"
+  })
+})
 public class NeoNetworkPlugin extends Plugin {
   private static final String TAG = "NeoNetworkPlugin";
   private static final String MONITOR_WORK_NAME = "neo_network_monitoring_periodic";
+
+  @Override
+  @PluginMethod
+  public void checkPermissions(PluginCall call) {
+    resolveNetworkPermissions(call);
+  }
+
+  @Override
+  @PluginMethod
+  public void requestPermissions(PluginCall call) {
+    List<String> aliases = new ArrayList<>();
+    if (getPermissionState("location") != PermissionState.GRANTED) {
+      aliases.add("location");
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && getPermissionState("wifi") != PermissionState.GRANTED) {
+      aliases.add("wifi");
+    }
+
+    if (aliases.isEmpty()) {
+      resolveNetworkPermissions(call);
+      return;
+    }
+
+    requestPermissionForAliases(aliases.toArray(new String[0]), call, "networkPermissionCallback");
+  }
+
+  @PermissionCallback
+  private void networkPermissionCallback(PluginCall call) {
+    resolveNetworkPermissions(call);
+  }
+
+  private void resolveNetworkPermissions(PluginCall call) {
+    JSObject result = new JSObject();
+    result.put("location", getPermissionState("location").toString());
+    result.put(
+      "wifi",
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        ? getPermissionState("wifi").toString()
+        : PermissionState.GRANTED.toString()
+    );
+    call.resolve(result);
+  }
 
   @PluginMethod
   public void configureBackgroundMonitoring(PluginCall call) {
@@ -244,9 +298,17 @@ public class NeoNetworkPlugin extends Plugin {
     // SSDP is independent of the TCP scan and operates within whatever
     // budget remains; if exceeded we skip it rather than running over.
     if (profile.useSsdp && System.currentTimeMillis() < scanDeadlineMs) {
-      long ssdpBudget = Math.min(profile.ssdpBudgetMs, scanDeadlineMs - System.currentTimeMillis());
-      for (JSObject host : discoverSsdpDevices(localIp, prefixLength, arpCache, profile, ssdpBudget)) {
-        mergeHost(discoveredByIp, host);
+      WifiManager.MulticastLock multicastLock = null;
+      try {
+        multicastLock = acquireSsdpMulticastLock();
+        long ssdpBudget = Math.min(profile.ssdpBudgetMs, scanDeadlineMs - System.currentTimeMillis());
+        for (JSObject host : discoverSsdpDevices(localIp, prefixLength, arpCache, profile, ssdpBudget)) {
+          mergeHost(discoveredByIp, host);
+        }
+      } finally {
+        if (multicastLock != null && multicastLock.isHeld()) {
+          multicastLock.release();
+        }
       }
     }
 
@@ -716,6 +778,20 @@ public class NeoNetworkPlugin extends Plugin {
     }
 
     return hosts;
+  }
+
+  private WifiManager.MulticastLock acquireSsdpMulticastLock() {
+    try {
+      WifiManager wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+      if (wifiManager == null) return null;
+      WifiManager.MulticastLock lock = wifiManager.createMulticastLock("neo-ssdp");
+      lock.setReferenceCounted(false);
+      lock.acquire();
+      return lock;
+    } catch (Exception ex) {
+      Log.d(TAG, "SSDP multicast lock unavailable: " + ex.getMessage());
+      return null;
+    }
   }
 
   private JSObject buildSsdpHost(String ip, String responseText, Map<String, String> arpCache, boolean resolveHostnameEnabled) {
