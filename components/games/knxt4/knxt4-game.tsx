@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import "./knxt4-styles.css"
 import {
   AI_LEVELS,
@@ -35,6 +35,17 @@ interface PowerState {
 
 const INITIAL_POWERS: PowerState = { energy: 6, armed: null, doublePending: false, peekCol: null }
 
+function TimerPill({ seconds }: { seconds: number }) {
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  const low = seconds <= 10
+  return (
+    <span className={`knxt4-timer ${low ? "knxt4-timer--low" : "knxt4-timer--ok"}`}>
+      {m}:{s.toString().padStart(2, "0")}
+    </span>
+  )
+}
+
 export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
   const [phase, setPhase] = useState<Phase>("hub")
   const [mode, setMode] = useState<ModeDef>(() => {
@@ -51,9 +62,12 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
   const [status, setStatus] = useState("YOUR TURN — DROP A CHIP")
   const [powers, setPowers] = useState<PowerState>(INITIAL_POWERS)
   const [toast, setToast] = useState<string | null>(null)
+  // Per-side countdown for TIMED mode. null in untimed modes.
+  const [timeLeft, setTimeLeft] = useState<{ you: number; neo: number } | null>(null)
   const recordedRef = useRef(false)
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tickTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const clearTimers = useCallback(() => {
     if (aiTimerRef.current) {
@@ -63,6 +77,10 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
     if (toastTimerRef.current) {
       clearTimeout(toastTimerRef.current)
       toastTimerRef.current = null
+    }
+    if (tickTimerRef.current) {
+      clearInterval(tickTimerRef.current)
+      tickTimerRef.current = null
     }
   }, [])
 
@@ -86,6 +104,12 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
     setStatus(`MODE: ${m.name} · AI ${AI_LEVELS[m.ai].name}`)
     setPowers(INITIAL_POWERS)
     setToast(null)
+    if (m.timerMs) {
+      const secs = Math.floor(m.timerMs / 1000)
+      setTimeLeft({ you: secs, neo: secs })
+    } else {
+      setTimeLeft(null)
+    }
     recordedRef.current = false
     setPhase("play")
   }, [clearTimers])
@@ -123,6 +147,34 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
     },
     [mode.ai, moves, startedAt, update],
   )
+
+  // Per-side countdown tick (TIMED mode only).
+  const timed = timeLeft !== null
+  useEffect(() => {
+    if (phase !== "play" || endReason !== null || !timed) return
+    if (tickTimerRef.current) clearInterval(tickTimerRef.current)
+    tickTimerRef.current = setInterval(() => {
+      setTimeLeft((tl) => {
+        if (!tl) return tl
+        if (turn === 1) return { ...tl, you: Math.max(0, tl.you - 1) }
+        return { ...tl, neo: Math.max(0, tl.neo - 1) }
+      })
+    }, 1000)
+    return () => {
+      if (tickTimerRef.current) {
+        clearInterval(tickTimerRef.current)
+        tickTimerRef.current = null
+      }
+    }
+  }, [phase, turn, endReason, timed])
+
+  // Timeout end-of-match: whoever hits 0 first loses.
+  useEffect(() => {
+    if (phase !== "play" || endReason !== null || !timeLeft) return
+    if (timeLeft.you === 0) finishMatch("lose", board)
+    else if (timeLeft.neo === 0) finishMatch("win", board)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, phase, endReason])
 
   // AI turn
   useEffect(() => {
@@ -207,24 +259,40 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
         return
       }
       if (id === "bomb") {
-        // bomb: vaporize next click — for compact integration, take first enemy token if any.
-        let found: { r: number; c: number } | null = null
-        for (let r = 0; r < ROWS && !found; r++) {
-          for (let c = 0; c < COLS && !found; c++) {
-            if (board[r][c] === 2) found = { r, c }
+        // Toggle bomb-arm. Energy is not spent until a target is picked.
+        let hasEnemy = false
+        for (let r = 0; r < ROWS && !hasEnemy; r++) {
+          for (let c = 0; c < COLS && !hasEnemy; c++) {
+            if (board[r][c] === 2) hasEnemy = true
           }
         }
-        if (!found) {
-          flash("NO TARGET TOKEN")
+        if (!hasEnemy) {
+          flash("NO ENEMY TOKENS")
           return
         }
-        const nb = vaporize(board, found.r, found.c)
-        setBoard(nb)
-        setPowers((p) => ({ ...p, energy: p.energy - cost }))
-        flash("TOKEN VAPORIZED")
+        setPowers((p) => ({ ...p, armed: p.armed === "bomb" ? null : "bomb" }))
+        flash(powers.armed === "bomb" ? "BOMB DISARMED" : "BOMB ARMED · PICK TARGET")
       }
     },
-    [board, flash, mode.ai, phase, powers.energy, turn],
+    [board, flash, mode.ai, phase, powers.armed, powers.energy, turn],
+  )
+
+  const onTokenTarget = useCallback(
+    (r: number, c: number) => {
+      if (phase !== "play" || turn !== 1) return
+      if (powers.armed !== "bomb") return
+      if (board[r][c] !== 2) return
+      const cost = POWERS.bomb.cost
+      if (powers.energy < cost) {
+        flash("LOW ENERGY")
+        return
+      }
+      const nb = vaporize(board, r, c)
+      setBoard(nb)
+      setPowers((p) => ({ ...p, energy: p.energy - cost, armed: null }))
+      flash("TOKEN VAPORIZED")
+    },
+    [board, flash, phase, powers.armed, powers.energy, turn],
   )
 
   const renderHub = () => (
@@ -263,6 +331,7 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
         <div className="knxt4-side">
           {sideDot(1)}
           <span>YOU</span>
+          {timeLeft && <TimerPill seconds={timeLeft.you} />}
         </div>
         <div className="knxt4-status">
           {endReason
@@ -271,9 +340,12 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
               : endReason === "lose"
                 ? "CORE BREACHED"
                 : "STANDOFF"
-            : status}
+            : powers.armed === "bomb"
+              ? "BOMB ARMED · PICK AN ENEMY TOKEN"
+              : status}
         </div>
         <div className="knxt4-side knxt4-side--right">
+          {timeLeft && <TimerPill seconds={timeLeft.neo} />}
           <span>{AI_LEVELS[mode.ai].name}</span>
           {sideDot(2)}
         </div>
@@ -288,6 +360,8 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
         winCells={winCells}
         disabled={phase !== "play" || turn !== 1 || endReason !== null}
         peekCol={powers.peekCol}
+        bombMode={powers.armed === "bomb" && turn === 1 && endReason === null}
+        onTokenTarget={onTokenTarget}
       />
 
       <div className="knxt4-powers">
@@ -342,11 +416,5 @@ export function Knxt4Game({ difficulty, update }: ArcadeGameComponentProps) {
     </div>
   )
 
-  return useMemo(
-    () => (
-      <div className="knxt4-root">{phase === "hub" ? renderHub() : renderPlay()}</div>
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [phase, board, turn, endReason, hotCol, powers, status, toast, winCells, moves],
-  )
+  return <div className="knxt4-root">{phase === "hub" ? renderHub() : renderPlay()}</div>
 }

@@ -249,3 +249,42 @@
   letter-spacing: 0.25em;
   color: rgba(255, 230, 0, 0.85);
 }
+
+/* Bomb click-to-pick targeting */
+.knxt4-root .knxt4-socket--bomb {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 122, 0, 0.85);
+  background: transparent;
+  padding: 0;
+  cursor: crosshair;
+  box-shadow: 0 0 10px rgba(255, 122, 0, 0.65);
+  animation: knxt4-bomb-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes knxt4-bomb-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 122, 0, 0.45); }
+  50% { box-shadow: 0 0 16px rgba(255, 122, 0, 0.95); }
+}
+
+/* Timer pill (TIMED mode) */
+.knxt4-root .knxt4-timer {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.knxt4-root .knxt4-timer--low {
+  color: #ff7a00;
+  box-shadow: inset 0 0 0 1px rgba(255, 122, 0, 0.6);
+}
+
+.knxt4-root .knxt4-timer--ok {
+  color: #b5f8ff;
+  box-shadow: inset 0 0 0 1px rgba(0, 232, 255, 0.5);
+}

@@ -68,6 +68,8 @@ interface BoardProps {
   winCells: { r: number; c: number }[]
   disabled: boolean
   peekCol: number | null
+  bombMode?: boolean
+  onTokenTarget?: (r: number, c: number) => void
 }
 
 export function Knxt4Board({
@@ -79,6 +81,8 @@ export function Knxt4Board({
   winCells,
   disabled,
   peekCol,
+  bombMode = false,
+  onTokenTarget,
 }: BoardProps) {
   const validCols = useMemo(() => {
     const out: number[] = []
@@ -121,16 +125,17 @@ export function Knxt4Board({
           const isValid = validCols.includes(c)
           const isHot = c === hotCol && !disabled
           const isPeek = peekCol === c
+          const arrowDisabled = disabled || !isValid || bombMode
           return (
             <button
               type="button"
               key={c}
-              disabled={disabled || !isValid}
-              onMouseEnter={() => !disabled && isValid && setHotCol(c)}
-              onMouseLeave={() => !disabled && setHotCol(null)}
-              onFocus={() => !disabled && isValid && setHotCol(c)}
-              onBlur={() => !disabled && setHotCol(null)}
-              onClick={() => !disabled && isValid && onDrop(c)}
+              disabled={arrowDisabled}
+              onMouseEnter={() => !arrowDisabled && setHotCol(c)}
+              onMouseLeave={() => !arrowDisabled && setHotCol(null)}
+              onFocus={() => !arrowDisabled && setHotCol(c)}
+              onBlur={() => !arrowDisabled && setHotCol(null)}
+              onClick={() => !arrowDisabled && onDrop(c)}
               className="knxt4-arrow"
               style={{
                 color: isValid ? portalColor : "rgba(255,255,255,0.18)",
@@ -160,13 +165,25 @@ export function Knxt4Board({
           {board.flatMap((row, r) =>
             row.map((cell, c) => {
               const isWin = cell !== 0 && winSet.has(`${r},${c}`)
-              const showGhost = !disabled && hotCol === c && dropRows[c] === r && cell === 0
+              const showGhost = !disabled && !bombMode && hotCol === c && dropRows[c] === r && cell === 0
+              const isBombTarget = bombMode && cell === 2 && !!onTokenTarget
               return (
                 <div className="knxt4-cell" key={`${r}-${c}`}>
-                  <div className="knxt4-socket">
-                    {cell !== 0 && <Token player={cell as Player} win={isWin} />}
-                    {cell === 0 && showGhost && <Token player={curPlayer} ghost />}
-                  </div>
+                  {isBombTarget ? (
+                    <button
+                      type="button"
+                      className="knxt4-socket knxt4-socket--bomb"
+                      onClick={() => onTokenTarget?.(r, c)}
+                      aria-label={`Vaporize token at row ${r + 1}, column ${c + 1}`}
+                    >
+                      <Token player={cell as Player} win={isWin} />
+                    </button>
+                  ) : (
+                    <div className="knxt4-socket">
+                      {cell !== 0 && <Token player={cell as Player} win={isWin} />}
+                      {cell === 0 && showGhost && <Token player={curPlayer} ghost />}
+                    </div>
+                  )}
                 </div>
               )
             }),
