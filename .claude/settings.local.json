@@ -16,7 +16,13 @@
       "Bash(git checkout *)",
       "Bash(git stash *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git commit *)",
+      "Bash(git reset *)",
+      "Bash(unzip -l \"Knxt 4.zip\")",
+      "Bash(mkdir -p /tmp/knxt4-extract)",
+      "Bash(unzip -q \"Knxt 4.zip\" -d /tmp/knxt4-extract)",
+      "Read(//tmp/**)"
     ]
   }
 }

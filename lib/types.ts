@@ -295,6 +295,13 @@ export type GameId =
   | "emoji"
   | "rapidfire"
   | "wyr"
+  | "codebreaker"
+  | "signal"
+  | "firewall"
+  | "heist"
+  | "dodge"
+  | "circuit"
+  | "knxt4"
 
 
 export interface GameProgressionStats {
@@ -322,6 +329,27 @@ export interface DailyChallengeRecord {
   completedAt?: number
 }
 
+export type DailyChallengeMetric =
+  | "wins"
+  | "playCount"
+  | "bestScore"
+  | "bestStreak"
+  | "fastestCompletionMs"
+  | "averageReactionMs"
+
+export interface DailyChallenge {
+  dayKey: string
+  gameId: GameId
+  label: string
+  metric: DailyChallengeMetric
+  target: number
+  comparator: "gte" | "lte"
+  xpReward: number
+  completed: boolean
+  completedAt?: number
+  baselineValue: number // metric value when the challenge was created — completion is measured against this
+}
+
 export interface ArcadeProgressionState {
   totalGamesPlayed: number
   totalWins: number
@@ -334,6 +362,7 @@ export interface ArcadeProgressionState {
   longestWinStreak: number
   achievements: ArcadeAchievement[]
   dailyChallengeHistory: DailyChallengeRecord[]
+  dailyChallenge: DailyChallenge | null
 }
 
 export interface GameDef {

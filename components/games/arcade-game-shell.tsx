@@ -16,6 +16,13 @@ const ACCENT: Record<GameId, "cyan" | "purple" | "pink" | "green" | "orange"> = 
   emoji: "pink",
   rapidfire: "orange",
   wyr: "green",
+  codebreaker: "green",
+  signal: "cyan",
+  firewall: "pink",
+  heist: "purple",
+  dodge: "orange",
+  circuit: "green",
+  knxt4: "cyan",
 }
 
 const HEX = {
@@ -37,6 +44,13 @@ const TITLES: Record<GameId, string> = {
   emoji: "EMOJI_DECODE",
   rapidfire: "RAPID_FIRE",
   wyr: "WOULD_YOU_RATHER",
+  codebreaker: "NEON_CODEBREAKER",
+  signal: "SIGNAL_SEQUENCE",
+  firewall: "FIREWALL_BREACH",
+  heist: "CYBER_HEIST",
+  dodge: "DRONE_DODGE",
+  circuit: "CIRCUIT_BUILDER",
+  knxt4: "KNXT_4 // N.E.O.C4",
 }
 
 export function ArcadeGameShell({ game, session, onReset, onClose, children }: {

@@ -12,6 +12,13 @@ import { WordScrambleGame } from "./word-scramble"
 import { EmojiDecodeGame } from "./emoji-decode"
 import { RapidFireGame } from "./rapid-fire"
 import { WouldYouRatherGame } from "./would-you-rather"
+import { NeonCodebreakerGame } from "./neon-codebreaker"
+import { SignalSequenceGame } from "./signal-sequence"
+import { FirewallBreachGame } from "./firewall-breach"
+import { CyberHeistGame } from "./cyber-heist"
+import { DroneDodgeGame } from "./drone-dodge"
+import { CircuitBuilderGame } from "./circuit-builder"
+import { Knxt4Game } from "./knxt4/knxt4-game"
 import type { Difficulty, SessionResult, UpdatePayload } from "./types"
 
 const TRASH = ["NEO logs this for calibration. Mostly for comedy.", "Bold move. The arcade cabinet is judging respectfully.", "Your reflexes filed a support ticket."]
@@ -40,5 +47,12 @@ export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exc
     {game === "emoji" && <EmojiDecodeGame difficulty={difficulty} update={update} />}
     {game === "rapidfire" && <RapidFireGame difficulty={difficulty} update={update} />}
     {game === "wyr" && <WouldYouRatherGame difficulty={difficulty} update={update} />}
+    {game === "codebreaker" && <NeonCodebreakerGame difficulty={difficulty} update={update} />}
+    {game === "signal" && <SignalSequenceGame difficulty={difficulty} update={update} />}
+    {game === "firewall" && <FirewallBreachGame difficulty={difficulty} update={update} />}
+    {game === "heist" && <CyberHeistGame difficulty={difficulty} update={update} />}
+    {game === "dodge" && <DroneDodgeGame difficulty={difficulty} update={update} />}
+    {game === "circuit" && <CircuitBuilderGame difficulty={difficulty} update={update} />}
+    {game === "knxt4" && <Knxt4Game difficulty={difficulty} update={update} />}
   </ArcadeGameShell>
 }
