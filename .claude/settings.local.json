@@ -22,7 +22,28 @@
       "Bash(unzip -l \"Knxt 4.zip\")",
       "Bash(mkdir -p /tmp/knxt4-extract)",
       "Bash(unzip -q \"Knxt 4.zip\" -d /tmp/knxt4-extract)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/01-lab-reactor-v7.png /tmp/sshot1.png)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/02-modes.png /tmp/sshot2.png)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/01-hub-hero.png /tmp/sshot3.png)",
+      "Bash(cp /tmp/knxt4-extract/screenshots/01-game-enhanced.png /tmp/sshot4.png)",
+      "Read(//c/tmp/**)",
+      "Bash(cp /tmp/sshot1.png ./screenshot-reactor.png)",
+      "Bash(cp /tmp/sshot2.png ./screenshot-modes.png)",
+      "Bash(cp /tmp/sshot3.png ./screenshot-hub.png)",
+      "Bash(cp /tmp/sshot4.png ./screenshot-game.png)",
+      "Bash(npm -v)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Aztr0nutZs\\\\Desktop\\\\NEO-the-NERD-v2-main\\\\components\\\\games\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)",
+      "Bash(awk '{print $9, $5}')",
+      "Bash(xargs wc *)",
+      "Bash(awk '{print $9, \"-\", $5}')",
+      "Bash(awk '{print $9, \":\", $5}')",
+      "Bash(xargs ls *)",
+      "Bash(awk '$5 ~ /[0-9][0-9]M/ || $5 ~ /[5-9][0-9][0-9]K/ {print $9, $5}')",
+      "Bash(mkdir -p /tmp/knxt4_extract)",
+      "Bash(unzip -o \"Knxt 4.zip\" -d /tmp/knxt4_extract)",
+      "Bash(cygpath -w /tmp/knxt4_extract)"
     ]
   }
 }

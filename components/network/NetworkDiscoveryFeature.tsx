@@ -87,6 +87,7 @@ import { computeNextAutoScanAt, shouldRunAutoScan } from "@/lib/network/networkM
 import {
   configureAndroidBackgroundMonitoring,
   getAndroidBackgroundMonitoringStatus,
+  requestNetworkPermissions,
 } from "@/lib/network/native-network-bridge";
 import {
   calculateNetworkHealth,
@@ -123,6 +124,10 @@ const NetworkMap3D = dynamic(
     ssr: false,
   }
 );
+
+function isNetworkPermissionDeniedMessage(message: string | null | undefined): boolean {
+  return typeof message === "string" && /wi-fi\/location permission denied|network permission denied|permission denied/i.test(message);
+}
 
 export function NetworkDiscoveryFeature() {
   const {
@@ -173,6 +178,8 @@ export function NetworkDiscoveryFeature() {
   const [robotMessage, setRobotMessage] = useState<string | null>(null);
   const [diagnosticsRunning, setDiagnosticsRunning] = useState(false);
   const [latestDiagnostics, setLatestDiagnostics] = useState<DiagnosticProbeResult[]>([]);
+  const [networkPermissionDenied, setNetworkPermissionDenied] = useState(false);
+  const [requestingNetworkPermissions, setRequestingNetworkPermissions] = useState(false);
   const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
   const identityRecordsRef = useRef(networkDeviceIdentities);
   const networkEventsRef = useRef(networkEvents);
@@ -624,6 +631,7 @@ export function NetworkDiscoveryFeature() {
         const failureReason =
           latestResultForBranches.failureReason ??
           "Native local discovery did not return a result.";
+        setNetworkPermissionDenied(isNetworkPermissionDeniedMessage(failureReason));
         const failureEvent = createScanFailedEvent(scanId, latestResultForBranches.scanMode, failureReason);
         appendEvents([failureEvent]);
         appendAlerts([
@@ -660,6 +668,7 @@ export function NetworkDiscoveryFeature() {
 
       // COMPLETE — real success path. Apply device list updates, diff events,
       // scan history, health snapshot, and notification alerts.
+      setNetworkPermissionDenied(false);
       networkAdapter.getNetworkStatus().then((next) => {
         if (cancelled) return;
         appendEvents(compareNetworkContext(previousNetworkStatusRef.current, next));
@@ -819,6 +828,7 @@ export function NetworkDiscoveryFeature() {
   // Handlers
   const handleStartScan = useCallback(async () => {
     try {
+      setNetworkPermissionDenied(false);
       playAvatarReaction("thinking");
       const scanId = `scan-${Date.now()}`;
       currentScanIdRef.current = scanId;
@@ -844,6 +854,7 @@ export function NetworkDiscoveryFeature() {
         error instanceof Error && error.message
           ? error.message
           : "Live scan unavailable in current runtime.";
+      setNetworkPermissionDenied(isNetworkPermissionDeniedMessage(failureReason));
       const failedEvent = createScanFailedEvent(scanId, selectedMode, failureReason);
       appendEvents([failedEvent]);
       appendAlerts([
@@ -883,6 +894,18 @@ export function NetworkDiscoveryFeature() {
       playAvatarReaction("angry");
     }
   }, [appendAlerts, appendEvents, playAvatarReaction, selectedMode, setNetworkMonitorState]);
+
+  const handleRequestNetworkPermissions = useCallback(async () => {
+    setRequestingNetworkPermissions(true);
+    try {
+      const granted = await requestNetworkPermissions();
+      setNetworkPermissionDenied(!granted);
+    } catch {
+      setNetworkPermissionDenied(true);
+    } finally {
+      setRequestingNetworkPermissions(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!settings) return;
@@ -1536,7 +1559,10 @@ export function NetworkDiscoveryFeature() {
                   onModeChange={setSelectedMode}
                   onStartScan={handleStartScan}
                   onStopScan={handleStopScan}
+                  onRequestPermissions={handleRequestNetworkPermissions}
                   isDemoMode={isDemoMode}
+                  permissionDenied={networkPermissionDenied}
+                  isRequestingPermissions={requestingNetworkPermissions}
                   lastScanDelta={lastNetworkScanDelta}
                   lastScanResult={lastScanCompletion}
                 />

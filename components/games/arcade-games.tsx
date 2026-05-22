@@ -18,14 +18,13 @@ import { FirewallBreachGame } from "./firewall-breach"
 import { CyberHeistGame } from "./cyber-heist"
 import { DroneDodgeGame } from "./drone-dodge"
 import { CircuitBuilderGame } from "./circuit-builder"
-import { Knxt4Game } from "./knxt4/knxt4-game"
 import type { Difficulty, SessionResult, UpdatePayload } from "./types"
 
 const TRASH = ["NEO logs this for calibration. Mostly for comedy.", "Bold move. The arcade cabinet is judging respectfully.", "Your reflexes filed a support ticket."]
 const trash = (e: boolean) => (e ? ` ${TRASH[Math.floor(Math.random() * TRASH.length)]}` : "")
 const makeSession = (game: GameId): GameSessionState => ({ activeGame: game, score: { you: 0, neo: 0 }, round: 1, result: "idle", robotResponse: "NEO is waiting. Begin the round." })
 
-export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exclude<GameId, "tictactoe" | "rps">; difficulty: Difficulty; trashTalk: boolean; onClose: () => void }) {
+export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exclude<GameId, "tictactoe" | "rps" | "knxt4">; difficulty: Difficulty; trashTalk: boolean; onClose: () => void }) {
   const [session, setSession] = useState<GameSessionState>(() => makeSession(game))
   const { playAvatarReaction, recordGameResult } = useApp()
   const update = (result: SessionResult, robotResponse: string, payload?: UpdatePayload) => {
@@ -53,6 +52,5 @@ export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exc
     {game === "heist" && <CyberHeistGame difficulty={difficulty} update={update} />}
     {game === "dodge" && <DroneDodgeGame difficulty={difficulty} update={update} />}
     {game === "circuit" && <CircuitBuilderGame difficulty={difficulty} update={update} />}
-    {game === "knxt4" && <Knxt4Game difficulty={difficulty} update={update} />}
   </ArcadeGameShell>
 }

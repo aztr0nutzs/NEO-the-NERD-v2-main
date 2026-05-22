@@ -50,7 +50,7 @@ const TITLES: Record<GameId, string> = {
   heist: "CYBER_HEIST",
   dodge: "DRONE_DODGE",
   circuit: "CIRCUIT_BUILDER",
-  knxt4: "KNXT_4 // N.E.O.C4",
+  knxt4: "KNXT_4",
 }
 
 export function ArcadeGameShell({ game, session, onReset, onClose, children }: {

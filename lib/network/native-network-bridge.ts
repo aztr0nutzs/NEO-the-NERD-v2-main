@@ -8,6 +8,8 @@ import type {
 } from "./native-network-types";
 
 type NeoNetworkPlugin = {
+  checkPermissions(): Promise<NativeNetworkPermissionStatus>;
+  requestPermissions(): Promise<NativeNetworkPermissionStatus>;
   getLocalNetworkContext(): Promise<NativeLocalNetworkContext>;
   scanLocalSubnet(options: NativeScanOptions): Promise<NativeScanResult>;
   getGatewayInfo(): Promise<NativeGatewayInfo>;
@@ -15,8 +17,16 @@ type NeoNetworkPlugin = {
   getBackgroundMonitoringStatus(): Promise<NativeBackgroundMonitoringStatus>;
 };
 
+type NativePermissionState = "prompt" | "prompt-with-rationale" | "granted" | "denied";
+
+type NativeNetworkPermissionStatus = {
+  location?: NativePermissionState;
+  wifi?: NativePermissionState;
+};
+
 const neoNetwork = registerPlugin<NeoNetworkPlugin>("NeoNetwork");
 const DEBUG_NATIVE_NETWORK = process.env.NEXT_PUBLIC_NEO_NETWORK_DIAGNOSTICS !== "false";
+let networkPermissionsRequested = false;
 
 function logNativeDiagnostic(event: string, details?: Record<string, unknown>): void {
   if (!DEBUG_NATIVE_NETWORK) return;
@@ -45,6 +55,36 @@ export async function isAndroidNativeNetworkPluginAvailable(): Promise<boolean> 
   }
 }
 
+function hasRequiredNetworkPermissions(status: NativeNetworkPermissionStatus | undefined | null): boolean {
+  if (!status) return false;
+  return status.location === "granted" && (status.wifi === undefined || status.wifi === "granted");
+}
+
+export async function requestNetworkPermissions(): Promise<boolean> {
+  if (!isAndroidNativeNetworkAvailable()) return true;
+
+  try {
+    const current = await neoNetwork.checkPermissions();
+    if (hasRequiredNetworkPermissions(current)) {
+      networkPermissionsRequested = true;
+      logNativeDiagnostic("permissions_already_granted", current as Record<string, unknown>);
+      return true;
+    }
+
+    const requested = await neoNetwork.requestPermissions();
+    const granted = hasRequiredNetworkPermissions(requested);
+    networkPermissionsRequested = granted;
+    logNativeDiagnostic(granted ? "permissions_granted" : "permissions_denied", requested as Record<string, unknown>);
+    return granted;
+  } catch (error) {
+    networkPermissionsRequested = false;
+    logNativeDiagnostic("permissions_request_failed", {
+      message: error instanceof Error ? error.message : "Unknown network permission request error",
+    });
+    return false;
+  }
+}
+
 export async function getLocalNetworkContext(): Promise<NativeLocalNetworkContext | null> {
   if (!isAndroidNativeNetworkAvailable()) return null;
   try {
@@ -65,6 +105,12 @@ export async function getLocalNetworkContext(): Promise<NativeLocalNetworkContex
 
 export async function scanLocalSubnet(options: NativeScanOptions): Promise<NativeScanResult | null> {
   if (!isAndroidNativeNetworkAvailable()) return null;
+  if (!networkPermissionsRequested) {
+    const granted = await requestNetworkPermissions();
+    if (!granted) {
+      throw new Error("Android Wi-Fi/location permission denied. Grant permission to scan the local network.");
+    }
+  }
   logNativeDiagnostic("scan_started", { scanMode: options.scanMode });
   try {
     const result = await neoNetwork.scanLocalSubnet(options);
