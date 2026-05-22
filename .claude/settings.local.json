@@ -31,7 +31,19 @@
       "Bash(cp /tmp/sshot1.png ./screenshot-reactor.png)",
       "Bash(cp /tmp/sshot2.png ./screenshot-modes.png)",
       "Bash(cp /tmp/sshot3.png ./screenshot-hub.png)",
-      "Bash(cp /tmp/sshot4.png ./screenshot-game.png)"
+      "Bash(cp /tmp/sshot4.png ./screenshot-game.png)",
+      "Bash(npm -v)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Aztr0nutZs\\\\Desktop\\\\NEO-the-NERD-v2-main\\\\components\\\\games\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)",
+      "Bash(awk '{print $9, $5}')",
+      "Bash(xargs wc *)",
+      "Bash(awk '{print $9, \"-\", $5}')",
+      "Bash(awk '{print $9, \":\", $5}')",
+      "Bash(xargs ls *)",
+      "Bash(awk '$5 ~ /[0-9][0-9]M/ || $5 ~ /[5-9][0-9][0-9]K/ {print $9, $5}')",
+      "Bash(mkdir -p /tmp/knxt4_extract)",
+      "Bash(unzip -o \"Knxt 4.zip\" -d /tmp/knxt4_extract)",
+      "Bash(cygpath -w /tmp/knxt4_extract)"
     ]
   }
 }
