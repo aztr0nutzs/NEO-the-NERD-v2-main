@@ -68,6 +68,13 @@ export function AppShell() {
   // that was producing the residual boot-time stutter even after the boot
   // overlay itself had finished.
   const [mediaReady, setMediaReady] = useState(false)
+  // `bgReady` flips true the moment the background <video> emits its first
+  // `onPlaying` (or, in reduced-motion / decode-fail fallback, on the next
+  // tick after the bg mounts). The persistent avatar orb's <video> mount is
+  // gated on this so the WebView's H.264 slots are not contended by two
+  // decoders on the same cold-start frame.
+  const [bgReady, setBgReady] = useState(false)
+  const handleBgReady = useCallback(() => setBgReady(true), [])
   const handleBootComplete = useCallback(() => {
     playAvatarReaction("wakeup")
     setBootMounted(false)
@@ -111,7 +118,7 @@ export function AppShell() {
           rendering throughout boot so the visual identity is preserved —
           the heavy MP4 simply fades in once the boot sequence has exited
           AND the post-boot stagger window has elapsed. */}
-      <NeoBackgroundScene videoEnabled={mediaReady} />
+      <NeoBackgroundScene videoEnabled={mediaReady} onReady={handleBgReady} />
       {/*
         Content-column shade. Sits behind the main viewport and in front of
         the animated background. Width-bounded to the same max-w-2xl column
@@ -135,7 +142,7 @@ export function AppShell() {
         but persisted state can restore a different screen at launch —
         so this gate is the only honest fix.
       */}
-      {!bootMounted && showPersistentOrb && <PersistentAvatarOrb />}
+      {!bootMounted && bgReady && showPersistentOrb && <PersistentAvatarOrb />}
 
       <main
         // Bottom padding reserves space for the fixed BottomDock (~5rem

@@ -36,6 +36,7 @@ import {
   runtimeTimbreLabel,
 } from "@/lib/voice/voiceUniqueness"
 import { bannerToneColor, getVoiceRuntimeMode } from "@/lib/voice/voiceRuntimeMode"
+import { VoiceModeBanner } from "@/components/voice/voice-mode-banner"
 import type { VoiceFilterState, VoiceProfile } from "@/lib/voice/types"
 import { IDLE_PLAYBACK_SNAPSHOT, type VoicePlaybackSnapshot } from "@/lib/voice/voicePlayback"
 import type { VoiceRuntimeBanner } from "@/lib/voice/voiceRuntimeMode"
@@ -221,6 +222,8 @@ export function VoicesScreen() {
           . The rest are styled variants that adjust pitch, rate, and delivery on top of whichever underlying voice the active engine exposes.
         </p>
       </header>
+
+      <VoiceModeBanner capabilities={capabilities} />
 
       <RuntimeTruthBanner banner={runtimeBanner} />
 

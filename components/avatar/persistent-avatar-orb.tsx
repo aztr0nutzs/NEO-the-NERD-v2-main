@@ -52,6 +52,13 @@ export function PersistentAvatarOrb() {
         reducedMotion={reducedMotion}
         ariaLabel="NEO persistent idle avatar"
         onReactionComplete={clearAvatarReaction}
+        // Still-frame substitute used as the <video poster=...> and as the
+        // sole visual under prefers-reduced-motion (no video element at all).
+        // The image itself is generated locally via the helper in
+        // scripts/encode-avatar-media.mjs; if it has not been generated the
+        // <img> 404s harmlessly and the wrapper's dark backing keeps the orb
+        // shape readable.
+        poster="/media/neo/avatar/idle-poster.webp"
       />
       <span
         className="absolute bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full"

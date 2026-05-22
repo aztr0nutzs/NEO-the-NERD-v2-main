@@ -20,9 +20,16 @@ interface NeoBackgroundSceneProps {
    * once the boot sequence has exited.
    */
   videoEnabled?: boolean
+  /**
+   * Fires once when the background `<video>` actually starts playing back its
+   * first frame. AppShell uses this to stagger the avatar orb mount so the
+   * bg decoder owns the WebView's H.264 slots on cold start and the orb's
+   * idle.mp4 doesn't compete for them on the same frame.
+   */
+  onReady?: () => void
 }
 
-export function NeoBackgroundScene({ mode = "auto", videoEnabled = true }: NeoBackgroundSceneProps) {
+export function NeoBackgroundScene({ mode = "auto", videoEnabled = true, onReady }: NeoBackgroundSceneProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   // `videoReady` flips true once the MP4 is actually playing, which fades it
   // in over the static PNG fallback. If autoplay fails or the file errors out
@@ -66,17 +73,27 @@ export function NeoBackgroundScene({ mode = "auto", videoEnabled = true }: NeoBa
     }
   }, [videoEnabled])
 
+  const readyEmittedRef = useRef(false)
+  const emitReadyOnce = useCallback(() => {
+    if (readyEmittedRef.current) return
+    readyEmittedRef.current = true
+    onReady?.()
+  }, [onReady])
+
   const handleCanPlay = useCallback(() => {
     const video = videoRef.current
     if (!video) return
     video.muted = true
-    video.play().then(() => setVideoReady(true)).catch(() => {
+    video.play().then(() => {
+      setVideoReady(true)
+      emitReadyOnce()
+    }).catch(() => {
       // Autoplay was rejected — keep PNG fallback visible instead of an empty
       // black canvas. We do not disable the video element entirely so it can
       // still attempt to resume on the next visibility change.
       setVideoReady(false)
     })
-  }, [])
+  }, [emitReadyOnce])
 
   const handleError = useCallback(() => {
     setVideoReady(false)
@@ -84,6 +101,18 @@ export function NeoBackgroundScene({ mode = "auto", videoEnabled = true }: NeoBa
   }, [])
 
   const showVideo = !reducedMotion && !videoDisabled && videoEnabled
+
+  // When the video path is suppressed entirely (reduced-motion, decode error,
+  // or the bg gate hasn't lifted yet — but here we've been asked to render,
+  // i.e. videoEnabled is true), the bg "ready" signal should fire on the next
+  // tick so downstream consumers (e.g. the persistent avatar orb mount gate
+  // in AppShell) don't wait forever for an onPlaying that will never come.
+  useEffect(() => {
+    if (videoEnabled && !showVideo) {
+      const t = window.setTimeout(emitReadyOnce, 0)
+      return () => window.clearTimeout(t)
+    }
+  }, [videoEnabled, showVideo, emitReadyOnce])
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black" aria-hidden="true">
@@ -134,7 +163,7 @@ export function NeoBackgroundScene({ mode = "auto", videoEnabled = true }: NeoBa
             "x5-video-player-type": "h5-page",
           }}
           onCanPlay={handleCanPlay}
-          onPlaying={() => setVideoReady(true)}
+          onPlaying={() => { setVideoReady(true); emitReadyOnce() }}
           onError={handleError}
         />
       )}

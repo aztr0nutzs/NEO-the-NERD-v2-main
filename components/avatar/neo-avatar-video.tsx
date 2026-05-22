@@ -13,6 +13,19 @@ import {
   type AvatarClipKey,
 } from "@/lib/avatar-media"
 
+/**
+ * Pre-warmed clip keys — these are the only sources the WebView is allowed
+ * to preload on first mount. Everything else is `preload="none"` until the
+ * user actually triggers a reaction of that kind, at which point setting
+ * `src` for the first time pulls the file lazily.
+ *
+ * `idle` is the base loop, `wakeup` is the boot-handoff reaction that fires
+ * the moment the boot overlay exits — both are guaranteed to play before any
+ * user input, so warming them is honest. The other six emotions only ever
+ * fire in response to a specific user/game event.
+ */
+const PREWARMED_CLIPS = new Set<AvatarClipKey>(["idle", "wakeup"])
+
 export interface NeoAvatarVideoHandle {
   playReaction: (key: Exclude<AvatarClipKey, "idle">) => void
 }
@@ -52,6 +65,12 @@ interface NeoAvatarVideoProps {
    * surfaces (Network avatar, persistent orb, badge), `bare` = unmasked raw.
    */
   variant?: AvatarVariant
+  /**
+   * Optional WebP/JPEG poster shown before the first decoded video frame —
+   * and used as a still substitute when reduced-motion is on (no `<video>`
+   * element is mounted in that case). Path is `public/`-relative.
+   */
+  poster?: string
 }
 
 // Feathered elliptical mask for the large stage: fully opaque through the
@@ -111,6 +130,7 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
       ariaLabel = "NEO the Nerd avatar",
       onReactionComplete,
       variant = "bare",
+      poster,
     },
     ref,
   ) {
@@ -223,6 +243,41 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
       }
     }, [baseKey, currentEntry.playback, onReactionComplete])
 
+    // Reduced-motion path: no <video> element at all. We render the poster as
+    // a plain <img> inside the same masked wrapper so the orb/stage still
+    // reads as the avatar visually, but nothing is decoding.
+    if (reducedMotion) {
+      return (
+        <div
+          ref={rootRef}
+          className={`${className ?? ""} ${config.wrapper}`.trim()}
+          style={config.wrapperStyle}
+          aria-label={ariaLabel}
+          role="img"
+        >
+          {poster ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={poster}
+              alt=""
+              className={config.video}
+              style={config.videoStyle}
+              draggable={false}
+            />
+          ) : (
+            <div
+              className={config.video}
+              style={{
+                ...config.videoStyle,
+                background:
+                  "radial-gradient(circle at 50% 38%, rgba(0,232,255,0.18), rgba(0,0,0,0.95) 70%)",
+              }}
+            />
+          )}
+        </div>
+      )
+    }
+
     return (
       <div
         ref={rootRef}
@@ -259,21 +314,27 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
           key={currentEntry.key}
           ref={videoRef}
           src={currentEntry.src}
+          poster={poster}
           className={config.video}
           style={config.videoStyle}
           autoPlay
           muted
           playsInline
           loop={currentEntry.playback === "loop"}
-          // Always `metadata`, never `auto`. The base idle clip is 18 MB —
-          // an `auto` preload pulls the whole asset into the WebView's
-          // memory the moment the element mounts, which competes with both
-          // the boot intro decoder (during the cinematic handoff frame) and
-          // the ambient background loop (immediately after). `metadata`
-          // lets the demuxer prep the file and start streaming on play()
-          // without the greedy whole-file fetch, and the visible playback
-          // start is still effectively instant because we are autoplaying.
-          preload="metadata"
+          // Two-tier preload policy:
+          //   - PREWARMED_CLIPS (idle, wakeup) ──► `auto`. These are
+          //     guaranteed to play in the first seconds after the boot
+          //     overlay exits, and idle is the persistent base loop.
+          //   - everything else (angry, ecstatic, happy, surprised,
+          //     thinking, shutdown) ──► `none`. The MP4 is not fetched
+          //     until the user triggers a reaction of that kind, at which
+          //     point React re-keys the <video>, sets `src`, and the
+          //     load happens on demand.
+          // The old policy was `metadata` for every clip; with idle at
+          // 18 MB and seven other one-shots that never play on cold
+          // start, that meant ~30 MB of unnecessary demuxer headers and
+          // partial range fetches the moment the avatar tree mounted.
+          preload={PREWARMED_CLIPS.has(currentKey) ? "auto" : "none"}
           aria-label={ariaLabel}
           onEnded={returnToIdle}
           onError={returnToIdle}

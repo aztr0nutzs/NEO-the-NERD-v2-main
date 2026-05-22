@@ -216,6 +216,22 @@ export function VoiceCard({
                     · {indicator}
                   </span>
                 )}
+                {capabilities &&
+                  !capabilities.providerTtsAvailable &&
+                  capabilities.currentPreviewMode === "native-android" &&
+                  capabilities.nativeAndroidVoiceCount <= 1 && (
+                  <span
+                    className="ps-mono text-[8px] tracking-[0.22em] rounded-full px-1.5 py-0.5"
+                    style={{
+                      color: "#ffd700",
+                      background: "rgba(255,215,0,0.08)",
+                      boxShadow: "inset 0 0 0 1px rgba(255,215,0,0.55)",
+                    }}
+                    title="Every profile routes to the same Android engine voice — only one is installed."
+                  >
+                    SHARED · OFFLINE
+                  </span>
+                )}
               </div>
             )
           })()}
