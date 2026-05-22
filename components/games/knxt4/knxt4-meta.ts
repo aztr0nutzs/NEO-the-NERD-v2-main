@@ -1,6 +1,7 @@
 "use client"
 
-import type { AiLevelId } from "./knxt4-core"
+import { COLS, ROWS, cloneBoard, drop as dropToken, dropRow, findWin, makeBoard } from "./knxt4-core"
+import type { AiLevelId, Board, Cell, Player } from "./knxt4-core"
 
 export interface Knxt4Recent {
   result: "win" | "loss" | "draw"
@@ -111,3 +112,107 @@ export const tokenColors = (skinId: string, player: 1 | 2) => {
 }
 
 export const tokenAnim = (skinId: string) => (TOKENS.find((t) => t.id === skinId) || TOKENS[0]).anim
+
+/* ───── POWERS (extended definitions w/ exec functions) ─────────────── */
+export type PowerId = "peek" | "bomb" | "double" | "shift" | "gravity"
+
+export interface PowerDef {
+  id: PowerId
+  name: string
+  desc: string
+  icon: string
+  color: "yellow" | "orange" | "lime" | "cyan" | "violet"
+  cost: number
+  target: "none" | "self" | "token" | "column"
+  exec: (
+    board: Board | null,
+    target: { r?: number; c?: number; dir?: -1 | 1; col?: number } | null,
+    me: Player,
+  ) => { ok?: boolean; message?: string; peekCol?: number | null; newBoard?: Board }
+}
+
+export const POWERS: Record<PowerId, PowerDef> = {
+  peek: {
+    id: "peek", name: "PEEK", desc: "Reveal NEO's next column.", icon: "eye", color: "yellow", cost: 1, target: "none",
+    exec: (board) => {
+      if (!board) return { message: "NO TARGET" }
+      const enemy = 2 as Player
+      let best = -1
+      for (let c = 0; c < COLS; c++) {
+        const r = dropRow(board, c)
+        if (r < 0) continue
+        const nb = cloneBoard(board)
+        dropToken(nb, c, enemy)
+        if (findWin(nb)?.player === enemy) { best = c; break }
+        if (best < 0) best = c
+      }
+      return { peekCol: best >= 0 ? best : null, message: best >= 0 ? `THREAT VECTOR · C-${best + 1}` : "NO TARGET" }
+    },
+  },
+  bomb: {
+    id: "bomb", name: "BOMB", desc: "Vaporize one enemy token.", icon: "spark", color: "orange", cost: 3, target: "token",
+    exec: (board, target, me) => {
+      if (!board || !target || target.r == null || target.c == null) return { ok: false, message: "INVALID" }
+      const enemy = (3 - me) as Player
+      if (board[target.r][target.c] !== enemy) return { ok: false, message: "PICK ENEMY TOKEN" }
+      const nb = cloneBoard(board)
+      nb[target.r][target.c] = 0
+      const stack: Cell[] = []
+      for (let rr = ROWS - 1; rr >= 0; rr--) if (nb[rr][target.c] !== 0) stack.push(nb[rr][target.c])
+      for (let rr = 0; rr < ROWS; rr++) nb[rr][target.c] = 0
+      for (let i = 0; i < stack.length; i++) nb[ROWS - 1 - i][target.c] = stack[i]
+      return { ok: true, newBoard: nb, message: "TOKEN VAPORIZED" }
+    },
+  },
+  double: {
+    id: "double", name: "DOUBLE", desc: "Place two of your tokens this turn.", icon: "plus", color: "lime", cost: 2, target: "self",
+    exec: () => ({ ok: true, message: "DOUBLE DROP ARMED" }),
+  },
+  shift: {
+    id: "shift", name: "SHIFT", desc: "Slide a column one slot left or right.", icon: "arrow-r", color: "cyan", cost: 3, target: "column",
+    exec: (board, target) => {
+      if (!board || !target || target.c == null || (target.dir !== 1 && target.dir !== -1)) return { ok: false, message: "INVALID" }
+      const c = target.c, dest = c + target.dir
+      if (dest < 0 || dest >= COLS) return { ok: false, message: "BLOCKED" }
+      const nb = cloneBoard(board)
+      for (let r = 0; r < ROWS; r++) {
+        if (nb[r][c] !== 0 && nb[r][dest] !== 0) return { ok: false, message: "DEST FULL" }
+      }
+      for (let r = 0; r < ROWS; r++) { nb[r][dest] = nb[r][c]; nb[r][c] = 0 }
+      for (const col of [c, dest]) {
+        const stack: Cell[] = []
+        for (let rr = ROWS - 1; rr >= 0; rr--) if (nb[rr][col] !== 0) stack.push(nb[rr][col])
+        for (let rr = 0; rr < ROWS; rr++) nb[rr][col] = 0
+        for (let i = 0; i < stack.length; i++) nb[ROWS - 1 - i][col] = stack[i]
+      }
+      return { ok: true, newBoard: nb, message: "COLUMN SHIFTED" }
+    },
+  },
+  gravity: {
+    id: "gravity", name: "GRAVITY", desc: "Drop a token at the top of a column.", icon: "arrow-d", color: "violet", cost: 2, target: "column",
+    exec: () => ({ ok: true, message: "GRAVITY INVERTED" }),
+  },
+}
+
+/* ───── PUZZLES (challenge stubs) ───────────────────────────────────── */
+export interface Puzzle {
+  id: number
+  name: string
+  task: string
+  moves: { col: number; player: Player }[]
+  solCol: number
+}
+
+export const PUZZLES: Puzzle[] = [
+  { id: 1, name: "OPENER",        task: "Win in 1 · centre press",      moves: [{ col: 3, player: 1 }, { col: 0, player: 2 }, { col: 3, player: 1 }, { col: 0, player: 2 }, { col: 3, player: 1 }, { col: 0, player: 2 }], solCol: 3 },
+  { id: 2, name: "TRAP LINE",     task: "Find the winning column",      moves: [{ col: 2, player: 1 }, { col: 3, player: 2 }, { col: 2, player: 1 }, { col: 3, player: 2 }, { col: 2, player: 1 }, { col: 3, player: 2 }], solCol: 2 },
+  { id: 3, name: "DOUBLE THREAT", task: "Block + win",                  moves: [{ col: 4, player: 1 }, { col: 4, player: 2 }, { col: 3, player: 1 }, { col: 3, player: 2 }, { col: 2, player: 1 }, { col: 5, player: 2 }], solCol: 1 },
+  { id: 4, name: "DIAGONAL",      task: "Complete the diagonal",        moves: [{ col: 0, player: 1 }, { col: 1, player: 2 }, { col: 1, player: 1 }, { col: 2, player: 2 }, { col: 2, player: 1 }, { col: 3, player: 2 }, { col: 2, player: 1 }, { col: 3, player: 2 }, { col: 3, player: 1 }, { col: 6, player: 2 }], solCol: 3 },
+  { id: 5, name: "MIRROR",        task: "Symmetric trap",               moves: [{ col: 3, player: 1 }, { col: 3, player: 2 }, { col: 2, player: 1 }, { col: 4, player: 2 }, { col: 2, player: 1 }, { col: 4, player: 2 }], solCol: 2 },
+]
+
+export const movesToBoard = (moves: { col: number; player: Player }[]): Board => {
+  const b = makeBoard()
+  for (const m of moves) dropToken(b, m.col, m.player)
+  return b
+}

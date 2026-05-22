@@ -34,6 +34,32 @@ function tokenize(css) {
   let i = 0
   const out = []
   const len = css.length
+  const advancePast = (from, stopChars) => {
+    // Walk from `from`, skipping over '..' / ".." string literals and /* */ comments,
+    // returning the index of the first unquoted character whose code is in stopChars.
+    let p = from
+    while (p < len) {
+      const ch = css[p]
+      if (ch === "'" || ch === '"') {
+        const q = ch
+        p++
+        while (p < len && css[p] !== q) {
+          if (css[p] === "\\") p++
+          p++
+        }
+        p++
+        continue
+      }
+      if (ch === "/" && css[p + 1] === "*") {
+        const end = css.indexOf("*/", p + 2)
+        p = end < 0 ? len : end + 2
+        continue
+      }
+      if (stopChars.includes(ch)) return p
+      p++
+    }
+    return len
+  }
   while (i < len) {
     // Skip leading whitespace + comments
     while (i < len && /\s/.test(css[i])) { out.push({ type: "ws", v: css[i] }); i++ }
@@ -50,9 +76,8 @@ function tokenize(css) {
       let j = i + 1
       while (j < len && /[\w-]/.test(css[j])) j++
       const name = css.slice(i, j)
-      // find next ; or {
-      let k = j
-      while (k < len && css[k] !== ";" && css[k] !== "{") k++
+      // find next ; or { (string-aware)
+      let k = advancePast(j, [";", "{"])
       if (k < len && css[k] === ";") {
         out.push({ type: "atStmt", v: css.slice(i, k + 1) })
         i = k + 1
@@ -83,9 +108,8 @@ function tokenize(css) {
       i = m + 1
       continue
     }
-    // Plain rule: read selector up to {
-    let k = i
-    while (k < len && css[k] !== "{") k++
+    // Plain rule: read selector up to { (string-aware)
+    const k = advancePast(i, ["{"])
     if (k >= len) { out.push({ type: "raw", v: css.slice(i) }); break }
     let depth = 1
     let m = k + 1
