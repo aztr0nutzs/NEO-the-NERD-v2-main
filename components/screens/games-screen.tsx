@@ -134,91 +134,106 @@ export function GamesScreen() {
 
   return (
     <div className="space-y-3">
-      <CelebrationToast />
-      <header className="px-1">
-        <p className="ps-mono text-[10px] tracking-[0.4em] text-white/50">NEO // ARCADE_HUB</p>
-        <h2 className="ps-heading text-2xl">
-          <span className="ps-text-orange">MINI</span>{" "}
-          <span className="text-white/80">GAMES</span>
-        </h2>
-      </header>
+      {!active && (
+        <>
+          <CelebrationToast />
+          <header className="px-1">
+            <p className="ps-mono text-[10px] tracking-[0.4em] text-white/50">NEO // ARCADE_HUB</p>
+            <h2 className="ps-heading text-2xl">
+              <span className="ps-text-orange">MINI</span>{" "}
+              <span className="text-white/80">GAMES</span>
+            </h2>
+          </header>
 
-      {/* Arcade Dashboard */}
-      <NeonPanel accent="cyan" glow="strong" className="p-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-cyan">ARCADE_LEVEL</p>
-            <p className="ps-heading text-3xl ps-text-cyan" style={{ textShadow: "0 0 12px #00f0ff" }}>
-              L{arcadeProgression.arcadeLevel}
-            </p>
-            <p className="mt-1 ps-mono text-[10px] tracking-[0.2em] text-white/55">
-              {arcadeProgression.arcadeXp} XP · NEXT @ {xpForNext}
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 flex-1 max-w-[260px]">
-            <DashStat icon={<Trophy className="h-3 w-3" />} label="WINS" value={`${arcadeProgression.totalWins}`} color="#39ff14" />
-            <DashStat icon={<Zap className="h-3 w-3" />} label="STREAK" value={`${arcadeProgression.currentWinStreak}`} color="#ff7a00" />
-            <DashStat icon={<History className="h-3 w-3" />} label="RUNS" value={`${totalRuns}`} color="#00f0ff" />
-          </div>
-        </div>
-        <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-          <div
-            className="h-full transition-[width] duration-500"
-            style={{ width: `${xpProgress}%`, background: "linear-gradient(90deg,#00f0ff,#39ff14)", boxShadow: "0 0 8px #00f0ff88" }}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between ps-mono text-[9px] tracking-[0.2em] text-white/55">
-          <span>LONGEST STREAK {arcadeProgression.longestWinStreak}</span>
-          <span>{bestGame ? `TOP: ${bestGame.g.title.toUpperCase()}` : totalRuns === 0 ? "NO RUNS LOGGED" : "TOP: --"}</span>
-        </div>
-      </NeonPanel>
+          {/* Arcade Dashboard */}
+          <NeonPanel accent="cyan" glow="strong" className="p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-cyan">ARCADE_LEVEL</p>
+                <p className="ps-heading text-3xl ps-text-cyan" style={{ textShadow: "0 0 12px #00f0ff" }}>
+                  L{arcadeProgression.arcadeLevel}
+                </p>
+                <p className="mt-1 ps-mono text-[10px] tracking-[0.2em] text-white/55">
+                  {arcadeProgression.arcadeXp} XP · NEXT @ {xpForNext}
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-2 flex-1 max-w-[260px]">
+                <DashStat icon={<Trophy className="h-3 w-3" />} label="WINS" value={`${arcadeProgression.totalWins}`} color="#39ff14" />
+                <DashStat icon={<Zap className="h-3 w-3" />} label="STREAK" value={`${arcadeProgression.currentWinStreak}`} color="#ff7a00" />
+                <DashStat icon={<History className="h-3 w-3" />} label="RUNS" value={`${totalRuns}`} color="#00f0ff" />
+              </div>
+            </div>
+            <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full transition-[width] duration-500"
+                style={{ width: `${xpProgress}%`, background: "linear-gradient(90deg,#00f0ff,#39ff14)", boxShadow: "0 0 8px #00f0ff88" }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between ps-mono text-[9px] tracking-[0.2em] text-white/55">
+              <span>LONGEST STREAK {arcadeProgression.longestWinStreak}</span>
+              <span>{bestGame ? `TOP: ${bestGame.g.title.toUpperCase()}` : totalRuns === 0 ? "NO RUNS LOGGED" : "TOP: --"}</span>
+            </div>
+          </NeonPanel>
 
-      {/* Daily Challenge */}
-      {daily && (
-        <DailyChallengeCard
-          challenge={daily}
-          stats={arcadeProgression.perGame[daily.gameId]}
-          onLaunch={(id) => setActive(id)}
-        />
+          {/* Daily Challenge */}
+          {daily && (
+            <DailyChallengeCard
+              challenge={daily}
+              stats={arcadeProgression.perGame[daily.gameId]}
+              onLaunch={(id) => setActive(id)}
+            />
+          )}
+
+          {/* Featured Challenge */}
+          <NeonPanel accent="orange" glow="strong" className="p-3">
+            <div className="flex items-center gap-3">
+              <div
+                className="grid h-12 w-12 place-items-center rounded-lg"
+                style={{ background: "rgba(255,122,0,0.18)", boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.6)" }}
+              >
+                <Swords className="h-5 w-5 ps-text-orange" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-orange">FEATURED_CHALLENGE</p>
+                <p className="ps-heading text-lg text-white/95 leading-tight">{featuredGame.title}</p>
+                <p className="ps-mono text-[9px] tracking-[0.2em] text-white/55">
+                  {featuredGame.category.toUpperCase()} · {featuredGame.estTime.toUpperCase()} · +XP ON WIN
+                </p>
+              </div>
+            </div>
+            <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+              <button
+                type="button"
+                onClick={() => setActive(featuredGame.id)}
+                className="rounded-lg py-2 ps-mono text-[11px] tracking-[0.3em]"
+                style={{ color: "#000", background: "linear-gradient(180deg,#ff7a00,#ff7a00AA)", boxShadow: "inset 0 0 0 1px #ff7a00, 0 0 14px #ff7a00AA" }}
+              >
+                LAUNCH
+              </button>
+              <button
+                type="button"
+                onClick={shuffleFeatured}
+                aria-label="Shuffle challenge"
+                className="grid h-9 w-9 place-items-center rounded-lg"
+                style={{ color: "#ff7a00", background: "rgba(255,122,0,0.12)", boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.5)" }}
+              >
+                <Shuffle className="h-4 w-4" />
+              </button>
+            </div>
+          </NeonPanel>
+        </>
       )}
 
-      {/* Featured Challenge */}
-      <NeonPanel accent="orange" glow="strong" className="p-3">
-        <div className="flex items-center gap-3">
-          <div
-            className="grid h-12 w-12 place-items-center rounded-lg"
-            style={{ background: "rgba(255,122,0,0.18)", boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.6)" }}
-          >
-            <Swords className="h-5 w-5 ps-text-orange" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-orange">FEATURED_CHALLENGE</p>
-            <p className="ps-heading text-lg text-white/95 leading-tight">{featuredGame.title}</p>
-            <p className="ps-mono text-[9px] tracking-[0.2em] text-white/55">
-              {featuredGame.category.toUpperCase()} · {featuredGame.estTime.toUpperCase()} · +XP ON WIN
-            </p>
-          </div>
-        </div>
-        <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
-          <button
-            type="button"
-            onClick={() => setActive(featuredGame.id)}
-            className="rounded-lg py-2 ps-mono text-[11px] tracking-[0.3em]"
-            style={{ color: "#000", background: "linear-gradient(180deg,#ff7a00,#ff7a00AA)", boxShadow: "inset 0 0 0 1px #ff7a00, 0 0 14px #ff7a00AA" }}
-          >
-            LAUNCH
-          </button>
-          <button
-            type="button"
-            onClick={shuffleFeatured}
-            aria-label="Shuffle challenge"
-            className="grid h-9 w-9 place-items-center rounded-lg"
-            style={{ color: "#ff7a00", background: "rgba(255,122,0,0.12)", boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.5)" }}
-          >
-            <Shuffle className="h-4 w-4" />
-          </button>
-        </div>
-      </NeonPanel>
+      {active && (
+        <button
+          type="button"
+          onClick={() => setActive(null)}
+          className="fixed right-4 top-4 z-50 rounded-full px-3 py-1.5 ps-mono text-[10px] tracking-[0.25em]"
+          style={{ color: "#00f0ff", background: "rgba(0,0,0,0.78)", boxShadow: "inset 0 0 0 1px rgba(0,240,255,0.55), 0 0 14px rgba(0,240,255,0.28)" }}
+        >
+          BACK
+        </button>
+      )}
 
       {/* Active game */}
       {active === "tictactoe" && <TicTacToeGame onClose={() => setActive(null)} />}
