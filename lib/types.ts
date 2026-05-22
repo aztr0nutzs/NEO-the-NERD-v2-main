@@ -301,6 +301,7 @@ export type GameId =
   | "heist"
   | "dodge"
   | "circuit"
+  | "knxt4"
 
 
 export interface GameProgressionStats {

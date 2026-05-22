@@ -1,0 +1,251 @@
+/* Knxt 4 — N.E.O. Connect 4 scoped styles.
+   All rules are scoped under .knxt4-root so they cannot leak into the rest of the app. */
+
+.knxt4-root {
+  --knxt4-cyan: #00e8ff;
+  --knxt4-magenta: #ff2eba;
+  --knxt4-frame: rgba(0, 232, 255, 0.55);
+  --knxt4-glass: linear-gradient(180deg, rgba(60, 90, 130, 0.18), rgba(20, 30, 50, 0.32) 50%, rgba(40, 60, 100, 0.22));
+  color: #e6f6ff;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  position: relative;
+}
+
+.knxt4-root .knxt4-stage {
+  position: relative;
+  padding: 6px 0 10px;
+  perspective: 1200px;
+}
+
+.knxt4-root .knxt4-toppipe {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 30px;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.knxt4-root .knxt4-arrows {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 0 12px 4px;
+}
+
+.knxt4-root .knxt4-arrow {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.knxt4-root .knxt4-arrow:disabled {
+  cursor: default;
+}
+
+.knxt4-root .knxt4-peek {
+  position: absolute;
+  top: -10px;
+  right: -2px;
+}
+
+.knxt4-root .knxt4-frame {
+  position: relative;
+  padding: 12px 10px 16px;
+  border: 1.5px solid var(--knxt4-frame);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(60, 90, 130, 0.18) 0%, rgba(20, 30, 50, 0.32) 50%, rgba(40, 60, 100, 0.22) 100%),
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0, 232, 255, 0.12), transparent 70%);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(0, 232, 255, 0.32),
+    inset 0 0 30px rgba(0, 232, 255, 0.08);
+}
+
+.knxt4-root .knxt4-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  padding: 8px;
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0, 232, 255, 0.08), transparent 70%),
+    rgba(2, 8, 18, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(0, 232, 255, 0.25), inset 0 0 18px rgba(0, 232, 255, 0.12);
+}
+
+.knxt4-root .knxt4-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #0a1422 0%, #02060c 70%, #000 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 232, 255, 0.35),
+    inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  padding: 6%;
+}
+
+.knxt4-root .knxt4-socket {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+}
+
+.knxt4-root .knxt4-pedestal {
+  margin: 10px auto 0;
+  height: 6px;
+  width: 70%;
+  background: linear-gradient(180deg, rgba(255, 122, 0, 0.7), rgba(255, 122, 0, 0.1));
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255, 122, 0, 0.5);
+}
+
+@keyframes knxt4-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.08); }
+}
+
+/* HUD */
+.knxt4-root .knxt4-hud {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.knxt4-root .knxt4-side {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+
+.knxt4-root .knxt4-side--right { justify-content: flex-end; }
+
+.knxt4-root .knxt4-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.knxt4-root .knxt4-status {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(0, 232, 255, 0.35);
+}
+
+/* Mode hub */
+.knxt4-root .knxt4-hub-title {
+  text-align: center;
+  font-size: 22px;
+  letter-spacing: 0.15em;
+  background: linear-gradient(90deg, var(--knxt4-cyan), var(--knxt4-magenta));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px rgba(0, 232, 255, 0.3);
+  margin: 4px 0 2px;
+}
+
+.knxt4-root .knxt4-hub-sub {
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 10px;
+}
+
+.knxt4-root .knxt4-mode-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.knxt4-root .knxt4-mode {
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(0, 232, 255, 0.35);
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.knxt4-root .knxt4-mode:hover,
+.knxt4-root .knxt4-mode:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--knxt4-cyan);
+  box-shadow: 0 0 14px rgba(0, 232, 255, 0.35), inset 0 0 0 1px rgba(0, 232, 255, 0.4);
+}
+
+.knxt4-root .knxt4-mode__name {
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  color: var(--knxt4-cyan);
+}
+
+.knxt4-root .knxt4-mode__sub {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Power tray */
+.knxt4-root .knxt4-powers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.knxt4-root .knxt4-power {
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.knxt4-root .knxt4-power:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.knxt4-root .knxt4-power:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.knxt4-root .knxt4-power--armed {
+  background: rgba(255, 230, 0, 0.18);
+  box-shadow: 0 0 10px rgba(255, 230, 0, 0.5), inset 0 0 0 1px rgba(255, 230, 0, 0.6);
+}
+
+.knxt4-root .knxt4-toast {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(255, 230, 0, 0.85);
+}

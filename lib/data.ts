@@ -63,6 +63,7 @@ export const GAMES: GameDef[] = [
   { id: "heist", title: "Cyber Heist", difficulty: "Hard", estTime: "5 min", behavior: "Branching infiltration choices", multiplayer: "You vs Robot", accent: "purple", playable: true, category: "strategy", skillType: "logic", supportsScore: true, supportsTimer: false, supportsStreakMode: false, recommendedDifficulty: "ADAPTIVE" },
   { id: "dodge", title: "Drone Dodge", difficulty: "Medium", estTime: "2 min", behavior: "Lane-shift survival vs drones", multiplayer: "You vs Robot", accent: "orange", playable: true, category: "reflex", skillType: "reaction", supportsScore: true, supportsTimer: true, supportsStreakMode: false, recommendedDifficulty: "ADAPTIVE" },
   { id: "circuit", title: "Circuit Builder", difficulty: "Medium", estTime: "4 min", behavior: "Rotate tiles to route the current", multiplayer: "You vs Robot", accent: "green", playable: true, category: "puzzle", skillType: "logic", supportsScore: true, supportsTimer: true, supportsStreakMode: false, recommendedDifficulty: "ADAPTIVE" },
+  { id: "knxt4", title: "Knxt 4", difficulty: "Hard", estTime: "5 min", behavior: "N.E.O. Connect 4 reactor duel — minimax + power-ups", multiplayer: "You vs Robot", accent: "cyan", playable: true, category: "strategy", skillType: "logic", supportsScore: true, supportsTimer: false, supportsStreakMode: true, recommendedDifficulty: "ADAPTIVE" },
 ]
 
 export const SAVED_RESPONSES = SYSTEM_RESPONSE_LIBRARY

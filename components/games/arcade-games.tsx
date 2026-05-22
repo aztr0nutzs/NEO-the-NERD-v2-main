@@ -18,6 +18,7 @@ import { FirewallBreachGame } from "./firewall-breach"
 import { CyberHeistGame } from "./cyber-heist"
 import { DroneDodgeGame } from "./drone-dodge"
 import { CircuitBuilderGame } from "./circuit-builder"
+import { Knxt4Game } from "./knxt4/knxt4-game"
 import type { Difficulty, SessionResult, UpdatePayload } from "./types"
 
 const TRASH = ["NEO logs this for calibration. Mostly for comedy.", "Bold move. The arcade cabinet is judging respectfully.", "Your reflexes filed a support ticket."]
@@ -52,5 +53,6 @@ export function ArcadeGame({ game, difficulty, trashTalk, onClose }: { game: Exc
     {game === "heist" && <CyberHeistGame difficulty={difficulty} update={update} />}
     {game === "dodge" && <DroneDodgeGame difficulty={difficulty} update={update} />}
     {game === "circuit" && <CircuitBuilderGame difficulty={difficulty} update={update} />}
+    {game === "knxt4" && <Knxt4Game difficulty={difficulty} update={update} />}
   </ArcadeGameShell>
 }
