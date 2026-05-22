@@ -511,7 +511,7 @@ export function MainScreen() {
               <p className="ps-mono mt-0.5 text-[12px] tracking-[0.18em] text-white/85">
                 {latestNetworkHealth
                   ? `Health ${latestNetworkHealth.score}/100 · ${latestNetworkHealth.grade}`
-                  : "Open the live device map & router scanner"}
+                  : "Open the device map · live scan on Android, simulated in browser"}
               </p>
               {latestThroughput?.value ? (
                 <p className="ps-mono mt-0.5 text-[10px] tracking-[0.15em] text-emerald-300/80">

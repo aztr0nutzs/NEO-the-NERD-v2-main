@@ -26,10 +26,12 @@ import { NeoChip, NeoIcon, NeoPhone } from "./knxt4-phone"
 import { NeoRobot } from "./knxt4-robot"
 import { Knxt4Board } from "./knxt4-board"
 import {
-  ComingSoonScreen,
+  GarageScreen,
   HubScreen,
   type Knxt4Config,
   ModesScreen,
+  SettingsScreen,
+  StatsScreen,
 } from "./knxt4-hub"
 import { useApp } from "@/lib/store"
 
@@ -558,11 +560,13 @@ const GameScreen = ({
 type Route =
   | { name: "hub" }
   | { name: "modes" }
+  | { name: "garage" }
+  | { name: "stats" }
+  | { name: "settings" }
   | { name: "play"; cfg: Knxt4Config }
-  | { name: "coming"; title: string; sub: string; color?: string }
 
 export function Knxt4Game({ onClose }: { onClose?: () => void }) {
-  const { settings, recordGameResult, playAvatarReaction } = useApp()
+  const { settings, updateSettings, recordGameResult, playAvatarReaction } = useApp()
   const [route, setRoute] = useState<Route>({ name: "hub" })
 
   const [save, setSave] = useState<Knxt4Save>(() => {
@@ -575,16 +579,15 @@ export function Knxt4Game({ onClose }: { onClose?: () => void }) {
 
   const go = (target: unknown) => {
     if (typeof target === "string") {
-      const titles: Record<string, { title: string; sub: string; color?: string }> = {
-        settings: { title: "SETTINGS", sub: "AUDIO · INPUT · DISPLAY · COMING SOON" },
-        stats: { title: "STATS", sub: "MATCH HISTORY · COMING SOON", color: "yellow" },
-        garage: { title: "GARAGE", sub: "TOKEN SKINS · COMING SOON", color: "lime" },
-        ladder: { title: "AI LADDER", sub: "TIER CLIMB · COMING SOON", color: "magenta" },
-        "challenge-select": { title: "CHALLENGE", sub: "PUZZLE BANK · COMING SOON", color: "yellow" },
-      }
-      if (target in titles) { setRoute({ name: "coming", ...titles[target as keyof typeof titles] }); return }
-      if (target === "modes") { setRoute({ name: "modes" }); return }
-      if (target === "hub") { setRoute({ name: "hub" }); return }
+      // Every named route below is a real screen — there are no more Coming
+      // Soon stubs. Ladder + Challenge entry points have been retired from
+      // the hub/modes UI in this build; the underlying data lives on in
+      // knxt4-meta.ts for a future enable.
+      if (target === "hub") setRoute({ name: "hub" })
+      else if (target === "modes") setRoute({ name: "modes" })
+      else if (target === "garage") setRoute({ name: "garage" })
+      else if (target === "stats") setRoute({ name: "stats" })
+      else if (target === "settings") setRoute({ name: "settings" })
       return
     }
     setRoute(target as Route)
@@ -629,8 +632,21 @@ export function Knxt4Game({ onClose }: { onClose?: () => void }) {
     <div className="knxt4-root">
       {route.name === "hub" && <HubScreen save={save} go={go} onClose={onClose} />}
       {route.name === "modes" && <ModesScreen save={save} go={go} onBack={() => setRoute({ name: "hub" })} />}
-      {route.name === "coming" && (
-        <ComingSoonScreen title={route.title} sub={route.sub} color={route.color || "cyan"} onBack={() => setRoute({ name: "modes" })} />
+      {route.name === "garage" && (
+        <GarageScreen save={save} setSave={setSave} go={go} onBack={() => setRoute({ name: "hub" })} />
+      )}
+      {route.name === "stats" && (
+        <StatsScreen save={save} go={go} onBack={() => setRoute({ name: "hub" })} />
+      )}
+      {route.name === "settings" && (
+        <SettingsScreen
+          bridge={{
+            soundEffects: settings.soundEffects,
+            reducedMotion: settings.reducedMotion,
+            onToggleSound: () => updateSettings({ soundEffects: !settings.soundEffects }),
+          }}
+          onBack={() => setRoute({ name: "hub" })}
+        />
       )}
       {route.name === "play" && (
         <GameScreen config={route.cfg} save={save} onBack={() => setRoute({ name: "modes" })} onResult={onResult} />

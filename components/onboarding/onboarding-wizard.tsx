@@ -428,7 +428,8 @@ function StepWelcome() {
         <FeatureBadge icon={Bot} accent="cyan" />
         <p className="text-[13px] leading-relaxed text-white/85">
           NEO is your cyberpunk companion: a chat assistant, a network watchdog, and a
-          playable arcade — all built into one interface.
+          playable arcade — all built into one interface. What&apos;s live depends on your
+          runtime — the chip on the top bar tells you which mode is active right now.
         </p>
       </div>
       <FeatureList
@@ -437,13 +438,13 @@ function StepWelcome() {
             icon: Sparkles,
             color: "#b829ff",
             title: "Talk + arcade",
-            body: "Chat with multiple personalities, run quick games, and tap NEO directly for reactions.",
+            body: "Smart assistant when a remote backend is configured; otherwise an on-device fallback engine answers. Arcade games and persona switching always work locally.",
           },
           {
             icon: Radar,
             color: "#39ff14",
             title: "Network Discovery",
-            body: "Map devices on your Wi-Fi, watch for new arrivals, and review unknown gear.",
+            body: "Live local Wi-Fi scan after the Android app's permission grant. Browser preview shows simulated data so nothing leaves your machine.",
           },
           {
             icon: ShieldCheck,
@@ -569,8 +570,10 @@ function StepVoice({
     <div className="space-y-3">
       <p className="text-[13px] leading-relaxed text-white/85">
         Pick a default voice for NEO. Tone, pace and pitch are tuned by profile.
-        Live TTS playback is configured on the Voices screen — your selection here is
-        what NEO uses when speech is enabled.
+        Full per-voice uniqueness requires a configured cloud TTS backend; otherwise
+        every profile plays through your device&apos;s text-to-speech engine with the
+        profile&apos;s pitch and rate applied on top. The Voices screen banner shows
+        which mode is live right now.
       </p>
 
       <div className="grid max-h-[40dvh] grid-cols-1 gap-2 overflow-y-auto pr-1">
@@ -967,9 +970,9 @@ function StepMonitoring({
       >
         <p className="ps-mono text-[10px] tracking-[0.25em] ps-text-purple">HOW IT WORKS</p>
         <p className="mt-1 text-[12px] leading-snug text-white/80">
-          Monitoring uses the adapter that&apos;s active for this build. On Android
-          the scheduler is in-app — closing the app stops the loop. Notifications
-          require the permission you saw earlier.
+          Background scans run every ~30 minutes when Android background work is
+          permitted. On the browser preview the scheduler is in-app — closing the
+          tab stops the loop. Notifications require the permission you saw earlier.
         </p>
       </div>
     </div>
@@ -995,7 +998,7 @@ function StepComplete() {
             icon: Radar,
             color: "#39ff14",
             title: "Watch the Network",
-            body: "Open the Network screen any time to view the live map and alerts.",
+            body: "Open the Network screen any time. On the Android app you'll see live scan results; the browser preview always shows the simulated map.",
           },
           {
             icon: CircleHelp,

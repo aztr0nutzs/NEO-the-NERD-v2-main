@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Bell, Cpu, Signal, Wifi } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { MOOD_COLORS, MOOD_LABELS, PERSONALITIES, VOICES } from "@/lib/data"
+import { RuntimeModeChip } from "./runtime-mode-chip"
 
 export function AssistantStatusBar() {
   const { mood, voiceId, personalityId } = useApp()
@@ -53,6 +54,8 @@ export function AssistantStatusBar() {
           <span className="text-white/30">·</span>
           <span className="ps-text-pink">{personality?.name ?? "—"}</span>
         </div>
+
+        <RuntimeModeChip />
 
         <div className="flex items-center gap-3 text-white/70">
           <Signal className="h-3.5 w-3.5" />
