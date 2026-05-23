@@ -3,7 +3,7 @@
 import { AI_LEVELS } from "./knxt4-core"
 import { LEVELS, type Knxt4Save, TOKENS, winRate, xpProgress } from "./knxt4-meta"
 import { BackBtn, NeoAppBar, NeoChip, NeoDifficulty, NeoIcon, NeoPhone, TokenChip } from "./knxt4-phone"
-import { NeoRobot } from "./knxt4-robot"
+import { NeoAvatarVideo } from "@/components/avatar/neo-avatar-video"
 
 type GoTarget =
   | "hub"
@@ -67,7 +67,14 @@ export const HubScreen = ({ save, go, onClose }: ScreenProps) => {
             <div className="hub-hero__ring hub-hero__ring--mid" />
             <div className="hub-hero__ring hub-hero__ring--inner" />
           </div>
-          <div className="hub-hero__robot"><NeoRobot size={124} variant="full" emote="idle" /></div>
+          <div className="hub-hero__robot">
+            <NeoAvatarVideo
+              className="knxt4-hub-neo-avatar"
+              variant="stage"
+              active
+              ariaLabel="NEO robot avatar in Knxt 4"
+            />
+          </div>
           <div className="hub-hero__info">
             <div className="hub-hero__eyebrow">▶ OPERATOR.YOU · ONLINE</div>
             <div className="hub-hero__name">{(save.name || "COMMANDER").toUpperCase()}</div>

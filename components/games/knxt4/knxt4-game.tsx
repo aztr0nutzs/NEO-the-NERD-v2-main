@@ -23,7 +23,6 @@ import {
   movesToBoard,
 } from "./knxt4-meta"
 import { NeoChip, NeoIcon, NeoPhone } from "./knxt4-phone"
-import { NeoRobot } from "./knxt4-robot"
 import { Knxt4Board } from "./knxt4-board"
 import {
   ComingSoonScreen,
@@ -32,6 +31,7 @@ import {
   ModesScreen,
 } from "./knxt4-hub"
 import { useApp } from "@/lib/store"
+import { NeoAvatarVideo } from "@/components/avatar/neo-avatar-video"
 
 type Phase =
   | "idle"
@@ -402,7 +402,12 @@ const GameScreen = ({
         <div className={`neo-player neo-player--p2 ${curPlayer === 2 && phase !== "over" ? "neo-player--active" : ""}`}>
           <div className="neo-player__avatar neo-player__avatar--robot">
             {opponent === "ai" ?
-              <NeoRobot variant="head" size={42} emote={phase === "ai" ? "thinking" : phase === "over" && winInfo?.player === 2 ? "smug" : phase === "over" && winInfo?.player === 1 ? "sad" : "idle"} />
+              <NeoAvatarVideo
+                className="knxt4-player-neo-avatar"
+                variant="circle"
+                active
+                ariaLabel="NEO robot opponent avatar"
+              />
               : "P2"}
           </div>
           <div>

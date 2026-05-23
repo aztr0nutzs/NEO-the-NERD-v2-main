@@ -3248,3 +3248,235 @@
 }
 /* The harsh vignette is gone — masking on the video itself does the job cleanly */
 .knxt4-root .neo-robot-video__vignette{ display: none; }
+
+/* App-native Knxt4 layout overrides.
+   The original Knxt4 port was framed as a phone mockup. Inside the Android
+   app that created a second phone inside the real phone, so the game now uses
+   the app viewport directly and clamps every board layer to the available
+   width. */
+.knxt4-root{
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.knxt4-root .neo-phone{
+  width: 100%;
+  max-width: 100%;
+  min-height: calc(100dvh - 9.5rem);
+  height: auto;
+  border-radius: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.knxt4-root .neo-phone__screen{
+  width: 100%;
+  min-height: calc(100dvh - 9.5rem);
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.knxt4-root .neo-phone__bezel,
+.knxt4-root .neo-status,
+.knxt4-root .neo-nav{
+  display: none;
+}
+
+.knxt4-root .neo-screen{
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+.knxt4-root .neo-appbar{
+  padding: 8px 2px 6px;
+  gap: 8px;
+}
+
+.knxt4-root .neo-appbar__brand{
+  font-size: clamp(12px, 3.4vw, 16px);
+}
+
+.knxt4-root .neo-appbar__right{
+  gap: 5px;
+}
+
+.knxt4-root .neo-chip{
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.knxt4-root .hub-hero{
+  min-width: 0;
+}
+
+.knxt4-root .hub-hero__robot{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.knxt4-root .knxt4-hub-neo-avatar{
+  width: min(38vw, 150px);
+  height: min(46vw, 190px);
+  filter:
+    drop-shadow(0 0 18px rgba(0,232,255,0.38))
+    drop-shadow(0 0 32px rgba(179,107,255,0.18));
+}
+
+.knxt4-root .knxt4-player-neo-avatar{
+  width: 100%;
+  height: 100%;
+}
+
+.knxt4-root .neo-player__avatar--robot{
+  background:
+    radial-gradient(circle at 50% 42%, rgba(0,232,255,0.18), rgba(0,0,0,0.96) 72%) !important;
+  box-shadow:
+    0 0 12px rgba(0,232,255,0.45),
+    0 0 18px rgba(255,46,186,0.22),
+    inset 0 0 0 1.5px rgba(0,232,255,0.42) !important;
+}
+
+.knxt4-root .neo-player__avatar--robot video{
+  border-radius: 50%;
+}
+
+.knxt4-root .neo3d-stage{
+  width: 100%;
+  max-width: 100%;
+  padding: 4px 0 12px;
+  overflow: hidden;
+}
+
+.knxt4-root .lab-droparrows{
+  padding-left: clamp(20px, 6.5vw, 28px);
+  padding-right: clamp(20px, 6.5vw, 28px);
+}
+
+.knxt4-root .lab-mainrow{
+  grid-template-columns: clamp(12px, 4.2vw, 22px) minmax(0, 1fr) clamp(12px, 4.2vw, 22px);
+  gap: 1px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.knxt4-root .lab-side{
+  min-width: 0;
+}
+
+.knxt4-root .lab-tube,
+.knxt4-root .lab-meters{
+  max-width: 100%;
+}
+
+.knxt4-root .lab-tube__cap{
+  width: min(24px, 5vw);
+}
+
+.knxt4-root .lab-tube__cyl{
+  width: min(18px, 4vw);
+}
+
+.knxt4-root .lab-frame{
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.knxt4-root .lab-frame__rim{
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(4px, 1.5vw, 6px);
+}
+
+.knxt4-root .lab-frame__inner{
+  padding: clamp(3px, 1vw, 4px);
+}
+
+.knxt4-root .neo3d-grid{
+  width: 100%;
+  max-width: 100%;
+  gap: clamp(3px, 1vw, 5px);
+}
+
+.knxt4-root .lab-collabels{
+  padding-left: clamp(28px, 10vw, 50px);
+  padding-right: clamp(28px, 10vw, 50px);
+}
+
+.knxt4-root .neo-tray,
+.knxt4-root .neo-dock{
+  max-width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 430px){
+  .knxt4-root .neo-appbar{
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .knxt4-root .neo-icon-btn{
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .knxt4-root .neo-player{
+    min-height: 58px;
+    padding: 8px 8px 8px 48px;
+  }
+
+  .knxt4-root .neo-player--p2{
+    padding: 8px 48px 8px 8px;
+  }
+
+  .knxt4-root .neo-player__avatar{
+    width: 36px;
+    height: 36px;
+    left: 7px;
+    top: 9px;
+  }
+
+  .knxt4-root .neo-player--p2 .neo-player__avatar{
+    right: 7px;
+  }
+
+  .knxt4-root .neo-player__name{
+    font-size: 11px;
+  }
+
+  .knxt4-root .neo-player__meta{
+    font-size: 8px;
+    letter-spacing: 0.08em;
+  }
+
+  .knxt4-root .neo-player__score{
+    font-size: 17px;
+  }
+
+  .knxt4-root .neo-vs{
+    min-width: 44px;
+  }
+
+  .knxt4-root .neo-dock{
+    gap: 4px;
+    padding: 8px 2px;
+  }
+
+  .knxt4-root .neo-dock__btn{
+    height: 44px;
+  }
+
+  .knxt4-root .neo-dock__btn span{
+    font-size: 7px;
+    letter-spacing: 0.06em;
+  }
+}

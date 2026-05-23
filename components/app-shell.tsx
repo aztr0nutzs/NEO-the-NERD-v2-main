@@ -54,7 +54,7 @@ const POST_BOOT_BACKGROUND_DELAY_MS = 700
 export function AppShell() {
   const { screen, playAvatarReaction, settings } = useApp()
   const Active = SCREEN_MAP[screen]
-  const showPersistentOrb = screen !== "main" && screen !== "network"
+  const showPersistentOrb = screen !== "main" && screen !== "network" && screen !== "games"
   // Once the boot video finishes (or fails), unmount the overlay entirely.
   // Keeping it mounted leaves an idle React subtree that — while invisible —
   // can hold onto a detached <video> element and its decoder buffers.

@@ -58,30 +58,10 @@ export const NeoIcon = ({ name, size = 18, color = "currentColor", stroke = 1.6 
   }
 }
 
-const NeoStatusBar = () => (
-  <div className="neo-status">
-    <span>9:30</span>
-    <div className="neo-status__dot" />
-    <div className="neo-status__icons">
-      <NeoIcon name="wifi" size={12} color="var(--cyan)" />
-      <NeoIcon name="cell" size={12} color="var(--cyan)" />
-      <NeoIcon name="battery" size={12} color="var(--cyan)" />
-    </div>
-  </div>
-)
-
-const NeoNavBar = () => (
-  <div className="neo-nav">
-    <div className="neo-nav__pill" />
-  </div>
-)
-
 export const NeoPhone = ({ children }: { children: ReactNode; label?: string }) => (
   <div className="neo neo-phone">
     <div className="neo-phone__screen">
-      <NeoStatusBar />
       <div className="neo-screen">{children}</div>
-      <NeoNavBar />
     </div>
     <div className="neo-phone__bezel" />
   </div>
