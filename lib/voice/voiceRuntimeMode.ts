@@ -63,7 +63,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
     return {
       mode: "provider-active",
       tone: "ok",
-      headline: "HIGH-QUALITY PROVIDER VOICES ACTIVE",
+      headline: "PROVIDER TTS ACTIVE · REAL DISTINCT VOICES",
       detail: `Neural backend reachable. ${PROVIDER_DISTINCT_COUNT} profiles deliver a distinct provider timbre; the rest are styled variants on top of those base voices.`,
       distinctRealizableCount: PROVIDER_DISTINCT_COUNT,
       totalProfiles: total,
@@ -78,7 +78,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
       return {
         mode: "android-collapsed",
         tone: "critical",
-        headline: "ONLY 1 DEVICE VOICE AVAILABLE — PROFILES WILL SOUND SIMILAR",
+      headline: "ANDROID DEVICE TTS FALLBACK · PROFILES MAY SOUND IDENTICAL",
         detail: capabilities.remoteBackendConfigured
           ? "Backend is configured but provider TTS is unreachable, and this device exposes only one usable Android engine voice. Every profile is routed through that single voice with pitch/rate/style adjustments on top."
           : "Provider TTS is not configured and this device exposes only one usable Android engine voice. Every profile is routed through that single voice with pitch/rate/style adjustments on top.",
@@ -97,7 +97,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
     return {
       mode: "android-multi",
       tone: "warn",
-      headline: "ANDROID FALLBACK VOICE MODE",
+      headline: "ANDROID DEVICE TTS FALLBACK · PROFILES MAY SOUND IDENTICAL",
       detail: capabilities.remoteBackendConfigured
         ? `Backend is configured but provider TTS is unreachable. Android engine exposes ${voiceCount} voices — only ~${reachable} of ${total} profiles can be slotted to a distinct device voice; others are styled variants.`
         : `Provider backend is not configured. Android engine exposes ${voiceCount} voices — only ~${reachable} of ${total} profiles can be slotted to a distinct device voice; others are styled variants.`,
@@ -114,9 +114,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
     return {
       mode: "browser-only",
       tone: capabilities.remoteBackendConfigured ? "warn" : "critical",
-      headline: capabilities.remoteBackendConfigured
-        ? "PROVIDER UNREACHABLE — BROWSER SPEECH FALLBACK"
-        : "PROVIDER BACKEND NOT CONFIGURED — BROWSER SPEECH FALLBACK",
+      headline: "BROWSER SPEECH FALLBACK · STYLED ONLY",
       detail:
         "Every profile plays through the browser's SpeechSynthesis voice. Profile pitch, rate, and styling are applied, but the underlying timbre is whatever the WebView ships with.",
       distinctRealizableCount: 0,
@@ -129,7 +127,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
   return {
     mode: "unavailable",
     tone: "critical",
-    headline: "VOICE PLAYBACK UNAVAILABLE",
+    headline: "VOICE PROVIDER UNAVAILABLE",
     detail: "No speech engine is available in this runtime. Configure a backend or install an Android TTS engine.",
     distinctRealizableCount: 0,
     totalProfiles: total,

@@ -73,6 +73,21 @@ Machine-specific IDE metadata (`.idea/`, `*.iml`, `local.properties`, `.gradle/`
 ### Environment
 Copy `.env.example` to `.env.local` and populate any keys you need (TTS provider, etc.). Without those, the app runs against the in-browser local response engine.
 
+#### Provider TTS for Android APKs
+- Server/backend must define:
+  - `OPENAI_API_KEY`
+  - `OPENAI_TTS_MODEL=gpt-4o-mini-tts` (or another supported model)
+- Android/client build must define:
+  - `NEXT_PUBLIC_NEO_BACKEND_BASE_URL=https://your-deployed-backend-url.com`
+
+If you build an APK without `NEXT_PUBLIC_NEO_BACKEND_BASE_URL`, the app cannot call server `/api/tts` routes from the packaged WebView and will run Android device TTS fallback mode (profiles may sound identical).
+
+#### Provider voice diagnostics helper
+Use this to verify provider-backed voice IDs differ:
+```bash
+node scripts/test-provider-voices.mjs
+```
+
 ### Project layout
 - `app/` — Next.js App Router entry
 - `components/` — UI, avatar, boot, network, screens

@@ -81,6 +81,7 @@ export interface ProviderSpeechPayload {
   audioBase64: string
   fileName: string
   mimeType: string
+  providerVoiceId?: string
 }
 
 export interface VoicePreviewRequest {
