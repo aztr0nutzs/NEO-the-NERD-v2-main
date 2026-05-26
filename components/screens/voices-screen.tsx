@@ -40,6 +40,7 @@ import type { VoiceFilterState, VoiceProfile } from "@/lib/voice/types"
 import { IDLE_PLAYBACK_SNAPSHOT, type VoicePlaybackSnapshot } from "@/lib/voice/voicePlayback"
 import type { VoiceRuntimeBanner } from "@/lib/voice/voiceRuntimeMode"
 import { getRecommendedPersonalityNamesForVoice, getRecommendedVoiceProfiles } from "@/lib/assistant/assistantIntegrations"
+import { getCachedBackendHealth } from "@/lib/runtime/backend-health"
 
 export function VoicesScreen() {
   const {
@@ -71,6 +72,7 @@ export function VoicesScreen() {
     fileName: string
     mimeType: string
   } | null>(null)
+  const [lastProviderVoiceId, setLastProviderVoiceId] = useState<string | null>(null)
   const [voiceStatus, setVoiceStatus] = useState("VOICE PREVIEW READY")
   const [distinctOnly, setDistinctOnly] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
@@ -157,6 +159,7 @@ export function VoicesScreen() {
         setVoiceStatus(snapshot.message)
       },
     })
+    if (result.payload?.providerVoiceId) setLastProviderVoiceId(result.payload.providerVoiceId)
     if (!result.ok && result.error) setVoiceStatus(result.error.toUpperCase())
     setTimeout(() => setPreviewId(null), 900)
   }
@@ -189,6 +192,7 @@ export function VoicesScreen() {
     })
     if (result.payload) {
       setAudioPayload(result.payload)
+      if (result.payload.providerVoiceId) setLastProviderVoiceId(result.payload.providerVoiceId)
       playPayload(result.payload)
       setVoiceStatus("GENERATED AUDIO READY")
     } else {
@@ -230,6 +234,9 @@ export function VoicesScreen() {
         capabilities={capabilities}
         banner={runtimeBanner}
         activeVoiceId={voiceId}
+        providerModel={getCachedBackendHealth().providerStatus?.model ?? "—"}
+        providerVoiceId={lastProviderVoiceId}
+        selectedProfile={getVoiceProfile(voiceId)}
         playback={playback}
       />
 
@@ -840,6 +847,9 @@ function RuntimeDiagnosticsPanel({
   capabilities,
   banner,
   activeVoiceId,
+  providerModel,
+  providerVoiceId,
+  selectedProfile,
   playback,
 }: {
   open: boolean
@@ -847,8 +857,12 @@ function RuntimeDiagnosticsPanel({
   capabilities: VoiceRuntimeCapabilities
   banner: VoiceRuntimeBanner
   activeVoiceId: string
+  providerModel: string
+  providerVoiceId: string | null
+  selectedProfile: VoiceProfile
   playback: VoicePlaybackSnapshot
 }) {
+  const distinctness = getVoiceUniquenessCategory(selectedProfile, capabilities)
   return (
     <div className="rounded-xl ps-glass p-3" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
       <button
@@ -870,11 +884,14 @@ function RuntimeDiagnosticsPanel({
           <DiagRow label="Active preview path" value={capabilities.currentPreviewMode.toUpperCase()} />
           <DiagRow label="Backend configured" value={capabilities.remoteBackendConfigured ? "YES" : "NO"} />
           <DiagRow label="Provider TTS reachable" value={capabilities.providerTtsAvailable ? "YES" : "NO"} />
+          <DiagRow label="Provider model" value={providerModel || "—"} />
           <DiagRow label="Native Android TTS" value={capabilities.nativeAndroidTtsAvailable ? "READY" : "OFF"} />
           <DiagRow label="Native voice count" value={String(capabilities.nativeAndroidVoiceCount)} />
           <DiagRow label="Selected Android voice" value={capabilities.selectedAndroidVoiceName ?? "—"} />
           <DiagRow label="Browser speech" value={capabilities.browserSpeechSupported ? "SUPPORTED" : "OFF"} />
           <DiagRow label="Selected profile ID" value={activeVoiceId} />
+          <DiagRow label="Provider voice ID" value={providerVoiceId ?? "—"} />
+          <DiagRow label="Distinctness class" value={distinctness.toUpperCase()} />
           <DiagRow label="Distinct realizable" value={`${banner.distinctRealizableCount} / ${banner.totalProfiles}`} />
           <DiagRow label="Last playback state" value={playback.state.toUpperCase()} />
           <DiagRow label="Last playback source" value={(playback.source ?? "—").toString().toUpperCase()} />

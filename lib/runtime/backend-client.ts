@@ -49,6 +49,8 @@ export interface TtsPreviewPayload {
   audioBase64: string;
   fileName: string;
   mimeType: string;
+  provider?: string;
+  providerVoiceId?: string;
 }
 
 export interface TtsPreviewResult {
@@ -184,6 +186,9 @@ export async function postTtsPreview(
       audioBase64: payload.audioBase64,
       fileName: payload.fileName,
       mimeType: payload.mimeType ?? "audio/mpeg",
+      provider: typeof payload.provider === "string" ? payload.provider : undefined,
+      providerVoiceId:
+        typeof payload.providerVoiceId === "string" ? payload.providerVoiceId : undefined,
     };
     return { outcome: "remote-success", payload: result, health: getCachedBackendHealth() };
   } catch (error) {
