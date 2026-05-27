@@ -2887,18 +2887,18 @@
 
 /* Robot face inside the player slot avatar */
 .knxt4-root .neo-player__avatar--robot{
-  background: radial-gradient(circle at 50% 38%, #1a1c25 0%, #050608 100%) !important;
-  box-shadow:
-    0 0 12px var(--magenta),
-    inset 0 0 0 1.5px rgba(255,46,186,0.55),
-    inset 0 0 10px rgba(255,46,186,0.2) !important;
+  width: 58px;
+  height: 58px;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
   display: flex;
   align-items: center; justify-content: center;
   overflow: hidden;
   padding: 0 !important;
 }
 .knxt4-root .neo-player__avatar--robot .neo-robot{
-  transform: scale(1.4) translateY(2px);
+  transform: scale(1.55) translateY(1px);
   transform-origin: center center;
 }
 .knxt4-root .neo-player__avatar--robot .neo-robot__svg{ overflow: visible; }
@@ -3337,35 +3337,28 @@
 }
 
 .knxt4-root .neo-player__avatar--robot{
-  background:
-    radial-gradient(circle at 50% 42%, rgba(0,232,255,0.18), rgba(0,0,0,0.96) 72%) !important;
-  box-shadow:
-    0 0 12px rgba(0,232,255,0.45),
-    0 0 18px rgba(255,46,186,0.22),
-    inset 0 0 0 1.5px rgba(0,232,255,0.42) !important;
-}
-
-.knxt4-root .neo-player__avatar--robot video{
-  border-radius: 50%;
-}
-
-.knxt4-root .neo3d-stage{
-  width: 100%;
-  max-width: 100%;
-  padding: 4px 0 12px;
+  width: 58px;
+  height: 58px;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  padding: 0 !important;
 }
+
+.knxt4-root .neo-player__avatar--robot .neo-robot{
+  transform: scale(1.55) translateY(1px);
+  transform-origin: center center;
+}
+
+.knxt4-root .neo-player__avatar--robot .neo-robot__svg{ overflow: visible; }
 
 .knxt4-root .lab-droparrows{
   padding-left: clamp(20px, 6.5vw, 28px);
   padding-right: clamp(20px, 6.5vw, 28px);
-}
-
-.knxt4-root .lab-mainrow{
-  grid-template-columns: clamp(12px, 4.2vw, 22px) minmax(0, 1fr) clamp(12px, 4.2vw, 22px);
-  gap: 1px;
-  width: 100%;
-  max-width: 100%;
 }
 
 .knxt4-root .lab-side{

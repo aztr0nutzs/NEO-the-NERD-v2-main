@@ -12,15 +12,6 @@ interface NeoRobotAvatarProps {
 export function NeoRobotAvatar({ status, message, onClick }: NeoRobotAvatarProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const statusColors = {
-    idle: { ring: "border-cyan-500/50", glow: "rgba(34,211,238,0.3)" },
-    scanning: { ring: "border-purple-500", glow: "rgba(168,85,247,0.5)" },
-    alert: { ring: "border-orange-500", glow: "rgba(249,115,22,0.5)" },
-    success: { ring: "border-green-500", glow: "rgba(34,197,94,0.5)" },
-  };
-
-  const colors = statusColors[status];
-
   return (
     <div className="relative">
       {/* Robot container */}
@@ -33,54 +24,20 @@ export function NeoRobotAvatar({ status, message, onClick }: NeoRobotAvatarProps
           ${isHovered ? "scale-105" : "scale-100"}
         `}
       >
-        {/* Outer glow ring */}
-        <div
-          className={`
-            absolute -inset-2 rounded-full border-2 transition-all duration-300
-            ${colors.ring}
-            ${status === "scanning" ? "animate-pulse" : ""}
-          `}
-          style={{
-            boxShadow: `0 0 20px ${colors.glow}`,
-          }}
-        />
-
-        {/* Rotating ring for scanning */}
-        {status === "scanning" && (
-          <div
-            className="absolute -inset-4 rounded-full border border-dashed border-purple-500/50"
-            style={{ animation: "spin 8s linear infinite" }}
-          />
-        )}
-
         {/*
-          Robot video — the `circle` variant owns the circular clip + feather
-          mask + object-cover framing, so the robot fills the circle cleanly
-          with no inner black rectangle and no reliance on blend modes.
+          Robot video — the `screen` variant owns the feathered cutout framing,
+          so the robot fills the compact surface cleanly with no outer ring and
+          no reliance on blend modes.
         */}
-        <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+        <div className="relative h-28 w-28 sm:h-32 sm:w-32">
           <NeoAvatarVideo
             className="absolute inset-0 h-full w-full"
-            variant="circle"
+            variant="screen"
             reactionKey={status === "scanning" ? "thinking" : status === "alert" ? "surprised" : null}
             reactionId={status === "scanning" ? 1 : status === "alert" ? 2 : null}
             ariaLabel="N.E.O. network avatar"
           />
         </div>
-
-        {/* Status indicator */}
-        <div
-          className={`
-            absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-black
-            ${status === "idle" ? "bg-cyan-400" : ""}
-            ${status === "scanning" ? "animate-pulse bg-purple-500" : ""}
-            ${status === "alert" ? "animate-pulse bg-orange-500" : ""}
-            ${status === "success" ? "bg-green-500" : ""}
-          `}
-          style={{
-            boxShadow: `0 0 8px ${colors.glow}`,
-          }}
-        />
       </button>
 
       {/* Speech bubble message */}
@@ -110,20 +67,19 @@ export function NeoRobotBadge({
   size?: "sm" | "md";
 }) {
   const sizeClasses = {
-    sm: "h-8 w-8",
-    md: "h-12 w-12",
+    sm: "h-10 w-10",
+    md: "h-14 w-14",
   };
 
   return (
     <div className={`relative ${sizeClasses[size]}`}>
       <NeoAvatarVideo
         className="absolute inset-0 h-full w-full"
-        variant="circle"
+        variant="screen"
+        reactionKey={status === "scanning" ? "thinking" : status === "alert" ? "surprised" : null}
+        reactionId={status === "scanning" ? 1 : status === "alert" ? 2 : null}
         ariaLabel="N.E.O. network badge avatar"
       />
-      {status === "scanning" && (
-        <div className="absolute inset-0 z-20 animate-pulse rounded-full ring-2 ring-purple-500/50" />
-      )}
     </div>
   );
 }

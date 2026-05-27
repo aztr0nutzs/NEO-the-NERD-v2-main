@@ -403,7 +403,7 @@ const GameScreen = ({
             {opponent === "ai" ?
               <NeoAvatarVideo
                 className="knxt4-player-neo-avatar"
-                variant="circle"
+                  variant="screen"
                 active
                 ariaLabel="NEO robot opponent avatar"
               />

@@ -31,12 +31,12 @@ export interface NeoAvatarVideoHandle {
  *     floor strip out of view
  *   - a feathered `mask-image` (CSS masks, `-webkit-mask-image` — reliable on
  *     Android WebView) that fades the rectangular video edge into transparency
- *   - `overflow-hidden` + `rounded-full` for the circular surfaces, so the
- *     rectangle is physically clipped to the circle
+ *   - `overflow-hidden` + surface-specific framing so the rectangle is
+ *     physically clipped without leaving a hard chrome ring around the robot
  * The near-black video background then sits invisibly on the app's near-black
- * stage/circle backing, with no hard box edge.
+ * stage/surface backing, with no hard box edge.
  */
-export type AvatarVariant = "stage" | "circle" | "bare"
+export type AvatarVariant = "stage" | "screen" | "bare"
 
 interface NeoAvatarVideoProps {
   className?: string
@@ -48,8 +48,9 @@ interface NeoAvatarVideoProps {
   ariaLabel?: string
   onReactionComplete?: () => void
   /**
-   * Compositing variant. `stage` = large main robot stage, `circle` = circular
-   * surfaces (Network avatar, persistent orb, badge), `bare` = unmasked raw.
+  * Compositing variant. `stage` = large main robot stage, `screen` = compact
+  * avatar surfaces (Network avatar, persistent orb, badge, opponent icons),
+  * `bare` = unmasked raw.
    */
   variant?: AvatarVariant
 }
@@ -59,10 +60,10 @@ interface NeoAvatarVideoProps {
 const STAGE_MASK =
   "radial-gradient(ellipse 74% 91% at 50% 43%, #000 0%, #000 54%, rgba(0,0,0,0.86) 66%, rgba(0,0,0,0.46) 79%, rgba(0,0,0,0.12) 90%, rgba(0,0,0,0) 100%)"
 
-// Soft inner-edge mask for circular surfaces — softens the hard circular clip
-// so it never reads as a stark cut, while staying opaque across the robot.
-const CIRCLE_MASK =
-  "radial-gradient(circle at 50% 50%, #000 0%, #000 82%, rgba(0,0,0,0.4) 93%, rgba(0,0,0,0) 100%)"
+// Soft inner-edge mask for compact avatar surfaces. The fade is broad enough
+// to hide the rectangular clip while keeping the robot itself fully readable.
+const SCREEN_MASK =
+  "radial-gradient(ellipse 72% 88% at 50% 46%, #000 0%, #000 60%, rgba(0,0,0,0.88) 73%, rgba(0,0,0,0.46) 87%, rgba(0,0,0,0) 100%)"
 
 interface VariantConfig {
   wrapper: string
@@ -85,13 +86,13 @@ const VARIANT_CONFIG: Record<AvatarVariant, VariantConfig> = {
     // showing the robot down past the glowing chest core.
     videoStyle: { objectPosition: "50% 18%", transform: "scale(1.14)" },
   },
-  circle: {
-    wrapper: "relative isolate overflow-hidden rounded-full bg-[#05060a]",
-    wrapperStyle: { maskImage: CIRCLE_MASK, WebkitMaskImage: CIRCLE_MASK },
+  screen: {
+    wrapper: "relative isolate overflow-hidden bg-transparent",
+    wrapperStyle: { maskImage: SCREEN_MASK, WebkitMaskImage: SCREEN_MASK },
     video: "h-full w-full object-cover",
-    // Frame the head + glowing chest core inside the circle; scale up so the
-    // robot fills the circular viewport edge-to-edge with no inner gap.
-    videoStyle: { objectPosition: "50% 22%", transform: "scale(1.14)" },
+    // Frame the head + glowing chest core so the robot fills the compact
+    // avatar cutout edge-to-edge with no inner gap.
+    videoStyle: { objectPosition: "50% 20%", transform: "scale(1.22)" },
   },
   bare: {
     wrapper: "",
@@ -238,20 +239,6 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
               // video so the robot reads as recessed into the reactor chamber.
               background:
                 "radial-gradient(ellipse 54% 72% at 50% 42%, rgba(0,0,0,0) 48%, rgba(0,0,0,0.26) 68%, rgba(0,0,0,0.72) 91%, rgba(0,0,0,0.92) 100%)",
-            }}
-          />
-        )}
-        {variant === "circle" && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-10 rounded-full"
-            style={{
-              // Inner edge highlight + floor shadow so the circular viewport
-              // looks like an intentional lens, not a flat crop.
-              boxShadow:
-                "inset 0 0 14px rgba(0,0,0,0.7), inset 0 2px 10px rgba(0,0,0,0.55)",
-              background:
-                "radial-gradient(circle at 50% 38%, rgba(0,0,0,0) 52%, rgba(0,0,0,0.32) 82%, rgba(0,0,0,0.7) 100%)",
             }}
           />
         )}
