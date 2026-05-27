@@ -882,6 +882,10 @@ function RuntimeDiagnosticsPanel({
         <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
           <DiagRow label="Runtime mode" value={banner.mode.toUpperCase()} />
           <DiagRow label="Active preview path" value={capabilities.currentPreviewMode.toUpperCase()} />
+          <DiagRow label="Active engine" value={capabilities.activeProvider.toUpperCase()} />
+          <DiagRow label="OpenAI backend configured" value={capabilities.remoteBackendConfigured ? "YES" : "NO"} />
+          <DiagRow label="OmniVoice backend configured" value={capabilities.omnivoiceBackendConfigured ? "YES" : "NO"} />
+          <DiagRow label="OmniVoice backend reachable" value={capabilities.omnivoiceBackendReachable ? "YES" : "NO"} />
           <DiagRow label="Backend configured" value={capabilities.remoteBackendConfigured ? "YES" : "NO"} />
           <DiagRow label="Provider TTS reachable" value={capabilities.providerTtsAvailable ? "YES" : "NO"} />
           <DiagRow label="Provider model" value={providerModel || "—"} />
@@ -892,6 +896,8 @@ function RuntimeDiagnosticsPanel({
           <DiagRow label="Selected profile ID" value={activeVoiceId} />
           <DiagRow label="Provider voice ID" value={providerVoiceId ?? "—"} />
           <DiagRow label="Distinctness class" value={distinctness.toUpperCase()} />
+          <DiagRow label="Selected provider" value={(selectedProfile.provider ?? "fallback").toUpperCase()} />
+          <DiagRow label="Fallback reason" value={capabilities.currentPreviewMode === "provider-tts" ? "NONE" : "PROVIDER NOT ACTIVE"} />
           <DiagRow label="Distinct realizable" value={`${banner.distinctRealizableCount} / ${banner.totalProfiles}`} />
           <DiagRow label="Last playback state" value={playback.state.toUpperCase()} />
           <DiagRow label="Last playback source" value={(playback.source ?? "—").toString().toUpperCase()} />

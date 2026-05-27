@@ -153,6 +153,12 @@ export interface VoiceProfile {
    * This is NOT authored — it's runtime-resolved per call.
    */
   nativeVoiceResolution?: NativeVoiceResolution
+  provider?: "openai" | "omnivoice" | "fallback"
+  omnivoiceMode?: "clone" | "design"
+  omnivoiceRefAudioId?: string
+  omnivoiceRefText?: string
+  omnivoiceInstruct?: string
+  languageId?: string
   /** Optional: pacing/cadence shape applied on top of slider rate. */
   cadenceProfile?: VoiceCadenceProfile
   /** Optional: 1..5 commanding presence/authority intensity for delivery. */
