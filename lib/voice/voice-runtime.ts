@@ -133,6 +133,20 @@ function profileCanUseProvider(profile: VoiceProfile) {
   return Boolean(getVoiceProviderConfig(profile.id)?.available)
 }
 
+function providerTtsAvailableForProfile(
+  profile: VoiceProfile | undefined,
+  input: {
+    remoteBackendConfigured: boolean
+    providerConfigured: boolean
+    omnivoiceBackendConfigured: boolean
+  },
+) {
+  if (profile?.provider === "omnivoice") {
+    return input.omnivoiceBackendConfigured
+  }
+  return input.remoteBackendConfigured && input.providerConfigured
+}
+
 export function getVoiceProfileCapabilities(profile: VoiceProfile) {
   return {
     providerReady: profileCanUseProvider(profile),
@@ -161,11 +175,15 @@ export async function getVoiceRuntimeCapabilities(
   const omnivoiceBackendReachable = omnivoiceBackendConfigured
   const nativeAndroidTtsAvailable = Boolean(nativeTts.available && nativeTts.ready)
   const remoteBackendConfigured = Boolean(config && config.mode !== "unavailable")
-  const providerTtsAvailable = Boolean(
-    remoteBackendConfigured &&
-      health?.state === "available" &&
+  const providerConfigured = Boolean(
+    health?.state === "available" &&
       health.providerStatus?.providerConfigured,
   )
+  const providerTtsAvailable = providerTtsAvailableForProfile(profile, {
+    remoteBackendConfigured,
+    providerConfigured,
+    omnivoiceBackendConfigured,
+  })
   const selectedAndroidVoiceName =
     nativeAndroidTtsAvailable && profile ? await selectAndroidNativeVoiceName(profile) : null
 
@@ -217,11 +235,15 @@ export function getCachedVoiceRuntimeCapabilities(
   const omnivoiceBackendReachable = omnivoiceBackendConfigured
   const remoteBackendConfigured = health.mode !== "unavailable"
   const nativeAndroidTtsAvailable = isAndroidNativeTtsRuntime()
-  const providerTtsAvailable = Boolean(
-    remoteBackendConfigured &&
-      health.state === "available" &&
+  const providerConfigured = Boolean(
+    health.state === "available" &&
       health.providerStatus?.providerConfigured,
   )
+  const providerTtsAvailable = providerTtsAvailableForProfile(profile, {
+    remoteBackendConfigured,
+    providerConfigured,
+    omnivoiceBackendConfigured,
+  })
 
   let currentPreviewMode: VoicePreviewMode = "unavailable"
   if (profile) {

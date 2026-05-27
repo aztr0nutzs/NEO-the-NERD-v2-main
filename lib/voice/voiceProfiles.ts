@@ -329,6 +329,7 @@ function profile(
   const emotionalInstructions = override.emotionalInstructions ?? synthesizeEmotionalInstructions(toneProfile, energyLevel, humorLevel)
   const cadenceProfile = override.cadenceProfile ?? defaultCadence(toneProfile, energyLevel)
   const authorityLevel = override.authorityLevel ?? defaultAuthority(toneProfile, energyLevel, roboticnessLevel)
+  const omnivoiceOverride = OMNIVOICE_PROFILE_OVERRIDES[id]
   return {
     id,
     displayName: name,
@@ -369,6 +370,7 @@ function profile(
     cadenceProfile,
     authorityLevel,
     nativeVoicePreference,
+    ...omnivoiceOverride,
   }
 }
 
