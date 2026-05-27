@@ -1,8 +1,8 @@
 "use client";
 
-import { Radar, Square, Clock, Zap, Scale, Search, Wifi } from "lucide-react";
+import { Radar, Square, Clock, Zap, Scale, Search, Wifi, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { NetworkStatus, ScanComparisonSummary, ScanCompletionResult, ScanMode } from "@/lib/network/types";
+import type { NetworkAdapterStatus, NetworkStatus, ScanComparisonSummary, ScanCompletionResult, ScanMode } from "@/lib/network/types";
 
 interface NetworkScanPanelProps {
   status: NetworkStatus;
@@ -17,28 +17,76 @@ interface NetworkScanPanelProps {
   isRequestingPermissions?: boolean;
   lastScanDelta?: ScanComparisonSummary | null;
   lastScanResult?: ScanCompletionResult | null;
+  adapterStatus?: NetworkAdapterStatus;
 }
 
-const SCAN_MODES: { mode: ScanMode; label: string; icon: typeof Zap; description: string }[] = [
+const SCAN_MODES: {
+  mode: ScanMode;
+  label: string;
+  icon: typeof Zap;
+  description: string;
+  estimate: string;
+  coverage: string;
+  bestFor: string;
+  methods: string;
+  recommended?: boolean;
+}[] = [
   {
     mode: "quick",
-    label: "QUICK",
+    label: "QUICK SCAN",
     icon: Zap,
-    description: "Context + gateway + shallow host probe",
+    description: "Fastest check for gateway and nearby responsive hosts.",
+    estimate: "~5-20 sec",
+    coverage: "Up to 64 centered hosts",
+    bestFor: "Quick sanity check",
+    methods: "Gateway, ARP cache, tcp/80 and tcp/443",
   },
   {
     mode: "balanced",
-    label: "BALANCED",
+    label: "BALANCED SCAN",
     icon: Scale,
-    description: "Quick + ARP/MAC + hostname + SSDP + bounded ports",
+    description: "Recommended normal scan for most home Wi-Fi networks.",
+    estimate: "~25-60 sec",
+    coverage: "Up to /24 or 254 hosts",
+    bestFor: "Normal inventory",
+    methods: "ARP, hostname, SSDP/UPnP, tcp/80/443/22/8080",
+    recommended: true,
   },
   {
     mode: "deep",
-    label: "DEEP",
+    label: "DEEP SCAN",
     icon: Search,
-    description: "Balanced + larger cap + expanded bounded ports",
+    description: "Slower scan with wider service probing.",
+    estimate: "~75-150 sec",
+    coverage: "Up to /24 or 254 hosts",
+    bestFor: "Harder-to-find devices",
+    methods: "Balanced plus tcp/53/139/445/8443",
   },
 ];
+
+const SCAN_PHASES = [
+  "preparing",
+  "checking gateway",
+  "scanning subnet",
+  "reading ARP cache",
+  "probing common ports",
+  "checking SSDP/UPnP",
+  "classifying devices",
+  "building map",
+] as const;
+
+function getScanPhase(progress: number) {
+  const index = Math.min(SCAN_PHASES.length - 1, Math.floor((Math.max(0, progress) / 100) * SCAN_PHASES.length));
+  return SCAN_PHASES[index];
+}
+
+function getNextAction(reason: string | null | undefined) {
+  if (!reason) return null;
+  if (/permission|denied/i.test(reason)) return "Grant Location and Nearby Wi-Fi permission, then retry.";
+  if (/subnet|local ip|gateway|wifi|wi-fi/i.test(reason)) return "Connect to Wi-Fi on a physical Android device and keep Location Services enabled.";
+  if (/timeout|unresponsive/i.test(reason)) return "Restart the app, keep the phone awake, and retry Balanced before Deep.";
+  return "Open diagnostics below, check the runtime state, then retry when the blocker is cleared.";
+}
 
 export function NetworkScanPanel({
   status,
@@ -53,11 +101,16 @@ export function NetworkScanPanel({
   isRequestingPermissions = false,
   lastScanDelta,
   lastScanResult,
+  adapterStatus,
 }: NetworkScanPanelProps) {
   const isScanning = status.scanState === "scanning";
   const scanFailed = status.scanState === "failed";
   const scanCancelled = status.scanState === "cancelled";
   const coverage = lastScanResult?.coverage ?? null;
+  const selectedModeMeta = SCAN_MODES.find((mode) => mode.mode === selectedMode) ?? SCAN_MODES[1];
+  const phase = getScanPhase(scanProgress);
+  const failureNextAction = getNextAction(lastScanResult?.failureReason);
+  const canScanLive = isDemoMode || (!permissionDenied && adapterStatus?.mode !== "native-unavailable");
 
   const formatLastScan = (timestamp: string | null) => {
     if (!timestamp) return "Never";
@@ -89,15 +142,39 @@ export function NetworkScanPanel({
         </div>
       </div>
 
+      <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3">
+        <div className="flex items-start gap-2">
+          {canScanLive ? (
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+          ) : (
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-300" />
+          )}
+          <div className="min-w-0">
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-cyan-300">
+              {canScanLive ? "READY TO SCAN" : "SCAN SETUP NEEDED"}
+            </p>
+            <p className="mt-1 font-mono text-[10px] leading-relaxed text-gray-300/90">
+              {isDemoMode
+                ? "Demo Preview is active. Results are simulated and clearly labeled; switch Demo Mode off on Android for real LAN discovery."
+                : permissionDenied
+                  ? "Android Location/Nearby Wi-Fi permission is required before local Wi-Fi discovery can run."
+                  : adapterStatus?.mode === "native-unavailable"
+                    ? adapterStatus.message
+                    : `${selectedModeMeta.label} will run ${selectedModeMeta.methods}. Discovery is based on devices that respond; hidden or sleeping devices may not appear.`}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Scan Mode Selector */}
-      <div className="grid grid-cols-3 gap-2">
-        {SCAN_MODES.map(({ mode, label, icon: Icon, description }) => (
+      <div className="grid gap-2 sm:grid-cols-3">
+        {SCAN_MODES.map(({ mode, label, icon: Icon, description, estimate, coverage: modeCoverage, bestFor, recommended }) => (
           <button
             key={mode}
             onClick={() => !isScanning && onModeChange(mode)}
             disabled={isScanning}
             className={`
-              relative flex flex-col items-center gap-1 rounded-lg border p-3
+              relative flex min-h-[150px] flex-col items-start gap-1 rounded-lg border p-3 text-left
               font-mono text-xs transition-all duration-200
               ${
                 selectedMode === mode
@@ -107,9 +184,20 @@ export function NetworkScanPanel({
               ${isScanning ? "cursor-not-allowed opacity-50" : "cursor-pointer"}
             `}
           >
-            <Icon className="h-4 w-4" />
-            <span className="font-bold tracking-wider">{label}</span>
-            <span className="text-[10px] text-gray-500">{description}</span>
+            <div className="flex w-full items-center gap-2">
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="font-bold tracking-wider">{label}</span>
+            </div>
+            {recommended && (
+              <span className="rounded border border-lime-400/40 bg-lime-400/10 px-1.5 py-0.5 text-[8px] uppercase tracking-[0.16em] text-lime-300">
+                Recommended
+              </span>
+            )}
+            <span className="text-[10px] leading-relaxed text-gray-400">{description}</span>
+            <span className="mt-auto text-[9px] uppercase tracking-[0.12em] text-cyan-300/85">
+              {estimate} · {modeCoverage}
+            </span>
+            <span className="text-[9px] uppercase tracking-[0.12em] text-gray-500">{bestFor}</span>
             {selectedMode === mode && (
               <div className="absolute -right-px -top-px h-2 w-2 rounded-bl rounded-tr bg-cyan-400" />
             )}
@@ -121,8 +209,8 @@ export function NetworkScanPanel({
       {isScanning && (
         <div className="space-y-2">
           <div className="flex items-center justify-between font-mono text-xs">
-            <span className="text-cyan-400">
-              {isDemoMode ? "RUNNING_PREVIEW_SCAN..." : "SCANNING_NETWORK..."}
+            <span className="text-cyan-400 uppercase">
+              {isDemoMode ? "running preview scan" : phase}
             </span>
             <span className="text-cyan-300">{Math.round(scanProgress)}%</span>
           </div>
@@ -136,10 +224,18 @@ export function NetworkScanPanel({
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-400" />
             <span className="animate-pulse">
               {isDemoMode && "Simulating browser-preview discovery data..."}
-              {!isDemoMode && selectedMode === "quick" && "Resolving local context + gateway + shallow host probe..."}
-              {!isDemoMode && selectedMode === "balanced" && "Running ARP/MAC, hostname, SSDP, and bounded port probes..."}
-              {!isDemoMode && selectedMode === "deep" && "Running expanded local host cap, timeout, and bounded port/service inference..."}
+              {!isDemoMode && `${selectedModeMeta.methods}. Host count updates when native scan returns.`}
             </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className="rounded border border-gray-800 bg-black/35 p-2">
+              <p className="font-mono text-gray-500">SCANNED_HOSTS</p>
+              <p className="font-mono text-gray-300">AVAILABLE AFTER SCAN</p>
+            </div>
+            <div className="rounded border border-gray-800 bg-black/35 p-2">
+              <p className="font-mono text-gray-500">DISCOVERED_HOSTS</p>
+              <p className="font-mono text-gray-300">{status.devicesFound}</p>
+            </div>
           </div>
         </div>
       )}
@@ -190,6 +286,35 @@ export function NetworkScanPanel({
           <p className="mt-1 font-mono text-[10px] leading-relaxed text-red-200/85">
             {lastScanResult.failureReason}
           </p>
+          {failureNextAction && (
+            <p className="mt-2 font-mono text-[10px] leading-relaxed text-red-100/90">
+              NEXT: {failureNextAction}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!isScanning && lastScanResult?.status === "complete" && (
+        <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p className="font-mono text-xs font-bold uppercase tracking-wider text-emerald-300">
+              LAST_SCAN_SUMMARY
+            </p>
+            <span className="font-mono text-[10px] uppercase tracking-wider text-gray-500">
+              {Math.round(lastScanResult.durationMs / 1000)}s · {isDemoMode ? "demo" : "native android"}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <DeltaBadge label="DISCOVERED" value={coverage?.discoveredHosts ?? status.devicesFound} />
+            <DeltaBadge label="NEW" value={lastScanDelta?.newDeviceIds.length ?? 0} />
+            <DeltaBadge label="UNKNOWN" value={status.unknownDevices} />
+            <DeltaBadge label="ROUTER" value={status.gatewayIp && status.gatewayIp !== "Unavailable" ? 1 : 0} />
+          </div>
+          {status.devicesFound === 0 && (
+            <p className="mt-2 font-mono text-[10px] leading-relaxed text-yellow-100/80">
+              No devices responded. This can happen if devices are asleep, blocked by firewall, isolated by the router, or Android permissions/network access are limited.
+            </p>
+          )}
         </div>
       )}
 

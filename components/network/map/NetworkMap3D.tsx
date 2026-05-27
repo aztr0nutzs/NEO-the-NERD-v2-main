@@ -332,7 +332,12 @@ export function NetworkMap3D({
           className="relative h-[430px] overflow-hidden rounded-lg border border-cyan-500/20 bg-black/70 sm:h-[520px]"
         >
           <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_20%,rgba(34,211,238,0.13),transparent_45%)]" />
-          {loadError ? (
+          {devices.length === 0 && scanState !== "scanning" ? (
+            <NetworkMapFallback
+              message="No discovered devices to map yet. Run a scan from the Scan tab. Live LAN discovery requires Android native runtime, Wi-Fi, Location permission, and devices that respond to ARP/TCP/SSDP probes."
+              topologyGraph={topologyGraph}
+            />
+          ) : loadError ? (
             <NetworkMapFallback message={loadError} topologyGraph={topologyGraph} />
           ) : !webglAvailable ? (
             <NetworkMapFallback topologyGraph={topologyGraph} />

@@ -13,6 +13,7 @@ import type {
   RouterStatus,
   ScanCompletionResult,
   ScanMode,
+  DiscoveredDevice,
 } from "@/lib/network/types";
 
 interface NetworkDiagnosticsPanelProps {
@@ -27,6 +28,7 @@ interface NetworkDiagnosticsPanelProps {
   lastScanResult: ScanCompletionResult | null;
   topologyGraph: NetworkTopologyGraph | null;
   routerStatus: RouterStatus;
+  devices: DiscoveredDevice[];
   routerCapabilities: RouterCapability[];
   routerControlMode: RouterControlMode;
   onRefresh: () => void;
@@ -44,6 +46,7 @@ export function NetworkDiagnosticsPanel({
   lastScanResult,
   topologyGraph,
   routerStatus,
+  devices,
   routerCapabilities,
   routerControlMode,
   onRefresh,
@@ -80,6 +83,13 @@ export function NetworkDiagnosticsPanel({
     localIp,
     connectionType: localContext?.connectionType ?? networkStatus.connectionType,
   });
+  const arpEntries = devices.filter((device) => device.discoverySources.includes("arp")).length;
+  const ssdpResponses = devices.filter((device) => device.discoverySources.includes("ssdp")).length;
+  const tcpProbeHits = devices.filter((device) => device.discoverySources.includes("tcp-probe")).length;
+  const probeFailures =
+    coverage && coverage.scannedHosts >= 0
+      ? Math.max(0, coverage.scannedHosts - tcpProbeHits)
+      : null;
 
   return (
     <section className="rounded-lg border border-cyan-500/30 bg-black/60 p-4 backdrop-blur-sm">
@@ -116,6 +126,9 @@ export function NetworkDiagnosticsPanel({
         <Diag label="Scan mode" value={selectedMode.toUpperCase()} />
         <Diag label="Scanned hosts" value={coverage ? String(coverage.scannedHosts) : "NONE"} tone={coverage ? "ok" : "muted"} />
         <Diag label="Discovered hosts" value={coverage ? String(coverage.discoveredHosts) : String(networkStatus.devicesFound)} tone={networkStatus.devicesFound > 0 ? "ok" : "warn"} />
+        <Diag label="ARP entries read" value={coverage ? String(arpEntries) : "NOT RUN"} tone={arpEntries > 0 ? "ok" : "muted"} />
+        <Diag label="SSDP responses" value={coverage ? String(ssdpResponses) : "NOT RUN"} tone={ssdpResponses > 0 ? "ok" : "muted"} />
+        <Diag label="Probe hits/fails" value={coverage ? `${tcpProbeHits}/${probeFailures ?? "UNKNOWN"}` : "NOT RUN"} tone={tcpProbeHits > 0 ? "ok" : "muted"} />
         <Diag label="Last scan duration" value={lastScanResult ? `${Math.round(lastScanResult.durationMs / 1000)}S` : "NONE"} />
         <Diag label="Last scan error" value={lastScanResult?.failureReason ?? "NONE"} tone={lastScanResult?.failureReason ? "critical" : "ok"} />
         <Diag label="Topology confidence" value={topologyConfidence} tone={topologyConfidence === "LIVE" ? "ok" : topologyConfidence === "DEMO" ? "warn" : "warn"} />
@@ -151,6 +164,28 @@ export function NetworkDiagnosticsPanel({
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="mt-3 rounded border border-lime-500/20 bg-lime-500/5 p-3">
+        <div className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-lime-300">
+          <Radar className="h-3.5 w-3.5" />
+          HOW TO GET BETTER RESULTS
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {[
+            "Use a physical Android device",
+            "Connect to Wi-Fi",
+            "Enable Location permission",
+            "Enable Location Services",
+            "Keep the phone awake",
+            "Run Balanced or Deep scan",
+            "Some devices may not respond to scans",
+          ].map((tip) => (
+            <span key={tip} className="rounded border border-gray-800 bg-black/35 px-2 py-1 font-mono text-[10px] leading-relaxed text-gray-300">
+              {tip}
+            </span>
+          ))}
         </div>
       </div>
     </section>

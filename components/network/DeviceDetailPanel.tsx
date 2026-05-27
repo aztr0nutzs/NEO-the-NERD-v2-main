@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   X,
   Smartphone,
@@ -26,6 +26,9 @@ import {
   User,
   MapPin,
   History,
+  Copy,
+  RefreshCw,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,6 +177,15 @@ export function DeviceDetailPanel({
     setHasUnsavedIdentity(false);
   };
 
+  const handleRestoreDefaultName = () => {
+    onUpdateIdentity(device, {
+      customName: "",
+      manuallyVerified: false,
+    });
+    setCustomName("");
+    setHasUnsavedIdentity(false);
+  };
+
   const handleSaveNote = () => {
     onSaveNote(device, noteText);
     setHasUnsavedNote(false);
@@ -183,6 +195,14 @@ export function DeviceDetailPanel({
     onBlock(device);
     setConfirmAction(null);
   };
+
+  const copyText = (value: string) => {
+    if (!value || value === "Unavailable") return;
+    navigator.clipboard?.writeText(value).catch(() => undefined);
+  };
+
+  const classificationReasons = getClassificationReasons(device);
+  const safetyFindings = getSafetyFindings(device);
 
   return (
     <>
@@ -335,6 +355,9 @@ export function DeviceDetailPanel({
                   />
                 </div>
               </div>
+              <p className="font-mono text-[10px] leading-relaxed text-cyan-100/75">
+                Local label only. This changes how NEO shows the device; it does not rename the router entry or the device itself.
+              </p>
               {hasUnsavedIdentity && (
                 <Button
                   onClick={handleSaveIdentity}
@@ -345,7 +368,70 @@ export function DeviceDetailPanel({
                   SAVE_IDENTITY
                 </Button>
               )}
+              {device.customName && (
+                <Button
+                  onClick={handleRestoreDefaultName}
+                  size="sm"
+                  variant="outline"
+                  className="w-full border border-gray-700 bg-gray-900/40 font-mono text-xs uppercase text-gray-300 hover:bg-gray-800"
+                >
+                  <RefreshCw className="mr-2 h-3 w-3" />
+                  RESTORE_DEFAULT_NAME
+                </Button>
+              )}
             </div>
+
+            <Section title="IDENTITY" tone="cyan">
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <IdentityDatum label="DISPLAY_NAME" value={device.name} />
+                <IdentityDatum label="HOSTNAME" value={device.hostname === device.ipAddress ? "Unavailable" : device.hostname} />
+                <IdentityDatum label="IP_ADDRESS" value={device.ipAddress} />
+                <IdentityDatum label="MAC_ADDRESS" value={device.macAddress} />
+                <IdentityDatum label="MANUFACTURER" value={device.vendor} />
+                <IdentityDatum label="DEVICE_TYPE" value={device.deviceType} />
+                <IdentityDatum label="CONFIDENCE" value={device.confidence} />
+                <IdentityDatum label="DATA_SOURCE" value={device.discoverySources.join(", ") || "Unavailable"} />
+                <IdentityDatum label="FIRST_SEEN" value={formatDate(device.identityFirstSeenAt ?? device.firstSeen)} />
+                <IdentityDatum label="LAST_SEEN" value={formatDate(device.identityLastSeenAt ?? device.lastSeen)} />
+              </div>
+            </Section>
+
+            <Section title="NETWORK_DETAILS" tone="purple">
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <IdentityDatum label="GATEWAY_RELATION" value={device.deviceType === "router" || device.discoverySources.includes("gateway") ? "Gateway/router candidate" : "Estimated client link"} />
+                <IdentityDatum label="SUBNET" value={device.rawIpAddress ? "Same discovered subnet" : "Unavailable"} />
+                <IdentityDatum label="OPEN_PORTS" value={device.openPorts.length ? device.openPorts.join(", ") : "Unavailable"} />
+                <IdentityDatum label="SERVICES" value={device.services.length ? device.services.join(" | ") : "Unavailable"} />
+                <IdentityDatum label="RESPONSE_TIME" value={device.latencyMs !== undefined ? `${device.latencyMs}ms` : "Unavailable"} />
+                <IdentityDatum label="SIGNAL_RSSI" value={device.signalStrength !== undefined ? `${device.signalStrength}dBm` : "Unavailable"} />
+                <IdentityDatum label="CONNECTION_CONFIDENCE" value={`${device.confidence}${device.dataLimited ? " / partial data" : ""}`} />
+                <IdentityDatum label="SSDP_UPNP" value={device.discoverySources.includes("ssdp") ? device.services.filter((service) => /SSDP|UPnP/i.test(service)).join(" | ") || "Detected" : "Unavailable"} />
+              </div>
+            </Section>
+
+            <Section title="CLASSIFICATION" tone="lime">
+              <div className="space-y-2">
+                <IdentityDatum label="INFERRED_TYPE" value={device.deviceType} />
+                <div className="space-y-1">
+                  {classificationReasons.map((reason) => (
+                    <p key={reason} className="rounded border border-gray-800 bg-black/30 px-2 py-1 font-mono text-[10px] leading-relaxed text-gray-300">
+                      {reason}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </Section>
+
+            <Section title="SAFETY_REVIEW" tone="orange">
+              <div className="space-y-1">
+                {safetyFindings.map((finding) => (
+                  <p key={finding} className="flex items-start gap-2 rounded border border-orange-500/15 bg-orange-500/5 px-2 py-1 font-mono text-[10px] leading-relaxed text-orange-100/85">
+                    <Info className="mt-0.5 h-3 w-3 shrink-0 text-orange-300" />
+                    {finding}
+                  </p>
+                ))}
+              </div>
+            </Section>
 
             <div className="space-y-2 rounded-lg border border-gray-800 bg-gray-900/30 p-3">
               <p className="font-mono text-xs text-gray-400">RAW_DISCOVERED_IDENTITY</p>
@@ -525,8 +611,29 @@ export function DeviceDetailPanel({
               </p>
             )}
 
+            <div className="rounded border border-red-500/25 bg-red-500/5 p-3">
+              <p className="font-mono text-xs font-bold uppercase tracking-wider text-red-300">
+                ROUTER_CONTROL_WARNING
+              </p>
+              <p className="mt-1 font-mono text-[10px] leading-relaxed text-red-100/80">
+                Block, pause, kick, reboot, and firewall changes require a connector-backed router integration. Generic discovery cannot safely control devices.
+              </p>
+            </div>
+
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
+              <ActionButton
+                icon={Copy}
+                label="COPY IP"
+                onClick={() => copyText(device.ipAddress)}
+                colorClass="border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
+              />
+              <ActionButton
+                icon={Copy}
+                label="COPY MAC"
+                onClick={() => copyText(device.macAddress)}
+                colorClass={device.macAddress === "Unavailable" ? "border-gray-700 bg-gray-900/30 text-gray-600" : "border-purple-500/50 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20"}
+              />
               {device.trustLevel !== "trusted" && (
                 <ActionButton
                   icon={Shield}
@@ -568,6 +675,16 @@ export function DeviceDetailPanel({
                     colorClass="border-cyan-500/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20"
                   />
                 )}
+              <Button
+                disabled
+                variant="outline"
+                size="sm"
+                title="Per-device rescan is not implemented; run a Quick/Balanced scan from Scan."
+                className="col-span-2 justify-start border border-gray-700 bg-gray-900/30 font-mono text-xs uppercase text-gray-600"
+              >
+                <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                RESCAN_DEVICE UNAVAILABLE
+              </Button>
             </div>
           </div>
         </ScrollArea>
@@ -636,6 +753,72 @@ function IdentityDatum({ label, value }: { label: string; value: string }) {
       <p className="truncate font-mono text-gray-300">{value || "Unavailable"}</p>
     </div>
   );
+}
+
+function Section({
+  title,
+  tone,
+  children,
+}: {
+  title: string;
+  tone: "cyan" | "purple" | "lime" | "orange";
+  children: ReactNode;
+}) {
+  const toneClass =
+    tone === "cyan"
+      ? "border-cyan-500/20 bg-cyan-500/5 text-cyan-300"
+      : tone === "purple"
+        ? "border-purple-500/20 bg-purple-500/5 text-purple-300"
+        : tone === "lime"
+          ? "border-lime-500/20 bg-lime-500/5 text-lime-300"
+          : "border-orange-500/20 bg-orange-500/5 text-orange-300";
+  return (
+    <div className={`space-y-2 rounded-lg border p-3 ${toneClass}`}>
+      <p className="font-mono text-xs font-bold uppercase tracking-[0.16em]">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+function getClassificationReasons(device: DiscoveredDevice) {
+  const reasons: string[] = [];
+  if (device.deviceType === "router" || device.discoverySources.includes("gateway")) {
+    reasons.push("Classified as router/gateway because it matches the discovered gateway source or gateway IP.");
+  }
+  if (device.hostname && device.hostname !== device.ipAddress) {
+    reasons.push(`Hostname contributed to identity: ${device.hostname}.`);
+  }
+  if (device.vendor && device.vendor !== "Unavailable") {
+    reasons.push(`Vendor/manufacturer hint contributed: ${device.vendor}.`);
+  }
+  if (device.openPorts.length > 0) {
+    reasons.push(`Open/common ports contributed: ${device.openPorts.join(", ")}.`);
+  }
+  if (device.discoverySources.includes("ssdp")) {
+    reasons.push("SSDP/UPnP response contributed service identity.");
+  }
+  if (device.customName || device.manuallyVerified) {
+    reasons.push("Manual/local label contributed to the display identity.");
+  }
+  if (reasons.length === 0 || device.deviceType === "unknown") {
+    reasons.push("Type remains unknown because hostname, vendor, ports, or SSDP data were insufficient.");
+  }
+  reasons.push(`Confidence is ${device.confidence}; unavailable fields are shown as unavailable instead of guessed.`);
+  return reasons;
+}
+
+function getSafetyFindings(device: DiscoveredDevice) {
+  const findings: string[] = [];
+  if (device.trustLevel === "new" || device.isNewIdentity) findings.push("New device: review whether you recognize this IP/MAC before marking trusted.");
+  if (device.vendor === "Unavailable") findings.push("Unknown vendor: Android/ARP data did not provide a manufacturer.");
+  if (!device.hostname || device.hostname === device.ipAddress) findings.push("No hostname: many devices hide names or block reverse lookup.");
+  if (device.deviceType === "unknown") findings.push("Unknown type: classification needs more evidence.");
+  if (device.dataLimited) findings.push("Partial data: at least one useful field was unavailable or blocked.");
+  if (device.openPorts.some((port) => [22, 139, 445, 8080, 8443].includes(port))) {
+    findings.push("Review exposed services: common management/file-sharing ports were detected.");
+  }
+  if (findings.length === 0) findings.push("No immediate review flag from the currently discovered data.");
+  return findings;
 }
 
 function LabeledInput({

@@ -25,6 +25,10 @@ import {
   ChevronDown,
   Box,
   RotateCcw,
+  Wifi,
+  MapPin,
+  ShieldCheck,
+  Router,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/lib/store";
@@ -135,6 +139,109 @@ const NetworkMap3D = dynamic(
 
 function isNetworkPermissionDeniedMessage(message: string | null | undefined): boolean {
   return typeof message === "string" && /wi-fi\/location permission denied|network permission denied|permission denied/i.test(message);
+}
+
+function getReadinessState({
+  platform,
+  adapterStatus,
+  settings,
+  networkStatus,
+  permissionStatus,
+  permissionDenied,
+}: {
+  platform: string;
+  adapterStatus: NetworkAdapterStatus;
+  settings: NetworkSettings;
+  networkStatus: NetworkStatus;
+  permissionStatus: NativeNetworkPermissionStatus | null;
+  permissionDenied: boolean;
+}) {
+  const locationDenied = permissionDenied || permissionStatus?.location === "denied";
+  const wifiDenied = permissionStatus?.wifi === "denied";
+  const hasWifi =
+    networkStatus.connectionType === "wifi" &&
+    networkStatus.localIp !== "Unavailable" &&
+    networkStatus.gatewayIp !== "Unavailable";
+  const probablyEmulator =
+    networkStatus.localIp.startsWith("10.0.2.") ||
+    networkStatus.gatewayIp === "10.0.2.2";
+
+  if (settings.demoMode || adapterStatus.isDemo) {
+    return {
+      label: "DEMO MODE ACTIVE",
+      tone: "warn" as const,
+      detail: "Demo Preview is using simulated devices. Turn Demo Mode off in Config and run on Android for real LAN discovery.",
+      steps: ["Results are not live scan results.", "Use a physical Android device on Wi-Fi to validate discovery."],
+    };
+  }
+
+  if (adapterStatus.mode === "native-unavailable") {
+    return {
+      label: platform === "android" ? "SCAN FAILED" : "BROWSER LIMITED",
+      tone: "critical" as const,
+      detail: adapterStatus.message,
+      steps: platform === "android"
+        ? ["Restart the app and retry.", "Confirm the Android plugin is registered.", "Grant network permissions when prompted."]
+        : ["Browser preview cannot scan your LAN.", "Install/run the Android app on a physical device for live results."],
+    };
+  }
+
+  if (locationDenied || wifiDenied) {
+    return {
+      label: "PERMISSION NEEDED",
+      tone: "warn" as const,
+      detail: "Android requires Location and, on Android 13+, Nearby Wi-Fi permission for Wi-Fi metadata and local discovery context.",
+      steps: ["Grant Location permission.", "Grant Nearby Wi-Fi permission if Android asks.", "Keep Location Services enabled."],
+    };
+  }
+
+  if (!hasWifi) {
+    return {
+      label: "WI-FI NOT DETECTED",
+      tone: "warn" as const,
+      detail: "Local LAN discovery needs an active Wi-Fi/LAN interface with local IP, gateway, and subnet.",
+      steps: ["Connect to Wi-Fi.", "Disable cellular-only mode or VPN if it hides local routing.", "Refresh diagnostics after connecting."],
+    };
+  }
+
+  if (probablyEmulator) {
+    return {
+      label: "EMULATOR LIMITED",
+      tone: "warn" as const,
+      detail: "Emulator networking usually exposes a virtual gateway, not your real LAN peers.",
+      steps: ["Use a physical Android device for real LAN discovery.", "Do not treat emulator discovery as a real LAN PASS."],
+    };
+  }
+
+  return {
+    label: "READY TO SCAN",
+    tone: "ok" as const,
+    detail: "Native Android discovery can scan the local subnet. Results are discovered devices, not a guarantee of every device on the network.",
+    steps: ["Balanced Scan is recommended.", "Keep the phone awake while scanning.", "Some devices may not respond or may hide names."],
+  };
+}
+
+function StatusCell({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Wifi;
+  label: string;
+  value: string;
+}) {
+  const unavailable = !value || value === "Unavailable" || value === "unknown";
+  return (
+    <div className="rounded border border-gray-800 bg-black/45 p-2.5">
+      <div className="mb-1 flex items-center gap-1.5">
+        <Icon className={`h-3.5 w-3.5 ${unavailable ? "text-orange-300" : "text-cyan-300"}`} />
+        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-gray-500">{label}</p>
+      </div>
+      <p className={`break-words font-mono text-[11px] uppercase tracking-[0.08em] ${unavailable ? "text-orange-200" : "text-gray-100"}`}>
+        {unavailable ? "Unavailable" : value}
+      </p>
+    </div>
+  );
 }
 
 export function NetworkDiscoveryFeature() {
@@ -1402,6 +1509,20 @@ export function NetworkDiscoveryFeature() {
   const effectivePanelSettings = settings;
   const newIdentityDevices = devices.filter((device) => device.isNewIdentity && !device.dismissedForNow);
   const latestHealthSnapshot = selectLatestHealthSnapshot(networkHealthSnapshots);
+  const readiness = getReadinessState({
+    platform: diagnosticPlatform,
+    adapterStatus: effectiveAdapterStatus,
+    settings,
+    networkStatus,
+    permissionStatus: diagnosticPermissionStatus,
+    permissionDenied: networkPermissionDenied,
+  });
+  const readinessColor =
+    readiness.tone === "ok"
+      ? "border-lime-500/35 bg-lime-500/5 text-lime-300"
+      : readiness.tone === "critical"
+        ? "border-pink-500/40 bg-pink-500/10 text-pink-300"
+        : "border-orange-500/35 bg-orange-500/10 text-orange-300";
 
   return (
     <div>
@@ -1469,6 +1590,44 @@ export function NetworkDiscoveryFeature() {
             </div>
           </div>
         </header>
+
+        <section className={`mb-6 rounded-lg border p-4 backdrop-blur-sm ${readinessColor}`}>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
+                <ShieldCheck className="h-4 w-4" />
+                <span>{readiness.label}</span>
+              </div>
+              <p className="font-mono text-[11px] leading-relaxed text-gray-200/90">
+                {readiness.detail}
+              </p>
+            </div>
+            {!isDemoMode && (networkPermissionDenied || diagnosticPermissionStatus?.location === "denied" || diagnosticPermissionStatus?.wifi === "denied") && (
+              <button
+                type="button"
+                onClick={handleRequestNetworkPermissions}
+                disabled={requestingNetworkPermissions}
+                className="rounded border border-yellow-500/50 bg-yellow-500/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-yellow-200 hover:bg-yellow-500/25 disabled:opacity-60"
+              >
+                {requestingNetworkPermissions ? "REQUESTING..." : "GRANT PERMISSION"}
+              </button>
+            )}
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+            <StatusCell icon={Wifi} label="SSID" value={networkStatus.networkName} />
+            <StatusCell icon={Router} label="Gateway" value={networkStatus.gatewayIp} />
+            <StatusCell icon={Network} label="Local IP" value={networkStatus.localIp} />
+            <StatusCell icon={MapPin} label="Subnet" value={networkStatus.subnet} />
+            <StatusCell icon={Cpu} label="Source" value={effectiveAdapterStatus.label} />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {readiness.steps.map((step) => (
+              <span key={step} className="rounded border border-gray-700 bg-black/35 px-2 py-1 font-mono text-[10px] leading-relaxed text-gray-300">
+                {step}
+              </span>
+            ))}
+          </div>
+        </section>
 
         {/* NERD Control Panel */}
         <section className="mb-6">
@@ -1538,6 +1697,7 @@ export function NetworkDiscoveryFeature() {
             lastScanResult={lastScanCompletion}
             topologyGraph={diagnosticTopologyGraph}
             routerStatus={routerStatus}
+            devices={devices}
             routerCapabilities={routerCapabilities}
             routerControlMode={routerControlMode}
             onRefresh={refreshOperationalDiagnostics}
@@ -1628,6 +1788,7 @@ export function NetworkDiscoveryFeature() {
                   isRequestingPermissions={requestingNetworkPermissions}
                   lastScanDelta={lastNetworkScanDelta}
                   lastScanResult={lastScanCompletion}
+                  adapterStatus={effectiveAdapterStatus}
                 />
                 <div className="h-[400px]">
                   <SecurityInsightsPanel

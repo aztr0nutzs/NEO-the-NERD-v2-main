@@ -187,6 +187,16 @@ public class NeoNetworkPlugin extends Plugin {
   @PluginMethod
   public void scanLocalSubnet(PluginCall call) {
     String scanMode = call.getString("scanMode", "balanced");
+    if (getPermissionState("location") != PermissionState.GRANTED) {
+      Log.d(TAG, "scanLocalSubnet denied scanMode=" + scanMode + " reason=location-permission-denied");
+      call.reject("Android Location permission denied. Grant Location permission and enable Location Services before scanning the local Wi-Fi network.");
+      return;
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && getPermissionState("wifi") != PermissionState.GRANTED) {
+      Log.d(TAG, "scanLocalSubnet denied scanMode=" + scanMode + " reason=nearby-wifi-permission-denied");
+      call.reject("Android Nearby Wi-Fi permission denied. Grant Nearby Wi-Fi permission before scanning the local network.");
+      return;
+    }
     ScanProfile profile = getScanProfile(scanMode, call);
     int maxHosts = profile.maxHosts;
     int timeoutMs = profile.timeoutMs;
