@@ -50,3 +50,7 @@ pnpm-debug.log*
 
 # Harness / agent state (not product code)
 .omx/
+
+# Python virtual environments
+.venv/
+**/.venv/

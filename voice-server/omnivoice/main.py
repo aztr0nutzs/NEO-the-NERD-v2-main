@@ -7,6 +7,9 @@ import subprocess
 import tempfile
 import json
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="NEO OmniVoice bridge")
 
@@ -80,7 +83,7 @@ def tts(req: TTSRequest):
     if req.duration is not None:
         cmd.extend(["--duration", str(req.duration)])
     try:
-        subprocess.run(cmd, check=True, timeout=int(os.getenv("OMNIVOICE_TIMEOUT_SEC", "45")))
+        subprocess.run(cmd, check=True, timeout=int(os.getenv("OMNIVOICE_TIMEOUT_SEC", "300")))
         with open(out_path, "rb") as f:
             import base64
             audio_b64 = base64.b64encode(f.read()).decode("utf-8")
