@@ -234,6 +234,16 @@ const UNIQUENESS_OVERRIDES: Record<string, UniquenessOverride> = {
   // synthesized defaults below.
 }
 
+
+const OMNIVOICE_PROFILE_OVERRIDES: Record<string, Partial<VoiceProfile>> = {
+  "neo": { provider: "omnivoice", omnivoiceMode: "clone", omnivoiceRefAudioId: "neo_ref_a", omnivoiceRefText: "NEO online. Tell me the mission.", languageId: "en", name: "NEO Clone" },
+  "commander": { provider: "omnivoice", omnivoiceMode: "clone", omnivoiceRefAudioId: "commander_ref_a", omnivoiceRefText: "Objective locked. Execute the first step.", languageId: "en", name: "Commander Clone" },
+  villain: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Theatrical harmless villain monologue with dramatic pacing.", languageId: "en", name: "Villain Design" },
+  prankster: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Mischievous sing-song playful style.", languageId: "en", name: "Prankster Design" },
+  glitch: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Digital glitch texture, playful and non-threatening.", languageId: "en", name: "Glitch Design" },
+  retro: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "8-bit arcade announcer with chiptune vibe.", languageId: "en", name: "Retro Arcade Design" },
+}
+
 export const VOICE_PROFILES: VoiceProfile[] = [
   profile("neo", "NEO", "Core NEO voices", "Calm, confident futuristic core voice.", "The default NEO companion voice: clear, stable, lightly synthetic, and suitable for most assistant interactions.", ["core", "calm", "futuristic"], ["default chat", "briefings", "navigation"], 3, 4, 2, 3, 5, 50, 50, 75, 60, ["genius", "friendly", "strat"], "NEO online. Tell me the mission.", true, "alloy", "provider-ready", "cyan"),
   profile("nova", "Nova", "Warm assistants", "Bright synthwave hostess with bubbly delivery.", "A warmer, brighter profile for upbeat explanations, daily briefings, and friendly check-ins.", ["bright", "synthwave", "friendly"], ["daily briefing", "casual chat"], 4, 5, 3, 2, 4, 65, 70, 75, 75, ["friendly", "hype"], "Good morning, Commander. The signal is clean.", true, "nova", "provider-ready", "pink"),

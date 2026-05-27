@@ -95,3 +95,17 @@ node scripts/test-provider-voices.mjs
 - `android/` — Capacitor-wrapped Android project
 - `public/media/neo/` — boot + avatar MP4 assets
 - `scripts/prepare-capacitor.mjs` — post-build asset hand-off for Capacitor
+
+### OmniVoice custom voice backend (optional)
+
+OpenAI TTS remains supported. OmniVoice is an additional optional backend for custom clone/design voices.
+
+- App routing priority: OmniVoice (if selected + configured) → OpenAI provider TTS → Android native TTS → browser speech.
+- Android fallback can sound identical when device only exposes one TTS voice.
+- OmniVoice must run as separate Python service (`voice-server/omnivoice/`), not inside APK.
+
+Set:
+- `NEXT_PUBLIC_OMNIVOICE_BASE_URL=https://your-omnivoice-service`
+- `NEXT_PUBLIC_NEO_BACKEND_BASE_URL=https://your-next-backend` (for OpenAI `/api/tts`)
+
+For Android builds, these `NEXT_PUBLIC_*` variables are baked into the JS bundle at build time.
