@@ -121,7 +121,7 @@ export interface VoiceProfile {
   expressivenessLevel: 1 | 2 | 3 | 4 | 5
   featured: boolean
   /** Authored provider preference. OpenAI and OmniVoice are remote provider paths; fallback uses local engines only. */
-  provider: VoiceProfileProvider
+  provider?: VoiceProfileProvider
   providerVoiceId?: string
   omnivoiceMode?: OmniVoiceMode
   omnivoiceRefAudioId?: string

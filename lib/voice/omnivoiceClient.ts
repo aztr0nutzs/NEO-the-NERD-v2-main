@@ -2,7 +2,8 @@ import type { VoiceParams } from "@/lib/types"
 import type { VoiceProfile } from "./types"
 
 const TRAILING_SLASH = /\/+$/
-const HEALTH_TTL_MS = 30_000
+const HEALTH_CACHE_MS = 30_000
+const HEALTH_TIMEOUT_MS = 3_000
 const REQUEST_TIMEOUT_MS = 60_000
 
 export interface OmniVoiceRequest {
@@ -17,7 +18,7 @@ export interface OmniVoiceRequest {
   duration?: number
 }
 
-export interface OmniVoiceAudioPayload {
+export interface OmniVoiceResult {
   audioBase64: string
   mimeType: string
   fileName: string
@@ -25,24 +26,34 @@ export interface OmniVoiceAudioPayload {
   providerVoiceId: string
 }
 
-export interface OmniVoiceHealth {
+export type OmniVoiceAudioPayload = OmniVoiceResult
+
+export interface OmniVoiceHealthResult {
   configured: boolean
-  available: boolean
+  reachable: boolean
+  generationReady: boolean
+  status: string
+  error?: string
   baseUrl: string | null
   checkedAt: number
-  status?: string
-  error?: string
+  /** Compatibility alias for older callers. */
+  available: boolean
 }
 
-const INITIAL_HEALTH: OmniVoiceHealth = {
+export type OmniVoiceHealth = OmniVoiceHealthResult
+
+const INITIAL_HEALTH: OmniVoiceHealthResult = {
   configured: false,
-  available: false,
+  reachable: false,
+  generationReady: false,
+  status: "unconfigured",
   baseUrl: null,
   checkedAt: 0,
+  available: false,
 }
 
-let cachedHealth: OmniVoiceHealth = INITIAL_HEALTH
-let inflightHealth: Promise<OmniVoiceHealth> | null = null
+let healthCache: OmniVoiceHealthResult = INITIAL_HEALTH
+let inflightHealth: Promise<OmniVoiceHealthResult> | null = null
 
 export function getOmniVoiceBaseUrl(): string | null {
   const raw =
@@ -54,33 +65,47 @@ export function getOmniVoiceBaseUrl(): string | null {
   return trimmed ? trimmed.replace(TRAILING_SLASH, "") : null
 }
 
+function requireOmniVoiceBaseUrl() {
+  const baseUrl = getOmniVoiceBaseUrl()
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_OMNIVOICE_BASE_URL is not configured.")
+  }
+  return baseUrl
+}
+
 export function isOmniVoiceConfigured() {
   return Boolean(getOmniVoiceBaseUrl())
 }
 
-export function getCachedOmniVoiceHealth(): OmniVoiceHealth {
+export function getCachedOmniVoiceHealth(): OmniVoiceHealthResult {
   const baseUrl = getOmniVoiceBaseUrl()
   if (!baseUrl) return INITIAL_HEALTH
-  if (cachedHealth.baseUrl !== baseUrl) {
+  if (healthCache.baseUrl !== baseUrl) {
     return {
       configured: true,
-      available: false,
+      reachable: false,
+      generationReady: false,
+      status: "unknown",
       baseUrl,
       checkedAt: 0,
-      status: "unknown",
+      available: false,
     }
   }
-  return cachedHealth
+  return healthCache
 }
 
-function isFresh(snapshot: OmniVoiceHealth) {
-  return snapshot.checkedAt > 0 && Date.now() - snapshot.checkedAt < HEALTH_TTL_MS
+function isFresh(snapshot: OmniVoiceHealthResult) {
+  return snapshot.checkedAt > 0 && Date.now() - snapshot.checkedAt < HEALTH_CACHE_MS
 }
 
-async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit | undefined,
+  timeoutMs: number,
+): Promise<Response> {
   if (typeof AbortController === "undefined") return fetch(url, init)
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
     return await fetch(url, { ...init, signal: controller.signal })
   } finally {
@@ -88,55 +113,56 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
   }
 }
 
-export async function checkOmniVoiceHealth(force = false): Promise<OmniVoiceHealth> {
+export async function checkOmniVoiceHealth(force = false): Promise<OmniVoiceHealthResult> {
   const baseUrl = getOmniVoiceBaseUrl()
   if (!baseUrl) {
-    cachedHealth = INITIAL_HEALTH
-    return cachedHealth
+    healthCache = INITIAL_HEALTH
+    return healthCache
   }
 
-  if (!force && cachedHealth.baseUrl === baseUrl && isFresh(cachedHealth)) {
-    return cachedHealth
+  if (!force && healthCache.baseUrl === baseUrl && isFresh(healthCache)) {
+    return healthCache
   }
   if (inflightHealth) return inflightHealth
 
   inflightHealth = (async () => {
     try {
-      const response = await fetchWithTimeout(`${baseUrl}/health`, { method: "GET" })
-      if (!response.ok) {
-        cachedHealth = {
-          configured: true,
-          available: false,
-          baseUrl,
-          checkedAt: Date.now(),
-          error: `OmniVoice health probe returned HTTP ${response.status}.`,
-        }
-        return cachedHealth
-      }
-      let status = "ok"
-      try {
-        const parsed = (await response.json()) as { status?: string }
-        status = typeof parsed.status === "string" ? parsed.status : status
-      } catch {
-        status = "ok"
-      }
-      cachedHealth = {
+      const response = await fetchWithTimeout(
+        `${baseUrl}/health`,
+        { cache: "no-store", method: "GET" },
+        HEALTH_TIMEOUT_MS,
+      )
+      const payload = await response.json().catch(() => null)
+      const status = String(payload?.status ?? (response.ok ? "ok" : "http_error"))
+      const generationReady = response.ok && (payload?.ok === undefined ? status === "ok" : Boolean(payload.ok))
+
+      healthCache = {
         configured: true,
-        available: true,
-        baseUrl,
-        checkedAt: Date.now(),
+        reachable: response.ok,
+        generationReady,
         status,
-      }
-      return cachedHealth
-    } catch (error) {
-      cachedHealth = {
-        configured: true,
-        available: false,
+        error: response.ok
+          ? typeof payload?.error === "string"
+            ? payload.error
+            : undefined
+          : payload?.error ?? `HTTP ${response.status}`,
         baseUrl,
         checkedAt: Date.now(),
-        error: error instanceof Error ? error.message : "OmniVoice backend unreachable.",
+        available: generationReady,
       }
-      return cachedHealth
+      return healthCache
+    } catch (error) {
+      healthCache = {
+        configured: true,
+        reachable: false,
+        generationReady: false,
+        status: "unreachable",
+        error: error instanceof Error ? error.message : "OmniVoice health check failed.",
+        baseUrl,
+        checkedAt: Date.now(),
+        available: false,
+      }
+      return healthCache
     }
   })()
 
@@ -145,6 +171,10 @@ export async function checkOmniVoiceHealth(force = false): Promise<OmniVoiceHeal
   } finally {
     inflightHealth = null
   }
+}
+
+export function paramsToOmniVoiceSpeed(params: VoiceParams): number {
+  return Math.min(2, Math.max(0.5, Number((0.5 + (params.speed / 100) * 1.5).toFixed(2))))
 }
 
 export function buildOmniVoiceRequest(
@@ -157,51 +187,42 @@ export function buildOmniVoiceRequest(
   }
   return {
     voiceId: profile.providerVoiceId,
-    text,
+    text: text.trim().slice(0, 4000),
     mode: profile.omnivoiceMode,
     refAudioId: profile.omnivoiceRefAudioId,
     refText: profile.omnivoiceRefText,
     instruct: profile.omnivoiceInstruct,
     languageId: profile.languageId,
-    speed: Number((0.5 + (params.speed / 100) * 1.5).toFixed(2)),
+    speed: paramsToOmniVoiceSpeed(params),
   }
 }
 
-export async function generateOmniVoiceTts(
-  profile: VoiceProfile,
-  text: string,
-  params: VoiceParams,
-): Promise<OmniVoiceAudioPayload> {
-  const baseUrl = getOmniVoiceBaseUrl()
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_OMNIVOICE_BASE_URL is not configured.")
+export async function generateOmniVoiceTts(request: OmniVoiceRequest): Promise<OmniVoiceResult> {
+  const response = await fetchWithTimeout(
+    `${requireOmniVoiceBaseUrl()}/tts`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...request,
+        text: request.text.trim().slice(0, 4000),
+      }),
+      cache: "no-store",
+    },
+    REQUEST_TIMEOUT_MS,
+  )
+  const payload = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new Error(payload?.error ?? `OmniVoice request failed (${response.status}).`)
   }
-
-  const request = buildOmniVoiceRequest(profile, text.trim().slice(0, 4000), params)
-  const response = await fetchWithTimeout(`${baseUrl}/tts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(request),
-  })
-
-  const payload = (await response.json().catch(() => null)) as Partial<OmniVoiceAudioPayload> & {
-    error?: string
-  } | null
-
-  if (
-    !response.ok ||
-    !payload?.audioBase64 ||
-    !payload.fileName ||
-    !payload.providerVoiceId
-  ) {
-    throw new Error(payload?.error ?? `OmniVoice TTS request failed (HTTP ${response.status}).`)
+  if (!payload?.audioBase64 || !payload?.fileName) {
+    throw new Error("OmniVoice response missing required audio fields.")
   }
-
   return {
     audioBase64: payload.audioBase64,
     mimeType: payload.mimeType ?? "audio/wav",
     fileName: payload.fileName,
     provider: "omnivoice",
-    providerVoiceId: payload.providerVoiceId,
+    providerVoiceId: payload.providerVoiceId ?? request.voiceId,
   }
 }
