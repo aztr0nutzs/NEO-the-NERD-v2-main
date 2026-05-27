@@ -103,6 +103,8 @@ OpenAI TTS remains supported. OmniVoice is an additional optional backend for cu
 - App routing priority: OmniVoice (if selected + configured) → OpenAI provider TTS → Android native TTS → browser speech.
 - Android fallback can sound identical when device only exposes one TTS voice.
 - OmniVoice must run as separate Python service (`voice-server/omnivoice/`), not inside APK.
+- OmniVoice is only marked active when `GET /health` reports `status: ok`.
+- If OmniVoice engine is not installed, server returns `not_configured` health and `/tts` HTTP 503.
 
 Set:
 - `NEXT_PUBLIC_OMNIVOICE_BASE_URL=https://your-omnivoice-service`

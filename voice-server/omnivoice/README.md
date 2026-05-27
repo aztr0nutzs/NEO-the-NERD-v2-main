@@ -17,4 +17,6 @@ uvicorn main:app --host 0.0.0.0 --port 8011
 Point app env:
 `NEXT_PUBLIC_OMNIVOICE_BASE_URL=http://localhost:8011`
 
-Replace placeholder audio generation with `omnivoice-infer` subprocess or Python API in your environment.
+This scaffold now checks for `omnivoice-infer` on PATH.
+- If missing: `/health` returns `status: not_configured` and `/tts` returns HTTP 503.
+- If present: `/health` returns `status: ok` and `/tts` attempts real generation via CLI.

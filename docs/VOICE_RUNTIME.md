@@ -196,3 +196,6 @@ Contract:
 - `POST {NEXT_PUBLIC_OMNIVOICE_BASE_URL}/tts`
 - request: `voiceId`, `text`, `mode` (`clone|design`), optional `refAudioId`, `refText`, `instruct`, `languageId`, `speed`, `duration`
 - response: `audioBase64`, `mimeType`, `fileName`, `provider:"omnivoice"`, `providerVoiceId`
+- `GET {NEXT_PUBLIC_OMNIVOICE_BASE_URL}/health` must return `status:"ok"` for OmniVoice to be reported active.
+
+Note: `app/api/tts` remains OpenAI-backed in this repo. OmniVoice calls bypass `/api/tts` and go directly to the external OmniVoice service.

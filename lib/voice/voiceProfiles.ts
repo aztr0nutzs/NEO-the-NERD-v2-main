@@ -285,7 +285,11 @@ export const VOICE_PROFILES: VoiceProfile[] = [
   profile("solar-diplomat", "Solar Diplomat", "Warm assistants", "Graceful, optimistic negotiation voice.", "A warm mediator profile for careful phrasing, social scripts, and polite disagreement.", ["diplomatic", "warm", "polished"], ["social scripts", "messages"], 3, 5, 2, 1, 5, 48, 48, 74, 52, ["friendly", "strat"], "We can say it clearly without starting a fire.", false, "shimmer", "provider-ready", "pink"),
   profile("void-oracle", "Void Oracle", "Dramatic / villainous voices", "Cryptic sci-fi prophecy tone.", "A mysterious profile for lore, dramatic warnings, and strange futuristic flavor.", ["oracle", "cryptic", "dark"], ["stories", "dramatic prompts"], 2, 2, 2, 3, 4, 36, 18, 76, 48, ["story", "detective"], "The quiet signal is usually the dangerous one.", false, undefined, "future-provider-target", "purple"),
   profile("circuit-cheerleader", "Circuit Cheerleader", "Energetic / hype voices", "Bright encouragement with robot sparkle.", "A cheerful hype profile for wins, habit streaks, and confidence boosts.", ["cheerful", "hype", "spark"], ["motivation", "celebrations"], 5, 5, 4, 2, 4, 82, 78, 80, 92, ["hype", "motivator", "friendly"], "Yes. That counts. Ship the next tiny win.", false, "coral", "provider-ready", "orange"),
-]
+].map((profile) =>
+  OMNIVOICE_PROFILE_OVERRIDES[profile.id]
+    ? { ...profile, ...OMNIVOICE_PROFILE_OVERRIDES[profile.id] }
+    : profile,
+)
 
 function profile(
   id: string,
