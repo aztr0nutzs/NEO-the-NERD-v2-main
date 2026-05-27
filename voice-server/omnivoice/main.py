@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Literal
 import os
@@ -7,6 +8,13 @@ import subprocess
 import tempfile
 
 app = FastAPI(title="NEO OmniVoice bridge")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in os.getenv("OMNIVOICE_CORS_ALLOW_ORIGINS", "*").split(",") if origin.strip()],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class TTSRequest(BaseModel):
     voiceId: str
