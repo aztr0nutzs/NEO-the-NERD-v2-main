@@ -24,6 +24,7 @@ import { NeoBackgroundScene } from "./background/neo-background-scene"
 import { BootSequenceOverlay } from "./boot/boot-sequence-overlay"
 import { PersistentAvatarOrb } from "./avatar/persistent-avatar-orb"
 import { OnboardingWizard } from "./onboarding/onboarding-wizard"
+import { logBootEvent } from "@/lib/boot-instrumentation"
 
 const SCREEN_MAP = {
   main: MainScreen,
@@ -71,19 +72,42 @@ export function AppShell() {
   // that was producing the residual boot-time stutter even after the boot
   // overlay itself had finished.
   const [mediaReady, setMediaReady] = useState(false)
+  const [interactiveReady, setInteractiveReady] = useState(false)
   const handleBootComplete = useCallback(() => {
-    playAvatarReaction("wakeup")
+    if (!settings.reducedMotion) {
+      playAvatarReaction("wakeup")
+    }
     setBootMounted(false)
-  }, [playAvatarReaction])
+  }, [playAvatarReaction, settings.reducedMotion])
 
   useEffect(() => {
-    if (bootMounted) return
+    if (bootMounted) {
+      setInteractiveReady(false)
+      setMediaReady(false)
+      return
+    }
+    const frame = window.requestAnimationFrame(() => {
+      logBootEvent("first interactive paint", {
+        reducedMotion: settings.reducedMotion,
+      })
+      setInteractiveReady(true)
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [bootMounted, settings.reducedMotion])
+
+  useEffect(() => {
+    if (bootMounted || !interactiveReady) return
     const timer = window.setTimeout(
-      () => setMediaReady(true),
+      () => {
+        logBootEvent("post_boot_media_ready", {
+          backgroundVideoEnabled: !settings.reducedMotion,
+        })
+        setMediaReady(true)
+      },
       POST_BOOT_BACKGROUND_DELAY_MS,
     )
     return () => window.clearTimeout(timer)
-  }, [bootMounted])
+  }, [bootMounted, interactiveReady, settings.reducedMotion])
 
   // Onboarding only shows once boot is offscreen so the cinematic intro plays
   // first. A failsafe timer also fires so that a failed boot (e.g. video error
@@ -114,7 +138,7 @@ export function AppShell() {
           rendering throughout boot so the visual identity is preserved —
           the heavy MP4 simply fades in once the boot sequence has exited
           AND the post-boot stagger window has elapsed. */}
-      <NeoBackgroundScene videoEnabled={mediaReady} />
+      <NeoBackgroundScene videoEnabled={mediaReady && !settings.reducedMotion} />
       {/*
         Content-column shade. Sits behind the main viewport and in front of
         the animated background. Width-bounded to the same max-w-2xl column
@@ -138,7 +162,7 @@ export function AppShell() {
         but persisted state can restore a different screen at launch —
         so this gate is the only honest fix.
       */}
-      {!bootMounted && showPersistentOrb && <PersistentAvatarOrb />}
+      {!bootMounted && interactiveReady && showPersistentOrb && <PersistentAvatarOrb />}
 
       <main
         // Bottom padding reserves space for the fixed BottomDock (~5rem
@@ -162,7 +186,7 @@ export function AppShell() {
           fades in via its own framer-motion entry animation immediately
           after, which preserves the cinematic handoff.
         */}
-        {!bootMounted && (
+        {!bootMounted && interactiveReady && (
           <AnimatePresence mode="wait">
             <motion.div
               key={screen}
@@ -178,7 +202,12 @@ export function AppShell() {
       </main>
 
       <BottomDock />
-      {bootMounted && <BootSequenceOverlay onBootComplete={handleBootComplete} />}
+      {bootMounted && (
+        <BootSequenceOverlay
+          onBootComplete={handleBootComplete}
+          reducedMotion={settings.reducedMotion}
+        />
+      )}
       <OnboardingWizard
         open={showOnboarding && !onboardingDismissed}
         onClose={handleOnboardingClose}
