@@ -18,6 +18,15 @@ export type VoiceAvailability =
   | "future-provider-target"
   | "unavailable"
 
+export type VoiceProfileProvider = "openai" | "omnivoice" | "fallback"
+export type OmniVoiceMode = "clone" | "design"
+export type TtsProviderType =
+  | "openai"
+  | "omnivoice"
+  | "android-native"
+  | "browser-speech"
+  | "unavailable"
+
 export type VoiceToneProfile =
   | "balanced"
   | "energetic"
@@ -111,7 +120,14 @@ export interface VoiceProfile {
   cadenceHint: string
   expressivenessLevel: 1 | 2 | 3 | 4 | 5
   featured: boolean
+  /** Authored provider preference. OpenAI and OmniVoice are remote provider paths; fallback uses local engines only. */
+  provider: VoiceProfileProvider
   providerVoiceId?: string
+  omnivoiceMode?: OmniVoiceMode
+  omnivoiceRefAudioId?: string
+  omnivoiceRefText?: string
+  omnivoiceInstruct?: string
+  languageId?: string
   availability: VoiceAvailability
   accent: AccentColor
 

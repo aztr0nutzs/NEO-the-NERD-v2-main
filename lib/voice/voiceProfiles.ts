@@ -36,6 +36,12 @@ const CANONICAL_PROVIDER_DISTINCT: Record<string, string> = {
   verse: "holo-host",
   marin: "velvet-circuit",
   cedar: "tactical-guide",
+  "neo-clone": "neo-clone",
+  "commander-clone": "commander-clone",
+  "villain-design": "villain-design",
+  "prankster-design": "prankster-design",
+  "glitch-design": "glitch-design",
+  "retro-arcade-design": "retro-arcade-design",
 }
 
 interface UniquenessOverride {
@@ -44,6 +50,15 @@ interface UniquenessOverride {
   cadenceProfile?: VoiceCadenceProfile
   authorityLevel?: 1 | 2 | 3 | 4 | 5
   uniquenessExplanation?: string
+}
+
+interface ProfileProviderOptions {
+  provider?: VoiceProfile["provider"]
+  omnivoiceMode?: VoiceProfile["omnivoiceMode"]
+  omnivoiceRefAudioId?: string
+  omnivoiceRefText?: string
+  omnivoiceInstruct?: string
+  languageId?: string
 }
 
 // Per-id authoring overrides for the high-character profiles. Anything not
@@ -235,6 +250,12 @@ const UNIQUENESS_OVERRIDES: Record<string, UniquenessOverride> = {
 }
 
 export const VOICE_PROFILES: VoiceProfile[] = [
+  profile("neo-clone", "NEO Clone", "Core NEO voices", "Custom cloned NEO voice through OmniVoice.", "An OmniVoice-ready cloned NEO profile for real custom timbre when the external OmniVoice service is configured.", ["clone", "custom", "core"], ["default chat", "briefings", "navigation"], 3, 4, 2, 3, 5, 50, 50, 75, 62, ["genius", "friendly", "strat"], "NEO clone online. Custom voice matrix stabilized.", true, "neo-clone", "provider-ready", "cyan", { provider: "omnivoice", omnivoiceMode: "clone", omnivoiceRefAudioId: "neo-reference", omnivoiceRefText: "NEO online. Tell me the mission.", languageId: "en" }),
+  profile("commander-clone", "Commander Clone", "Narrator / announcer voices", "Custom cloned tactical command voice.", "An OmniVoice-ready cloned commander profile for a distinct custom baritone when the external OmniVoice service is configured.", ["clone", "tactical", "custom"], ["strategy", "plans", "mission prompts"], 3, 2, 1, 2, 5, 44, 24, 78, 46, ["strat", "genius"], "Command channel cloned. Awaiting objective.", true, "commander-clone", "provider-ready", "cyan", { provider: "omnivoice", omnivoiceMode: "clone", omnivoiceRefAudioId: "commander-reference", omnivoiceRefText: "Objective locked. Execute the first step.", languageId: "en" }),
+  profile("villain-design", "Villain Design", "Dramatic / villainous voices", "Designed theatrical villain voice through OmniVoice.", "An OmniVoice-designed villain profile for a custom dramatic voice without requiring an in-app cloning upload flow.", ["design", "villain", "theatrical"], ["drama", "games", "pranks"], 4, 1, 5, 2, 4, 44, 30, 78, 78, ["story", "gm", "chaos"], "Behold, the custom inconvenience begins.", false, "villain-design", "provider-ready", "purple", { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Design a theatrical cartoon villain voice with slow smug pacing, harmless menace, and crisp diction.", languageId: "en" }),
+  profile("prankster-design", "Prankster Design", "Comic voices", "Designed mischievous custom voice through OmniVoice.", "An OmniVoice-designed prankster profile for a distinct playful timbre when the external service is reachable.", ["design", "mischief", "custom"], ["safe pranks", "jokes"], 4, 3, 5, 1, 4, 62, 66, 75, 82, ["chaos"], "Custom mischief loaded. This is probably fine.", false, "prankster-design", "provider-ready", "pink", { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Design a playful mischievous voice with sing-song timing, bright grin, and conspiratorial punchlines.", languageId: "en" }),
+  profile("glitch-design", "Glitch Design", "Robotic / synthetic voices", "Designed glitchy custom voice through OmniVoice.", "An OmniVoice-designed synthetic profile for custom glitch character output when the backend is active.", ["design", "glitch", "synthetic"], ["safe pranks", "robot reactions"], 5, 2, 5, 5, 3, 70, 42, 75, 86, ["chaos", "snark"], "G-g-generated voice path is alive.", false, "glitch-design", "provider-ready", "purple", { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Design a glitchy synthetic voice with playful stutters, crisp consonants, and high-energy digital artifacts.", languageId: "en" }),
+  profile("retro-arcade-design", "Retro Arcade Design", "Retro / arcade voices", "Designed arcade announcer through OmniVoice.", "An OmniVoice-designed retro arcade profile for a custom cabinet-style voice when the external service is reachable.", ["design", "retro", "arcade"], ["arcade games", "scoreboards"], 5, 3, 4, 4, 4, 76, 62, 82, 84, ["gm", "hype"], "Player one, custom voice ready.", true, "retro-arcade-design", "provider-ready", "orange", { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Design a punchy retro arcade announcer voice with short phrases, bright cabinet energy, and clean intelligibility.", languageId: "en" }),
   profile("neo", "NEO", "Core NEO voices", "Calm, confident futuristic core voice.", "The default NEO companion voice: clear, stable, lightly synthetic, and suitable for most assistant interactions.", ["core", "calm", "futuristic"], ["default chat", "briefings", "navigation"], 3, 4, 2, 3, 5, 50, 50, 75, 60, ["genius", "friendly", "strat"], "NEO online. Tell me the mission.", true, "alloy", "provider-ready", "cyan"),
   profile("nova", "Nova", "Warm assistants", "Bright synthwave hostess with bubbly delivery.", "A warmer, brighter profile for upbeat explanations, daily briefings, and friendly check-ins.", ["bright", "synthwave", "friendly"], ["daily briefing", "casual chat"], 4, 5, 3, 2, 4, 65, 70, 75, 75, ["friendly", "hype"], "Good morning, Commander. The signal is clean.", true, "nova", "provider-ready", "pink"),
   profile("glitch", "Glitch", "Robotic / synthetic voices", "Distorted prank voice with chaotic stutter energy.", "A jagged synthetic persona for safe mischief, weird alerts, and playful glitch-flavored lines.", ["distorted", "glitch", "prank"], ["safe pranks", "robot reactions"], 5, 2, 5, 5, 3, 70, 40, 75, 85, ["chaos", "snark"], "G-g-glitch protocol says this is technically fine.", false, "echo", "provider-ready", "purple"),
@@ -300,7 +321,11 @@ function profile(
   providerVoiceId: string | undefined,
   availability: VoiceProfile["availability"],
   accent: VoiceProfile["accent"],
+  providerOptions: ProfileProviderOptions = {},
 ): VoiceProfile {
+  const provider =
+    providerOptions.provider ??
+    (availability === "provider-ready" && providerVoiceId ? "openai" : "fallback")
   const pitch = sliderToProfilePitch(defaultPitch)
   const rate = sliderToProfileRate(defaultSpeed)
   const toneProfile = inferToneProfile(category, toneTags, energyLevel, humorLevel, roboticnessLevel)
@@ -308,6 +333,7 @@ function profile(
     id,
     name,
     providerVoiceId,
+    provider,
     availability,
     toneProfile,
     shortDescription,
@@ -416,6 +442,7 @@ interface ComputeUniquenessInput {
   id: string
   name: string
   providerVoiceId: string | undefined
+  provider: VoiceProfile["provider"]
   availability: VoiceProfile["availability"]
   toneProfile: VoiceToneProfile
   shortDescription: string
@@ -430,8 +457,18 @@ interface UniquenessComputation {
 }
 
 function computeUniqueness(input: ComputeUniquenessInput): UniquenessComputation {
-  const { id, providerVoiceId, availability } = input
+  const { id, providerVoiceId, availability, provider } = input
   if (availability === "provider-ready" && providerVoiceId) {
+    if (provider === "omnivoice") {
+      return {
+        timbreSource: "provider-distinct",
+        uniquenessScore: 98,
+        uniquenessExplanation:
+          `OmniVoice profile "${providerVoiceId}" can realize a custom cloned/designed timbre when the external OmniVoice backend is reachable.`,
+        fallbackBehavior:
+          "If OmniVoice is offline, falls back to OpenAI only for OpenAI-authored profiles; otherwise Android/browser TTS with profile pitch, rate, and style.",
+      }
+    }
     const canonicalId = CANONICAL_PROVIDER_DISTINCT[providerVoiceId]
     if (canonicalId === id) {
       return {

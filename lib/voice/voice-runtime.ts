@@ -20,7 +20,7 @@
 "use client"
 
 import type { VoiceParams } from "@/lib/types"
-import type { VoiceProfile } from "./types"
+import type { TtsProviderType, VoiceProfile } from "./types"
 import {
   isBrowserSpeechSupported,
   pauseBrowserSpeech,
@@ -46,6 +46,11 @@ import {
 } from "./native-tts-bridge"
 import { getVoiceTruthLabel } from "./voiceUniqueness"
 import type { SpeechIntent } from "./speechIntent"
+import {
+  checkOmniVoiceHealth,
+  generateOmniVoiceTts,
+  getCachedOmniVoiceHealth,
+} from "./omnivoiceClient"
 
 // -----------------------------------------------------------------------------
 // Capability model
@@ -65,6 +70,16 @@ export interface VoiceRuntimeCapabilities {
   browserSpeechSupported: boolean
   /** Backend is reachable AND a TTS provider key is configured server-side. */
   providerTtsAvailable: boolean
+  /** OpenAI TTS backend is reachable and configured server-side. */
+  openaiTtsAvailable: boolean
+  /** OmniVoice external backend URL is configured. */
+  omnivoiceBackendConfigured: boolean
+  /** OmniVoice external backend health passed. */
+  omnivoiceTtsAvailable: boolean
+  /** Provider/engine selected for the active profile in this runtime. */
+  selectedProvider: TtsProviderType
+  /** Human-readable reason when the selected profile is using fallback. */
+  fallbackReason: string | null
   /** Local Android TextToSpeech plugin is registered and engine-ready. */
   nativeAndroidTtsAvailable: boolean
   /** Number of selectable Android engine voices exposed by the installed TTS engine. */
@@ -81,6 +96,7 @@ export interface ProviderSpeechPayload {
   audioBase64: string
   fileName: string
   mimeType: string
+  provider?: "openai" | "omnivoice"
   providerVoiceId?: string
 }
 
@@ -123,13 +139,25 @@ export interface VoicePreviewResult {
 // -----------------------------------------------------------------------------
 
 function profileCanUseProvider(profile: VoiceProfile) {
+  if (profile.provider !== "openai") return false
   if (profile.availability !== "provider-ready") return false
   return Boolean(getVoiceProviderConfig(profile.id)?.available)
+}
+
+function profileCanUseOmniVoice(profile: VoiceProfile) {
+  return Boolean(
+    profile.provider === "omnivoice" &&
+      profile.availability === "provider-ready" &&
+      profile.providerVoiceId &&
+      profile.omnivoiceMode,
+  )
 }
 
 export function getVoiceProfileCapabilities(profile: VoiceProfile) {
   return {
     providerReady: profileCanUseProvider(profile),
+    omnivoiceReady: profileCanUseOmniVoice(profile),
+    provider: profile.provider,
     providerVoiceId: getVoiceProviderConfig(profile.id)?.providerVoiceId ?? null,
     supports: getVoiceProviderConfig(profile.id)?.supports ?? {
       speed: false,
@@ -149,39 +177,80 @@ export async function getVoiceRuntimeCapabilities(
     getAndroidNativeTtsAvailability().catch(() => ({ available: false, ready: false, platform: "unknown" })),
     getAndroidNativeVoices().catch(() => []),
   ])
+  const omniHealth = await checkOmniVoiceHealth().catch(() => getCachedOmniVoiceHealth())
   const browserSpeechSupported = isBrowserSpeechSupported()
   const nativeAndroidTtsAvailable = Boolean(nativeTts.available && nativeTts.ready)
   const remoteBackendConfigured = Boolean(config && config.mode !== "unavailable")
-  const providerTtsAvailable = Boolean(
+  const openaiTtsAvailable = Boolean(
     remoteBackendConfigured &&
       health?.state === "available" &&
       health.providerStatus?.providerConfigured,
   )
+  const omnivoiceTtsAvailable = Boolean(omniHealth.configured && omniHealth.available)
+  const omnivoiceBackendConfigured = Boolean(omniHealth.configured)
+  const providerTtsAvailable = profile
+    ? Boolean(
+        (profileCanUseOmniVoice(profile) && omnivoiceTtsAvailable) ||
+          (profileCanUseProvider(profile) && openaiTtsAvailable),
+      )
+    : Boolean(openaiTtsAvailable || omnivoiceTtsAvailable)
   const selectedAndroidVoiceName =
     nativeAndroidTtsAvailable && profile ? await selectAndroidNativeVoiceName(profile) : null
 
   let currentPreviewMode: VoicePreviewMode = "unavailable"
+  let selectedProvider: TtsProviderType = "unavailable"
+  let fallbackReason: string | null = null
   if (profile) {
-    if (profileCanUseProvider(profile) && providerTtsAvailable) {
+    if (profileCanUseOmniVoice(profile) && omnivoiceTtsAvailable) {
       currentPreviewMode = "provider-tts"
+      selectedProvider = "omnivoice"
+    } else if (profileCanUseProvider(profile) && openaiTtsAvailable) {
+      currentPreviewMode = "provider-tts"
+      selectedProvider = "openai"
     } else if (nativeAndroidTtsAvailable && profile.availability !== "unavailable") {
       currentPreviewMode = "native-android"
+      selectedProvider = "android-native"
     } else if (browserSpeechSupported && profile.availability !== "unavailable") {
       currentPreviewMode = "browser-speech"
+      selectedProvider = "browser-speech"
     } else {
       currentPreviewMode = "unavailable"
+      selectedProvider = "unavailable"
     }
-  } else if (providerTtsAvailable) {
+    if (
+      currentPreviewMode !== "provider-tts" &&
+      profile.availability !== "unavailable" &&
+      (profile.provider === "omnivoice" || profile.provider === "openai")
+    ) {
+      fallbackReason = providerFallbackReason(profile, {
+        openaiTtsAvailable,
+        omnivoiceBackendConfigured,
+        omnivoiceTtsAvailable,
+        remoteBackendConfigured,
+      })
+    }
+  } else if (omnivoiceTtsAvailable) {
     currentPreviewMode = "provider-tts"
+    selectedProvider = "omnivoice"
+  } else if (openaiTtsAvailable) {
+    currentPreviewMode = "provider-tts"
+    selectedProvider = "openai"
   } else if (nativeAndroidTtsAvailable) {
     currentPreviewMode = "native-android"
+    selectedProvider = "android-native"
   } else if (browserSpeechSupported) {
     currentPreviewMode = "browser-speech"
+    selectedProvider = "browser-speech"
   }
 
   return {
     browserSpeechSupported,
     providerTtsAvailable,
+    openaiTtsAvailable,
+    omnivoiceBackendConfigured,
+    omnivoiceTtsAvailable,
+    selectedProvider,
+    fallbackReason,
     nativeAndroidTtsAvailable,
     nativeAndroidVoiceCount: nativeVoices.length,
     selectedAndroidVoiceName,
@@ -194,35 +263,98 @@ export function getCachedVoiceRuntimeCapabilities(
   profile?: VoiceProfile,
 ): VoiceRuntimeCapabilities {
   const health = getCachedBackendHealth()
+  const omniHealth = getCachedOmniVoiceHealth()
   const browserSpeechSupported = isBrowserSpeechSupported()
   const remoteBackendConfigured = health.mode !== "unavailable"
   const nativeAndroidTtsAvailable = isAndroidNativeTtsRuntime()
-  const providerTtsAvailable = Boolean(
+  const openaiTtsAvailable = Boolean(
     remoteBackendConfigured &&
       health.state === "available" &&
       health.providerStatus?.providerConfigured,
   )
+  const omnivoiceTtsAvailable = Boolean(omniHealth.configured && omniHealth.available)
+  const omnivoiceBackendConfigured = Boolean(omniHealth.configured)
+  const providerTtsAvailable = profile
+    ? Boolean(
+        (profileCanUseOmniVoice(profile) && omnivoiceTtsAvailable) ||
+          (profileCanUseProvider(profile) && openaiTtsAvailable),
+      )
+    : Boolean(openaiTtsAvailable || omnivoiceTtsAvailable)
 
   let currentPreviewMode: VoicePreviewMode = "unavailable"
+  let selectedProvider: TtsProviderType = "unavailable"
+  let fallbackReason: string | null = null
   if (profile) {
-    if (profileCanUseProvider(profile) && providerTtsAvailable) {
+    if (profileCanUseOmniVoice(profile) && omnivoiceTtsAvailable) {
       currentPreviewMode = "provider-tts"
+      selectedProvider = "omnivoice"
+    } else if (profileCanUseProvider(profile) && openaiTtsAvailable) {
+      currentPreviewMode = "provider-tts"
+      selectedProvider = "openai"
     } else if (nativeAndroidTtsAvailable && profile.availability !== "unavailable") {
       currentPreviewMode = "native-android"
+      selectedProvider = "android-native"
     } else if (browserSpeechSupported && profile.availability !== "unavailable") {
       currentPreviewMode = "browser-speech"
+      selectedProvider = "browser-speech"
+    }
+    if (
+      currentPreviewMode !== "provider-tts" &&
+      profile.availability !== "unavailable" &&
+      (profile.provider === "omnivoice" || profile.provider === "openai")
+    ) {
+      fallbackReason = providerFallbackReason(profile, {
+        openaiTtsAvailable,
+        omnivoiceBackendConfigured,
+        omnivoiceTtsAvailable,
+        remoteBackendConfigured,
+      })
     }
   }
 
   return {
     browserSpeechSupported,
     providerTtsAvailable,
+    openaiTtsAvailable,
+    omnivoiceBackendConfigured,
+    omnivoiceTtsAvailable,
+    selectedProvider,
+    fallbackReason,
     nativeAndroidTtsAvailable,
     nativeAndroidVoiceCount: 0,
     selectedAndroidVoiceName: null,
     remoteBackendConfigured,
     currentPreviewMode,
   }
+}
+
+function providerFallbackReason(
+  profile: VoiceProfile,
+  state: {
+    openaiTtsAvailable: boolean
+    omnivoiceBackendConfigured: boolean
+    omnivoiceTtsAvailable: boolean
+    remoteBackendConfigured: boolean
+  },
+) {
+  if (profile.provider === "omnivoice") {
+    if (!state.omnivoiceBackendConfigured) {
+      return "OmniVoice profile selected, but NEXT_PUBLIC_OMNIVOICE_BASE_URL is not configured."
+    }
+    if (!state.omnivoiceTtsAvailable) {
+      return "OmniVoice profile selected, but the OmniVoice backend health check is not passing."
+    }
+    return "OmniVoice profile selected, but it is missing required OmniVoice metadata."
+  }
+  if (profile.provider === "openai") {
+    if (!state.remoteBackendConfigured) {
+      return "OpenAI provider profile selected, but NEXT_PUBLIC_NEO_BACKEND_BASE_URL is not configured for this runtime."
+    }
+    if (!state.openaiTtsAvailable) {
+      return "OpenAI provider profile selected, but the backend is unreachable or OPENAI_API_KEY is not configured."
+    }
+  }
+  return null
 }
 
 // -----------------------------------------------------------------------------

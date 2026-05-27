@@ -35,7 +35,10 @@ export interface TtsResult {
 
 export const VOICE_PROVIDER_CONFIG: Record<string, VoiceProviderConfig> = Object.fromEntries(
   VOICE_PROFILES.filter(
-    (profile) => profile.availability === "provider-ready" && profile.providerVoiceId,
+    (profile) =>
+      profile.provider === "openai" &&
+      profile.availability === "provider-ready" &&
+      profile.providerVoiceId,
   ).map((profile) => [profile.id, providerVoice(profile.providerVoiceId!)]),
 )
 
@@ -54,7 +57,11 @@ function providerVoice(providerVoiceId: string): VoiceProviderConfig {
 
 export function getVoiceProviderConfig(voiceId: string) {
   const profile = getVoiceProfile(voiceId)
-  if (profile.availability !== "provider-ready" || !profile.providerVoiceId) return null
+  if (
+    profile.provider !== "openai" ||
+    profile.availability !== "provider-ready" ||
+    !profile.providerVoiceId
+  ) return null
   return VOICE_PROVIDER_CONFIG[voiceId] ?? providerVoice(profile.providerVoiceId)
 }
 
