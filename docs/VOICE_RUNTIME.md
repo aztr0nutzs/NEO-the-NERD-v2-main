@@ -185,3 +185,17 @@ read from the same `BackendHealthSnapshot`.
 After install, the Voice Library button will read `GENERATE PROVIDER AUDIO`
 and the per-profile truth label will read `Provider Distinct Voice` for
 provider-ready voices when the backend/provider path is actually active.
+
+## OmniVoice external provider routing
+
+NEO now supports provider router targets: `openai`, `omnivoice`, `android-native`, `browser-speech`, `unavailable`.
+
+OmniVoice is **never** run inside the Android APK. It must run as an external Python/FastAPI backend (`voice-server/omnivoice`).
+
+Contract:
+- `POST {NEXT_PUBLIC_OMNIVOICE_BASE_URL}/tts`
+- request: `voiceId`, `text`, `mode` (`clone|design`), optional `refAudioId`, `refText`, `instruct`, `languageId`, `speed`, `duration`
+- response: `audioBase64`, `mimeType`, `fileName`, `provider:"omnivoice"`, `providerVoiceId`
+- `GET {NEXT_PUBLIC_OMNIVOICE_BASE_URL}/health` must return `status:"ok"` for OmniVoice to be reported active.
+
+Note: `app/api/tts` remains OpenAI-backed in this repo. OmniVoice calls bypass `/api/tts` and go directly to the external OmniVoice service.

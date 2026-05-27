@@ -63,7 +63,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
     return {
       mode: "provider-active",
       tone: "ok",
-      headline: "PROVIDER TTS ACTIVE · REAL DISTINCT VOICES",
+      headline: capabilities.activeProvider === "omnivoice" ? "OMNIVOICE ACTIVE · CUSTOM GENERATED VOICES" : "OPENAI TTS ACTIVE · PROVIDER DISTINCT VOICES",
       detail: `Neural backend reachable. ${PROVIDER_DISTINCT_COUNT} profiles deliver a distinct provider timbre; the rest are styled variants on top of those base voices.`,
       distinctRealizableCount: PROVIDER_DISTINCT_COUNT,
       totalProfiles: total,
@@ -78,7 +78,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
       return {
         mode: "android-collapsed",
         tone: "critical",
-      headline: "ANDROID DEVICE TTS FALLBACK · PROFILES MAY SOUND IDENTICAL",
+      headline: "ANDROID FALLBACK · PROFILES MAY SOUND IDENTICAL",
         detail: capabilities.remoteBackendConfigured
           ? "Backend is configured but provider TTS is unreachable, and this device exposes only one usable Android engine voice. Every profile is routed through that single voice with pitch/rate/style adjustments on top."
           : "Provider TTS is not configured and this device exposes only one usable Android engine voice. Every profile is routed through that single voice with pitch/rate/style adjustments on top.",
@@ -97,7 +97,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
     return {
       mode: "android-multi",
       tone: "warn",
-      headline: "ANDROID DEVICE TTS FALLBACK · PROFILES MAY SOUND IDENTICAL",
+      headline: "ANDROID FALLBACK · PROFILES MAY SOUND IDENTICAL",
       detail: capabilities.remoteBackendConfigured
         ? `Backend is configured but provider TTS is unreachable. Android engine exposes ${voiceCount} voices — only ~${reachable} of ${total} profiles can be slotted to a distinct device voice; others are styled variants.`
         : `Provider backend is not configured. Android engine exposes ${voiceCount} voices — only ~${reachable} of ${total} profiles can be slotted to a distinct device voice; others are styled variants.`,

@@ -234,6 +234,16 @@ const UNIQUENESS_OVERRIDES: Record<string, UniquenessOverride> = {
   // synthesized defaults below.
 }
 
+
+const OMNIVOICE_PROFILE_OVERRIDES: Record<string, Partial<VoiceProfile>> = {
+  "neo": { provider: "omnivoice", omnivoiceMode: "clone", omnivoiceRefAudioId: "neo_ref_a", omnivoiceRefText: "NEO online. Tell me the mission.", languageId: "en", name: "NEO Clone" },
+  "commander": { provider: "omnivoice", omnivoiceMode: "clone", omnivoiceRefAudioId: "commander_ref_a", omnivoiceRefText: "Objective locked. Execute the first step.", languageId: "en", name: "Commander Clone" },
+  villain: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Theatrical harmless villain monologue with dramatic pacing.", languageId: "en", name: "Villain Design" },
+  prankster: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Mischievous sing-song playful style.", languageId: "en", name: "Prankster Design" },
+  glitch: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "Digital glitch texture, playful and non-threatening.", languageId: "en", name: "Glitch Design" },
+  retro: { provider: "omnivoice", omnivoiceMode: "design", omnivoiceInstruct: "8-bit arcade announcer with chiptune vibe.", languageId: "en", name: "Retro Arcade Design" },
+}
+
 export const VOICE_PROFILES: VoiceProfile[] = [
   profile("neo", "NEO", "Core NEO voices", "Calm, confident futuristic core voice.", "The default NEO companion voice: clear, stable, lightly synthetic, and suitable for most assistant interactions.", ["core", "calm", "futuristic"], ["default chat", "briefings", "navigation"], 3, 4, 2, 3, 5, 50, 50, 75, 60, ["genius", "friendly", "strat"], "NEO online. Tell me the mission.", true, "alloy", "provider-ready", "cyan"),
   profile("nova", "Nova", "Warm assistants", "Bright synthwave hostess with bubbly delivery.", "A warmer, brighter profile for upbeat explanations, daily briefings, and friendly check-ins.", ["bright", "synthwave", "friendly"], ["daily briefing", "casual chat"], 4, 5, 3, 2, 4, 65, 70, 75, 75, ["friendly", "hype"], "Good morning, Commander. The signal is clean.", true, "nova", "provider-ready", "pink"),
@@ -275,7 +285,11 @@ export const VOICE_PROFILES: VoiceProfile[] = [
   profile("solar-diplomat", "Solar Diplomat", "Warm assistants", "Graceful, optimistic negotiation voice.", "A warm mediator profile for careful phrasing, social scripts, and polite disagreement.", ["diplomatic", "warm", "polished"], ["social scripts", "messages"], 3, 5, 2, 1, 5, 48, 48, 74, 52, ["friendly", "strat"], "We can say it clearly without starting a fire.", false, "shimmer", "provider-ready", "pink"),
   profile("void-oracle", "Void Oracle", "Dramatic / villainous voices", "Cryptic sci-fi prophecy tone.", "A mysterious profile for lore, dramatic warnings, and strange futuristic flavor.", ["oracle", "cryptic", "dark"], ["stories", "dramatic prompts"], 2, 2, 2, 3, 4, 36, 18, 76, 48, ["story", "detective"], "The quiet signal is usually the dangerous one.", false, undefined, "future-provider-target", "purple"),
   profile("circuit-cheerleader", "Circuit Cheerleader", "Energetic / hype voices", "Bright encouragement with robot sparkle.", "A cheerful hype profile for wins, habit streaks, and confidence boosts.", ["cheerful", "hype", "spark"], ["motivation", "celebrations"], 5, 5, 4, 2, 4, 82, 78, 80, 92, ["hype", "motivator", "friendly"], "Yes. That counts. Ship the next tiny win.", false, "coral", "provider-ready", "orange"),
-]
+].map((profile) =>
+  OMNIVOICE_PROFILE_OVERRIDES[profile.id]
+    ? { ...profile, ...OMNIVOICE_PROFILE_OVERRIDES[profile.id] }
+    : profile,
+)
 
 function profile(
   id: string,
