@@ -215,6 +215,7 @@ public class NeoNetworkPlugin extends Plugin {
       response.put("durationMs", System.currentTimeMillis() - scanStartMs);
       response.put("message", "Local subnet unavailable for safe bounded scan.");
       Log.d(TAG, "scanLocalSubnet limited-data scanMode=" + scanMode + " reason=local-subnet-unavailable");
+      Log.d(TAG, "scan_completed scannedHosts=0 discoveredHosts=0 durationMs=" + (System.currentTimeMillis() - scanStartMs) + " limitedData=true");
       call.resolve(response);
       return;
     }
@@ -345,6 +346,13 @@ public class NeoNetworkPlugin extends Plugin {
     response.put("message", scanDeadlineExceeded
       ? "Native scan stopped at the time budget; partial coverage."
       : "Local subnet scan complete.");
+    Log.d(TAG, "scan_completed scannedHosts=" + targets.size()
+      + " discoveredHosts=" + discovered.size()
+      + " durationMs=" + durationMs
+      + " limitedData=false"
+      + " scanMode=" + scanMode
+      + " subnetTotalHosts=" + subnetTotalHosts
+      + " deadlineExceeded=" + scanDeadlineExceeded);
     Log.d(TAG, "scanLocalSubnet completed scanMode=" + scanMode
       + " scannedHosts=" + targets.size()
       + " discoveredHosts=" + discovered.size()

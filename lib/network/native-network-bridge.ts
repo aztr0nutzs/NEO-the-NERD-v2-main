@@ -19,7 +19,7 @@ type NeoNetworkPlugin = {
 
 type NativePermissionState = "prompt" | "prompt-with-rationale" | "granted" | "denied";
 
-type NativeNetworkPermissionStatus = {
+export type NativeNetworkPermissionStatus = {
   location?: NativePermissionState;
   wifi?: NativePermissionState;
 };
@@ -82,6 +82,20 @@ export async function requestNetworkPermissions(): Promise<boolean> {
       message: error instanceof Error ? error.message : "Unknown network permission request error",
     });
     return false;
+  }
+}
+
+export async function checkNetworkPermissions(): Promise<NativeNetworkPermissionStatus | null> {
+  if (!isAndroidNativeNetworkAvailable()) return null;
+  try {
+    const status = await neoNetwork.checkPermissions();
+    logNativeDiagnostic("permissions_checked", status as Record<string, unknown>);
+    return status;
+  } catch (error) {
+    logNativeDiagnostic("permissions_check_failed", {
+      message: error instanceof Error ? error.message : "Unknown network permission check error",
+    });
+    return null;
   }
 }
 

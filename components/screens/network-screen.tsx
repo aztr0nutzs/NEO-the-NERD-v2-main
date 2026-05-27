@@ -37,7 +37,7 @@ export function NetworkScreen() {
               NEURAL_MAP // 3D NETWORK TOPOLOGY
             </p>
             <p className="ps-mono mt-0.5 text-[12px] tracking-[0.18em] text-white/85">
-              Live device discovery · interactive 3D map
+              Runtime-labeled discovery · estimated 3D topology
             </p>
           </div>
           <Radar

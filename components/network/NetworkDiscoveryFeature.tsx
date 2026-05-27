@@ -16,6 +16,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
+import { Capacitor } from "@capacitor/core";
 import {
   Radar,
   Network,
@@ -43,6 +44,7 @@ import { DeviceIdentityReviewQueue } from "./DeviceIdentityReviewQueue";
 import { NetworkTimelinePanel } from "./NetworkTimelinePanel";
 import { NetworkAlertsPanel } from "./NetworkAlertsPanel";
 import { NetworkHealthPanel } from "./NetworkHealthPanel";
+import { NetworkDiagnosticsPanel } from "./NetworkDiagnosticsPanel";
 import { NetworkMapLoadingState } from "./map/NetworkMapLoadingState";
 import { NetworkExportPanel } from "@/components/exports/network-export-panel";
 
@@ -85,7 +87,9 @@ import {
 } from "@/lib/network/networkNotifications";
 import { computeNextAutoScanAt, shouldRunAutoScan } from "@/lib/network/networkMonitoring";
 import {
+  checkNetworkPermissions,
   configureAndroidBackgroundMonitoring,
+  getLocalNetworkContext as getNativeLocalNetworkContext,
   getAndroidBackgroundMonitoringStatus,
   requestNetworkPermissions,
 } from "@/lib/network/native-network-bridge";
@@ -110,7 +114,11 @@ import type {
   RouterControlMode,
   DeviceIdentityUpdate,
   DiagnosticProbeResult,
+  NetworkTopologyGraph,
+  ScanCompletionResult,
 } from "@/lib/network/types";
+import type { NativeLocalNetworkContext } from "@/lib/network/native-network-types";
+import type { NativeNetworkPermissionStatus } from "@/lib/network/native-network-bridge";
 
 const NetworkMap3D = dynamic(
   () => import("./map/NetworkMap3D").then((module) => module.NetworkMap3D),
@@ -171,7 +179,7 @@ export function NetworkDiscoveryFeature() {
   const [selectedDevice, setSelectedDevice] = useState<DiscoveredDevice | null>(null);
   const [selectedMode, setSelectedMode] = useState<ScanMode>("balanced");
   const [scanProgress, setScanProgress] = useState(0);
-  const [lastScanCompletion, setLastScanCompletion] = useState<import("@/lib/network/types").ScanCompletionResult | null>(null);
+  const [lastScanCompletion, setLastScanCompletion] = useState<ScanCompletionResult | null>(null);
   const [activeTab, setActiveTab] = useState("map");
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<string[]>([]);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
@@ -180,6 +188,10 @@ export function NetworkDiscoveryFeature() {
   const [latestDiagnostics, setLatestDiagnostics] = useState<DiagnosticProbeResult[]>([]);
   const [networkPermissionDenied, setNetworkPermissionDenied] = useState(false);
   const [requestingNetworkPermissions, setRequestingNetworkPermissions] = useState(false);
+  const [diagnosticPlatform, setDiagnosticPlatform] = useState("web");
+  const [diagnosticLocalContext, setDiagnosticLocalContext] = useState<NativeLocalNetworkContext | null>(null);
+  const [diagnosticPermissionStatus, setDiagnosticPermissionStatus] = useState<NativeNetworkPermissionStatus | null>(null);
+  const [diagnosticTopologyGraph, setDiagnosticTopologyGraph] = useState<NetworkTopologyGraph | null>(null);
   const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
   const identityRecordsRef = useRef(networkDeviceIdentities);
   const networkEventsRef = useRef(networkEvents);
@@ -586,7 +598,7 @@ export function NetworkDiscoveryFeature() {
       clearInterval(interval);
       if (cancelled) return;
 
-      const resolvedResult: import("@/lib/network/types").ScanCompletionResult =
+      const resolvedResult: ScanCompletionResult =
         latestResult && nativeReported
           ? latestResult
           : {
@@ -900,12 +912,45 @@ export function NetworkDiscoveryFeature() {
     try {
       const granted = await requestNetworkPermissions();
       setNetworkPermissionDenied(!granted);
+      const status = await checkNetworkPermissions();
+      setDiagnosticPermissionStatus(status);
     } catch {
       setNetworkPermissionDenied(true);
     } finally {
       setRequestingNetworkPermissions(false);
     }
   }, []);
+
+  const refreshOperationalDiagnostics = useCallback(async () => {
+    setDiagnosticPlatform(Capacitor.getPlatform());
+    const [permissionResult, contextResult, topologyResult] = await Promise.allSettled([
+      checkNetworkPermissions(),
+      getNativeLocalNetworkContext(),
+      networkAdapter.getNetworkTopology(),
+    ]);
+
+    setDiagnosticPermissionStatus(
+      permissionResult.status === "fulfilled" ? permissionResult.value : null
+    );
+    setDiagnosticLocalContext(
+      contextResult.status === "fulfilled" ? contextResult.value : null
+    );
+    setDiagnosticTopologyGraph(
+      topologyResult.status === "fulfilled" ? topologyResult.value : null
+    );
+  }, []);
+
+  useEffect(() => {
+    void refreshOperationalDiagnostics();
+  }, [
+    refreshOperationalDiagnostics,
+    initAttempt,
+    networkStatus?.lastScanAt,
+    networkStatus?.scanState,
+    lastScanCompletion?.finishedAt,
+    settings?.demoMode,
+    adapterStatus?.mode,
+  ]);
 
   useEffect(() => {
     if (!settings) return;
@@ -1477,6 +1522,25 @@ export function NetworkDiscoveryFeature() {
             onJumpToSecurity={() => setActiveTab("security")}
             onJumpToScan={() => setActiveTab("overview")}
             healthSnapshot={latestHealthSnapshot}
+          />
+        </section>
+
+        <section className="mb-6">
+          <NetworkDiagnosticsPanel
+            platform={diagnosticPlatform}
+            adapterStatus={effectiveAdapterStatus}
+            settings={effectivePanelSettings}
+            networkStatus={networkStatus}
+            selectedMode={selectedMode}
+            localContext={diagnosticLocalContext}
+            permissionStatus={diagnosticPermissionStatus}
+            permissionDenied={networkPermissionDenied}
+            lastScanResult={lastScanCompletion}
+            topologyGraph={diagnosticTopologyGraph}
+            routerStatus={routerStatus}
+            routerCapabilities={routerCapabilities}
+            routerControlMode={routerControlMode}
+            onRefresh={refreshOperationalDiagnostics}
           />
         </section>
 
