@@ -584,7 +584,7 @@ export function Knxt4Game({ onClose }: { onClose?: () => void }) {
         settings: { title: "SETTINGS", sub: "AUDIO · INPUT · DISPLAY · COMING SOON" },
         stats: { title: "STATS", sub: "MATCH HISTORY · COMING SOON", color: "yellow" },
         garage: { title: "GARAGE", sub: "TOKEN SKINS · COMING SOON", color: "lime" },
-        ladder: { title: "AI LADDER", sub: "TIER CLIMB · COMING SOON", color: "magenta" },
+        ladder: { title: "AI LADDER", sub: "TIER CLIMB · PARTIAL", color: "magenta" },
         "challenge-select": { title: "CHALLENGE", sub: "PUZZLE BANK · COMING SOON", color: "yellow" },
       }
       if (target in titles) { setRoute({ name: "coming", ...titles[target as keyof typeof titles] }); return }

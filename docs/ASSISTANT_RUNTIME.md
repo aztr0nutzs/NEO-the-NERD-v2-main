@@ -99,13 +99,13 @@ interface AssistantReplyResult {
 
 | Runtime | `BACKEND_BASE_URL` | Health probe | Result |
 |---|---|---|---|
-| `next dev`, `OPENAI_API_KEY` set | unset | `available` + provider | `mode=provider`, `status=ok`, AI: CONNECTED |
-| `next dev`, no key | unset | `available-no-provider` | `mode=local-engine`, `status=config-fallback`, AI: LOCAL FALLBACK |
-| Capacitor APK | unset | (skipped) | `mode=local-engine`, `status=config-fallback`, AI: LOCAL FALLBACK |
-| Capacitor APK | valid hosted URL, key set | `available` + provider | `mode=provider`, `status=ok`, AI: CONNECTED |
-| Capacitor APK | invalid URL | `unreachable` | `mode=local-engine`, `status=provider-fallback`, AI: BACKEND UNAVAILABLE |
-| Hosted | provider returns 500 | `available` then `unreachable` | `mode=local-engine`, `status=provider-fallback`, AI: BACKEND UNAVAILABLE |
-| Hosted | provider returns valid text but `fallback:true` | `available-no-provider` | `mode=local-engine`, `status=config-fallback`, AI: LOCAL FALLBACK |
+| `next dev`, `OPENAI_API_KEY` set | unset | `available` + provider | `mode=provider`, `status=ok`, AI: PROVIDER ACTIVE |
+| `next dev`, no key | unset | `available-no-provider` | `mode=local-engine`, `status=config-fallback`, AI: FALLBACK |
+| Capacitor APK | unset | (skipped) | `mode=local-engine`, `status=config-fallback`, AI: NOT CONFIGURED |
+| Capacitor APK | valid hosted URL, key set | `available` + provider | `mode=provider`, `status=ok`, AI: PROVIDER ACTIVE |
+| Capacitor APK | invalid URL | `unreachable` | `mode=local-engine`, `status=provider-fallback`, AI: UNAVAILABLE |
+| Hosted | provider returns 500 | `available` then `unreachable` | `mode=local-engine`, `status=provider-fallback`, AI: UNAVAILABLE |
+| Hosted | provider returns valid text but `fallback:true` | `available-no-provider` | `mode=local-engine`, `status=config-fallback`, AI: FALLBACK |
 
 ## Failure-path behavior
 
@@ -148,14 +148,15 @@ interface AssistantReplyResult {
 The chat header now contains a single right-aligned mono pill:
 
 ```
-NEO // CHANNEL_NEO                    AI: CONNECTED
+NEO // CHANNEL_NEO                    AI: PROVIDER ACTIVE
 ```
 
 Possible labels:
 
-- `AI: CONNECTED` (green)        — provider reachable + configured
-- `AI: LOCAL FALLBACK` (orange)  — local engine path is active
-- `AI: BACKEND UNAVAILABLE` (pink) — health probe failed
+- `AI: PROVIDER ACTIVE` (green) — provider reachable + configured
+- `AI: FALLBACK` (orange) — local engine path is active
+- `AI: NOT CONFIGURED` (orange) — provider path is absent for this runtime
+- `AI: UNAVAILABLE` (pink) — health probe failed
 - `AI: DETECTING` (orange)       — first paint, before the probe resolves
 
 It mirrors the truthful state from `useBackendRuntime()`, which is already used
@@ -165,11 +166,11 @@ by the Settings/Controls engine rows. No other chat layout is changed.
 
 | ID | Scenario | Expected |
 |---|---|---|
-| A  | `next dev`, no `OPENAI_API_KEY` | AI: LOCAL FALLBACK; chat answers from local engine; no errors |
-| A' | `next dev`, `OPENAI_API_KEY` set | AI: CONNECTED; chat answers from provider; no fallback suffix |
-| B  | Capacitor build, no `NEXT_PUBLIC_NEO_BACKEND_BASE_URL` | AI: LOCAL FALLBACK; zero `/api/*` requests in WebView devtools |
-| C  | Capacitor build, invalid URL | AI: BACKEND UNAVAILABLE; chat still answers from local engine |
-| D  | Hosted, force a 500 from `/api/assistant/chat` | AI: BACKEND UNAVAILABLE; chat answers from local engine; no raw diagnostic suffix in the bubble |
+| A  | `next dev`, no `OPENAI_API_KEY` | AI: FALLBACK; chat answers from local engine; no errors |
+| A' | `next dev`, `OPENAI_API_KEY` set | AI: PROVIDER ACTIVE; chat answers from provider; no fallback suffix |
+| B  | Capacitor build, no `NEXT_PUBLIC_NEO_BACKEND_BASE_URL` | AI: NOT CONFIGURED; zero `/api/*` requests in WebView devtools |
+| C  | Capacitor build, invalid URL | AI: UNAVAILABLE; chat still answers from local engine |
+| D  | Hosted, force a 500 from `/api/assistant/chat` | AI: UNAVAILABLE; chat answers from local engine; no raw diagnostic suffix in the bubble |
 | E  | Local engine path with valid input | Returns coherent text; matches personality + intent |
 | F  | Pull network mid-send | sendState resets to idle within 1.2 s; local engine still answers |
 | G  | Toggle backend up/down between sends | AI status label updates within 30 s (health TTL) or immediately if `refresh()` is called |

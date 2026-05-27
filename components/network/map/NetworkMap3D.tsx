@@ -273,16 +273,16 @@ export function NetworkMap3D({
   const relationshipsConfirmed = Boolean(topologyGraph?.relationshipsConfirmed);
   const truthBadge =
     topologyMode === "demo"
-      ? "DEMO TOPOLOGY VIEW"
+      ? "DEMO"
       : topologyMode === "estimated"
-        ? "ESTIMATED LOGICAL TOPOLOGY"
-        : "BACKEND CONFIRMED TOPOLOGY";
+        ? "ESTIMATED"
+        : "LIVE";
   const confidenceLabel =
     topologyMode === "backend-confirmed" && relationshipsConfirmed
-      ? "CONFIDENCE: CONFIRMED"
+      ? "LIVE"
       : topologyMode === "demo"
-        ? "CONFIDENCE: DEMO"
-        : "CONFIDENCE: ESTIMATED";
+        ? "DEMO"
+        : "ESTIMATED";
   const confidenceClasses =
     topologyMode === "backend-confirmed" && relationshipsConfirmed
       ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"

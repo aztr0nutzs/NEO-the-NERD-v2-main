@@ -311,7 +311,7 @@ export function GamesScreen() {
             })}
           </div>
           <p className="ps-mono text-[9px] tracking-[0.2em] text-white/40 px-1">
-            {category === "all" ? `${playableCount} PLAYABLE` : `${filteredPlayable} IN ${category.toUpperCase()}`}
+            {category === "all" ? `${playableCount} LIVE` : `${filteredPlayable} LIVE IN ${category.toUpperCase()}`}
           </p>
 
           {/* Game grid */}

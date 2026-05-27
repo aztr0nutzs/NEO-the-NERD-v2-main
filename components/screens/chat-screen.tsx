@@ -253,7 +253,9 @@ export function ChatScreen() {
         </div>
         <h2 className="ps-heading text-2xl">
           <span className="ps-text-purple">CONVERSATION</span>{" "}
-          <span className="text-white/80">/ LIVE</span>
+          <span className="text-white/80">
+            / {backendRuntime.aiStatusLabel === "PROVIDER ACTIVE" ? "PROVIDER ACTIVE" : backendRuntime.aiStatusLabel}
+          </span>
         </h2>
         {chatSendState !== "idle" && (
           <p className="mt-1 ps-mono text-[10px] tracking-[0.25em] text-white/50">

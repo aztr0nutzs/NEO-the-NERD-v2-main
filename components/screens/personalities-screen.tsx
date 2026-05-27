@@ -126,11 +126,11 @@ export function PersonalitiesScreen() {
         setPreviewState("done")
         const friendlyMode =
           result.mode === "provider-tts"
-            ? "HIGH-QUALITY PROVIDER VOICE"
+            ? "PROVIDER ACTIVE"
             : result.mode === "native-android"
-              ? "STYLED ANDROID FALLBACK"
+              ? "FALLBACK"
               : result.mode === "browser-speech"
-                ? "BROWSER SPEECH FALLBACK"
+                ? "FALLBACK"
                 : result.mode.replace("-", " ").toUpperCase()
         setPreviewMessage(`HEARD VIA ${friendlyMode}`)
       } else {

@@ -119,7 +119,7 @@ The model intentionally separates:
 
 | Surface | Before | After |
 |---|---|---|
-| Settings → TTS ENGINE | `LOCAL MOCK` (Phase 1) | `PROVIDER READY` / `BROWSER + LOCAL ENGINE` / `LOCAL ENGINE ONLY` / `BACKEND UNREACHABLE` / `DETECTING` from `useBackendRuntime()` |
+| Settings → TTS ENGINE | `LOCAL MOCK` (Phase 1) | `PROVIDER ACTIVE` / `LOCAL` / `NOT CONFIGURED` / `UNAVAILABLE` / `DETECTING` from `useBackendRuntime()` |
 | Controls → VOICE ENGINE | `LOCAL MOCK` (Phase 1) | Same as above |
 | Voice Library → "GENERATE PROVIDER AUDIO" button | Always enabled, errored at click time | Disabled with label `PROVIDER AUDIO UNAVAILABLE` when `providerTtsAvailable === false`. Tooltip explains. |
 | Voice Library → status footer | "Emotion is provider/style metadata." | "Emotion is provider-style metadata applied by provider TTS." / "Emotion is provider-style metadata; provider TTS not active." — toggles on `providerTtsAvailable`. |

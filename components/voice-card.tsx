@@ -8,7 +8,7 @@ import type { VoiceRuntimeCapabilities } from "@/lib/voice/voice-runtime"
 import { getVoiceUniquenessCategory } from "@/lib/voice/voiceUniqueness"
 
 type AuthoredBadge = "UNIQUE TIMBRE" | "STYLED VARIANT" | "DEVICE VOICE" | "PROFILE ONLY" | "UNAVAILABLE"
-type RuntimeIndicator = "LIVE" | "FALLBACK" | "LIMITED" | "OFFLINE"
+type RuntimeIndicator = "LIVE" | "FALLBACK" | "PARTIAL" | "UNAVAILABLE"
 
 function authoredBadge(voice: VoiceProfile): AuthoredBadge {
   if (voice.availability === "unavailable") return "UNAVAILABLE"
@@ -31,15 +31,15 @@ const BADGE_COLOR: Record<AuthoredBadge, string> = {
 const INDICATOR_COLOR: Record<RuntimeIndicator, string> = {
   LIVE: "#39ff14",
   FALLBACK: "#ff7a00",
-  LIMITED: "#ffd700",
-  OFFLINE: "#ff2d9c",
+  PARTIAL: "#ffd700",
+  UNAVAILABLE: "#ff2d9c",
 }
 
 function runtimeIndicator(voice: VoiceProfile, capabilities?: VoiceRuntimeCapabilities | null): RuntimeIndicator | null {
   if (!capabilities) return null
-  if (voice.availability === "unavailable") return "OFFLINE"
+  if (voice.availability === "unavailable") return "UNAVAILABLE"
   const category = getVoiceUniquenessCategory(voice, capabilities)
-  if (category === "unavailable") return "OFFLINE"
+  if (category === "unavailable") return "UNAVAILABLE"
   // Special case: Android runtime collapsed to a single device voice — every
   // profile shares the same underlying timbre regardless of authored intent.
   if (
@@ -47,13 +47,13 @@ function runtimeIndicator(voice: VoiceProfile, capabilities?: VoiceRuntimeCapabi
     capabilities.nativeAndroidTtsAvailable &&
     capabilities.nativeAndroidVoiceCount <= 1
   ) {
-    return "LIMITED"
+    return "PARTIAL"
   }
   // Authored intent realized → LIVE; otherwise the runtime is delivering a
-  // lower category than authored → FALLBACK (engine swap) or LIMITED (engine
+  // lower category than authored → FALLBACK (engine swap) or PARTIAL (engine
   // is correct but can't reach distinct timbre).
   if (voice.timbreSource === category) return "LIVE"
-  if (voice.timbreSource === "provider-distinct" && category === "styled-variant" && capabilities.providerTtsAvailable) return "LIMITED"
+  if (voice.timbreSource === "provider-distinct" && category === "styled-variant" && capabilities.providerTtsAvailable) return "PARTIAL"
   return "FALLBACK"
 }
 

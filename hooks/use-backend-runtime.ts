@@ -13,11 +13,11 @@ import {
 export interface BackendRuntimeStatus {
   environment: RuntimeEnvironment | null
   health: BackendHealthSnapshot | null
-  /** UI-friendly label for the engine row (TTS / VOICE ENGINE). */
+  /** UI-friendly truth label for the engine row (TTS / VOICE ENGINE). */
   engineLabel: string
   /** Hex color for the badge to match existing palette. */
   engineLabelColor: string
-  /** Compact label for the chat AI status pill: "CONNECTED" / "LOCAL FALLBACK" / "BACKEND UNAVAILABLE". */
+  /** Compact truth label for the chat AI status pill. */
   aiStatusLabel: string
   /** Hex color matching the AI status label for the chat pill. */
   aiStatusColor: string
@@ -40,22 +40,22 @@ function deriveEngineLabel(
 
   if (health.state === "available" && health.providerStatus?.providerConfigured) {
     return {
-      label: env.nativeRuntime ? "REMOTE PROVIDER" : "PROVIDER READY",
+      label: "PROVIDER ACTIVE",
       color: COLOR_GREEN,
       fallbackActive: false,
     }
   }
 
   if (health.state === "available" || health.state === "available-no-provider") {
-    return { label: "BROWSER + LOCAL ENGINE", color: COLOR_ORANGE, fallbackActive: false }
+    return { label: "LOCAL", color: COLOR_ORANGE, fallbackActive: false }
   }
 
   if (health.state === "unavailable-by-config") {
-    return { label: "LOCAL ENGINE ONLY", color: COLOR_ORANGE, fallbackActive: true }
+    return { label: "NOT CONFIGURED", color: COLOR_ORANGE, fallbackActive: true }
   }
 
   if (health.state === "unreachable") {
-    return { label: "BACKEND UNREACHABLE", color: COLOR_PINK, fallbackActive: true }
+    return { label: "UNAVAILABLE", color: COLOR_PINK, fallbackActive: true }
   }
 
   return { label: "DETECTING", color: COLOR_ORANGE, fallbackActive: false }
@@ -66,16 +66,16 @@ function deriveAiStatus(
 ): { label: string; color: string } {
   if (!health) return { label: "DETECTING", color: COLOR_ORANGE }
   if (health.state === "available" && health.providerStatus?.providerConfigured) {
-    return { label: "CONNECTED", color: COLOR_GREEN }
+    return { label: "PROVIDER ACTIVE", color: COLOR_GREEN }
   }
   if (health.state === "available" || health.state === "available-no-provider") {
-    return { label: "LOCAL FALLBACK", color: COLOR_ORANGE }
+    return { label: "FALLBACK", color: COLOR_ORANGE }
   }
   if (health.state === "unavailable-by-config") {
-    return { label: "LOCAL FALLBACK", color: COLOR_ORANGE }
+    return { label: "NOT CONFIGURED", color: COLOR_ORANGE }
   }
   if (health.state === "unreachable") {
-    return { label: "BACKEND UNAVAILABLE", color: COLOR_PINK }
+    return { label: "UNAVAILABLE", color: COLOR_PINK }
   }
   return { label: "DETECTING", color: COLOR_ORANGE }
 }

@@ -72,7 +72,7 @@ export function NetworkSettingsPanel({
             <div className="flex items-start gap-2 rounded-lg border border-orange-500/30 bg-orange-500/10 p-3">
               <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
               <div>
-                <p className="font-mono text-xs font-bold text-orange-400">DEMO_MODE_ACTIVE</p>
+                <p className="font-mono text-xs font-bold text-orange-400">DEMO</p>
                 <p className="mt-0.5 font-mono text-[10px] text-orange-300/80">
                   Browser preview mode: simulated network data. Install/run the Android app for live local LAN discovery.
                   Installed Android local discovery does not require a backend.
@@ -85,7 +85,7 @@ export function NetworkSettingsPanel({
             <div className="flex items-start gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-400" />
               <div>
-                <p className="font-mono text-xs font-bold text-yellow-400">NATIVE_DISCOVERY_UNAVAILABLE</p>
+                <p className="font-mono text-xs font-bold text-yellow-400">UNAVAILABLE</p>
                 <p className="mt-0.5 font-mono text-[10px] text-yellow-300/80">
                   Native Android discovery failed to initialize. No backend is required for local LAN scanning —
                   retry live discovery from the Scan tab, or enable Demo Preview to use labeled simulated data.
@@ -221,7 +221,7 @@ export function NetworkSettingsPanel({
           <SettingGroup title="ADAPTER_MODE" icon={FlaskConical}>
             <div className="space-y-3">
               <SettingToggle
-                label="DEMO_MODE"
+                label="DEMO"
                 description="Use simulated network data"
                 checked={settings.demoMode}
                 onCheckedChange={(checked) => onUpdateSettings({ demoMode: checked })}

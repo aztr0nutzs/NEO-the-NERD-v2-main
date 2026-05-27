@@ -111,17 +111,17 @@ CORS must allow the Capacitor origin (`capacitor://localhost` for Android,
 - The app **never** silently pretends a backend is configured when it is not.
   The Settings → Engine row and Controls → VOICE ENGINE row both read from
   `useBackendRuntime()` and surface one of:
-  - `PROVIDER READY` — backend reachable and `providerConfigured: true`.
-  - `REMOTE PROVIDER` — same as above, native runtime targeting a remote URL.
-  - `BROWSER + LOCAL ENGINE` — backend reachable but no live provider key.
-  - `LOCAL ENGINE ONLY` — Capacitor without a backend URL configured.
-  - `BACKEND UNREACHABLE` — probe failed.
+  - `PROVIDER ACTIVE` — backend reachable and `providerConfigured: true`.
+  - `LOCAL` — local browser/engine path is active.
+  - `FALLBACK` — provider path was skipped or failed but local response still works.
+  - `NOT CONFIGURED` — provider backend URL/key path is absent for this runtime.
+  - `UNAVAILABLE` — provider probe failed.
 - Chat answers from the local engine are not suffixed with raw diagnostics.
   The response source remains truthful via the AI status pill and Settings /
   Controls runtime rows.
 - Provider TTS error messages bubble up to the existing voice-status line; the
-  voice profile truth labels (`PROVIDER READY // BROWSER PREVIEW`,
-  `PROFILE ONLY`, `FUTURE PROVIDER TARGET`) remain authoritative.
+  voice profile truth labels (`PROVIDER ACTIVE`, `FALLBACK`, `PARTIAL`,
+  `UNAVAILABLE`) remain authoritative.
 
 ## What this layer does not do
 

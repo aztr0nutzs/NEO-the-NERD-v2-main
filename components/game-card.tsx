@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { Play, Trophy, Clock, Flame } from "lucide-react"
 import type { GameDef, GameId, GameProgressionStats } from "@/lib/types"
+import { TruthBadge } from "@/components/truth-badge"
 
 const ACCENT_HEX: Record<GameDef["accent"], string> = {
   cyan: "#00f0ff",
@@ -52,18 +53,10 @@ export function GameCard({
           </h3>
           <p className="mt-1 text-[12px] text-white/70 text-pretty">{game.behavior}</p>
         </div>
-        {game.playable && (
-          <span
-            className="rounded-full px-2 py-0.5 ps-mono text-[8px] tracking-[0.25em]"
-            style={{
-              color: "#39ff14",
-              background: "rgba(57,255,20,0.12)",
-              boxShadow: "inset 0 0 0 1px rgba(57,255,20,0.55)",
-            }}
-          >
-            PLAYABLE
-          </span>
-        )}
+        <TruthBadge
+          label={game.playable ? "LIVE" : "COMING SOON"}
+          title={game.playable ? "Playable in this build." : "Mode staged, not playable in this build."}
+        />
       </div>
 
       <div className="mt-2 flex flex-wrap gap-1.5">

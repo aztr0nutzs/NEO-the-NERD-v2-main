@@ -1377,11 +1377,10 @@ export function NetworkDiscoveryFeature() {
                   backgroundClip: "text",
                 }}
               >
-                NETWORK DISCOVERY + CONTROL
+                NETWORK DISCOVERY + READ ONLY CONTROL
               </h1>
               <p className="mt-1 font-mono text-xs text-gray-300/90 sm:text-sm">
-                Map nearby devices, review activity, and queue safe control actions from the N.E.O.
-                command layer.
+                Map nearby devices, review activity, and inspect router state. Control actions require a connector.
               </p>
             </div>
 
@@ -1402,7 +1401,7 @@ export function NetworkDiscoveryFeature() {
                 {!isDemoMode && effectiveAdapterStatus.mode === "native-unavailable" && (
                   <span className="flex items-center gap-1.5 rounded-full border border-yellow-500/50 bg-yellow-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-yellow-300">
                     <AlertTriangle className="h-3 w-3" />
-                    LIVE UNAVAILABLE // NO DEMO DATA LOADED
+                    UNAVAILABLE // NO DEMO DATA LOADED
                   </span>
                 )}
                 <span className={`flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider ${
@@ -1414,12 +1413,12 @@ export function NetworkDiscoveryFeature() {
                 }`}>
                   <Cpu className="h-3 w-3" />
                   {effectiveAdapterStatus.label === "LIVE_ANDROID_DISCOVERY"
-                    ? "LIVE ANDROID DISCOVERY"
+                    ? "LIVE"
                     : effectiveAdapterStatus.mode === "native-unavailable"
-                      ? "LIVE DISCOVERY UNAVAILABLE"
+                      ? "UNAVAILABLE"
                       : effectiveAdapterStatus.mode === "native-android"
-                        ? "LIVE LOCAL ANDROID DISCOVERY"
-                        : "SIMULATED BROWSER PREVIEW"}
+                        ? "LIVE"
+                        : "DEMO"}
                 </span>
               </div>
             </div>
@@ -1710,12 +1709,12 @@ export function NetworkDiscoveryFeature() {
           <p className="text-center font-mono text-[10px] text-gray-400">
             {`N.E.O. NETWORK MODULE // ${effectiveAdapterStatus.label} // ${
               effectiveAdapterStatus.mode === "native-android"
-                ? "LIVE LOCAL ANDROID DISCOVERY · NO BACKEND REQUIRED"
+                ? "LIVE · LOCAL DISCOVERY · NO BACKEND REQUIRED"
                 : effectiveAdapterStatus.mode === "native-unavailable"
-                  ? "NATIVE DISCOVERY UNAVAILABLE"
+                  ? "UNAVAILABLE"
                   : effectiveAdapterStatus.mode === "scan-failed"
-                    ? "LAST SCAN FAILED"
-                    : "SIMULATED BROWSER PREVIEW"
+                    ? "PARTIAL · LAST SCAN FAILED"
+                    : "DEMO"
             }`}
           </p>
         </footer>

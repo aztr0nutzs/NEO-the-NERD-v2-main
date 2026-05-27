@@ -1663,7 +1663,7 @@ function VerdictBanner({
           className="hud-mono mt-2 text-[9px] font-bold"
           style={{ color: rgba(NEO.yellow, 0.85), letterSpacing: "0.08em" }}
         >
-          PARTIAL TEST · DOWNLOAD/LATENCY/JITTER MEASURED · UPLOAD NOT MEASURED
+          PARTIAL · DOWNLOAD/LATENCY/JITTER MEASURED · UPLOAD NOT CONFIGURED
         </p>
       )}
     </div>

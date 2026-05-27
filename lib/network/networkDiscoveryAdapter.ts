@@ -129,7 +129,7 @@ function createReadOnlyActionResult(
     id: `readonly-action-${Date.now()}`,
     createdAt: new Date().toISOString(),
     status: "failed",
-    message: `${action.message} [READ_ONLY_NATIVE_ADAPTER - ${reason}]`,
+    message: `${action.message} [READ ONLY - ${reason}]`,
   };
 }
 
@@ -707,7 +707,7 @@ class NativeNetworkAdapter implements NetworkAdapterInterface {
       lastSeen: new Date().toISOString(),
       openPorts: host.openPorts ?? [],
       services: host.services ?? [],
-      notes: host.dataLimited ? "LIMITED DATA" : "LIVE ANDROID DISCOVERY",
+      notes: host.dataLimited ? "PARTIAL" : "LIVE",
       latencyMs: host.latencyMs,
       discoverySources: host.discoverySources ?? ["tcp-probe"],
       confidence: host.confidence ?? "low",

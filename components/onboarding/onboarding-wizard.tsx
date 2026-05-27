@@ -417,7 +417,7 @@ const STEP_LABELS: Record<StepId, { title: string }> = {
   permissions: { title: "Permissions" },
   "first-scan": { title: "Your first scan" },
   "review-unknown": { title: "Review unknown devices" },
-  monitoring: { title: "Background monitoring" },
+  monitoring: { title: "Foreground monitoring" },
   complete: { title: "All systems nominal" },
 }
 
@@ -443,7 +443,7 @@ function StepWelcome() {
             icon: Radar,
             color: "#39ff14",
             title: "Network Discovery",
-            body: "Map devices on your Wi-Fi, watch for new arrivals, and review unknown gear.",
+            body: "Scan or demo-map devices on your Wi-Fi, watch foreground alerts, and review unknown gear.",
           },
           {
             icon: ShieldCheck,
@@ -695,7 +695,7 @@ function StepDemoVsLive({
         />
         <ModePanel
           accent="green"
-          title="LIVE MODE"
+          title="LIVE"
           active={live && !adapterDemoMode}
           bullets={[
             "Reads your subnet via the native plugin",
@@ -722,7 +722,7 @@ function StepDemoVsLive({
         >
           {capabilityPlatform.toUpperCase()}
           {" ·· "}
-          {live ? "LIVE DISCOVERY AVAILABLE" : "DEMO MODE WILL BE USED"}
+          {live ? "LIVE" : "DEMO"}
         </p>
         {!live && (
           <p className="mt-1.5 text-[11px] leading-snug text-white/70">
@@ -820,7 +820,7 @@ function StepFirstScan({
         }}
       >
         <p className="ps-mono text-[10px] tracking-[0.25em] text-white/55">
-          {liveScanAvailable ? "LIVE SCAN AVAILABLE" : "LIVE SCAN UNAVAILABLE"}
+          {liveScanAvailable ? "LIVE" : "UNAVAILABLE"}
         </p>
         <p className="mt-1 text-[12px] leading-snug text-white/80">
           {liveScanAvailable
@@ -942,15 +942,15 @@ function StepMonitoring({
   return (
     <div className="space-y-3">
       <p className="text-[13px] leading-relaxed text-white/85">
-        Want NEO to keep watching while you do other things? Monitoring runs
-        periodic scans and surfaces new arrivals on the Home dashboard.
+        Want NEO to keep watching while the app is open? Monitoring is
+        foreground only: periodic scans surface new arrivals on the Home dashboard.
       </p>
       <div className="grid grid-cols-2 gap-2">
         <MonitoringChoice
           accent="green"
           label="ENABLE_MONITOR"
           selected={enabled}
-          description="Run scheduled scans and surface new devices."
+          description="Run foreground scheduled scans and surface new devices."
           onClick={() => onChange(true)}
         />
         <MonitoringChoice
@@ -995,7 +995,7 @@ function StepComplete() {
             icon: Radar,
             color: "#39ff14",
             title: "Watch the Network",
-            body: "Open the Network screen any time to view the live map and alerts.",
+            body: "Open the Network screen any time to view the estimated map and foreground alerts.",
           },
           {
             icon: CircleHelp,

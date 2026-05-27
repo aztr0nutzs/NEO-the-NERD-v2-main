@@ -261,7 +261,7 @@ export function ControlsScreen() {
         <NeonPanel accent="orange" glow="soft" className="p-3">
           <div className="flex items-center gap-2 ps-mono text-[11px] tracking-[0.25em] ps-text-orange">
             <WifiOff className="h-4 w-4" />
-            OFFLINE MODE ARMED · LOCAL RESPONSES ONLY
+            LOCAL · PROVIDER NOT CONFIGURED
           </div>
         </NeonPanel>
       )}

@@ -380,7 +380,7 @@ export function MainScreen() {
             <Stat label="MONITOR" value={networkMonitorState.enabled ? "ON" : "OFF"} color="#39ff14" />
             <Stat
               label="ADAPTER"
-              value={persistedNetworkSettings?.demoMode ? "DEMO" : "LIVE/READY"}
+              value={persistedNetworkSettings?.demoMode ? "DEMO" : "LIVE"}
               color="#00f0ff"
             />
             <Stat label="VOICE" value={voice?.name ?? "—"} color="#b829ff" />

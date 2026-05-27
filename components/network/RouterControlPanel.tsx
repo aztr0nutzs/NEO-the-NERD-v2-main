@@ -80,9 +80,9 @@ export function RouterControlPanel({
   const subtitleText = isControlMode
     ? null
     : routerStatus.readOnlyMode
-      ? "READ ONLY · CONNECTOR REQUIRED FOR CONTROL"
+      ? "READ ONLY · CONNECTOR REQUIRED"
       : isDemoControl
-        ? "DEMO ADAPTER · SIMULATED CONTROL"
+        ? "DEMO · SIMULATED CONTROL"
         : null;
   const titleColor = isControlMode ? "text-emerald-400" : "text-cyan-300";
   const borderColor = isControlMode ? "border-emerald-500/30" : "border-cyan-500/30";
@@ -108,12 +108,12 @@ export function RouterControlPanel({
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 font-mono text-[10px] text-cyan-300">
-              MODE: {routerControlMode.toUpperCase()}
+              {isControlMode ? "PROVIDER ACTIVE" : isDemoControl ? "DEMO" : "READ ONLY"}
             </span>
             {routerStatus.readOnlyMode && (
               <span className="flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 font-mono text-[10px] text-orange-400">
                 <Lock className="h-3 w-3" />
-                READ_ONLY
+                READ ONLY
               </span>
             )}
             <span
@@ -262,7 +262,7 @@ export function RouterControlPanel({
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <div className="space-y-1">
                 <p className="font-bold uppercase tracking-[0.18em] text-orange-400">
-                  ROUTER CONTROL REQUIRES CONNECTOR
+                  CONNECTOR REQUIRED
                 </p>
                 <p>
                   Local LAN discovery and status reads are live in this runtime. Reboot, guest
@@ -271,7 +271,7 @@ export function RouterControlPanel({
                 </p>
                 {isDemoMode && (
                   <p className="text-orange-300/80">
-                    DEMO ADAPTER: any control attempt below is simulated only.
+                    DEMO: any control attempt below is simulated only.
                   </p>
                 )}
               </div>
@@ -348,7 +348,7 @@ function DisabledControl({ icon: Icon, label }: { icon: typeof Power; label: str
         </span>
       </div>
       <span className="rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em] text-orange-300/80">
-        REQUIRES_CONNECTOR
+        CONNECTOR REQUIRED
       </span>
     </div>
   );

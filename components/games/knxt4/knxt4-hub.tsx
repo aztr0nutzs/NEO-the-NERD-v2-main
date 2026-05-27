@@ -156,9 +156,9 @@ export const ModesScreen = ({ save, go, onBack }: ScreenProps) => {
     { id: "classic", title: "CLASSIC", sub: "Standard 7x6. Choose your AI tier.", color: "cyan", icon: "grid", tag: "CORE" },
     { id: "quick", title: "QUICK MATCH", sub: "Auto setup. Drop-in vs Normal AI.", color: "lime", icon: "bolt", tag: "INSTANT" },
     { id: "timed", title: "TIMED MATCH", sub: "20s per turn. Lose turn on timeout.", color: "yellow", icon: "wave", tag: "PRESSURE" },
-    { id: "challenge", title: "CHALLENGE", sub: "5 prebuilt puzzles. Win in one.", color: "mag", icon: "puzzle", tag: "5 PZL" },
-    { id: "training", title: "TRAINING", sub: "Always-on hints. Free undo. Easy AI.", color: "cyan", icon: "brain", tag: "LEARN" },
-    { id: "ladder", title: "AI LADDER", sub: "Climb 6 tiers to N.E.O. Master.", color: "violet", icon: "crown", tag: `T0${save.currentLadder}` },
+    { id: "challenge", title: "CHALLENGE", sub: "Puzzle bank staged.", color: "mag", icon: "puzzle", tag: "COMING SOON" },
+    { id: "training", title: "TRAINING", sub: "Lesson mode staged.", color: "cyan", icon: "brain", tag: "COMING SOON" },
+    { id: "ladder", title: "AI LADDER", sub: "Tier browser staged; next-tier engage is live.", color: "violet", icon: "crown", tag: "PARTIAL" },
   ]
 
   const pickMode = (id: string) => {

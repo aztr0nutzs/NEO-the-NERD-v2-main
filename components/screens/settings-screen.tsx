@@ -205,7 +205,7 @@ export function SettingsScreen() {
           )}
         />
         <p className="ps-mono text-[9px] uppercase tracking-[0.18em] text-white/45 px-1">
-          Realistic neural output requires provider voice mode. Native Android fallback adapts to the
+          Provider-grade output requires `PROVIDER ACTIVE`. Native Android `FALLBACK` adapts to the
           voices installed on this device — quality varies by OEM. Browser speech is the weakest path.
         </p>
       </SettingsSection>
@@ -291,7 +291,7 @@ export function SettingsScreen() {
           }
           color={networkConnected === false ? "#ff7a00" : "#39ff14"}
         />
-        <Row label="BACKGROUND SERVICE" value="UNAVAILABLE" color="#ff7a00" />
+        <Row label="BACKGROUND SERVICE" value="FOREGROUND ONLY" color="#b829ff" />
       </SettingsSection>
 
       <SettingsSection
@@ -443,17 +443,17 @@ function resolveSpeechModeLabel(
   preference: "prefer-high-quality" | "fallback-only",
   engineLabel: string,
 ): string {
-  const providerLive = engineLabel === "PROVIDER READY" || engineLabel === "REMOTE PROVIDER"
-  if (preference === "fallback-only") return "STYLED FALLBACK"
-  if (providerLive) return "HIGH-QUALITY PROVIDER"
-  return "STYLED FALLBACK"
+  const providerLive = engineLabel === "PROVIDER ACTIVE"
+  if (preference === "fallback-only") return "FALLBACK"
+  if (providerLive) return "PROVIDER ACTIVE"
+  return "FALLBACK"
 }
 
 function resolveSpeechModeColor(
   preference: "prefer-high-quality" | "fallback-only",
   engineLabel: string,
 ): string {
-  const providerLive = engineLabel === "PROVIDER READY" || engineLabel === "REMOTE PROVIDER"
+  const providerLive = engineLabel === "PROVIDER ACTIVE"
   if (preference === "fallback-only") return "#ff7a00"
   return providerLive ? "#39ff14" : "#ff7a00"
 }

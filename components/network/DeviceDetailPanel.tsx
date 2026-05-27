@@ -448,7 +448,7 @@ export function DeviceDetailPanel({
                   <p className="font-mono text-gray-300">{device.discoverySources.join(", ").toUpperCase()}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="font-mono text-[10px] text-gray-500">DATA_LIMITED</p>
+                  <p className="font-mono text-[10px] text-gray-500">PARTIAL</p>
                   <p className="font-mono text-gray-300">{device.dataLimited ? "YES" : "NO"}</p>
                 </div>
               </div>

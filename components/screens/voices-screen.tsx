@@ -294,8 +294,8 @@ export function VoicesScreen() {
             disabled={generating || !providerTtsAvailable}
             title={
               providerTtsAvailable
-                ? "Render this voice through the high-quality neural TTS provider"
-                : "High-quality neural voice requires a configured backend"
+              ? "Render this voice through the high-quality neural TTS provider"
+                : "Provider voice requires a configured backend"
             }
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg py-2 ps-mono text-[10px] tracking-[0.25em]"
             style={{
@@ -306,10 +306,10 @@ export function VoicesScreen() {
             }}
           >
             {generating
-              ? "GENERATING NEURAL VOICE..."
+              ? "GENERATING PROVIDER VOICE..."
               : providerTtsAvailable
-                ? "PLAY HIGH-QUALITY NEURAL VOICE"
-                : "NEURAL VOICE UNAVAILABLE · CONFIGURE BACKEND"}
+                ? "PLAY PROVIDER ACTIVE VOICE"
+                : "PROVIDER REQUIRED · NOT CONFIGURED"}
           </button>
 
           <div className="mt-2 grid grid-cols-4 gap-2">
@@ -387,12 +387,12 @@ export function VoicesScreen() {
           >
             HEARING:{" "}
             {providerTtsAvailable && qualityPreference === "prefer-high-quality"
-              ? "HIGH-QUALITY PROVIDER VOICE"
+              ? "PROVIDER ACTIVE"
               : capabilities.nativeAndroidTtsAvailable
-                ? "STYLED ANDROID FALLBACK"
+                ? "FALLBACK"
                 : capabilities.browserSpeechSupported
-                  ? "BROWSER SPEECH FALLBACK"
-                  : "NO ENGINE AVAILABLE"}
+                  ? "FALLBACK"
+                  : "UNAVAILABLE"}
             {" · "}
             {getProfileTruthLabel(getVoiceProfile(voiceId), capabilities)}
           </p>
@@ -402,7 +402,7 @@ export function VoicesScreen() {
           </p>
           {qualityPreference === "fallback-only" && providerTtsAvailable && (
             <p className="mt-1 ps-mono text-[9px] uppercase tracking-[0.18em]" style={{ color: "rgba(255,122,0,0.85)" }}>
-              VOICE QUALITY = FALLBACK ONLY · NEURAL VOICE AVAILABLE BUT SKIPPED · CHANGE IN SETTINGS → VOICE
+              VOICE QUALITY = FALLBACK · PROVIDER ACTIVE SKIPPED · CHANGE IN SETTINGS → VOICE
             </p>
           )}
           {capabilities.nativeAndroidTtsAvailable && (
@@ -752,7 +752,7 @@ function OneVoiceModeCard({
         <DiagPill label="Mode" value="ANDROID-COLLAPSED" />
       </div>
       <p className="mt-3 text-[11px] text-white/65 text-pretty">
-        To unlock the full library of distinct voices, configure the provider backend
+        To unlock provider-active distinct voices, configure the provider backend
         (<span className="ps-mono text-[10px]">NEXT_PUBLIC_NEO_BACKEND_BASE_URL</span>) so neural
         TTS becomes reachable. Until then, choose any preset below for personality, but expect
         timbre to remain the same.
