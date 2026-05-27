@@ -5,6 +5,8 @@ import os
 import shutil
 import subprocess
 import tempfile
+import json
+from pathlib import Path
 
 app = FastAPI(title="NEO OmniVoice bridge")
 
@@ -18,6 +20,17 @@ class TTSRequest(BaseModel):
     languageId: Optional[str] = None
     speed: Optional[float] = None
     duration: Optional[float] = None
+
+
+def _load_profiles() -> dict:
+    profiles_path = os.getenv("OMNIVOICE_PROFILES_PATH", "./profiles.example.json")
+    p = Path(profiles_path)
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
 
 @app.get('/health')
 def health():
@@ -35,21 +48,33 @@ def tts(req: TTSRequest):
         raise HTTPException(status_code=503, detail="OmniVoice engine not installed/configured")
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as out_file:
         out_path = out_file.name
+    profile = _load_profiles().get(req.voiceId, {})
+    mode = req.mode or profile.get("mode")
+    ref_audio = profile.get("refAudioPath")
+    if req.refAudioId:
+        ref_audio = req.refAudioId
+    ref_text = req.refText or profile.get("refText")
+    instruct = req.instruct or profile.get("instruct")
+    language = req.languageId or profile.get("language") or profile.get("languageId")
+
+    if mode == "clone" and not ref_audio:
+        raise HTTPException(status_code=400, detail="clone mode requires refAudioPath in profile or refAudioId in request")
+    if mode == "design" and not instruct:
+        raise HTTPException(status_code=400, detail="design mode requires instruct in profile or request")
+
     cmd = [
         cli,
         "--text", req.text,
-        "--mode", req.mode,
-        "--voice-id", req.voiceId,
         "--output", out_path,
     ]
-    if req.refAudioId:
-        cmd.extend(["--ref-audio-id", req.refAudioId])
-    if req.refText:
-        cmd.extend(["--ref-text", req.refText])
-    if req.instruct:
-        cmd.extend(["--instruct", req.instruct])
-    if req.languageId:
-        cmd.extend(["--language-id", req.languageId])
+    if ref_audio:
+        cmd.extend(["--ref_audio", ref_audio])
+    if ref_text:
+        cmd.extend(["--ref_text", ref_text])
+    if instruct:
+        cmd.extend(["--instruct", instruct])
+    if language:
+        cmd.extend(["--language", language])
     if req.speed is not None:
         cmd.extend(["--speed", str(req.speed)])
     if req.duration is not None:

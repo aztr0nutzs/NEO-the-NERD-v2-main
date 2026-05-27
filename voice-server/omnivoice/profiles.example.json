@@ -1,4 +1,4 @@
 {
-  "neo": {"mode":"clone","refAudioId":"neo_ref_a","refText":"NEO online. Tell me the mission.","languageId":"en"},
-  "villain": {"mode":"design","instruct":"Theatrical harmless villain monologue","languageId":"en"}
+  "neo": {"mode":"clone","refAudioPath":"./refs/neo_ref.wav","refText":"NEO online. Tell me the mission.","language":"English"},
+  "villain": {"mode":"design","instruct":"male, low pitch, british accent","language":"English"}
 }
