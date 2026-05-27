@@ -36,7 +36,9 @@ export function GamesScreen() {
   const [featured, setFeatured] = useState<GameId>(() => PLAYABLE_GAMES[0].id)
 
   useEffect(() => {
-    if (acceptedGameInvite) setActive(acceptedGameInvite as GameId)
+    if (acceptedGameInvite && PLAYABLE_GAMES.some((game) => game.id === acceptedGameInvite)) {
+      setActive(acceptedGameInvite as GameId)
+    }
   }, [acceptedGameInvite])
 
   // Ensure today's daily challenge exists when the screen mounts or the day rolls over.
@@ -131,6 +133,11 @@ export function GamesScreen() {
   const filteredPlayable = filtered.filter((g) => g.playable).length
 
   const daily = arcadeProgression.dailyChallenge?.dayKey === todayKey() ? arcadeProgression.dailyChallenge : null
+  const startGame = (id: GameId) => {
+    const game = GAMES.find((item) => item.id === id)
+    if (!game?.playable) return
+    setActive(id)
+  }
 
   return (
     <div className="space-y-3">
@@ -180,7 +187,7 @@ export function GamesScreen() {
             <DailyChallengeCard
               challenge={daily}
               stats={arcadeProgression.perGame[daily.gameId]}
-              onLaunch={(id) => setActive(id)}
+              onLaunch={startGame}
             />
           )}
 
@@ -204,7 +211,7 @@ export function GamesScreen() {
             <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
               <button
                 type="button"
-                onClick={() => setActive(featuredGame.id)}
+                onClick={() => startGame(featuredGame.id)}
                 className="rounded-lg py-2 ps-mono text-[11px] tracking-[0.3em]"
                 style={{ color: "#000", background: "linear-gradient(180deg,#ff7a00,#ff7a00AA)", boxShadow: "inset 0 0 0 1px #ff7a00, 0 0 14px #ff7a00AA" }}
               >
@@ -272,7 +279,7 @@ export function GamesScreen() {
                   <button
                     key={g.id}
                     type="button"
-                    onClick={() => setActive(g.id)}
+                    onClick={() => startGame(g.id)}
                     className="rounded-lg ps-glass p-2 text-left"
                     style={{ boxShadow: `inset 0 0 0 1px rgba(255,255,255,0.08)` }}
                   >
@@ -311,7 +318,7 @@ export function GamesScreen() {
             })}
           </div>
           <p className="ps-mono text-[9px] tracking-[0.2em] text-white/40 px-1">
-            {category === "all" ? `${playableCount} LIVE` : `${filteredPlayable} LIVE IN ${category.toUpperCase()}`}
+            {category === "all" ? `${playableCount} PLAYABLE · LOCAL ONLY` : `${filteredPlayable} PLAYABLE IN ${category.toUpperCase()}`}
           </p>
 
           {/* Game grid */}
@@ -321,7 +328,7 @@ export function GamesScreen() {
                 key={g.id}
                 game={g}
                 stats={arcadeProgression.perGame[g.id]}
-                onPlay={(id) => setActive(id)}
+                onPlay={startGame}
                 recommended={g.id === recommendation && totalRuns > 0}
               />
             ))}

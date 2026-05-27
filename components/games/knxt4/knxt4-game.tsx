@@ -80,7 +80,6 @@ const GameScreen = ({
   const skinId = save.selectedToken || "core"
   const usePowerUps = cfg.powerUps !== false && cfg.mode !== "challenge" && cfg.mode !== "training"
   const isChallenge = cfg.mode === "challenge"
-  const isTraining = cfg.mode === "training"
   const puzzle: Puzzle | undefined = (cfg as Knxt4Config & { puzzle?: Puzzle }).puzzle
 
   const initBoard = useMemo(() => puzzle ? movesToBoard(puzzle.moves) : makeBoard(), [puzzle])
@@ -491,7 +490,7 @@ const GameScreen = ({
 
       {usePowerUps && (
         <div className="neo-tray">
-          {Object.values(POWERS).map((p) => {
+          {Object.values(POWERS).filter((p) => save.unlockedPowers.includes(p.id)).map((p) => {
             const unlocked = save.unlockedPowers.includes(p.id)
             const affordable = energy >= p.cost
             const isActive = activePower === p.id
@@ -584,7 +583,7 @@ export function Knxt4Game({ onClose }: { onClose?: () => void }) {
         settings: { title: "SETTINGS", sub: "AUDIO · INPUT · DISPLAY · COMING SOON" },
         stats: { title: "STATS", sub: "MATCH HISTORY · COMING SOON", color: "yellow" },
         garage: { title: "GARAGE", sub: "TOKEN SKINS · COMING SOON", color: "lime" },
-        ladder: { title: "AI LADDER", sub: "TIER CLIMB · PARTIAL", color: "magenta" },
+        ladder: { title: "AI LADDER", sub: "TIER CLIMB · COMING SOON", color: "magenta" },
         "challenge-select": { title: "CHALLENGE", sub: "PUZZLE BANK · COMING SOON", color: "yellow" },
       }
       if (target in titles) { setRoute({ name: "coming", ...titles[target as keyof typeof titles] }); return }

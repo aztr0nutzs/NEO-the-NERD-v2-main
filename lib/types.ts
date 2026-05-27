@@ -374,6 +374,9 @@ export interface GameDef {
   multiplayer: "You vs Robot" | "Turn-based" | "Quick duel" | "Party mode"
   accent: "cyan" | "purple" | "pink" | "green" | "orange"
   playable?: boolean
+  status?: "PLAYABLE" | "PREVIEW" | "COMING SOON" | "PARTIAL"
+  availability?: "LOCAL ONLY"
+  statusDetail?: string
   category: "strategy" | "reflex" | "puzzle" | "trivia" | "party"
   skillType: "logic" | "memory" | "reaction" | "language" | "social"
   supportsScore: boolean

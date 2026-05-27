@@ -3,7 +3,6 @@
 import { motion } from "framer-motion"
 import { Play, Trophy, Clock, Flame } from "lucide-react"
 import type { GameDef, GameId, GameProgressionStats } from "@/lib/types"
-import { TruthBadge } from "@/components/truth-badge"
 
 const ACCENT_HEX: Record<GameDef["accent"], string> = {
   cyan: "#00f0ff",
@@ -28,6 +27,12 @@ export function GameCard({
   const totalRuns = stats ? stats.wins + stats.losses + stats.draws : 0
   const winRate = totalRuns > 0 ? Math.round((stats!.wins / totalRuns) * 100) : null
   const bestTimeSec = stats?.fastestCompletionMs ? Math.ceil(stats.fastestCompletionMs / 1000) : null
+  const status = game.status ?? (game.playable ? "PLAYABLE" : "COMING SOON")
+  const availability = game.availability ?? (game.playable ? "LOCAL ONLY" : undefined)
+  const statusColor =
+    status === "PLAYABLE" ? "#39ff14" :
+      status === "PARTIAL" ? "#ffd000" :
+        status === "PREVIEW" ? "#00f0ff" : "#9ad7ff"
 
   return (
     <motion.div
@@ -40,7 +45,7 @@ export function GameCard({
           className="absolute -top-2 left-3 rounded-full px-2 py-0.5 ps-mono text-[8px] tracking-[0.3em]"
           style={{ color: "#000", background: c, boxShadow: `0 0 10px ${c}aa` }}
         >
-          NEO REC
+          LOCAL PICK
         </span>
       )}
       <div className="flex items-start justify-between gap-2">
@@ -53,13 +58,22 @@ export function GameCard({
           </h3>
           <p className="mt-1 text-[12px] text-white/70 text-pretty">{game.behavior}</p>
         </div>
-        <TruthBadge
-          label={game.playable ? "LIVE" : "COMING SOON"}
-          title={game.playable ? "Playable in this build." : "Mode staged, not playable in this build."}
-        />
+        <span
+          className="rounded-full border px-2 py-1 ps-mono text-[8px] font-black uppercase tracking-[0.22em]"
+          style={{
+            color: statusColor,
+            borderColor: `${statusColor}80`,
+            background: `${statusColor}14`,
+            boxShadow: `0 0 10px ${statusColor}26`,
+          }}
+          title={game.statusDetail ?? (game.playable ? "Playable in this build." : "Staged, not playable in this build.")}
+        >
+          {status}
+        </span>
       </div>
 
       <div className="mt-2 flex flex-wrap gap-1.5">
+        {availability && <Tag label={availability} c="#00f0ff" />}
         <Tag label={game.category.toUpperCase()} c={c} />
         <Tag label={game.difficulty.toUpperCase()} c={c} />
         <Tag label={game.estTime.toUpperCase()} c="#ffffff80" />

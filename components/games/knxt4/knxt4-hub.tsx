@@ -1,6 +1,5 @@
 "use client"
 
-import { AI_LEVELS } from "./knxt4-core"
 import { LEVELS, type Knxt4Save, TOKENS, winRate, xpProgress } from "./knxt4-meta"
 import { BackBtn, NeoAppBar, NeoChip, NeoDifficulty, NeoIcon, NeoPhone, TokenChip } from "./knxt4-phone"
 import { NeoAvatarVideo } from "@/components/avatar/neo-avatar-video"
@@ -93,15 +92,15 @@ export const HubScreen = ({ save, go, onClose }: ScreenProps) => {
           <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
             <div className="neo-aibadge" style={{ color: `var(--${nextLadder.color})`, background: "rgba(255,255,255,0.04)", width: 52, height: 52, fontSize: 13 }}>L{String(nextLadder.id).padStart(2, "0")}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="neo-eyebrow" style={{ color: `var(--${nextLadder.color})` }}>▶ NEXT LADDER · TIER 0{nextLadder.id}</div>
+              <div className="neo-eyebrow" style={{ color: `var(--${nextLadder.color})` }}>▶ AI LADDER · COMING SOON</div>
               <div className="neo-h2" style={{ fontSize: 18, color: "#fff", textShadow: `0 0 12px var(--${nextLadder.color})`, marginTop: 2, lineHeight: 1 }}>{nextLadder.name}</div>
-              <div className="neo-mono" style={{ fontSize: 9, color: "var(--ink-mute)", marginTop: 4 }}>vs {nextLadder.ai} · {AI_LEVELS[nextLadder.aiLevel].name}</div>
+              <div className="neo-mono" style={{ fontSize: 9, color: "var(--ink-mute)", marginTop: 4 }}>TIER CLIMB STAGED · PLAY CLASSIC/QUICK/TIMED</div>
             </div>
             <NeoDifficulty level={nextLadder.aiLevel} color={`var(--${nextLadder.color})`} />
           </div>
           <div style={{ position: "relative", display: "flex", gap: 8, marginTop: 12 }}>
-            <button className={`neo-btn neo-btn--sm neo-btn--block${nextLadder.color === "magenta" ? " neo-btn--mag" : nextLadder.color === "lime" ? " neo-btn--lime" : nextLadder.color === "yellow" ? " neo-btn--yellow" : ""}`} onClick={(e) => { e.stopPropagation(); go({ name: "play", cfg: { mode: "ladder", level: nextLadder, aiLevel: nextLadder.aiLevel, aiName: nextLadder.ai, opponent: "ai", powerUps: true } }) }}>
-              <NeoIcon name="play" size={12} /> ENGAGE
+            <button className={`neo-btn neo-btn--sm neo-btn--block${nextLadder.color === "magenta" ? " neo-btn--mag" : nextLadder.color === "lime" ? " neo-btn--lime" : nextLadder.color === "yellow" ? " neo-btn--yellow" : ""}`} onClick={(e) => { e.stopPropagation(); go("modes") }}>
+              <NeoIcon name="grid" size={12} /> LIVE MODES
             </button>
             <button className={`neo-btn neo-btn--sm neo-btn--ghost neo-btn--block${nextLadder.color === "magenta" ? " neo-btn--mag" : ""}`} style={{ color: `var(--${nextLadder.color})` }} onClick={(e) => { e.stopPropagation(); go("ladder") }}>
               ALL TIERS
@@ -124,7 +123,7 @@ export const HubScreen = ({ save, go, onClose }: ScreenProps) => {
             { l: "WINS", v: String(save.wins).padStart(2, "0"), c: "cyan" },
             { l: "STREAK", v: String(save.streak).padStart(2, "0"), c: "yellow" },
             { l: "RATE", v: `${wr}%`, c: "lime" },
-            { l: "TIERS", v: `${save.laddersBeaten.length}/6`, c: "magenta" },
+            { l: "LIVE", v: "03", c: "magenta" },
           ].map((s, i) => <div key={i} className="neo-stat" style={{ padding: "8px 8px" }}><div className="neo-stat__label" style={{ fontSize: 8 }}>{s.l}</div><div className="neo-stat__value" style={{ fontSize: 18, color: `var(--${s.c})` }}>{s.v}</div></div>)}
         </div>
 
@@ -153,12 +152,12 @@ export const HubScreen = ({ save, go, onClose }: ScreenProps) => {
 
 export const ModesScreen = ({ save, go, onBack }: ScreenProps) => {
   const modes = [
-    { id: "classic", title: "CLASSIC", sub: "Standard 7x6. Choose your AI tier.", color: "cyan", icon: "grid", tag: "CORE" },
+    { id: "classic", title: "CLASSIC", sub: "Standard 7x6 vs N.E.O. Power-ups enabled.", color: "cyan", icon: "grid", tag: "PLAYABLE" },
     { id: "quick", title: "QUICK MATCH", sub: "Auto setup. Drop-in vs Normal AI.", color: "lime", icon: "bolt", tag: "INSTANT" },
     { id: "timed", title: "TIMED MATCH", sub: "20s per turn. Lose turn on timeout.", color: "yellow", icon: "wave", tag: "PRESSURE" },
     { id: "challenge", title: "CHALLENGE", sub: "Puzzle bank staged.", color: "mag", icon: "puzzle", tag: "COMING SOON" },
     { id: "training", title: "TRAINING", sub: "Lesson mode staged.", color: "cyan", icon: "brain", tag: "COMING SOON" },
-    { id: "ladder", title: "AI LADDER", sub: "Tier browser staged; next-tier engage is live.", color: "violet", icon: "crown", tag: "PARTIAL" },
+    { id: "ladder", title: "AI LADDER", sub: "Tier climb and unlock track staged.", color: "violet", icon: "crown", tag: "COMING SOON" },
   ]
 
   const pickMode = (id: string) => {
@@ -180,16 +179,16 @@ export const ModesScreen = ({ save, go, onBack }: ScreenProps) => {
           <div className="neo-circuit" />
           <div style={{ position: "relative", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div style={{ flex: 1 }}>
-              <div style={{ display: "flex", gap: 6, marginBottom: 6 }}><NeoChip variant="" dot>CORE</NeoChip><NeoChip variant="off">vs AI · LOCAL 2P</NeoChip></div>
+              <div style={{ display: "flex", gap: 6, marginBottom: 6 }}><NeoChip variant="" dot>PLAYABLE</NeoChip><NeoChip variant="off">LOCAL ONLY</NeoChip></div>
               <div className="neo-mode__title" style={{ fontSize: 24, color: "var(--cyan)", textShadow: "0 0 14px rgba(0,232,255,0.55)" }}>CLASSIC</div>
-              <div className="neo-mode__sub" style={{ marginTop: 2, fontSize: 11 }}>Standard 7x6 Connect 4 rules.<br />Choose your AI tier · Power-ups enabled.</div>
+              <div className="neo-mode__sub" style={{ marginTop: 2, fontSize: 11 }}>Standard 7x6 Connect 4 rules.<br />Normal AI · Power-ups enabled.</div>
             </div>
             <div style={{ width: 70, height: 70, position: "relative", flexShrink: 0 }}>
               <div style={{ position: "absolute", top: 0, left: 0, width: 44, height: 44 }}><TokenChip skinId={save.selectedToken} player={1} size={44} /></div>
               <div style={{ position: "absolute", bottom: 0, right: 0, width: 36, height: 36 }}><TokenChip skinId={save.selectedToken} player={2} size={36} /></div>
             </div>
           </div>
-          <div style={{ position: "relative", marginTop: 10 }}><button className="neo-btn neo-btn--sm">CONFIGURE · PLAY <NeoIcon name="arrow-r" size={11} color="#001016" /></button></div>
+          <div style={{ position: "relative", marginTop: 10 }}><button className="neo-btn neo-btn--sm">PLAY CLASSIC <NeoIcon name="arrow-r" size={11} color="#001016" /></button></div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
           {modes.slice(1).map((m) => {
