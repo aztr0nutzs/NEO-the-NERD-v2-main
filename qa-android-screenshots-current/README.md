@@ -1,5 +1,7 @@
 # qa-android-screenshots-current/
 
+> Historical artifact: despite the folder name, this is not the current validation source. Use `docs/stabilization/` and the latest phase report for current Android runtime status.
+
 **App under audit:** `com.neothenerd.app` ("NEO the Nerd") — debug APK built this cycle.
 
 **Cycle date (UTC):** 2026-05-18
