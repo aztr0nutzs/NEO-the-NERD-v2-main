@@ -678,13 +678,13 @@ function VoiceDetailPanel({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => onPreview(voice.id)} disabled={previewDisabled} className="rounded-lg py-2.5 ps-mono text-[11px] uppercase tracking-[0.25em]" style={{ color: previewDisabled ? "rgba(255,255,255,0.35)" : "#00f0ff", boxShadow: "inset 0 0 0 1px rgba(0,240,255,0.45)", background: "rgba(0,240,255,0.08)" }}>
+          <button type="button" onClick={() => onPreview(voice.id)} disabled={previewDisabled} className="min-h-11 rounded-lg py-2.5 ps-mono text-[11px] uppercase tracking-[0.25em] touch-manipulation" style={{ color: previewDisabled ? "rgba(255,255,255,0.35)" : "#00f0ff", boxShadow: "inset 0 0 0 1px rgba(0,240,255,0.45)", background: "rgba(0,240,255,0.08)" }}>
             Preview
           </button>
-          <button type="button" onClick={onToggleFavorite} className="rounded-lg py-2.5 ps-mono text-[11px] uppercase tracking-[0.25em]" style={{ color: favorite ? "#ff7a00" : "#fff", boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.45)", background: "rgba(255,122,0,0.08)" }}>
+          <button type="button" onClick={onToggleFavorite} className="min-h-11 rounded-lg py-2.5 ps-mono text-[11px] uppercase tracking-[0.25em] touch-manipulation" style={{ color: favorite ? "#ff7a00" : "#fff", boxShadow: "inset 0 0 0 1px rgba(255,122,0,0.45)", background: "rgba(255,122,0,0.08)" }}>
             {favorite ? "Favorited" : "Favorite"}
           </button>
-          <button type="button" onClick={onApply} className="col-span-2 rounded-lg py-2.5 ps-mono text-[11px] uppercase tracking-[0.25em]" style={{ color: selected ? "#000" : "#39ff14", background: selected ? "linear-gradient(180deg, #39ff14, #00f0ff)" : "rgba(57,255,20,0.08)", boxShadow: "inset 0 0 0 1px rgba(57,255,20,0.65), 0 0 14px rgba(57,255,20,0.25)" }}>
+          <button type="button" onClick={onApply} className="col-span-2 min-h-11 rounded-lg py-2.5 ps-mono text-[11px] uppercase tracking-[0.25em] touch-manipulation" style={{ color: selected ? "#000" : "#39ff14", background: selected ? "linear-gradient(180deg, #39ff14, #00f0ff)" : "rgba(57,255,20,0.08)", boxShadow: "inset 0 0 0 1px rgba(57,255,20,0.65), 0 0 14px rgba(57,255,20,0.25)" }}>
             {selected ? "Active Voice" : "Apply Voice"}
           </button>
         </div>
@@ -711,7 +711,7 @@ function Meter({ label, value }: { label: string; value: number }) {
 
 function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="shrink-0 rounded-full px-3 py-1.5 ps-mono text-[10px] uppercase tracking-[0.18em]" style={{ color: active ? "#00f0ff" : "rgba(255,255,255,0.64)", background: active ? "rgba(0,240,255,0.12)" : "rgba(255,255,255,0.04)", boxShadow: active ? "inset 0 0 0 1px #00f0ff, 0 0 10px rgba(0,240,255,0.35)" : "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
+    <button type="button" onClick={onClick} className="shrink-0 min-h-10 rounded-full px-4 py-2 ps-mono text-[10px] uppercase tracking-[0.18em] touch-manipulation" style={{ color: active ? "#00f0ff" : "rgba(255,255,255,0.64)", background: active ? "rgba(0,240,255,0.12)" : "rgba(255,255,255,0.04)", boxShadow: active ? "inset 0 0 0 1px #00f0ff, 0 0 10px rgba(0,240,255,0.35)" : "inset 0 0 0 1px rgba(255,255,255,0.1)" }}>
       {label}
     </button>
   )

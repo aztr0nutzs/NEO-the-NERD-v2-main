@@ -250,7 +250,7 @@ export function VoiceCard({
             type="button"
             onClick={() => onToggleFavorite?.(voice.id)}
             aria-label={favorite ? `Unfavorite ${voice.name}` : `Favorite ${voice.name}`}
-            className="grid h-9 w-9 place-items-center rounded-lg"
+            className="grid h-11 w-11 place-items-center rounded-lg touch-manipulation"
             style={{
               background: favorite ? "rgba(255,122,0,0.16)" : `${accent}10`,
               boxShadow: favorite
@@ -268,7 +268,7 @@ export function VoiceCard({
             onClick={() => onPreview?.(voice.id)}
             disabled={previewDisabled}
             aria-label={`Preview ${voice.name}`}
-            className="grid h-9 w-9 place-items-center rounded-lg"
+            className="grid h-11 w-11 place-items-center rounded-lg touch-manipulation"
             style={{
               background: `${accent}1A`,
               boxShadow: `inset 0 0 0 1px ${accent}88, 0 0 10px ${accent}55`,
@@ -281,7 +281,7 @@ export function VoiceCard({
             type="button"
             onClick={() => onDetails?.(voice)}
             aria-label={`Open ${voice.name} details`}
-            className="grid h-9 w-9 place-items-center rounded-lg"
+            className="grid h-11 w-11 place-items-center rounded-lg touch-manipulation"
             style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.12)" }}
           >
             <Info className="h-3.5 w-3.5 text-white/70" />
@@ -310,7 +310,7 @@ export function VoiceCard({
       <button
         type="button"
         onClick={() => onSelect?.(voice.id)}
-        className="mt-3 w-full rounded-lg py-2 ps-mono text-[11px] tracking-[0.3em]"
+        className="mt-3 min-h-11 w-full rounded-lg py-2.5 ps-mono text-[11px] tracking-[0.3em] touch-manipulation"
         style={{
           color: selected ? "#000" : accent,
           background: selected

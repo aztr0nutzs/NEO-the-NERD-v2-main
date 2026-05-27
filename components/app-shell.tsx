@@ -43,6 +43,9 @@ const SCREEN_MAP = {
   settings: SettingsScreen,
 } as const
 
+const SCREEN_CONTENT_CLASS =
+  "relative z-10 mx-auto w-full max-w-2xl pl-3 pt-2 pb-[calc(9.25rem+env(safe-area-inset-bottom))]"
+
 // Stage delay between boot unmount and the ambient background video being
 // allowed to mount. Boot has already detached its source by this point so
 // there is no decoder fight, but the avatar wakeup/idle pipeline is still
@@ -142,7 +145,7 @@ export function AppShell() {
         // dock content + 1rem container padding/border) PLUS the Android
         // safe-area gesture inset, with a comfortable buffer so the
         // last content card never sits beneath the dock's glass surface.
-        className={`relative z-10 mx-auto w-full max-w-2xl pl-3 pt-2 pb-[calc(8.5rem+env(safe-area-inset-bottom))] ${
+        className={`${SCREEN_CONTENT_CLASS} ${
           // Reserve right-side runway on narrow phones when the persistent orb
           // is visible so header titles and right-aligned status pills do not
           // disappear under it. Tablet+ uses the standard right padding.

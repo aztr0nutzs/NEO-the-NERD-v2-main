@@ -188,13 +188,13 @@ export function ControlsScreen() {
           <p className="ps-mono text-[10px] tracking-[0.25em] text-white/55 mb-1">
             WAKE PHRASE
           </p>
-          <input
-            value={settings.wakePhrase}
-            onChange={(e) => updateSettings({ wakePhrase: e.target.value })}
-            placeholder="Hey NEO"
-            className="h-9 w-full rounded-md bg-black/60 px-3 text-[13px] text-white outline-none"
-            style={{ boxShadow: "inset 0 0 0 1px rgba(57,255,20,0.4)" }}
-          />
+            <input
+              value={settings.wakePhrase}
+              onChange={(e) => updateSettings({ wakePhrase: e.target.value })}
+              placeholder="Hey NEO"
+              className="h-11 w-full rounded-md bg-black/60 px-3 text-[13px] text-white outline-none"
+              style={{ boxShadow: "inset 0 0 0 1px rgba(57,255,20,0.4)" }}
+            />
         </div>
         <Toggle
           label="Offline mode"

@@ -71,7 +71,7 @@ export function BottomDock() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-50 px-2 pb-[max(env(safe-area-inset-bottom),8px)]"
+      className="fixed inset-x-0 bottom-0 z-40 px-2 pb-[max(env(safe-area-inset-bottom),8px)]"
     >
       <div
         className="mx-auto max-w-2xl ps-glass relative rounded-t-2xl rounded-b-xl border border-white/10"
@@ -92,7 +92,7 @@ export function BottomDock() {
 
         <ul
           ref={listRef}
-          className="grid auto-cols-[4.75rem] grid-flow-col overflow-x-auto scroll-smooth px-1 py-1.5 [scrollbar-width:none] sm:grid-cols-11 sm:auto-cols-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
+          className="grid auto-cols-[5.1rem] grid-flow-col overflow-x-auto scroll-smooth px-1 py-1.5 [scrollbar-width:none] sm:grid-cols-11 sm:auto-cols-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden"
         >
           {ITEMS.map((item) => {
             const active = screen === item.id
@@ -104,7 +104,7 @@ export function BottomDock() {
                   onClick={() => setScreen(item.id)}
                   aria-label={item.label}
                   aria-current={active ? "page" : undefined}
-                  className="relative flex w-full flex-col items-center justify-center gap-0.5 rounded-xl py-1.5"
+                  className="relative flex min-h-[3.25rem] w-full flex-col items-center justify-center gap-0.5 rounded-xl py-2 touch-manipulation"
                 >
                   {active && (
                     <motion.span
@@ -118,14 +118,14 @@ export function BottomDock() {
                     />
                   )}
                   <Icon
-                    className="relative z-10 h-[18px] w-[18px]"
+                    className="relative z-10 h-[20px] w-[20px]"
                     style={{
                       color: active ? item.accent : "rgba(255,255,255,0.7)",
                       filter: active ? `drop-shadow(0 0 6px ${item.accent})` : "none",
                     }}
                   />
                   <span
-                    className="relative z-10 ps-mono text-[8px] tracking-[0.2em]"
+                    className="relative z-10 ps-mono text-[9px] tracking-[0.18em]"
                     style={{
                       color: active ? item.accent : "rgba(255,255,255,0.55)",
                     }}

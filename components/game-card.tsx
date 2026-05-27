@@ -93,15 +93,15 @@ export function GameCard({
       <button
         type="button"
         onClick={() => onPlay?.(game.id)}
-        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg py-2 ps-mono text-[11px] tracking-[0.3em]"
+        disabled={!game.playable}
+        aria-disabled={!game.playable}
+        className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg py-2.5 ps-mono text-[11px] tracking-[0.3em] disabled:cursor-not-allowed"
         style={{
-          color: game.playable ? "#000" : c,
-          background: game.playable
-            ? `linear-gradient(180deg, ${c}, ${c}AA)`
-            : `${c}14`,
+          color: game.playable ? "#000" : "rgba(255,255,255,0.45)",
+          background: game.playable ? `linear-gradient(180deg, ${c}, ${c}AA)` : "rgba(255,255,255,0.04)",
           boxShadow: game.playable
             ? `inset 0 0 0 1px ${c}, 0 0 14px ${c}AA`
-            : `inset 0 0 0 1px ${c}66`,
+            : "inset 0 0 0 1px rgba(255,255,255,0.12)",
         }}
       >
         <Play className="h-3.5 w-3.5" />

@@ -185,9 +185,9 @@
     */
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
-      rgba(6, 6, 12, 0.84);
-    backdrop-filter: blur(16px) saturate(130%);
-    -webkit-backdrop-filter: blur(16px) saturate(130%);
+      rgba(6, 6, 12, 0.88);
+    backdrop-filter: blur(18px) saturate(128%);
+    -webkit-backdrop-filter: blur(18px) saturate(128%);
   }
   .ps-glass-strong {
     /*
@@ -198,9 +198,9 @@
     */
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
-      rgba(4, 4, 10, 0.92);
-    backdrop-filter: blur(18px) saturate(130%);
-    -webkit-backdrop-filter: blur(18px) saturate(130%);
+      rgba(4, 4, 10, 0.95);
+    backdrop-filter: blur(20px) saturate(128%);
+    -webkit-backdrop-filter: blur(20px) saturate(128%);
   }
   /*
     Content-area scrim. Sits behind the screen viewport but above the
@@ -211,7 +211,7 @@
   */
   .ps-content-shade {
     background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.22) 50%, rgba(0, 0, 0, 0.30) 100%);
+      linear-gradient(180deg, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.28) 50%, rgba(0, 0, 0, 0.38) 100%);
   }
   .ps-glow-cyan {
     box-shadow:

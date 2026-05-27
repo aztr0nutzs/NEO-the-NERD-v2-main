@@ -46,7 +46,7 @@ export function QuickCommandChips({
               type="button"
               whileTap={{ scale: 0.94 }}
               onClick={() => onSelect?.(c.label)}
-              className="group flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3.5 py-2 ps-glass"
+              className="group flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-black/60 px-4 py-2.5 ps-glass touch-manipulation"
               style={{
                 boxShadow: `inset 0 0 0 1px ${c.accent}33, 0 0 14px ${c.accent}33`,
               }}

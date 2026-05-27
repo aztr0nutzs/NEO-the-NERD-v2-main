@@ -103,7 +103,7 @@ export function Toggle({
         onClick={() => onChange(!value)}
         aria-pressed={value}
         aria-label={planned ? `${label} (planned)` : label}
-        className="relative h-6 w-11 shrink-0 rounded-full transition-colors"
+        className="relative h-7 w-12 shrink-0 rounded-full transition-colors touch-manipulation"
         style={{
           background: value ? `${color}33` : "rgba(255,255,255,0.08)",
           boxShadow: value
@@ -112,7 +112,7 @@ export function Toggle({
         }}
       >
         <span
-          className="absolute top-0.5 h-5 w-5 rounded-full transition-all"
+          className="absolute top-0.5 h-6 w-6 rounded-full transition-all"
           style={{
             left: value ? "22px" : "2px",
             background: value ? color : "#888",
@@ -158,7 +158,7 @@ export function SegmentedSelect<T extends string>({
               key={o}
               type="button"
               onClick={() => onChange(o)}
-              className="rounded-full px-3 py-1.5 ps-mono text-[10px] tracking-[0.25em]"
+              className="min-h-10 rounded-full px-4 py-2 ps-mono text-[10px] tracking-[0.25em] touch-manipulation"
               style={{
                 color: active ? color : "rgba(255,255,255,0.65)",
                 background: active ? `${color}1A` : "rgba(255,255,255,0.04)",
