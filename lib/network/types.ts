@@ -298,6 +298,13 @@ export interface SpeedTestPhase {
   success: boolean;
 }
 
+export type SpeedTestUploadState =
+  | "MEASURED"
+  | "NOT CONFIGURED"
+  | "NOT MEASURED"
+  | "FAILED"
+  | "SKIPPED";
+
 export interface SpeedTestResult {
   id: string;
   startedAt: string;
@@ -315,6 +322,7 @@ export interface SpeedTestResult {
   success: boolean;
   failureReason?: string;
   uploadMeasured: boolean;
+  uploadState: SpeedTestUploadState;
   completeness: "partial-no-upload" | "full";
   phases: SpeedTestPhase[];
   samples: ThroughputSample[];

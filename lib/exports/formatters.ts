@@ -97,6 +97,8 @@ const SPEED_TEST_HEADERS: Array<keyof SpeedTestRow> = [
   "provider",
   "downloadMbps",
   "uploadMbps",
+  "uploadState",
+  "uploadDisplay",
   "latencyMs",
   "jitterMs",
   "success",

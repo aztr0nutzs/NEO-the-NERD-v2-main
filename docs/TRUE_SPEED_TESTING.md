@@ -11,8 +11,9 @@
   not a synthetic sweep.
 - **Upload throughput** — bytes actually POSTed to the configured upload
   endpoint, divided by elapsed time. **Only runs when an upload endpoint is
-  configured.** When no endpoint is configured, the UL pill reads `N/A` and
-  the runner returns `uploadMbps: null` with
+  configured.** When no endpoint is configured, the UL pill reads
+  `NOT CONFIGURED` and the runner returns `uploadMbps: null`,
+  `uploadState: "NOT CONFIGURED"`, and
   `failureReason: "upload-not-configured"`. The screen also shows
   `UL_ENDPOINT_NOT_CONFIGURED` so the user knows nothing was fabricated.
 
@@ -31,7 +32,7 @@ SpeedTestScreen (components/screens/speed-test-screen.tsx)
 runStreamingSpeedTest (lib/network/speedTestRunner.ts)
     │      ├─ measureLatency       ──► onLatencySample / onLatencySummary
     │      ├─ measureDownload      ──► onDownloadTick (real Mbps from reader)
-    │      └─ measureUpload        ──► onUploadComplete (or "upload-not-configured")
+    │      └─ measureUpload        ──► onUploadComplete (MEASURED / NOT CONFIGURED / FAILED)
     │      └─ onPhase / onStatus / onLog throughout
     ▼
 SpeedTestResult  ──►  store.recordSpeedTestResult
@@ -68,7 +69,7 @@ Key files:
 | `preparing`   | `PREPARING`        | Resets readouts, opens telemetry|
 | `latency`     | `INJECTING_PACKETS`| Live `PING_SAMPLE N/M=...ms` log|
 | `download`    | `PULLING_PAYLOADS` | Main gauge animates from bytes  |
-| `upload`      | `PUSHING_UPLINK`   | UL pill or `N/A` if not configured |
+| `upload`      | `PUSHING_UPLINK`   | UL pill, `NOT CONFIGURED`, or `FAILED` |
 | `complete`    | `COMPLETE`         | Probe status `READY` (green)    |
 | `aborted`     | `ABORT`            | Probe status `ABORTED` (pink)   |
 | `failed`      | `HALT`             | Probe status `FAILED` (pink)    |
@@ -93,7 +94,7 @@ defaultCloudflarePreset(safeMode) => {
 A consumer can override any field via the screen's `configOverride` prop
 (e.g. provide a `uploadUrl` pointing at a connector you operate). The screen
 detects whether `uploadUrl` was set and either runs the upload phase or
-reports the upload as `N/A`.
+reports the upload as `NOT CONFIGURED`.
 
 To wire a custom endpoint set in the future, extend `NetworkSettings`
 with `speedTestDownloadUrl` / `speedTestUploadUrl` and pass them in via
@@ -126,7 +127,7 @@ trivial.
   keep the screen foregrounded during a run.
 - Upload numbers (when configured) depend on the endpoint accepting
   unauthenticated cross-origin POSTs; an HTTP non-2xx response sets
-  `failureReason="upload-http-<code>"` instead of synthesising a value.
+  `uploadState="FAILED"` and `failureReason="upload-http-<code>"` instead of synthesising a value.
 
 ## Failure modes
 - Network unreachable → download phase fetch rejects → `failureReason`
@@ -134,7 +135,7 @@ trivial.
 - Reader throws → handled, `failureReason="download-failed"`.
 - User abort → `failureReason="aborted"`, status `ABORT`.
 - Upload endpoint missing → result still `success` (download succeeded),
-  `uploadMbps: null`, `failureReason="upload-not-configured"`.
+  `uploadMbps: null`, `uploadState="NOT CONFIGURED"`, `failureReason="upload-not-configured"`.
 
 ## Testing
 `lib/network/speedTest.test.ts` covers:

@@ -40,7 +40,7 @@ that surfaces it. Truth matrix:
 | **Latency**    | Median of 5–8 HTTP HEAD-equivalent round trips to the latency URL                            | **Real**, measured via `performance.now()`       |
 | **Jitter**     | Population standard deviation of the same latency samples                                    | **Real**                                         |
 | **Download**   | Bytes consumed from the response body reader during the configured window, divided by time  | **Real**, computed from actual transferred bytes |
-| **Upload**     | POST of 64–512 KB of random bytes to the configured upload URL                               | **Endpoint-dependent**: real only when an upload URL is configured. Otherwise reads `N/A` honestly. |
+| **Upload**     | POST of 64–512 KB of random bytes to the configured upload URL                               | **Endpoint-dependent**: real only when an upload URL is configured. Otherwise reads `NOT CONFIGURED` honestly. |
 | **Provider**   | `Cloudflare speed.cloudflare.com` (`__down` endpoint) by default                             | Real                                             |
 
 Real probe captured during this session against the configured Cloudflare

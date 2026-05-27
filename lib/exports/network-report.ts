@@ -7,6 +7,7 @@ import type {
   ScanComparisonSummary,
   SpeedTestResult,
 } from "@/lib/network/types"
+import { inferUploadState, uploadValueLabel } from "@/lib/network/speedTestSemantics"
 
 export interface NetworkReportInput {
   generatedAt?: string
@@ -91,6 +92,8 @@ export interface SpeedTestRow {
   provider: string
   downloadMbps: number
   uploadMbps: number | null
+  uploadState: string
+  uploadDisplay: string
   latencyMs: number
   jitterMs: number
   success: boolean
@@ -173,6 +176,8 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
     provider: run.provider,
     downloadMbps: Number(run.downloadMbps.toFixed(2)),
     uploadMbps: run.uploadMbps === null ? null : Number(run.uploadMbps.toFixed(2)),
+    uploadState: inferUploadState(run),
+    uploadDisplay: uploadValueLabel(run),
     latencyMs: Number(run.latencyMs.toFixed(2)),
     jitterMs: Number(run.jitterMs.toFixed(2)),
     success: run.success,
@@ -251,12 +256,12 @@ export function buildNetworkReport(input: NetworkReportInput): NetworkReport {
     latestSpeedTest: latestSpeedTestRun
       ? `down ${latestSpeedTestRun.downloadMbps.toFixed(2)} Mbps · ${
           latestSpeedTestRun.uploadMbps === null
-            ? "up n/a"
+            ? `up ${uploadValueLabel(latestSpeedTestRun).toLowerCase()}`
             : `up ${latestSpeedTestRun.uploadMbps.toFixed(2)} Mbps`
         } · lat ${Math.round(latestSpeedTestRun.latencyMs)}ms · ${latestSpeedTestRun.provider} · ${
-          (latestSpeedTestRun.uploadMeasured ?? latestSpeedTestRun.uploadMbps !== null)
+          inferUploadState(latestSpeedTestRun) === "MEASURED"
             ? "FULL_TEST"
-            : "PARTIAL_NO_UPLOAD"
+            : `PARTIAL_TEST_UPLOAD_${inferUploadState(latestSpeedTestRun).replace(/\s+/g, "_")}`
         }`
       : latestHealth?.diagnostics.find((probe) => probe.key === "throughput")?.value ?? null,
   }

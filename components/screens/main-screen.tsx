@@ -38,6 +38,7 @@ import {
   isLatencyDeltaSignificant,
   verdictAccentColor,
 } from "@/lib/network/speedTestThresholds"
+import { uploadValueLabel } from "@/lib/network/speedTestSemantics"
 
 const RESPONSE_TEMPLATES: Record<string, string> = {
   "Tell a joke":
@@ -726,7 +727,7 @@ function SpeedTestSummary({
           </p>
           <p className="truncate ps-mono text-[12px] font-semibold tracking-wider" style={{ color: accent }}>
             {latest.downloadMbps.toFixed(1)} Mbps DL · {Math.round(latest.latencyMs)} ms LAT
-            {latest.uploadMbps !== null ? ` · ${latest.uploadMbps.toFixed(1)} Mbps UL` : " · UL N/A"}
+            {latest.uploadMbps !== null ? ` · ${latest.uploadMbps.toFixed(1)} Mbps UL` : ` · UL ${uploadValueLabel(latest).toUpperCase()}`}
           </p>
           {(dlDeltaSignificant || latDeltaSignificant) && (
             <p className="ps-mono text-[9px] tracking-[0.2em] text-white/60">

@@ -77,7 +77,7 @@ Additions that don't alter the source identity:
 | Complete state                                         | ✓      | DL/UL/LAT/JITTER commit from final `SpeedTestResult`; PROBE STATUS reads `READY` (green) |
 | Error/abort state                                      | ✓      | Aborted runs report `ABORT` status + `ABORTED`/`FAILED` probe; failed runs carry a `failureReason` and log line |
 | Download metrics real                                  | ✓      | Bytes accumulated via `response.body.getReader()`; mbps = `(bytes·8)/(elapsedMs·1000)` per `calculateMbps` |
-| Upload either real or honestly N/A                     | ✓      | Default preset omits `uploadUrl`; UL pill reads `N/A`, a yellow `UL_ENDPOINT_NOT_CONFIGURED` line is shown |
+| Upload either real or honestly state-labeled           | ✓      | Default preset omits `uploadUrl`; UL pill reads `NOT CONFIGURED`, a yellow `UL_ENDPOINT_NOT_CONFIGURED` line is shown |
 | Truthful latency/jitter copy                           | ✓      | Labels read `REQUEST LATENCY` and `JITTER (σ)` (not "ping") |
 | History persists                                       | ✓      | `recordSpeedTestResult` pushes into `speedTestHistory` (cap 50, in-memory + PersistedAppState) |
 | Events fire                                            | ✓      | `speed_test_started` on launch, `speed_test_completed` or `speed_test_failed` on terminal — surfaced in `NetworkTimelinePanel` |
@@ -150,7 +150,7 @@ Re-read each major surface to confirm nothing was accidentally altered:
 
 - **Upload endpoint** — the default Cloudflare preset deliberately omits
   `uploadUrl`. Until a connector POST endpoint is wired via the screen's
-  `configOverride.uploadUrl`, the UL pill stays `N/A`. This is intentional
+  `configOverride.uploadUrl`, the UL pill stays `NOT CONFIGURED`. This is intentional
   and clearly surfaced in-screen; it is not a defect.
 - **Live network run not executed here** — outbound HTTPS to
   `speed.cloudflare.com` from this sandbox isn't guaranteed, so an

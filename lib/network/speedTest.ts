@@ -62,7 +62,8 @@ export async function runSpeedTest(config: SpeedTestConfig): Promise<SpeedTestRe
   phases.push({ name: "download", startedAt: new Date().toISOString(), completedAt: new Date().toISOString(), elapsedMs: downloadElapsed, success: downloaded > 0 });
 
   let uploaded = 0;
-  let uploadMbps = 0;
+  let uploadMbps: number | null = null;
+  let uploadState: SpeedTestResult["uploadState"] = config.uploadUrl ? "NOT MEASURED" : "NOT CONFIGURED";
   if (config.uploadUrl) {
     const payloadSize = Math.max(64 * 1024, config.uploadBytes ?? 512 * 1024);
     const payload = new Uint8Array(payloadSize);
@@ -71,7 +72,8 @@ export async function runSpeedTest(config: SpeedTestConfig): Promise<SpeedTestRe
     const up = await timedFetch(config.uploadUrl, config.timeoutMs, { method: "POST", body: payload });
     const uploadElapsed = performance.now() - u0;
     uploaded = up.ok ? payloadSize : 0;
-    uploadMbps = calculateMbps(uploaded, uploadElapsed);
+    uploadMbps = up.ok ? calculateMbps(uploaded, uploadElapsed) : null;
+    uploadState = up.ok ? "MEASURED" : "FAILED";
     phases.push({ name: "upload", startedAt: new Date().toISOString(), completedAt: new Date().toISOString(), elapsedMs: uploadElapsed, success: up.ok });
   }
 
@@ -83,16 +85,17 @@ export async function runSpeedTest(config: SpeedTestConfig): Promise<SpeedTestRe
     provider: config.provider,
     source: config.downloadUrl,
     downloadMbps,
-    uploadMbps: config.uploadUrl ? uploadMbps : null,
+    uploadMbps,
     latencyMs,
     jitterMs,
     testBytesDownloaded: downloaded,
     testBytesUploaded: uploaded,
     sampleCount: samples.length,
     success: downloaded > 0,
-    failureReason: downloaded > 0 ? undefined : "download failed",
-    uploadMeasured: Boolean(config.uploadUrl && uploaded > 0),
-    completeness: config.uploadUrl && uploaded > 0 ? "full" : "partial-no-upload",
+    failureReason: downloaded > 0 ? (uploadState === "FAILED" ? "upload-failed" : uploadState === "NOT CONFIGURED" ? "upload-not-configured" : undefined) : "download failed",
+    uploadMeasured: uploadState === "MEASURED",
+    uploadState: downloaded > 0 ? uploadState : uploadState === "MEASURED" ? "SKIPPED" : uploadState,
+    completeness: downloaded > 0 && uploadState === "MEASURED" ? "full" : "partial-no-upload",
     phases,
     samples,
     environmentNotes: config.environmentNotes ?? "Browser HTTPS request-based throughput test",

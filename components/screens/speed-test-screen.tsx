@@ -32,6 +32,13 @@ import {
   runStreamingSpeedTest,
   type SpeedTestRunStatus,
 } from "@/lib/network/speedTestRunner"
+import {
+  inferUploadState,
+  isFullSpeedTest,
+  uploadStateExplanation,
+  uploadStateLabel,
+  uploadValueLabel,
+} from "@/lib/network/speedTestSemantics"
 import type { SpeedTestConfig, SpeedTestResult } from "@/lib/network/types"
 import {
   NEO_PALETTE,
@@ -130,7 +137,7 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
   const [phaseProgress, setPhaseProgress] = useState(0)
   const [latencySamplesCount, setLatencySamplesCount] = useState({ done: 0, total: 0 })
   // Persisted upload endpoint (user-configurable). When set, the runner will
-  // actually exercise the upload path; otherwise UL reads "N/A" honestly.
+  // actually exercise the upload path; otherwise UL reads "NOT CONFIGURED" honestly.
   const [uploadUrlInput, setUploadUrlInput] = useState<string>("")
   const [uploadUrlSaved, setUploadUrlSaved] = useState<string | null>(null)
   const [uploadConfigOpen, setUploadConfigOpen] = useState(false)
@@ -373,7 +380,7 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     logSeqRef.current = 0
     setMainValue(0)
     setDlValue("--")
-    setUlValue(config.uploadUrl ? "--" : "N/A")
+    setUlValue(config.uploadUrl ? "--" : "NOT CONFIGURED")
     setPingMedian("--")
     setJitter("--")
     setJitterBars(seedJitterBars(2))
@@ -432,7 +439,7 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
         },
         onUploadComplete: (info) => {
           if (info.mbps === null) {
-            setUlValue(info.reason === "upload-not-configured" ? "N/A" : "FAIL")
+            setUlValue(info.reason === "upload-not-configured" ? "NOT CONFIGURED" : "FAILED")
           } else {
             setUlValue(info.mbps.toFixed(1))
           }
@@ -445,7 +452,7 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
 
     // Final commits derived from the result the runner returned.
     setDlValue(result.downloadMbps.toFixed(1))
-    if (result.uploadMbps !== null) setUlValue(result.uploadMbps.toFixed(1))
+    setUlValue(result.uploadMbps !== null ? result.uploadMbps.toFixed(1) : uploadStateLabel(inferUploadState(result)))
     setMainValue(result.downloadMbps)
     setPingMedian(String(Math.round(result.latencyMs)))
     setJitter(String(Math.round(result.jitterMs)))
@@ -719,11 +726,15 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
               </span>
             </Pill>
             {(() => {
-              const ulFailed = ulValue === "FAIL"
-              const ulNotConfigured = !uploadConfigured && (ulValue === "N/A" || ulValue === "--")
+              const resultUploadState = lastResult && !running ? inferUploadState(lastResult) : null
+              const ulFailed = resultUploadState === "FAILED" || ulValue === "FAILED"
+              const ulNotConfigured =
+                resultUploadState === "NOT CONFIGURED" ||
+                (!uploadConfigured && (ulValue === "NOT CONFIGURED" || ulValue === "--"))
+              const ulNotMeasured = resultUploadState === "NOT MEASURED" || resultUploadState === "SKIPPED"
               const ulPillBorder = ulFailed
                 ? rgba(NEO.pink, 0.6)
-                : ulNotConfigured
+                : ulNotConfigured || ulNotMeasured
                   ? rgba(NEO.yellow, 0.45)
                   : rgba(NEO.pink, 0.32)
               if (ulNotConfigured) {
@@ -758,9 +769,9 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
                   </span>
                   <span
                     className="hud-text-tight text-[12px] font-black italic"
-                    style={{ color: ulFailed ? NEO.pink : NEO.yellow }}
+                    style={{ color: ulFailed ? NEO.pink : ulNotMeasured ? NEO.yellow : NEO.yellow }}
                   >
-                    {ulFailed ? "FAILED" : ulValue}
+                    {ulFailed ? "FAILED" : ulNotMeasured ? uploadStateLabel(resultUploadState ?? "NOT MEASURED") : ulValue}
                   </span>
                 </Pill>
               )
@@ -1024,6 +1035,7 @@ function RecentResultsPanel({
           const prior = last[index + 1] ?? null
           const isBestDl = bestDownload && run.id === bestDownload.id
           const isBestLat = bestLatency && run.id === bestLatency.id
+          const uploadState = inferUploadState(run)
           return (
             <div
               key={run.id}
@@ -1051,12 +1063,12 @@ function RecentResultsPanel({
                     {isBestDl ? "BEST DL" : "BEST LAT"}
                   </span>
                 )}
-                {!(run.uploadMeasured ?? run.uploadMbps !== null) && (
+                {!isFullSpeedTest(run) && (
                   <span
                     className="hud-mono mt-0.5 text-[8px] font-black"
                     style={{ color: NEO.yellow, letterSpacing: "0.12em" }}
                   >
-                    PARTIAL
+                    PARTIAL TEST
                   </span>
                 )}
               </div>
@@ -1069,13 +1081,13 @@ function RecentResultsPanel({
               />
               <MetricWithDelta
                 label="UL"
-                value={run.uploadMbps === null ? "NOT MEASURED" : run.uploadMbps.toFixed(1)}
+                value={run.uploadMbps === null ? uploadValueLabel(run).toUpperCase() : run.uploadMbps.toFixed(1)}
                 delta={
                   prior && prior.uploadMbps !== null && run.uploadMbps !== null
                     ? run.uploadMbps - prior.uploadMbps
                     : null
                 }
-                color={run.uploadMbps === null ? NEO.yellow : NEO.pink}
+                color={uploadState === "FAILED" ? NEO.pink : run.uploadMbps === null ? NEO.yellow : NEO.pink}
                 higherIsBetter
               />
               <MetricWithDelta
@@ -1416,7 +1428,7 @@ function PhaseSegmentStrip({
         : status === "upload"
           ? uploadConfigured
             ? "PUSHING UPLINK"
-            : "UL N/A"
+            : "UL NOT CONFIGURED"
           : status === "preparing"
             ? "WARMING PROBE"
             : status === "complete"
@@ -1658,12 +1670,12 @@ function VerdictBanner({
           )}
         </div>
       )}
-      {result.success && result.uploadMbps === null && (
+      {result.success && !isFullSpeedTest(result) && (
         <p
           className="hud-mono mt-2 text-[9px] font-bold"
           style={{ color: rgba(NEO.yellow, 0.85), letterSpacing: "0.08em" }}
         >
-          PARTIAL · DOWNLOAD/LATENCY/JITTER MEASURED · UPLOAD NOT CONFIGURED
+          PARTIAL TEST · DOWNLOAD/LATENCY/JITTER MEASURED · UPLOAD {uploadStateLabel(inferUploadState(result))}
         </p>
       )}
     </div>
@@ -1789,13 +1801,13 @@ function computeMetricHighlights(result: SpeedTestResult): {
 
   // Upload-not-measured is shown explicitly in the weakest slot only when no
   // other "weak" metric stands out — keeps the badge honest.
-  const uploadMissing = result.uploadMbps === null
+  const uploadMissing = inferUploadState(result) !== "MEASURED"
   if (uploadMissing && weakest.tier === "strong") {
     return {
       strongest: { label: strongest.name, note: strongest.note },
       weakest: {
-        label: "Upload not measured",
-        note: "Endpoint not configured",
+        label: "Upload " + uploadStateLabel(inferUploadState(result)).toLowerCase(),
+        note: uploadStateExplanation(inferUploadState(result)),
         tone: "warn",
       },
     }
@@ -1875,30 +1887,35 @@ function computeVerdict(result: SpeedTestResult): {
   const lat = result.latencyMs
   const dlTier = gradeDownload(dl)
   const latTier = gradeLatency(lat)
+  const fullTest = isFullSpeedTest(result)
+  const partialPrefix = fullTest ? "" : "PARTIAL TEST · "
+  const basis = fullTest
+    ? "Internet path is measured across download, upload, and latency"
+    : `Download/latency/jitter measured; upload ${uploadStateLabel(inferUploadState(result)).toLowerCase()}`
   if (dlTier === "strong" && latTier === "strong") {
     return {
-      label: result.uploadMeasured ? "EXCELLENT" : "EXCELLENT (PARTIAL)",
-      detail: `${result.uploadMeasured ? "Internet path is fast and responsive" : "Internet path download/latency is fast and responsive; upload was not measured"} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+      label: `${partialPrefix}EXCELLENT`,
+      detail: `${basis} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
       color: NEO.green,
     }
   }
   if (dlTier !== "weak" && latTier !== "weak") {
     return {
-      label: result.uploadMeasured ? "GOOD" : "GOOD (PARTIAL)",
-      detail: `${result.uploadMeasured ? "Stable internet path" : "Stable download/latency path; upload was not measured"} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+      label: `${partialPrefix}GOOD`,
+      detail: `${basis} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
       color: NEO.cyan,
     }
   }
   if (dlTier !== "weak" || latTier !== "weak") {
     return {
-      label: result.uploadMeasured ? "USABLE" : "USABLE (PARTIAL)",
-      detail: `${result.uploadMeasured ? "Throughput is adequate but latency or jitter may impact realtime use" : "Download/latency readings are usable but incomplete without upload measurement"} (${dl.toFixed(1)} Mbps · ${Math.round(lat)} ms).`,
+      label: `${partialPrefix}USABLE`,
+      detail: `${basis} (${dl.toFixed(1)} Mbps · ${Math.round(lat)} ms).`,
       color: NEO.yellow,
     }
   }
   return {
-    label: result.uploadMeasured ? "DEGRADED" : "DEGRADED (PARTIAL)",
-    detail: `${result.uploadMeasured ? "Throughput is low" : "Download/latency probe is degraded; upload was not measured"} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
+    label: `${partialPrefix}DEGRADED`,
+    detail: `${basis} — ${dl.toFixed(1)} Mbps down, ${Math.round(lat)} ms latency.`,
     color: NEO.pink,
   }
 }
@@ -1990,7 +2007,7 @@ function UploadEndpointConfig({
         ) : (
           <>
             <span style={{ color: NEO.yellow }}>UL_ENDPOINT_NOT_CONFIGURED · </span>
-            Upload reads N/A until a POST endpoint is wired in. Download,
+            Upload reads NOT CONFIGURED until a POST endpoint is wired in. Download,
             latency, and jitter are unaffected — they remain fully measured.
           </>
         )}

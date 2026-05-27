@@ -10,6 +10,7 @@ import type {
   RouterStatus,
   ScanComparisonSummary,
 } from "./types";
+import { uploadValueLabel } from "./speedTestSemantics";
 import { runSpeedTest } from "./speedTest";
 
 const HEALTH_HISTORY_LIMIT = 60;
@@ -287,7 +288,7 @@ export async function runNetworkDiagnostics(status: NetworkStatus): Promise<Diag
       key: "throughput",
       label: "Internet throughput",
       status: speed.success ? "passed" : "failed",
-      value: `down ${speed.downloadMbps.toFixed(2)} Mbps · up ${speed.uploadMbps === null ? "n/a" : speed.uploadMbps.toFixed(2)} Mbps`,
+      value: `down ${speed.downloadMbps.toFixed(2)} Mbps · up ${speed.uploadMbps === null ? uploadValueLabel(speed).toLowerCase() : `${speed.uploadMbps.toFixed(2)} Mbps`}`,
       latencyMs: speed.latencyMs,
       samples: speed.samples.slice(0, 8).map((sample) => Number(sample.mbps.toFixed(2))),
       detail: `Provider=${speed.provider}; bytes down=${speed.testBytesDownloaded}; bytes up=${speed.testBytesUploaded}; jitter=${speed.jitterMs.toFixed(2)}ms.`,

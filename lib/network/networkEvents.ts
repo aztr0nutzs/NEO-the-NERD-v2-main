@@ -9,6 +9,7 @@ import type {
   InsightSeverity,
   SpeedTestResult,
 } from "./types";
+import { inferUploadState, uploadValueLabel } from "./speedTestSemantics";
 
 export const NETWORK_EVENT_RETENTION_LIMIT = 500;
 export const NETWORK_EVENT_RETENTION_DAYS = 90;
@@ -95,7 +96,8 @@ export function createSpeedTestStartedEvent(runId: string, provider: string, tim
 }
 
 export function createSpeedTestCompletedEvent(result: SpeedTestResult) {
-  const upload = result.uploadMbps === null ? "n/a" : `${result.uploadMbps.toFixed(2)} Mbps`;
+  const upload = result.uploadMbps === null ? uploadValueLabel(result) : `${result.uploadMbps.toFixed(2)} Mbps`;
+  const uploadState = inferUploadState(result);
   return createNetworkEvent({
     type: "speed_test_completed",
     severity: "info",
@@ -105,7 +107,8 @@ export function createSpeedTestCompletedEvent(result: SpeedTestResult) {
       runId: result.id,
       provider: result.provider,
       downloadMbps: Number(result.downloadMbps.toFixed(2)),
-      uploadMbps: result.uploadMbps === null ? "n/a" : Number(result.uploadMbps.toFixed(2)),
+      uploadMbps: result.uploadMbps === null ? uploadValueLabel(result) : Number(result.uploadMbps.toFixed(2)),
+      uploadState,
       latencyMs: Number(result.latencyMs.toFixed(2)),
       jitterMs: Number(result.jitterMs.toFixed(2)),
       bytesDown: result.testBytesDownloaded,

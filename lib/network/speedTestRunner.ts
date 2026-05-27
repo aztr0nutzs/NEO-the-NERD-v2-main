@@ -14,6 +14,7 @@ import type {
   ThroughputSample,
 } from "./types";
 import { calculateJitterMs, calculateMbps } from "./speedTest";
+import type { SpeedTestUploadState } from "./types";
 
 export type SpeedTestRunStatus =
   | "idle"
@@ -208,6 +209,7 @@ async function measureUpload(
   samples: ThroughputSample[];
   phase: SpeedTestPhase | null;
   failureReason?: string;
+  uploadState: SpeedTestUploadState;
 }> {
   if (!cfg.uploadUrl) {
     cb.onUploadComplete?.({ mbps: null, bytes: 0, reason: "upload-not-configured" });
@@ -221,6 +223,7 @@ async function measureUpload(
       samples: [],
       phase: null,
       failureReason: "upload-not-configured",
+      uploadState: "NOT CONFIGURED",
     };
   }
 
@@ -278,6 +281,7 @@ async function measureUpload(
     samples,
     phase,
     failureReason,
+    uploadState: success ? "MEASURED" : "FAILED",
   };
 }
 
@@ -342,7 +346,8 @@ export async function runStreamingSpeedTest(
       success,
       failureReason: success ? upload.failureReason ?? download.failureReason : (download.failureReason ?? "download-failed"),
       uploadMeasured: upload.mbps !== null,
-      completeness: upload.mbps === null ? "partial-no-upload" : "full",
+      uploadState: success ? upload.uploadState : upload.uploadState === "MEASURED" ? "SKIPPED" : upload.uploadState,
+      completeness: success && upload.uploadState === "MEASURED" ? "full" : "partial-no-upload",
       phases,
       samples,
       environmentNotes: cfg.environmentNotes ?? "Browser HTTPS fetch-based throughput test",
@@ -375,6 +380,7 @@ export async function runStreamingSpeedTest(
       success: false,
       failureReason: aborted ? "aborted" : err instanceof Error ? err.message : "unknown-error",
       uploadMeasured: false,
+      uploadState: aborted ? "SKIPPED" : "NOT MEASURED",
       completeness: "partial-no-upload",
       phases,
       samples,

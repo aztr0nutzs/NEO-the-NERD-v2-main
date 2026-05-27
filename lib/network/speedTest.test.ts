@@ -56,6 +56,8 @@ async function failurePathSmokeTest() {
   assert.ok(statuses.includes("preparing"), "emits preparing");
   assert.equal(result.success, false, "bogus endpoint should not report success");
   assert.equal(result.uploadMbps, null, "no upload endpoint => null mbps");
+  assert.equal(result.uploadState, "NOT CONFIGURED", "no upload endpoint => explicit upload state");
+  assert.equal(result.completeness, "partial-no-upload", "missing upload keeps result partial");
   assert.ok(typeof result.failureReason === "string", "failure reason set");
 }
 

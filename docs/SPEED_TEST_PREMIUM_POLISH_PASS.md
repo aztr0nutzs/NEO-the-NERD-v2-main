@@ -99,7 +99,7 @@ intentionally **locked-by-configuration** state when no URL is saved.
 | Border | Amber, faint inset | Green, faint inset |
 | Header chip | `LOCKED` badge next to title | (omitted) |
 | Toggle label | `UNLOCK` (instead of `CONFIGURE`) | `EDIT` |
-| Helper copy | "Upload reads N/A until a POST endpoint is wired in. Download, latency, and jitter are unaffected — they remain fully measured." | `CONFIGURED · <host>` |
+| Helper copy | "Upload reads NOT CONFIGURED until a POST endpoint is wired in. Download, latency, and jitter are unaffected — they remain fully measured." | `CONFIGURED · <host>` |
 
 The verdict banner also now surfaces a one-line `UL_NOT_MEASURED ·
 UPLOAD ENDPOINT NOT CONFIGURED` chip when a run succeeds without
@@ -160,7 +160,7 @@ When a successful run exists:
 
 ```
 SPEED_TEST · LAST_RUN
-42.3 Mbps DL · 28 ms LAT · 6.1 Mbps UL   (or " · UL N/A" when not configured)
+42.3 Mbps DL · 28 ms LAT · 6.1 Mbps UL   (or " · UL NOT CONFIGURED" when not configured)
 Δ DL +3.2 Mbps · Δ LAT -4 ms             (delta row only when significant)
 ```
 
@@ -274,7 +274,7 @@ helpers (`lib/network/speedTest.ts`), event creators
 1. Open the Speed Test screen with no prior runs. Confirm the
    ready-halo breathes around the gauge before pressing Execute.
 2. Tap **EXECUTE**. Observe the segment strip light up `PREP` → `PING`
-   → `DL` → `UL` (or `UL N/A`) → `DONE`. Confirm the jitter bars
+   → `DL` → `UL` (or `UL NOT CONFIGURED`) → `DONE`. Confirm the jitter bars
    re-flow with the running ping samples instead of staying static.
 3. On `complete`, confirm the green expanding shockwave fires once and
    then clears. Confirm the verdict banner now renders STRONGEST /
@@ -286,7 +286,7 @@ helpers (`lib/network/speedTest.ts`), event creators
 5. Tap **ABORT** mid-run. Confirm the pink scanline glitch fires once
    and the verdict reads `ABORTED`.
 6. Open Mission Control. Confirm the `SpeedTestSummary` card now
-   shows the last run with DL / LAT / UL (or `UL N/A`) and any
+   shows the last run with DL / LAT / UL (or `UL NOT CONFIGURED`) and any
    significant deltas vs the prior run.
 7. Toggle Settings → Accessibility → Reduced Motion (or the OS-level
    reduce-motion flag). Confirm the ready-breath, shockwave, and
