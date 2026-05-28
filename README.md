@@ -81,6 +81,7 @@ Copy `.env.example` to `.env.local` and populate any keys you need (TTS provider
   - `NEXT_PUBLIC_NEO_BACKEND_BASE_URL=https://your-deployed-backend-url.com`
 
 If you build an APK without `NEXT_PUBLIC_NEO_BACKEND_BASE_URL`, the app cannot call server `/api/tts` routes from the packaged WebView and will run Android device TTS fallback mode (profiles may sound identical).
+After changing any `NEXT_PUBLIC_*` value, rebuild the web bundle and resync Android (`npm run build && npx cap sync android`) so the APK contains the new URL.
 
 #### Provider voice diagnostics helper
 Use this to verify provider-backed voice IDs differ:
@@ -105,9 +106,17 @@ OpenAI TTS remains supported. OmniVoice is an additional optional backend for cu
 - OmniVoice must run as separate Python service (`voice-server/omnivoice/`), not inside APK.
 - OmniVoice is only marked active when `GET /health` reports `status: ok`.
 - If OmniVoice engine is not installed, server returns `not_configured` health and `/tts` HTTP 503.
+- Android emulator builds should use `http://10.0.2.2:8011` for a local PC-hosted OmniVoice service.
+- Physical Android devices must use the PC's LAN IP, not `127.0.0.1` or `localhost`.
+- `/tts` must return a real playable audio payload; the app will not mark OmniVoice playback successful until generated audio starts.
 
 Set:
 - `NEXT_PUBLIC_OMNIVOICE_BASE_URL=https://your-omnivoice-service`
 - `NEXT_PUBLIC_NEO_BACKEND_BASE_URL=https://your-next-backend` (for OpenAI `/api/tts`)
 
 For Android builds, these `NEXT_PUBLIC_*` variables are baked into the JS bundle at build time.
+
+Voice debug checklist:
+- Voices screen diagnostics should show `OpenAI backend reachable: YES` and `OpenAI provider configured: YES` for provider TTS.
+- If the status says `Playing Android device TTS fallback`, provider audio is not active and profiles may sound identical.
+- Capture runtime logs with Android Studio Logcat or `adb logcat | findstr /i "NeoTtsPlugin voice-preview"`.

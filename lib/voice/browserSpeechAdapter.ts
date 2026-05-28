@@ -78,12 +78,27 @@ export async function speakWithBrowserSpeech({
 
   return new Promise<boolean>((resolve) => {
     const utterance = new SpeechSynthesisUtterance(speech.text)
+    let started = false
+    const startTimer = window.setTimeout(() => {
+      if (started) return
+      if (activeUtterance === utterance) activeUtterance = null
+      window.speechSynthesis.cancel()
+      onStateChange?.({
+        state: "error",
+        source: "browser-speech",
+        voiceId: profile.id,
+        message: "Playback failed: browser speech did not start.",
+      })
+      resolve(false)
+    }, 2500)
     utterance.rate = speech.rate
     utterance.pitch = speech.pitch
     utterance.volume = speech.volume
     utterance.voice = selectBrowserVoice(profile)
 
     utterance.onstart = () => {
+      started = true
+      window.clearTimeout(startTimer)
       onStateChange?.({
         state: "playing",
         source: "browser-speech",
@@ -111,6 +126,7 @@ export async function speakWithBrowserSpeech({
     }
 
     utterance.onend = () => {
+      window.clearTimeout(startTimer)
       if (activeUtterance === utterance) activeUtterance = null
       onStateChange?.({
         state: "ended",
@@ -122,6 +138,7 @@ export async function speakWithBrowserSpeech({
     }
 
     utterance.onerror = () => {
+      window.clearTimeout(startTimer)
       if (activeUtterance === utterance) activeUtterance = null
       onStateChange?.({
         state: "error",

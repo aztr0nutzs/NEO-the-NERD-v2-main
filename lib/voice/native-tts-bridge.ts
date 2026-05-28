@@ -46,6 +46,7 @@ interface NativeTtsPlugin {
 }
 
 const neoTts = registerPlugin<NativeTtsPlugin>("NeoTts")
+let cachedAvailability: NativeTtsAvailability | null = null
 
 export function isAndroidNativeTtsRuntime(): boolean {
   return Capacitor.getPlatform() === "android"
@@ -56,14 +57,28 @@ export async function getAndroidNativeTtsAvailability(): Promise<NativeTtsAvaila
     return { available: false, ready: false, platform: Capacitor.getPlatform(), message: "Not Android runtime." }
   }
   try {
-    return await neoTts.isAvailable()
+    cachedAvailability = await neoTts.isAvailable()
+    return cachedAvailability
   } catch (error) {
-    return {
+    cachedAvailability = {
       available: false,
       ready: false,
       platform: "android",
       message: error instanceof Error ? error.message : "Native Android TTS bridge unavailable.",
     }
+    return cachedAvailability
+  }
+}
+
+export function getCachedAndroidNativeTtsAvailability(): NativeTtsAvailability {
+  if (!isAndroidNativeTtsRuntime()) {
+    return { available: false, ready: false, platform: Capacitor.getPlatform(), message: "Not Android runtime." }
+  }
+  return cachedAvailability ?? {
+    available: false,
+    ready: false,
+    platform: "android",
+    message: "Android TextToSpeech has not been probed yet.",
   }
 }
 
@@ -108,6 +123,10 @@ export async function getAndroidNativeVoices(): Promise<AndroidNativeVoice[]> {
     cachedAndroidVoices = []
     return cachedAndroidVoices
   }
+}
+
+export function getCachedAndroidNativeVoices(): AndroidNativeVoice[] {
+  return cachedAndroidVoices ?? []
 }
 
 export interface NativeVoiceResolutionResult {

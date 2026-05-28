@@ -46,6 +46,7 @@ public class NeoTtsPlugin extends Plugin {
     result.put("available", tts != null && !failed);
     result.put("ready", tts != null && ready);
     result.put("platform", "android");
+    result.put("nativeVoiceCount", getNativeVoiceCount());
     result.put("message", ready ? "Android TextToSpeech ready." : (failed ? "Android TextToSpeech unavailable." : "Android TextToSpeech initializing."));
     call.resolve(result);
   }
@@ -71,7 +72,11 @@ public class NeoTtsPlugin extends Plugin {
     float pitch = clampFloat(pitchValue != null ? pitchValue.floatValue() : 1.0f, 0.1f, 2.0f);
     float volume = clampFloat(volumeValue != null ? volumeValue.floatValue() : 1.0f, 0.0f, 1.0f);
 
-    String selectedVoiceName = selectVoiceByName(voiceName);
+    VoiceSelection selectedVoice = selectVoiceByName(voiceName);
+    if (voiceName != null && !voiceName.trim().isEmpty() && !selectedVoice.supported) {
+      call.reject("Requested Android TTS voice is not installed: " + voiceName);
+      return;
+    }
     tts.setSpeechRate(rate);
     tts.setPitch(pitch);
 
@@ -83,7 +88,8 @@ public class NeoTtsPlugin extends Plugin {
     JSObject result = new JSObject();
     result.put("ok", status == TextToSpeech.SUCCESS);
     result.put("message", status == TextToSpeech.SUCCESS ? "Android TTS preview started." : "Android TTS failed to start.");
-    result.put("voiceName", selectedVoiceName);
+    result.put("voiceName", selectedVoice.name);
+    result.put("nativeVoiceCount", getNativeVoiceCount());
     if (status == TextToSpeech.SUCCESS) {
       call.resolve(result);
     } else {
@@ -153,19 +159,39 @@ public class NeoTtsPlugin extends Plugin {
     return Math.max(min, Math.min(max, value));
   }
 
-  private String selectVoiceByName(String voiceName) {
-    if (voiceName == null || voiceName.trim().isEmpty() || tts == null) return null;
+  private int getNativeVoiceCount() {
+    if (tts == null || !ready) return 0;
     try {
       Set<Voice> voices = tts.getVoices();
-      if (voices == null) return null;
+      return voices != null ? voices.size() : 0;
+    } catch (Exception ignored) {
+      return 0;
+    }
+  }
+
+  private VoiceSelection selectVoiceByName(String voiceName) {
+    if (voiceName == null || voiceName.trim().isEmpty() || tts == null) return new VoiceSelection(null, true);
+    try {
+      Set<Voice> voices = tts.getVoices();
+      if (voices == null) return new VoiceSelection(null, false);
       for (Voice voice : voices) {
         if (voice.getName().equals(voiceName)) {
           int result = tts.setVoice(voice);
-          return result == TextToSpeech.SUCCESS ? voice.getName() : null;
+          return new VoiceSelection(result == TextToSpeech.SUCCESS ? voice.getName() : null, result == TextToSpeech.SUCCESS);
         }
       }
     } catch (Exception ignored) {
     }
-    return null;
+    return new VoiceSelection(null, false);
+  }
+
+  private static class VoiceSelection {
+    final String name;
+    final boolean supported;
+
+    VoiceSelection(String name, boolean supported) {
+      this.name = name;
+      this.supported = supported;
+    }
   }
 }

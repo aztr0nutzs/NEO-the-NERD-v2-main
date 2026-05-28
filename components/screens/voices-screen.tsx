@@ -73,6 +73,8 @@ export function VoicesScreen() {
     mimeType: string
   } | null>(null)
   const [lastProviderVoiceId, setLastProviderVoiceId] = useState<string | null>(null)
+  const [lastPreviewAttempt, setLastPreviewAttempt] = useState("NONE")
+  const [lastPreviewResult, setLastPreviewResult] = useState("NONE")
   const [voiceStatus, setVoiceStatus] = useState("VOICE PREVIEW READY")
   const [distinctOnly, setDistinctOnly] = useState(false)
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
@@ -146,6 +148,7 @@ export function VoicesScreen() {
     const previewParams = id === voiceId ? voiceParams : voiceProfileToParams(id)
     const text = previewText.trim() || voice.sampleText
     const intent = inferSpeechIntent({ text })
+    setLastPreviewAttempt(`${id} via auto`)
     const result = await previewVoice({
       profile: voice,
       text,
@@ -160,7 +163,8 @@ export function VoicesScreen() {
       },
     })
     if (result.payload?.providerVoiceId) setLastProviderVoiceId(result.payload.providerVoiceId)
-    if (!result.ok && result.error) setVoiceStatus(result.error.toUpperCase())
+    setLastPreviewResult(result.ok ? `OK: ${result.mode}` : `FAILED: ${result.error ?? result.mode}`)
+    if (!result.ok && result.error) setVoiceStatus(`Playback failed: ${result.error}`)
     setTimeout(() => setPreviewId(null), 900)
   }
 
@@ -234,11 +238,22 @@ export function VoicesScreen() {
         capabilities={capabilities}
         banner={runtimeBanner}
         activeVoiceId={voiceId}
-        providerModel={getCachedBackendHealth().providerStatus?.model ?? "—"}
+        providerModel={getCachedBackendHealth().ttsStatus?.model ?? "—"}
         providerVoiceId={lastProviderVoiceId}
         selectedProfile={getVoiceProfile(voiceId)}
         playback={playback}
+        lastPreviewAttempt={lastPreviewAttempt}
+        lastPreviewResult={lastPreviewResult}
       />
+
+      <NeonPanel accent="orange" glow="soft" className="p-3">
+        <p className="ps-mono text-[10px] uppercase tracking-[0.28em] text-[#ff7a00]">
+          WHY DO VOICES SOUND THE SAME?
+        </p>
+        <p className="mt-1 text-[12px] leading-snug text-white/75 text-pretty">
+          Real different voices require provider TTS or OmniVoice. Android fallback may expose only one system voice, so pitch and rate changes are styling, not true separate timbres. Configure the backend provider to unlock real distinct voices.
+        </p>
+      </NeonPanel>
 
       <NeonPanel accent="cyan" glow="soft" className="p-3">
         <p className="ps-mono text-[10px] tracking-[0.3em] ps-text-cyan mb-2">
@@ -545,6 +560,7 @@ export function VoicesScreen() {
           voice={detailVoice}
           selected={detailVoice.id === voiceId}
           favorite={voiceFavoriteIds.includes(detailVoice.id)}
+          capabilities={capabilities}
           onClose={() => setDetailVoice(null)}
           onPreview={handlePreview}
           onApply={() => applyVoice(detailVoice.id)}
@@ -608,6 +624,7 @@ function VoiceDetailPanel({
   voice,
   selected,
   favorite,
+  capabilities,
   onClose,
   onPreview,
   onApply,
@@ -616,12 +633,15 @@ function VoiceDetailPanel({
   voice: VoiceProfile
   selected: boolean
   favorite: boolean
+  capabilities: VoiceRuntimeCapabilities
   onClose: () => void
   onPreview: (id: string) => void
   onApply: () => void
   onToggleFavorite: () => void
 }) {
   const provider = getProviderVoiceCapabilities(voice.id)
+  const runtimeTruth = getProfileTruthLabel(voice, capabilities)
+  const distinctness = getVoiceUniquenessCategory(voice, capabilities)
   const previewDisabled = voice.availability === "unavailable"
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/70 p-3 backdrop-blur-sm sm:items-center sm:justify-center">
@@ -652,7 +672,9 @@ function VoiceDetailPanel({
           <div className="rounded-lg bg-black/40 p-3" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
             <p className="ps-mono text-[9px] uppercase tracking-[0.22em] text-white/45">Availability</p>
             <p className="mt-1 ps-mono text-[11px] uppercase tracking-[0.18em] text-white/75">
-              {provider.providerReady ? `PROVIDER ${provider.providerVoiceId}` : availabilityLabel(voice.availability)}
+              {capabilities.currentPreviewMode === "provider-tts" && provider.providerReady
+                ? `PROVIDER ${provider.providerVoiceId}`
+                : runtimeTruth}
             </p>
           </div>
         </div>
@@ -660,11 +682,15 @@ function VoiceDetailPanel({
         <div className="mt-4 rounded-lg bg-black/40 p-3" style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
           <p className="ps-mono text-[9px] uppercase tracking-[0.24em] text-white/45">Uniqueness model</p>
           <p className="mt-1 text-xs text-white/70">
-            {provider.providerReady
-              ? "Provider Distinct Voice: this profile maps to a provider voice ID when backend TTS is configured."
-              : voice.availability === "profile-only"
-                ? "Profile-only / no unique engine timbre: style metadata changes phrasing, pitch, rate, and cadence only."
-                : "Styled Android TTS / browser preview: local engines may style pitch and rate; provider timbre is not active for this profile."}
+            {distinctness === "provider-distinct"
+              ? "Provider Distinct Voice: provider audio is active for this profile right now."
+              : voice.provider === "omnivoice" && capabilities.currentPreviewMode === "provider-tts"
+                ? "OmniVoice Custom: OmniVoice health is ready and this profile routes to real OmniVoice audio."
+                : capabilities.nativeAndroidTtsAvailable
+                  ? "Android shared fallback: profiles may sound identical on this device; pitch, rate, and cadence are styling only."
+                  : capabilities.browserSpeechSupported
+                    ? "Browser speech fallback: the browser voice is shared; pitch, rate, and cadence are styling only."
+                    : "Preview unavailable: no provider, Android TTS, or browser speech engine is ready."}
           </p>
         </div>
 
@@ -851,6 +877,8 @@ function RuntimeDiagnosticsPanel({
   providerVoiceId,
   selectedProfile,
   playback,
+  lastPreviewAttempt,
+  lastPreviewResult,
 }: {
   open: boolean
   onToggle: () => void
@@ -861,6 +889,8 @@ function RuntimeDiagnosticsPanel({
   providerVoiceId: string | null
   selectedProfile: VoiceProfile
   playback: VoicePlaybackSnapshot
+  lastPreviewAttempt: string
+  lastPreviewResult: string
 }) {
   const distinctness = getVoiceUniquenessCategory(selectedProfile, capabilities)
   return (
@@ -883,7 +913,9 @@ function RuntimeDiagnosticsPanel({
           <DiagRow label="Runtime mode" value={banner.mode.toUpperCase()} />
           <DiagRow label="Active preview path" value={capabilities.currentPreviewMode.toUpperCase()} />
           <DiagRow label="Active engine" value={capabilities.activeProvider.toUpperCase()} />
-          <DiagRow label="OpenAI configured" value={capabilities.openAiProviderAvailable ? "YES" : "NO"} />
+          <DiagRow label="OpenAI backend URL configured" value={capabilities.openAiBackendConfigured ? "YES" : "NO"} />
+          <DiagRow label="OpenAI backend reachable" value={capabilities.openAiBackendReachable ? "YES" : "NO"} />
+          <DiagRow label="OpenAI provider configured" value={capabilities.openAiProviderAvailable ? "YES" : "NO"} />
           <DiagRow label="OmniVoice backend configured" value={capabilities.omnivoiceBackendConfigured ? "YES" : "NO"} />
           <DiagRow label="OmniVoice backend reachable" value={capabilities.omnivoiceBackendReachable ? "YES" : "NO"} />
           <DiagRow label="OmniVoice generation ready" value={capabilities.omnivoiceProviderAvailable ? "YES" : "NO"} />
@@ -902,6 +934,8 @@ function RuntimeDiagnosticsPanel({
           <DiagRow label="Distinct realizable" value={`${banner.distinctRealizableCount} / ${banner.totalProfiles}`} />
           <DiagRow label="Last playback state" value={playback.state.toUpperCase()} />
           <DiagRow label="Last playback source" value={(playback.source ?? "—").toString().toUpperCase()} />
+          <DiagRow label="Last preview attempted" value={lastPreviewAttempt} />
+          <DiagRow label="Last preview result" value={lastPreviewResult} />
           <div className="sm:col-span-2">
             <DiagRow label="Last status message" value={playback.message || "—"} />
           </div>

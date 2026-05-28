@@ -18,6 +18,18 @@ const DEFAULT_PARAMS: VoiceParams = {
   emotion: 60,
 }
 
+export async function GET() {
+  const providerConfigured = Boolean(process.env.OPENAI_API_KEY)
+  return NextResponse.json({
+    provider: "openai",
+    providerConfigured,
+    model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
+    message: providerConfigured
+      ? "OpenAI TTS provider configured server-side."
+      : "OPENAI_API_KEY is not configured for provider TTS.",
+  })
+}
+
 export async function POST(request: Request) {
   let body: TtsRouteBody
   try {

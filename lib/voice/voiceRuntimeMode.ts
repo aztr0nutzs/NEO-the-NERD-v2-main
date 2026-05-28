@@ -59,7 +59,7 @@ const NATIVE_DISTINCT_COUNT = VOICE_PROFILES.filter(
 export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): VoiceRuntimeBanner {
   const total = VOICE_PROFILES.length
 
-  if (capabilities.providerTtsAvailable) {
+  if (capabilities.anyProviderAvailable) {
     return {
       mode: "provider-active",
       tone: "ok",
@@ -78,7 +78,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
       return {
         mode: "android-collapsed",
         tone: "critical",
-      headline: "FALLBACK · PROFILES MAY SOUND IDENTICAL",
+        headline: "ANDROID TTS FALLBACK · ONE DEVICE VOICE AVAILABLE",
         detail: capabilities.remoteBackendConfigured
           ? "Backend is configured but provider TTS is unreachable, and this device exposes only one usable Android engine voice. Every profile is routed through that single voice with pitch/rate/style adjustments on top."
           : "Provider TTS is not configured and this device exposes only one usable Android engine voice. Every profile is routed through that single voice with pitch/rate/style adjustments on top.",
@@ -97,7 +97,7 @@ export function getVoiceRuntimeMode(capabilities: VoiceRuntimeCapabilities): Voi
     return {
       mode: "android-multi",
       tone: "warn",
-      headline: "FALLBACK · PROFILES MAY SOUND IDENTICAL",
+      headline: `ANDROID TTS FALLBACK · ${voiceCount} DEVICE VOICES AVAILABLE`,
       detail: capabilities.remoteBackendConfigured
         ? `Backend is configured but provider TTS is unreachable. Android engine exposes ${voiceCount} voices — only ~${reachable} of ${total} profiles can be slotted to a distinct device voice; others are styled variants.`
         : `Provider backend is not configured. Android engine exposes ${voiceCount} voices — only ~${reachable} of ${total} profiles can be slotted to a distinct device voice; others are styled variants.`,

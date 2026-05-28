@@ -32,7 +32,7 @@ export function canUseBrowserSpeechPreview() {
 }
 
 export async function playVoicePreview(request: VoicePreviewRequest) {
-  const result = await previewVoice({ ...request, mode: "browser-speech" })
+  const result = await previewVoice({ ...request, mode: "auto" })
   return result.ok
 }
 

@@ -39,7 +39,11 @@ export interface UniquenessSummary {
 
 function resolveEngine(profile: VoiceProfile, capabilities: VoiceRuntimeCapabilities): ResolvedEngine {
   if (profile.availability === "unavailable") return "none"
-  if (profile.availability === "provider-ready" && capabilities.providerTtsAvailable) return "provider"
+  if (
+    profile.availability === "provider-ready" &&
+    ((profile.provider === "omnivoice" && capabilities.omnivoiceProviderAvailable) ||
+      (profile.provider === "openai" && capabilities.openAiProviderAvailable))
+  ) return "provider"
   if (capabilities.nativeAndroidTtsAvailable) return "native-android"
   if (capabilities.browserSpeechSupported) return "browser-speech"
   return "none"

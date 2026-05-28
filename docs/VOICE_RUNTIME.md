@@ -49,8 +49,11 @@ interface VoiceRuntimeCapabilities {
 }
 ```
 
-`getVoiceRuntimeCapabilities(profile?)` returns the async snapshot (probes
-backend health via the Phase 1 transport's 30 s cache).
+`getVoiceRuntimeCapabilities(profile?)` returns the async snapshot. OpenAI TTS
+availability is based on a real backend probe of `GET /api/tts`, not on env
+guessing in the client. OmniVoice availability is based on `GET /health` from
+the configured OmniVoice service. Android TTS availability is based on the
+Capacitor `NeoTts` plugin reporting ready.
 `getCachedVoiceRuntimeCapabilities(profile?)` is a cheap synchronous read for
 first paint.
 
@@ -61,25 +64,28 @@ first paint.
 ```
 1. If profile.availability === "unavailable"
        → onStateChange("error"); return { mode:"unavailable", ok:false }
-2. If mode === "provider-tts", OR (mode === "auto" AND currentPreviewMode === "provider-tts"):
+2. If the selected profile is OmniVoice and OmniVoice /health is ready:
+       POST <NEXT_PUBLIC_OMNIVOICE_BASE_URL>/tts and play the returned audio.
+       Preview only succeeds after the generated audio starts.
+3. If mode === "provider-tts", OR (mode === "auto" AND currentPreviewMode === "provider-tts"):
        a. If !providerTtsAvailable
-              → return { mode:"unavailable", ok:false, error:"…not configured." }
+               → return { mode:"unavailable", ok:false, error:"…not configured." }
        b. Stop any browser speech utterance, signal "preparing",
           POST /api/tts via Phase 1 transport.
               - On payload         → playProviderAudio() (manages blob URL),
                                       return { mode:"provider-tts", ok:true, payload }
               - On error           → return { mode:"provider-tts", ok:false, error }
-3. If mode === "native-android", OR (mode === "auto" AND currentPreviewMode === "native-android"):
+4. If mode === "native-android", OR (mode === "auto" AND currentPreviewMode === "native-android"):
        a. If Android TextToSpeech is not ready
               → return { mode:"unavailable", ok:false, error:"…not ready." }
        b. Stop browser/provider playback, select a safe local Android engine voice if the engine reports one,
           then speak through the Capacitor `NeoTts` plugin with styled text, rate, pitch, and volume.
-4. If mode === "browser-speech", OR (mode === "auto" AND currentPreviewMode === "browser-speech"):
+5. If mode === "browser-speech", OR (mode === "auto" AND currentPreviewMode === "browser-speech"):
        a. If !browserSpeechSupported
               → return { mode:"unavailable", ok:false, error:"…not supported." }
        b. teardownProviderAudio() (revoke any active blob URL)
        c. speakWithBrowserSpeech(...); return { mode:"browser-speech", ok }
-5. Otherwise return { mode:"unavailable", ok:false, error:"Neither path available." }
+6. Otherwise return { mode:"unavailable", ok:false, error:"No provider, Android TTS, or browser speech engine is available." }
 ```
 
 `stopVoicePreview()` cancels both the browser speech utterance and the managed
@@ -161,6 +167,8 @@ via the Filesystem plugin and does not create a blob URL.
 | No browser speech support | `BROWSER PREVIEW UNAVAILABLE` truth label; status "BROWSER SPEECH UNAVAILABLE IN THIS WEBVIEW"; preview button still clickable for provider profiles when provider is available. |
 | Provider unavailable (no backend URL on Capacitor) | `GENERATE PROVIDER AUDIO` button **disabled** with label `PROVIDER AUDIO UNAVAILABLE`; status: "REMOTE BACKEND NOT CONFIGURED // SET NEXT_PUBLIC_NEO_BACKEND_BASE_URL". |
 | Provider configured but unreachable (network error / 5xx) | Status: error message from transport (uppercased). Playback state is `error`. |
+| Provider payload cannot play | Status: `Playback failed: <reason>`. Preview returns `ok:false`; the UI must not claim provider voice playback. |
+| Android fallback active with one or zero native voices | Status/banner: `ANDROID TTS FALLBACK · ONE DEVICE VOICE AVAILABLE`; cards label shared fallback and warn profiles may sound identical. |
 | Profile.availability === "unavailable" | Status: "VOICE PREVIEW UNAVAILABLE". Preview no-ops. |
 | Stop preview successful | `stopVoicePreview()` cancels browser utterance + provider audio, revokes URL. No status text is needed — the player buttons reflect the idle state. |
 
@@ -178,6 +186,23 @@ read from the same `BackendHealthSnapshot`.
 1. Deploy the Next.js app with `OPENAI_API_KEY` set.
 2. For the Android build, set
    `NEXT_PUBLIC_NEO_BACKEND_BASE_URL=https://your-backend.example.com`.
+3. Rebuild after env changes: `npm run build && npx cap sync android`.
+
+## OmniVoice Android URL rules
+
+- OmniVoice runs separately from the APK in `voice-server/omnivoice/`.
+- Android emulator to host PC: `NEXT_PUBLIC_OMNIVOICE_BASE_URL=http://10.0.2.2:8011`.
+- Physical phone to host PC: use the PC LAN IP, for example `http://192.168.1.50:8011`.
+- Do not use `127.0.0.1` on a phone; that points at the phone itself.
+- `GET /health` must return ready and `POST /tts` must return a real audio payload before the app labels OmniVoice active.
+
+## Debug checklist
+
+- Open Voices -> Voice Runtime Diagnostics.
+- Provider path is real only when `OpenAI backend reachable`, `OpenAI provider configured`, and the preview status says `Playing OpenAI provider voice: <providerVoiceId>`.
+- OmniVoice path is real only when `OmniVoice backend reachable`, `OmniVoice generation ready`, and the preview status says `Playing OmniVoice profile: <voiceId>`.
+- Android fallback is active when status says `Playing Android device TTS fallback: <nativeVoiceName>`. If native voice count is `0` or `1`, profiles may sound identical.
+- Capture logs with Android Studio Logcat or `adb logcat | findstr /i "NeoTtsPlugin voice-preview"`.
 3. `npm run build && npx cap sync android` — the env var is baked into the
    client JS.
 4. CORS on the backend must allow the Capacitor origin (`capacitor://localhost`).

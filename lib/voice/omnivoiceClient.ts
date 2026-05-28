@@ -213,7 +213,7 @@ export async function generateOmniVoiceTts(request: OmniVoiceRequest): Promise<O
   )
   const payload = await response.json().catch(() => null)
   if (!response.ok) {
-    throw new Error(payload?.error ?? `OmniVoice request failed (${response.status}).`)
+    throw new Error(payload?.error ?? payload?.detail ?? `OmniVoice request failed (${response.status}).`)
   }
   if (!payload?.audioBase64 || !payload?.fileName) {
     throw new Error("OmniVoice response missing required audio fields.")

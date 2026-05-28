@@ -32,6 +32,8 @@ export interface BackendHealthSnapshot {
   checkedAt: number;
   /** Provider status as reported by GET /api/assistant/chat, when reachable. */
   providerStatus: ProviderStatusSnapshot | null;
+  /** TTS provider status as reported by GET /api/tts, when reachable. */
+  ttsStatus: ProviderStatusSnapshot | null;
   /** Last error message, when state === "unreachable". */
   error: string | null;
 }
@@ -42,6 +44,7 @@ const INITIAL_SNAPSHOT: BackendHealthSnapshot = {
   baseUrl: null,
   checkedAt: 0,
   providerStatus: null,
+  ttsStatus: null,
   error: null,
 };
 
@@ -80,6 +83,7 @@ export async function checkBackendAvailability(force = false): Promise<BackendHe
         baseUrl: config.baseUrl,
         checkedAt,
         providerStatus: null,
+        ttsStatus: null,
         error: config.reason,
       };
       return cached;
@@ -93,6 +97,7 @@ export async function checkBackendAvailability(force = false): Promise<BackendHe
         baseUrl: config.baseUrl,
         checkedAt,
         providerStatus: null,
+        ttsStatus: null,
         error: "No URL resolved for backend health probe.",
       };
       return cached;
@@ -107,11 +112,13 @@ export async function checkBackendAvailability(force = false): Promise<BackendHe
           baseUrl: config.baseUrl,
           checkedAt,
           providerStatus: null,
+          ttsStatus: null,
           error: `Backend health probe returned HTTP ${response.status}.`,
         };
         return cached;
       }
       let providerStatus: ProviderStatusSnapshot | null = null;
+      let ttsStatus: ProviderStatusSnapshot | null = null;
       try {
         const parsed = (await response.json()) as Partial<ProviderStatusSnapshot>;
         if (parsed && typeof parsed === "object" && typeof parsed.providerConfigured === "boolean") {
@@ -126,16 +133,52 @@ export async function checkBackendAvailability(force = false): Promise<BackendHe
         providerStatus = null;
       }
 
+      const ttsUrl = resolveBackendUrl(config, "/api/tts");
+      if (ttsUrl) {
+        try {
+          const ttsResponse = await fetchWithTimeout(ttsUrl, HEALTH_TIMEOUT_MS);
+          const parsed = (await ttsResponse.json()) as Partial<ProviderStatusSnapshot>;
+          if (
+            ttsResponse.ok &&
+            parsed &&
+            typeof parsed === "object" &&
+            typeof parsed.providerConfigured === "boolean"
+          ) {
+            ttsStatus = {
+              provider: String(parsed.provider ?? "unknown"),
+              providerConfigured: parsed.providerConfigured,
+              model: String(parsed.model ?? ""),
+              message: String(parsed.message ?? ""),
+            };
+          } else if (!ttsResponse.ok) {
+            ttsStatus = {
+              provider: "openai",
+              providerConfigured: false,
+              model: "",
+              message: `TTS health probe returned HTTP ${ttsResponse.status}.`,
+            };
+          }
+        } catch (error) {
+          ttsStatus = {
+            provider: "openai",
+            providerConfigured: false,
+            model: "",
+            message: error instanceof Error ? error.message : "TTS health probe failed.",
+          };
+        }
+      }
+
       cached = {
-        state: providerStatus?.providerConfigured
+        state: ttsStatus?.providerConfigured || providerStatus?.providerConfigured
           ? "available"
-          : providerStatus
+          : providerStatus || ttsStatus
             ? "available-no-provider"
             : "available",
         mode: config.mode,
         baseUrl: config.baseUrl,
         checkedAt,
         providerStatus,
+        ttsStatus,
         error: null,
       };
       return cached;
@@ -146,6 +189,7 @@ export async function checkBackendAvailability(force = false): Promise<BackendHe
         baseUrl: config.baseUrl,
         checkedAt,
         providerStatus: null,
+        ttsStatus: null,
         error: error instanceof Error ? error.message : "Backend probe failed.",
       };
       return cached;

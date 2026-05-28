@@ -7,7 +7,7 @@ import { availabilityLabel } from "@/lib/voice/voicePresets"
 import type { VoiceRuntimeCapabilities } from "@/lib/voice/voice-runtime"
 import { getVoiceUniquenessCategory } from "@/lib/voice/voiceUniqueness"
 
-type AuthoredBadge = "UNIQUE TIMBRE" | "STYLED VARIANT" | "DEVICE VOICE" | "PROFILE ONLY" | "UNAVAILABLE"
+type AuthoredBadge = "UNIQUE TIMBRE" | "STYLED VARIANT" | "DEVICE VOICE" | "ANDROID SHARED" | "PROFILE ONLY" | "UNAVAILABLE"
 type RuntimeIndicator = "LIVE" | "FALLBACK" | "PARTIAL" | "UNAVAILABLE"
 
 function authoredBadge(voice: VoiceProfile): AuthoredBadge {
@@ -24,6 +24,7 @@ const BADGE_COLOR: Record<AuthoredBadge, string> = {
   "UNIQUE TIMBRE": "#39ff14",
   "STYLED VARIANT": "#00f0ff",
   "DEVICE VOICE": "#b829ff",
+  "ANDROID SHARED": "#ff7a00",
   "PROFILE ONLY": "#ff7a00",
   UNAVAILABLE: "#ff2d9c",
 }
@@ -43,7 +44,7 @@ function runtimeIndicator(voice: VoiceProfile, capabilities?: VoiceRuntimeCapabi
   // Special case: Android runtime collapsed to a single device voice — every
   // profile shares the same underlying timbre regardless of authored intent.
   if (
-    !capabilities.providerTtsAvailable &&
+    !capabilities.anyProviderAvailable &&
     capabilities.nativeAndroidTtsAvailable &&
     capabilities.nativeAndroidVoiceCount <= 1
   ) {
@@ -93,7 +94,10 @@ function classifyRuntimeTruth(
   if (cat === "unavailable") {
     return { category: "unavailable", label: "UNAVAILABLE IN CURRENT RUNTIME", color: "#ff2d9c" }
   }
-  if (capabilities.providerTtsAvailable) {
+  if (
+    (voice.provider === "omnivoice" && capabilities.omnivoiceProviderAvailable) ||
+    (voice.provider === "openai" && capabilities.openAiProviderAvailable)
+  ) {
     if (cat === "provider-distinct") {
       return { category: "provider-distinct", label: "PROVIDER DISTINCT VOICE", color: "#39ff14" }
     }
@@ -190,7 +194,12 @@ export function VoiceCard({
             PREVIEW: {availabilityLabel(voice.availability)}
           </p>
           {(() => {
-            const badge = authoredBadge(voice)
+            const collapsedAndroid =
+              capabilities &&
+              !capabilities.anyProviderAvailable &&
+              capabilities.nativeAndroidTtsAvailable &&
+              capabilities.nativeAndroidVoiceCount <= 1
+            const badge = collapsedAndroid ? "ANDROID SHARED" : authoredBadge(voice)
             const badgeColor = BADGE_COLOR[badge]
             const indicator = runtimeIndicator(voice, capabilities)
             const indicatorColor = indicator ? INDICATOR_COLOR[indicator] : null
