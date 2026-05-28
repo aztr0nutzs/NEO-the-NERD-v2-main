@@ -962,6 +962,13 @@ export function NetworkDiscoveryFeature() {
         lastIssue: null,
       }));
       await networkAdapter.startNetworkScan(selectedMode);
+      const immediateScanResult = networkAdapter.getLastScanResult?.() ?? null;
+      if (!networkAdapter.getIsScanning() && immediateScanResult?.status === "failed") {
+        throw new Error(
+          immediateScanResult.failureReason ??
+            "Native local discovery did not return a result."
+        );
+      }
       const status = await networkAdapter.getNetworkStatus();
       const currentAdapterStatus = await networkAdapter.getAdapterStatus();
       setNetworkStatus({
