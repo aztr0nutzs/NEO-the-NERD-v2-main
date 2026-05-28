@@ -165,6 +165,7 @@ export function VoicesScreen() {
     if (result.payload?.providerVoiceId) setLastProviderVoiceId(result.payload.providerVoiceId)
     setLastPreviewResult(result.ok ? `OK: ${result.mode}` : `FAILED: ${result.error ?? result.mode}`)
     if (!result.ok && result.error) setVoiceStatus(`Playback failed: ${result.error}`)
+    getVoiceRuntimeCapabilities(voice).then(setCapabilities).catch(() => undefined)
     setTimeout(() => setPreviewId(null), 900)
   }
 

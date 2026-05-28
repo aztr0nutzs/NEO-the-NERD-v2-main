@@ -28,9 +28,11 @@ interface DeviceListPanelProps {
   selectedDeviceId: string | null;
   onSelectDevice: (device: DiscoveredDevice) => void;
   onVisibleDeviceIdsChange?: (deviceIds: string[]) => void;
+  activeFilter?: DeviceListFilterType;
+  onFilterChange?: (filter: DeviceListFilterType) => void;
 }
 
-type FilterType =
+export type DeviceListFilterType =
   | "all"
   | "router"
   | "online"
@@ -45,7 +47,7 @@ type FilterType =
   | "needs-review";
 type SortType = "ip" | "name" | "deviceType" | "lastSeen" | "confidence" | "status" | "vendor";
 
-const FILTERS: { key: FilterType; label: string }[] = [
+const FILTERS: { key: DeviceListFilterType; label: string }[] = [
   { key: "all", label: "ALL" },
   { key: "router", label: "ROUTER" },
   { key: "online", label: "ONLINE" },
@@ -116,10 +118,17 @@ export function DeviceListPanel({
   selectedDeviceId,
   onSelectDevice,
   onVisibleDeviceIdsChange,
+  activeFilter: controlledActiveFilter,
+  onFilterChange,
 }: DeviceListPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [uncontrolledActiveFilter, setUncontrolledActiveFilter] = useState<DeviceListFilterType>("all");
   const [sortType, setSortType] = useState<SortType>("ip");
+  const activeFilter = controlledActiveFilter ?? uncontrolledActiveFilter;
+  const setActiveFilter = (filter: DeviceListFilterType) => {
+    setUncontrolledActiveFilter(filter);
+    onFilterChange?.(filter);
+  };
 
   const filteredDevices = useMemo(() => {
     const confidenceRank = { high: 0, medium: 1, low: 2 };
@@ -218,7 +227,7 @@ export function DeviceListPanel({
     onVisibleDeviceIdsChange?.(filteredDevices.map((device) => device.id));
   }, [filteredDevices, onVisibleDeviceIdsChange]);
 
-  const getFilterCount = (filter: FilterType): number => {
+  const getFilterCount = (filter: DeviceListFilterType): number => {
     switch (filter) {
       case "all":
         return devices.length;

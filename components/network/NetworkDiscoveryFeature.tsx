@@ -14,7 +14,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import { Capacitor } from "@capacitor/core";
 import {
@@ -35,8 +35,9 @@ import { useApp } from "@/lib/store";
 
 import { NetworkOverviewPanel } from "./NetworkOverviewPanel";
 import { NetworkScanPanel } from "./NetworkScanPanel";
-import { DeviceListPanel } from "./DeviceListPanel";
+import { DeviceListPanel, type DeviceListFilterType } from "./DeviceListPanel";
 import { DeviceDetailPanel } from "./DeviceDetailPanel";
+import { NetworkReactorCore } from "./NetworkReactorCore";
 import { RouterControlPanel } from "./RouterControlPanel";
 import { SecurityInsightsPanel } from "./SecurityInsightsPanel";
 import { ScanHistoryPanel } from "./ScanHistoryPanel";
@@ -264,6 +265,7 @@ export function NetworkDiscoveryFeature() {
     setNetworkAssistantSnapshot,
     sendMessage,
     setScreen,
+    settings: appSettings,
   } = useApp();
   // Core state
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus | null>(null);
@@ -299,6 +301,11 @@ export function NetworkDiscoveryFeature() {
   const [diagnosticLocalContext, setDiagnosticLocalContext] = useState<NativeLocalNetworkContext | null>(null);
   const [diagnosticPermissionStatus, setDiagnosticPermissionStatus] = useState<NativeNetworkPermissionStatus | null>(null);
   const [diagnosticTopologyGraph, setDiagnosticTopologyGraph] = useState<NetworkTopologyGraph | null>(null);
+  const [deviceListFilter, setDeviceListFilter] = useState<DeviceListFilterType>("all");
+  const [clipboardAvailable, setClipboardAvailable] = useState(false);
+  const mapSectionRef = useRef<HTMLDivElement | null>(null);
+  const devicesSectionRef = useRef<HTMLDivElement | null>(null);
+  const diagnosticsSectionRef = useRef<HTMLDivElement | null>(null);
   const previousDevicesRef = useRef<DiscoveredDevice[]>([]);
   const identityRecordsRef = useRef(networkDeviceIdentities);
   const networkEventsRef = useRef(networkEvents);
@@ -336,6 +343,10 @@ export function NetworkDiscoveryFeature() {
   useEffect(() => {
     persistedNetworkSettingsRef.current = persistedNetworkSettings;
   }, [persistedNetworkSettings]);
+
+  useEffect(() => {
+    setClipboardAvailable(Boolean(navigator.clipboard?.writeText));
+  }, []);
 
   const appendEvents = useCallback(
     (eventsToAdd: Parameters<typeof appendNetworkEvents>[1]) => {
@@ -1289,6 +1300,84 @@ export function NetworkDiscoveryFeature() {
     [sendMessage, setScreen]
   );
 
+  const scrollToSection = useCallback((ref: RefObject<HTMLDivElement | null>) => {
+    window.setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }, []);
+
+  const handleOpenDevicesFromReactor = useCallback(() => {
+    setActiveTab("devices");
+    scrollToSection(devicesSectionRef);
+  }, [scrollToSection]);
+
+  const handleOpenMapFromReactor = useCallback(() => {
+    setActiveTab("map");
+    scrollToSection(mapSectionRef);
+  }, [scrollToSection]);
+
+  const handleOpenDiagnosticsFromReactor = useCallback(() => {
+    scrollToSection(diagnosticsSectionRef);
+  }, [scrollToSection]);
+
+  const handleFilterDevicesFromReactor = useCallback(
+    (filter: "all" | "unknown" | "online" | "router" | "needs-review") => {
+      setDeviceListFilter(filter);
+      setActiveTab("devices");
+      scrollToSection(devicesSectionRef);
+    },
+    [scrollToSection]
+  );
+
+  const handleOpenGatewayFromReactor = useCallback(() => {
+    const gatewayDevice = devices.find(
+      (device) =>
+        device.deviceType === "router" ||
+        device.discoverySources.includes("gateway") ||
+        device.ipAddress === networkStatus?.gatewayIp ||
+        device.ipAddress === routerStatus?.gatewayIp
+    );
+    if (!gatewayDevice) {
+      setRobotMessage("Gateway device is not present in the current discovered device list.");
+      setTimeout(() => setRobotMessage(null), 4500);
+      return;
+    }
+    handleSelectDevice(gatewayDevice);
+    setActiveTab("devices");
+    scrollToSection(devicesSectionRef);
+  }, [devices, handleSelectDevice, networkStatus?.gatewayIp, routerStatus?.gatewayIp, scrollToSection]);
+
+  const handleCopyScanSummary = useCallback(() => {
+    if (!navigator.clipboard?.writeText || !networkStatus) return;
+    const coverage = lastScanCompletion?.coverage;
+    const summary = [
+      "NEO Network Scan Summary",
+      `Source: ${settingsRef.current?.demoMode ? "DEMO" : adapterStatus?.label ?? "UNKNOWN"}`,
+      `SSID: ${networkStatus.networkName}`,
+      `Gateway: ${networkStatus.gatewayIp}`,
+      `Local IP: ${networkStatus.localIp}`,
+      `Subnet: ${networkStatus.subnet}`,
+      `Scan state: ${networkStatus.scanState}`,
+      `Selected mode: ${selectedMode}`,
+      `Devices: ${devices.length}`,
+      `Online: ${devices.filter((device) => device.status === "online").length}`,
+      `Unknown: ${devices.filter((device) => device.deviceType === "unknown").length}`,
+      coverage ? `Coverage: ${coverage.scannedHosts}/${coverage.subnetTotalHosts} hosts, ${coverage.discoveredHosts} discovered` : "Coverage: not available",
+      `Last error: ${lastScanCompletion?.failureReason ?? "none"}`,
+      "Truth: topology is estimated unless labeled LIVE; router control requires connector.",
+    ].join("\n");
+    navigator.clipboard.writeText(summary).then(
+      () => {
+        setRobotMessage("Network scan summary copied.");
+        setTimeout(() => setRobotMessage(null), 3000);
+      },
+      () => {
+        setRobotMessage("Clipboard copy failed in this runtime.");
+        setTimeout(() => setRobotMessage(null), 3500);
+      }
+    );
+  }, [adapterStatus?.label, devices, lastScanCompletion, networkStatus, selectedMode]);
+
   const handleRouterAction = useCallback(
     async (action: "refresh" | "reboot" | "toggleGuest" | "toggleQoS", value?: boolean) => {
       try {
@@ -1601,6 +1690,38 @@ export function NetworkDiscoveryFeature() {
           </div>
         </header>
 
+        <div className="mb-4">
+          <NetworkReactorCore
+            status={networkStatus}
+            devices={devices}
+            routerStatus={routerStatus}
+            adapterStatus={effectiveAdapterStatus}
+            localContext={diagnosticLocalContext}
+            permissionStatus={diagnosticPermissionStatus}
+            permissionDenied={networkPermissionDenied}
+            isRequestingPermissions={requestingNetworkPermissions}
+            isDemoMode={isDemoMode}
+            selectedMode={selectedMode}
+            scanProgress={scanProgress}
+            lastScanResult={lastScanCompletion}
+            lastScanDelta={lastNetworkScanDelta}
+            topologyGraph={diagnosticTopologyGraph}
+            reducedMotion={appSettings.reducedMotion}
+            clipboardAvailable={clipboardAvailable}
+            onModeChange={setSelectedMode}
+            onStartScan={handleStartScan}
+            onStopScan={handleStopScan}
+            onRequestPermissions={handleRequestNetworkPermissions}
+            onRescanLastMode={handleStartScan}
+            onOpenDevices={handleOpenDevicesFromReactor}
+            onOpenMap={handleOpenMapFromReactor}
+            onOpenDiagnostics={handleOpenDiagnosticsFromReactor}
+            onOpenGateway={handleOpenGatewayFromReactor}
+            onFilterDevices={handleFilterDevicesFromReactor}
+            onCopyScanSummary={handleCopyScanSummary}
+          />
+        </div>
+
         <section className="mb-4 grid items-start gap-3 xl:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.45fr)_minmax(300px,0.9fr)]">
           <aside className="space-y-3 xl:sticky xl:top-4">
             <div className={`rounded-lg border p-3 backdrop-blur-sm ${readinessColor}`}>
@@ -1701,7 +1822,7 @@ export function NetworkDiscoveryFeature() {
           </aside>
         </section>
 
-        <section className="mb-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section ref={diagnosticsSectionRef} className="mb-4 scroll-mt-24 grid gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
             <NetworkDiagnosticsPanel
               platform={diagnosticPlatform}
@@ -1754,7 +1875,7 @@ export function NetworkDiscoveryFeature() {
           </TabsList>
 
           {/* Map Tab */}
-          <TabsContent value="map" className="space-y-4">
+          <TabsContent value="map" ref={mapSectionRef} className="scroll-mt-24 space-y-4">
             {activeTab === "map" && (
               <NetworkMap3D
                 devices={devices}
@@ -1809,7 +1930,7 @@ export function NetworkDiscoveryFeature() {
           </TabsContent>
 
           {/* Devices Tab */}
-          <TabsContent value="devices" className="space-y-4">
+          <TabsContent value="devices" ref={devicesSectionRef} className="scroll-mt-24 space-y-4">
             <div className="grid gap-4 lg:grid-cols-2">
               <div className="h-[600px]">
                 <DeviceListPanel
@@ -1817,6 +1938,8 @@ export function NetworkDiscoveryFeature() {
                   selectedDeviceId={selectedDevice?.id ?? null}
                   onSelectDevice={handleSelectDevice}
                   onVisibleDeviceIdsChange={handleVisibleDeviceIdsChange}
+                  activeFilter={deviceListFilter}
+                  onFilterChange={setDeviceListFilter}
                 />
               </div>
               <div

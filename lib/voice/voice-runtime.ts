@@ -145,6 +145,47 @@ export interface VoicePreviewResult {
   fallbackReason?: string | null
 }
 
+const PROVIDER_PROOF_TTL_MS = 5 * 60_000
+
+let lastOpenAiProviderPlaybackSuccessAt = 0
+let lastOmniVoicePlaybackSuccessAt = 0
+let lastOpenAiProviderFailure: { message: string; at: number } | null = null
+let lastOmniVoiceProviderFailure: { message: string; at: number } | null = null
+
+function freshTimestamp(value: number) {
+  return value > 0 && Date.now() - value < PROVIDER_PROOF_TTL_MS
+}
+
+function freshProviderFailure(provider: "openai" | "omnivoice") {
+  const failure = provider === "openai" ? lastOpenAiProviderFailure : lastOmniVoiceProviderFailure
+  return failure && Date.now() - failure.at < PROVIDER_PROOF_TTL_MS ? failure : null
+}
+
+function markProviderPlaybackSuccess(provider: "openai" | "omnivoice") {
+  if (provider === "openai") {
+    lastOpenAiProviderPlaybackSuccessAt = Date.now()
+    lastOpenAiProviderFailure = null
+    return
+  }
+  lastOmniVoicePlaybackSuccessAt = Date.now()
+  lastOmniVoiceProviderFailure = null
+}
+
+function markProviderPlaybackFailure(provider: "openai" | "omnivoice", message: string) {
+  const failure = { message, at: Date.now() }
+  if (provider === "openai") {
+    lastOpenAiProviderFailure = failure
+    lastOpenAiProviderPlaybackSuccessAt = 0
+    return
+  }
+  lastOmniVoiceProviderFailure = failure
+  lastOmniVoicePlaybackSuccessAt = 0
+}
+
+function providerFailureMessage(provider: "openai" | "omnivoice") {
+  return freshProviderFailure(provider)?.message ?? null
+}
+
 function logVoicePreview(
   phase: "attempt" | "success" | "failure" | "fallback",
   details: Record<string, unknown>,
@@ -207,15 +248,26 @@ export async function getVoiceRuntimeCapabilities(
       health &&
       (health.state === "available" || health.state === "available-no-provider"),
   )
-  const openAiProviderAvailable = Boolean(
+  const openAiRuntimeReachable = Boolean(
     remoteBackendConfigured &&
       health?.state === "available" &&
       health.ttsStatus?.providerConfigured,
   )
+  const openAiFailure = providerFailureMessage("openai")
+  const openAiProviderAvailable = Boolean(
+    openAiRuntimeReachable &&
+      !openAiFailure &&
+      freshTimestamp(lastOpenAiProviderPlaybackSuccessAt),
+  )
   const openaiTtsAvailable = openAiProviderAvailable
   const omnivoiceProviderConfigured = omniHealth.configured
   const omnivoiceProviderReachable = omniHealth.reachable
-  const omnivoiceProviderAvailable = omniHealth.generationReady
+  const omniFailure = providerFailureMessage("omnivoice")
+  const omnivoiceProviderAvailable = Boolean(
+    omniHealth.generationReady &&
+      !omniFailure &&
+      freshTimestamp(lastOmniVoicePlaybackSuccessAt),
+  )
   const omnivoiceTtsAvailable = omnivoiceProviderAvailable
   const omnivoiceBackendConfigured = omnivoiceProviderConfigured
   const omnivoiceBackendReachable = omnivoiceProviderReachable
@@ -233,10 +285,10 @@ export async function getVoiceRuntimeCapabilities(
   let selectedProvider: TtsProviderType = "unavailable"
   let fallbackReason: string | null = null
   if (profile) {
-    if (profileCanUseOmniVoice(profile) && omnivoiceProviderAvailable) {
+    if (profileCanUseOmniVoice(profile) && omniHealth.generationReady && !omniFailure) {
       currentPreviewMode = "provider-tts"
       selectedProvider = "omnivoice"
-    } else if (profileCanUseProvider(profile) && openAiProviderAvailable) {
+    } else if (profileCanUseProvider(profile) && openAiRuntimeReachable && !openAiFailure) {
       currentPreviewMode = "provider-tts"
       selectedProvider = "openai"
     } else if (nativeAndroidTtsAvailable && profile.availability !== "unavailable") {
@@ -259,12 +311,14 @@ export async function getVoiceRuntimeCapabilities(
         omnivoiceBackendConfigured,
         omnivoiceTtsAvailable,
         remoteBackendConfigured,
+        openAiFailure,
+        omniFailure,
       })
     }
-  } else if (omnivoiceProviderAvailable) {
+  } else if (omniHealth.generationReady && !omniFailure) {
     currentPreviewMode = "provider-tts"
     selectedProvider = "omnivoice"
-  } else if (openAiProviderAvailable) {
+  } else if (openAiRuntimeReachable && !openAiFailure) {
     currentPreviewMode = "provider-tts"
     selectedProvider = "openai"
   } else if (nativeAndroidTtsAvailable) {
@@ -300,6 +354,16 @@ export async function getVoiceRuntimeCapabilities(
   }
 }
 
+function profileCanAttemptProvider(profile: VoiceProfile, capabilities: VoiceRuntimeCapabilities) {
+  if (profileCanUseOmniVoice(profile)) {
+    return capabilities.omnivoiceProviderConfigured && capabilities.omnivoiceProviderReachable
+  }
+  if (profileCanUseProvider(profile)) {
+    return capabilities.remoteBackendConfigured && capabilities.openAiBackendReachable
+  }
+  return false
+}
+
 export function getCachedVoiceRuntimeCapabilities(
   profile?: VoiceProfile,
 ): VoiceRuntimeCapabilities {
@@ -315,16 +379,27 @@ export function getCachedVoiceRuntimeCapabilities(
     remoteBackendConfigured &&
       (health.state === "available" || health.state === "available-no-provider"),
   )
-  const openAiProviderAvailable = Boolean(
+  const openAiRuntimeReachable = Boolean(
     remoteBackendConfigured &&
       health.state === "available" &&
       health.ttsStatus?.providerConfigured,
+  )
+  const openAiFailure = providerFailureMessage("openai")
+  const openAiProviderAvailable = Boolean(
+    openAiRuntimeReachable &&
+      !openAiFailure &&
+      freshTimestamp(lastOpenAiProviderPlaybackSuccessAt),
   )
   const openaiTtsAvailable = openAiProviderAvailable
   const omnivoiceBackendConfigured = Boolean(omniHealth.configured)
   const omnivoiceProviderConfigured = omnivoiceBackendConfigured
   const omnivoiceProviderReachable = omniHealth.reachable
-  const omnivoiceProviderAvailable = omniHealth.generationReady
+  const omniFailure = providerFailureMessage("omnivoice")
+  const omnivoiceProviderAvailable = Boolean(
+    omniHealth.generationReady &&
+      !omniFailure &&
+      freshTimestamp(lastOmniVoicePlaybackSuccessAt),
+  )
   const omnivoiceTtsAvailable = omnivoiceProviderAvailable
   const omnivoiceBackendReachable = omnivoiceProviderReachable
   const anyProviderAvailable = openAiProviderAvailable || omnivoiceProviderAvailable
@@ -339,10 +414,10 @@ export function getCachedVoiceRuntimeCapabilities(
   let selectedProvider: TtsProviderType = "unavailable"
   let fallbackReason: string | null = null
   if (profile) {
-    if (profileCanUseOmniVoice(profile) && omnivoiceTtsAvailable) {
+    if (profileCanUseOmniVoice(profile) && omniHealth.generationReady && !omniFailure) {
       currentPreviewMode = "provider-tts"
       selectedProvider = "omnivoice"
-    } else if (profileCanUseProvider(profile) && openaiTtsAvailable) {
+    } else if (profileCanUseProvider(profile) && openAiRuntimeReachable && !openAiFailure) {
       currentPreviewMode = "provider-tts"
       selectedProvider = "openai"
     } else if (nativeAndroidTtsAvailable && profile.availability !== "unavailable") {
@@ -362,6 +437,8 @@ export function getCachedVoiceRuntimeCapabilities(
         omnivoiceBackendConfigured,
         omnivoiceTtsAvailable,
         remoteBackendConfigured,
+        openAiFailure,
+        omniFailure,
       })
     }
   }
@@ -403,9 +480,12 @@ function providerFallbackReason(
     omnivoiceBackendConfigured: boolean
     omnivoiceTtsAvailable: boolean
     remoteBackendConfigured: boolean
+    openAiFailure?: string | null
+    omniFailure?: string | null
   },
 ) {
   if (profile.provider === "omnivoice") {
+    if (state.omniFailure) return `OmniVoice provider failed: ${state.omniFailure}`
     if (!state.omnivoiceBackendConfigured) {
       return "OmniVoice profile selected, but NEXT_PUBLIC_OMNIVOICE_BASE_URL is not configured."
     }
@@ -415,6 +495,7 @@ function providerFallbackReason(
     return "OmniVoice profile selected, but it is missing required OmniVoice metadata."
   }
   if (profile.provider === "openai") {
+    if (state.openAiFailure) return `OpenAI provider failed: ${state.openAiFailure}`
     if (!state.remoteBackendConfigured) {
       return "OpenAI provider profile selected, but NEXT_PUBLIC_NEO_BACKEND_BASE_URL is not configured for this runtime."
     }
@@ -681,7 +762,7 @@ export async function previewVoice(
     desiredMode === "provider-tts" ||
     (desiredMode === "auto" && autoPreferredMode === "provider-tts")
   ) {
-    if (!capabilities.providerTtsAvailable) {
+    if (!profileCanAttemptProvider(request.profile, capabilities)) {
       const error = capabilities.fallbackReason ??
         (capabilities.remoteBackendConfigured
           ? "Provider TTS reachable but not configured."
@@ -700,9 +781,18 @@ export async function previewVoice(
         providerVoiceId: request.profile.providerVoiceId ?? null,
         fallbackReason: error,
       })
+      if (desiredMode === "auto") {
+        return previewViaFallbackAfterProviderFailure(request, capabilities, error)
+      }
       return { mode: "unavailable", ok: false, error, fallbackReason: error }
     }
-    return previewViaProvider(request)
+    const providerResult = await previewViaProvider(request)
+    if (providerResult.ok || desiredMode !== "auto") return providerResult
+    return previewViaFallbackAfterProviderFailure(
+      request,
+      await getVoiceRuntimeCapabilities(request.profile),
+      providerResult.error ?? "Provider TTS failed.",
+    )
   }
 
   // Native Android TextToSpeech path — the reliable local preview route for the Android app.
@@ -738,38 +828,7 @@ export async function previewVoice(
       })
       return { mode: "unavailable", ok: false, error }
     }
-    teardownProviderAudio()
-    const ok = await speakWithBrowserSpeech({
-      profile: request.profile,
-      text: request.text,
-      params: request.params,
-      personalityId: request.personalityId,
-      intent: request.intent,
-      onStateChange: request.onStateChange,
-    })
-    if (ok) {
-      logVoicePreview("success", {
-        selectedProfileId: request.profile.id,
-        provider: profileProvider,
-        requestedRuntimeMode: desiredMode,
-        resolvedRuntimeMode: "browser-speech",
-        fallbackReason: capabilities.fallbackReason,
-      })
-    } else {
-      logVoicePreview("failure", {
-        selectedProfileId: request.profile.id,
-        provider: profileProvider,
-        requestedRuntimeMode: desiredMode,
-        resolvedRuntimeMode: "browser-speech",
-        fallbackReason: capabilities.fallbackReason,
-      })
-    }
-    return {
-      mode: "browser-speech",
-      ok,
-      error: ok ? undefined : "Playback failed: browser speech preview failed.",
-      fallbackReason: capabilities.fallbackReason,
-    }
+    return previewViaBrowserSpeech(request, capabilities)
   }
 
   request.onStateChange?.({
@@ -794,8 +853,55 @@ export async function previewVoice(
   }
 }
 
+async function previewViaFallbackAfterProviderFailure(
+  request: VoicePreviewRequest,
+  capabilities: VoiceRuntimeCapabilities,
+  providerError: string,
+): Promise<VoicePreviewResult> {
+  const reason = providerError || capabilities.fallbackReason || "Provider TTS failed."
+  logVoicePreview("fallback", {
+    selectedProfileId: request.profile.id,
+    provider: request.profile.provider ?? "fallback",
+    requestedRuntimeMode: "auto",
+    resolvedRuntimeMode: capabilities.nativeAndroidTtsAvailable
+      ? "native-android"
+      : capabilities.browserSpeechSupported
+        ? "browser-speech"
+        : "unavailable",
+    providerVoiceId: request.profile.providerVoiceId ?? null,
+    fallbackReason: reason,
+  })
+  request.onStateChange?.({
+    state: "preparing",
+    source: "unavailable",
+    voiceId: request.profile.id,
+    message: `Provider unavailable: ${reason}`,
+  })
+
+  if (capabilities.nativeAndroidTtsAvailable) {
+    return previewViaNativeAndroidTts(request, reason)
+  }
+  if (capabilities.browserSpeechSupported) {
+    return previewViaBrowserSpeech(request, capabilities, reason)
+  }
+
+  request.onStateChange?.({
+    state: "error",
+    source: "unavailable",
+    voiceId: request.profile.id,
+    message: `VOICE PREVIEW UNAVAILABLE: Provider failed (${reason}); no Android or browser speech fallback is available.`,
+  })
+  return {
+    mode: "unavailable",
+    ok: false,
+    error: `Provider failed (${reason}); no Android or browser speech fallback is available.`,
+    fallbackReason: reason,
+  }
+}
+
 async function previewViaNativeAndroidTts(
   request: VoicePreviewRequest,
+  providerFailureReason?: string,
 ): Promise<VoicePreviewResult> {
   const capabilities = await getVoiceRuntimeCapabilities(request.profile)
   stopBrowserSpeech()
@@ -804,7 +910,9 @@ async function previewViaNativeAndroidTts(
     state: "preparing",
     source: "native-android",
     voiceId: request.profile.id,
-    message: capabilities.fallbackReason
+    message: providerFailureReason
+      ? `Provider unavailable: ${providerFailureReason}. Preparing Android TTS fallback...`
+      : capabilities.fallbackReason
       ? `Provider unavailable: ${capabilities.fallbackReason}. Preparing Android TTS fallback...`
       : "Preparing Android TTS fallback...",
   })
@@ -865,6 +973,44 @@ async function previewViaNativeAndroidTts(
   return { mode: "native-android", ok: true, fallbackReason: capabilities.fallbackReason }
 }
 
+async function previewViaBrowserSpeech(
+  request: VoicePreviewRequest,
+  capabilities: VoiceRuntimeCapabilities,
+  providerFailureReason?: string,
+): Promise<VoicePreviewResult> {
+  teardownProviderAudio()
+  if (providerFailureReason) {
+    request.onStateChange?.({
+      state: "preparing",
+      source: "browser-speech",
+      voiceId: request.profile.id,
+      message: `Provider unavailable: ${providerFailureReason}. Preparing browser speech fallback...`,
+    })
+  }
+  const ok = await speakWithBrowserSpeech({
+    profile: request.profile,
+    text: request.text,
+    params: request.params,
+    personalityId: request.personalityId,
+    intent: request.intent,
+    onStateChange: request.onStateChange,
+  })
+  logVoicePreview(ok ? "success" : "failure", {
+    selectedProfileId: request.profile.id,
+    provider: request.profile.provider ?? "fallback",
+    requestedRuntimeMode: "browser-speech",
+    resolvedRuntimeMode: "browser-speech",
+    providerVoiceId: request.profile.providerVoiceId ?? null,
+    fallbackReason: providerFailureReason ?? capabilities.fallbackReason,
+  })
+  return {
+    mode: "browser-speech",
+    ok,
+    error: ok ? undefined : "Playback failed: browser speech preview failed.",
+    fallbackReason: providerFailureReason ?? capabilities.fallbackReason,
+  }
+}
+
 async function previewViaProvider(
   request: VoicePreviewRequest,
 ): Promise<VoicePreviewResult> {
@@ -882,6 +1028,7 @@ async function previewViaProvider(
       const health = await checkOmniVoiceHealth(true)
       if (!health.generationReady) {
         const message = health.error ?? "OmniVoice /health is not ready."
+        markProviderPlaybackFailure("omnivoice", message)
         request.onStateChange?.({
           state: "error",
           source: "provider",
@@ -917,6 +1064,7 @@ async function previewViaProvider(
         onStateChange: request.onStateChange,
       })
       await playback.started
+      markProviderPlaybackSuccess("omnivoice")
       logVoicePreview("success", {
         selectedProfileId: request.profile.id,
         provider: "omnivoice",
@@ -929,6 +1077,7 @@ async function previewViaProvider(
       return { mode: "provider-tts", ok: true, payload }
     } catch (error) {
       const message = error instanceof Error ? error.message : "OmniVoice TTS request failed."
+      markProviderPlaybackFailure("omnivoice", message)
       request.onStateChange?.({ state: "error", source: "provider", voiceId: request.profile.id, message: `Playback failed: ${message}` })
       logVoicePreview("failure", {
         selectedProfileId: request.profile.id,
@@ -953,6 +1102,7 @@ async function previewViaProvider(
 
   if (!transport.payload) {
     const error = transport.error ?? "Provider TTS request failed."
+    markProviderPlaybackFailure("openai", error)
     request.onStateChange?.({
       state: "error",
       source: "provider",
@@ -983,6 +1133,7 @@ async function previewViaProvider(
     await playback.started
   } catch (error) {
     const message = error instanceof Error ? error.message : "Playback failed: provider audio did not start."
+    markProviderPlaybackFailure("openai", message)
     logVoicePreview("failure", {
       selectedProfileId: request.profile.id,
       provider: "openai",
@@ -996,6 +1147,7 @@ async function previewViaProvider(
     return { mode: "provider-tts", ok: false, error: message }
   }
 
+  markProviderPlaybackSuccess("openai")
   logVoicePreview("success", {
     selectedProfileId: request.profile.id,
     provider: "openai",
