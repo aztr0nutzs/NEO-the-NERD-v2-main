@@ -7,6 +7,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.RouteInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -387,36 +388,51 @@ public class NeoNetworkPlugin extends Plugin {
 
     String localIp = null;
     Integer prefixLength = null;
+    String gatewayIp = null;
     String connectionType = "unknown";
 
     if (cm != null) {
-      Network network = cm.getActiveNetwork();
-      if (network != null) {
-        NetworkCapabilities capabilities = cm.getNetworkCapabilities(network);
+      Network[] networks = cm.getAllNetworks();
+      for (Network candidate : networks) {
+        NetworkCapabilities capabilities = cm.getNetworkCapabilities(candidate);
+        if (capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+          continue;
+        }
+        LinkProperties linkProperties = cm.getLinkProperties(candidate);
+        NetworkAddress address = readNetworkAddress(linkProperties);
+        if (address != null) {
+          localIp = address.localIp;
+          prefixLength = address.prefixLength;
+          gatewayIp = readGatewayIp(linkProperties);
+          connectionType = "wifi";
+          break;
+        }
+      }
+
+      if (localIp == null) {
+        Network network = cm.getActiveNetwork();
+        NetworkCapabilities capabilities = network != null ? cm.getNetworkCapabilities(network) : null;
         if (capabilities != null) {
           if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             connectionType = "wifi";
+          } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
+            connectionType = "vpn";
           } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             connectionType = "cellular";
           }
         }
 
-        LinkProperties linkProperties = cm.getLinkProperties(network);
-        if (linkProperties != null) {
-          for (LinkAddress linkAddress : linkProperties.getLinkAddresses()) {
-            InetAddress inetAddress = linkAddress.getAddress();
-            String hostAddress = inetAddress != null ? inetAddress.getHostAddress() : null;
-            if (hostAddress != null && hostAddress.contains(".") && !hostAddress.startsWith("127.")) {
-              localIp = hostAddress;
-              prefixLength = linkAddress.getPrefixLength();
-              break;
-            }
-          }
+        LinkProperties linkProperties = network != null ? cm.getLinkProperties(network) : null;
+        NetworkAddress address = readNetworkAddress(linkProperties);
+        if (address != null) {
+          localIp = address.localIp;
+          prefixLength = address.prefixLength;
+          gatewayIp = readGatewayIp(linkProperties);
         }
       }
     }
 
-    String gatewayIp = readGatewayIp();
+    if (gatewayIp == null) gatewayIp = readGatewayIp();
     String networkName = readWifiSsid();
 
     result.put("localIp", localIp);
@@ -428,6 +444,40 @@ public class NeoNetworkPlugin extends Plugin {
     result.put("adapterStatus", "active");
     result.put("limitedData", localIp == null || prefixLength == null);
     return result;
+  }
+
+  private static class NetworkAddress {
+    final String localIp;
+    final int prefixLength;
+
+    NetworkAddress(String localIp, int prefixLength) {
+      this.localIp = localIp;
+      this.prefixLength = prefixLength;
+    }
+  }
+
+  private NetworkAddress readNetworkAddress(LinkProperties linkProperties) {
+    if (linkProperties == null) return null;
+    for (LinkAddress linkAddress : linkProperties.getLinkAddresses()) {
+      InetAddress inetAddress = linkAddress.getAddress();
+      String hostAddress = inetAddress != null ? inetAddress.getHostAddress() : null;
+      if (hostAddress != null && hostAddress.contains(".") && !hostAddress.startsWith("127.")) {
+        return new NetworkAddress(hostAddress, linkAddress.getPrefixLength());
+      }
+    }
+    return null;
+  }
+
+  private String readGatewayIp(LinkProperties linkProperties) {
+    if (linkProperties == null) return null;
+    for (RouteInfo route : linkProperties.getRoutes()) {
+      InetAddress gateway = route.getGateway();
+      String hostAddress = gateway != null ? gateway.getHostAddress() : null;
+      if (hostAddress != null && hostAddress.contains(".") && !hostAddress.equals("0.0.0.0")) {
+        return hostAddress;
+      }
+    }
+    return null;
   }
 
   private String readWifiSsid() {
@@ -445,6 +495,20 @@ public class NeoNetworkPlugin extends Plugin {
   }
 
   private String readGatewayIp() {
+    try {
+      ConnectivityManager cm = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+      if (cm != null) {
+        for (Network candidate : cm.getAllNetworks()) {
+          NetworkCapabilities capabilities = cm.getNetworkCapabilities(candidate);
+          if (capabilities == null || !capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+            continue;
+          }
+          String gatewayIp = readGatewayIp(cm.getLinkProperties(candidate));
+          if (gatewayIp != null) return gatewayIp;
+        }
+      }
+    } catch (Exception ignored) {}
+
     try (BufferedReader reader = new BufferedReader(new FileReader(new File("/proc/net/route")))) {
       String line;
       while ((line = reader.readLine()) != null) {

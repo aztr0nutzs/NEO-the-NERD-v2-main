@@ -127,7 +127,7 @@ export function NetworkScanPanel({
   };
 
   return (
-    <div className="space-y-4 rounded-lg border border-cyan-500/30 bg-black/60 p-4 backdrop-blur-sm">
+    <div className="space-y-3 rounded-lg border border-cyan-500/30 bg-black/60 p-3 backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -167,14 +167,14 @@ export function NetworkScanPanel({
       </div>
 
       {/* Scan Mode Selector */}
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 md:grid-cols-3 xl:grid-cols-1">
         {SCAN_MODES.map(({ mode, label, icon: Icon, description, estimate, coverage: modeCoverage, bestFor, recommended }) => (
           <button
             key={mode}
             onClick={() => !isScanning && onModeChange(mode)}
             disabled={isScanning}
             className={`
-              relative flex min-h-[150px] flex-col items-start gap-1 rounded-lg border p-3 text-left
+              relative flex min-h-[112px] flex-col items-start gap-1 rounded-lg border p-2.5 text-left
               font-mono text-xs transition-all duration-200
               ${
                 selectedMode === mode

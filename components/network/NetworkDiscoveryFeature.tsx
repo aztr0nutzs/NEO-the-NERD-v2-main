@@ -1601,117 +1601,129 @@ export function NetworkDiscoveryFeature() {
           </div>
         </header>
 
-        <section className={`mb-6 rounded-lg border p-4 backdrop-blur-sm ${readinessColor}`}>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
+        <section className="mb-4 grid items-start gap-3 xl:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.45fr)_minmax(300px,0.9fr)]">
+          <aside className="space-y-3 xl:sticky xl:top-4">
+            <div className={`rounded-lg border p-3 backdrop-blur-sm ${readinessColor}`}>
               <div className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em]">
                 <ShieldCheck className="h-4 w-4" />
                 <span>{readiness.label}</span>
               </div>
-              <p className="font-mono text-[11px] leading-relaxed text-gray-200/90">
+              <p className="font-mono text-[10px] leading-relaxed text-gray-200/90">
                 {readiness.detail}
               </p>
+              {!isDemoMode && (networkPermissionDenied || diagnosticPermissionStatus?.location === "denied" || diagnosticPermissionStatus?.wifi === "denied") && (
+                <button
+                  type="button"
+                  onClick={handleRequestNetworkPermissions}
+                  disabled={requestingNetworkPermissions}
+                  className="mt-3 w-full rounded border border-yellow-500/50 bg-yellow-500/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-yellow-200 hover:bg-yellow-500/25 disabled:opacity-60"
+                >
+                  {requestingNetworkPermissions ? "REQUESTING..." : "GRANT PERMISSION"}
+                </button>
+              )}
+              <div className="mt-3 grid gap-2">
+                <StatusCell icon={Wifi} label="SSID" value={networkStatus.networkName} />
+                <StatusCell icon={Router} label="Gateway" value={networkStatus.gatewayIp} />
+                <StatusCell icon={Network} label="Local IP" value={networkStatus.localIp} />
+                <StatusCell icon={MapPin} label="Subnet" value={networkStatus.subnet} />
+                <StatusCell icon={Cpu} label="Source" value={effectiveAdapterStatus.label} />
+              </div>
             </div>
-            {!isDemoMode && (networkPermissionDenied || diagnosticPermissionStatus?.location === "denied" || diagnosticPermissionStatus?.wifi === "denied") && (
-              <button
-                type="button"
-                onClick={handleRequestNetworkPermissions}
-                disabled={requestingNetworkPermissions}
-                className="rounded border border-yellow-500/50 bg-yellow-500/15 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-yellow-200 hover:bg-yellow-500/25 disabled:opacity-60"
-              >
-                {requestingNetworkPermissions ? "REQUESTING..." : "GRANT PERMISSION"}
-              </button>
-            )}
+
+            <NetworkScanPanel
+              status={networkStatus}
+              scanProgress={scanProgress}
+              selectedMode={selectedMode}
+              onModeChange={setSelectedMode}
+              onStartScan={handleStartScan}
+              onStopScan={handleStopScan}
+              onRequestPermissions={handleRequestNetworkPermissions}
+              isDemoMode={isDemoMode}
+              permissionDenied={networkPermissionDenied}
+              isRequestingPermissions={requestingNetworkPermissions}
+              lastScanDelta={lastNetworkScanDelta}
+              lastScanResult={lastScanCompletion}
+              adapterStatus={effectiveAdapterStatus}
+            />
+          </aside>
+
+          <div className="min-w-0 space-y-3">
+            <NetworkOverviewPanel
+              status={networkStatus}
+              isDemoMode={isDemoMode}
+              scanState={networkStatus.scanState}
+              onJumpToDevices={() => setActiveTab("devices")}
+              onJumpToSecurity={() => setActiveTab("security")}
+              onJumpToScan={() => setActiveTab("overview")}
+              healthSnapshot={latestHealthSnapshot}
+            />
+
+            <NerdControlPanel
+              networkStatus={networkStatus}
+              devices={devices}
+              isScanning={networkStatus.scanState === "scanning"}
+              scanProgress={scanProgress}
+              actions={actions}
+              settings={effectivePanelSettings}
+              onOpenDevices={() => setActiveTab("devices")}
+              onOpenQueue={() => setActiveTab("overview")}
+              onOpenSecurity={() => setActiveTab("security")}
+              onOpenScan={() => setActiveTab("overview")}
+            />
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            <StatusCell icon={Wifi} label="SSID" value={networkStatus.networkName} />
-            <StatusCell icon={Router} label="Gateway" value={networkStatus.gatewayIp} />
-            <StatusCell icon={Network} label="Local IP" value={networkStatus.localIp} />
-            <StatusCell icon={MapPin} label="Subnet" value={networkStatus.subnet} />
-            <StatusCell icon={Cpu} label="Source" value={effectiveAdapterStatus.label} />
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {readiness.steps.map((step) => (
-              <span key={step} className="rounded border border-gray-700 bg-black/35 px-2 py-1 font-mono text-[10px] leading-relaxed text-gray-300">
-                {step}
-              </span>
-            ))}
-          </div>
+
+          <aside className="space-y-3 xl:sticky xl:top-4">
+            <NetworkHealthPanel
+              snapshot={latestHealthSnapshot}
+              lastScanDelta={lastNetworkScanDelta}
+              diagnosticsRunning={diagnosticsRunning}
+              onRunDiagnostics={handleRunDiagnostics}
+              onOpenTimeline={() => setActiveTab("timeline")}
+            />
+
+            <NetworkAlertsPanel
+              alerts={networkAlerts}
+              monitorState={networkMonitorState}
+              onMarkAllRead={handleMarkAllAlertsRead}
+              onClearRead={handleClearReadAlerts}
+            />
+
+            <DeviceIdentityReviewQueue
+              devices={newIdentityDevices}
+              onReview={(device) => {
+                handleSelectDevice(device);
+                setActiveTab("devices");
+              }}
+              onTrust={(device) => handleDeviceAction("trust", device)}
+              onWatch={(device) => handleDeviceAction("watch", device)}
+              onDismiss={handleDismissDeviceIdentity}
+            />
+          </aside>
         </section>
 
-        {/* NERD Control Panel */}
-        <section className="mb-6">
-          <NerdControlPanel
-            networkStatus={networkStatus}
-            devices={devices}
-            isScanning={networkStatus.scanState === "scanning"}
-            scanProgress={scanProgress}
-            actions={actions}
-            settings={effectivePanelSettings}
-            onOpenDevices={() => setActiveTab("devices")}
-            onOpenQueue={() => setActiveTab("overview")}
-            onOpenSecurity={() => setActiveTab("security")}
-            onOpenScan={() => setActiveTab("overview")}
-          />
-        </section>
-
-        <DeviceIdentityReviewQueue
-          devices={newIdentityDevices}
-          onReview={(device) => {
-            handleSelectDevice(device);
-            setActiveTab("devices");
-          }}
-          onTrust={(device) => handleDeviceAction("trust", device)}
-          onWatch={(device) => handleDeviceAction("watch", device)}
-          onDismiss={handleDismissDeviceIdentity}
-        />
-
-        <NetworkAlertsPanel
-          alerts={networkAlerts}
-          monitorState={networkMonitorState}
-          onMarkAllRead={handleMarkAllAlertsRead}
-          onClearRead={handleClearReadAlerts}
-        />
-
-        <NetworkHealthPanel
-          snapshot={latestHealthSnapshot}
-          lastScanDelta={lastNetworkScanDelta}
-          diagnosticsRunning={diagnosticsRunning}
-          onRunDiagnostics={handleRunDiagnostics}
-          onOpenTimeline={() => setActiveTab("timeline")}
-        />
-
-        {/* Overview Stats */}
-        <section className="mb-6">
-          <NetworkOverviewPanel
-            status={networkStatus}
-            isDemoMode={isDemoMode}
-            scanState={networkStatus.scanState}
-            onJumpToDevices={() => setActiveTab("devices")}
-            onJumpToSecurity={() => setActiveTab("security")}
-            onJumpToScan={() => setActiveTab("overview")}
-            healthSnapshot={latestHealthSnapshot}
-          />
-        </section>
-
-        <section className="mb-6">
-          <NetworkDiagnosticsPanel
-            platform={diagnosticPlatform}
-            adapterStatus={effectiveAdapterStatus}
-            settings={effectivePanelSettings}
-            networkStatus={networkStatus}
-            selectedMode={selectedMode}
-            localContext={diagnosticLocalContext}
-            permissionStatus={diagnosticPermissionStatus}
-            permissionDenied={networkPermissionDenied}
-            lastScanResult={lastScanCompletion}
-            topologyGraph={diagnosticTopologyGraph}
-            routerStatus={routerStatus}
-            devices={devices}
-            routerCapabilities={routerCapabilities}
-            routerControlMode={routerControlMode}
-            onRefresh={refreshOperationalDiagnostics}
-          />
+        <section className="mb-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0">
+            <NetworkDiagnosticsPanel
+              platform={diagnosticPlatform}
+              adapterStatus={effectiveAdapterStatus}
+              settings={effectivePanelSettings}
+              networkStatus={networkStatus}
+              selectedMode={selectedMode}
+              localContext={diagnosticLocalContext}
+              permissionStatus={diagnosticPermissionStatus}
+              permissionDenied={networkPermissionDenied}
+              lastScanResult={lastScanCompletion}
+              topologyGraph={diagnosticTopologyGraph}
+              routerStatus={routerStatus}
+              devices={devices}
+              routerCapabilities={routerCapabilities}
+              routerControlMode={routerControlMode}
+              onRefresh={refreshOperationalDiagnostics}
+            />
+          </div>
+          <div className="h-[360px] min-w-0">
+            <NetworkActionQueue actions={actions} />
+          </div>
         </section>
 
         {/* Main Content Tabs */}
@@ -1783,37 +1795,15 @@ export function NetworkDiscoveryFeature() {
 
           {/* Scan Tab */}
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-3">
-              <div className="lg:col-span-2 space-y-4">
-                <NetworkScanPanel
-                  status={networkStatus}
-                  scanProgress={scanProgress}
-                  selectedMode={selectedMode}
-                  onModeChange={setSelectedMode}
-                  onStartScan={handleStartScan}
-                  onStopScan={handleStopScan}
-                  onRequestPermissions={handleRequestNetworkPermissions}
-                  isDemoMode={isDemoMode}
-                  permissionDenied={networkPermissionDenied}
-                  isRequestingPermissions={requestingNetworkPermissions}
-                  lastScanDelta={lastNetworkScanDelta}
-                  lastScanResult={lastScanCompletion}
-                  adapterStatus={effectiveAdapterStatus}
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="h-[520px]">
+                <SecurityInsightsPanel
+                  insights={securityInsights}
+                  onViewDevice={handleViewDeviceFromInsight}
                 />
-                <div className="h-[400px]">
-                  <SecurityInsightsPanel
-                    insights={securityInsights}
-                    onViewDevice={handleViewDeviceFromInsight}
-                  />
-                </div>
               </div>
-              <div className="space-y-4">
-                <div className="h-[300px]">
-                  <NetworkActionQueue actions={actions} />
-                </div>
-                <div className="h-[350px]">
-                  <ScanHistoryPanel history={scanHistory} />
-                </div>
+              <div className="h-[520px]">
+                <ScanHistoryPanel history={scanHistory} />
               </div>
             </div>
           </TabsContent>
