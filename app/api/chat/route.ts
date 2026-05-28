@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
 import { createAssistantClient } from "@/lib/assistant/assistantClient"
+import { jsonWithCors, optionsWithCors } from "@/lib/runtime/api-cors"
 import type { ChatMessage, ConversationMode } from "@/lib/types"
 
 interface ChatRouteBody {
@@ -8,19 +8,25 @@ interface ChatRouteBody {
   conversationMode?: ConversationMode
 }
 
+export async function OPTIONS(request: Request) {
+  return optionsWithCors(request)
+}
+
 export async function POST(request: Request) {
   let body: ChatRouteBody
   try {
     body = (await request.json()) as ChatRouteBody
   } catch {
-    return NextResponse.json(
+    return jsonWithCors(
+      request,
       { error: "Invalid chat request JSON." },
       { status: 400 },
     )
   }
 
   if (!body.messages?.length || !body.personalityId || !body.conversationMode) {
-    return NextResponse.json(
+    return jsonWithCors(
+      request,
       { error: "Missing messages, personality, or conversation mode." },
       { status: 400 },
     )
@@ -33,13 +39,13 @@ export async function POST(request: Request) {
       personalityId: body.personalityId,
       conversationMode: body.conversationMode,
     })
-    return NextResponse.json(result)
+    return jsonWithCors(request, result)
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "AI assistant unavailable. Check server configuration."
 
-    return NextResponse.json({ error: message }, { status: 503 })
+    return jsonWithCors(request, { error: message }, { status: 503 })
   }
 }

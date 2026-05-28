@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"
 import { generateOpenAITts } from "@/lib/voice/ttsClient"
+import { jsonWithCors, optionsWithCors } from "@/lib/runtime/api-cors"
 import type { VoiceParams } from "@/lib/types"
 import type { SpeechIntent } from "@/lib/voice/speechIntent"
 
@@ -18,9 +18,13 @@ const DEFAULT_PARAMS: VoiceParams = {
   emotion: 60,
 }
 
-export async function GET() {
+export async function OPTIONS(request: Request) {
+  return optionsWithCors(request)
+}
+
+export async function GET(request: Request) {
   const providerConfigured = Boolean(process.env.OPENAI_API_KEY)
-  return NextResponse.json({
+  return jsonWithCors(request, {
     provider: "openai",
     providerConfigured,
     model: process.env.OPENAI_TTS_MODEL || "gpt-4o-mini-tts",
@@ -35,11 +39,11 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as TtsRouteBody
   } catch {
-    return NextResponse.json({ error: "Invalid TTS request JSON." }, { status: 400 })
+    return jsonWithCors(request, { error: "Invalid TTS request JSON." }, { status: 400 })
   }
 
   if (!body.voiceId || !body.text?.trim()) {
-    return NextResponse.json({ error: "Missing voice or text for TTS." }, { status: 400 })
+    return jsonWithCors(request, { error: "Missing voice or text for TTS." }, { status: 400 })
   }
 
   try {
@@ -50,13 +54,13 @@ export async function POST(request: Request) {
       personalityId: body.personalityId,
       intent: body.intent,
     })
-    return NextResponse.json(result)
+    return jsonWithCors(request, result)
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "TTS provider unavailable. Check server configuration."
 
-    return NextResponse.json({ error: message }, { status: 503 })
+    return jsonWithCors(request, { error: message }, { status: 503 })
   }
 }

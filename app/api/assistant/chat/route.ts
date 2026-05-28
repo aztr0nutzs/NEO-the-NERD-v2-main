@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
 import { buildAssistantContext } from "@/lib/assistant/assistantContext"
 import { createAssistantProvider } from "@/lib/assistant/assistantProvider"
 import { buildAssistantProviderInstructions } from "@/lib/assistant/assistantPromptBuilder"
 import { generateAssistantResponseDraft } from "@/lib/assistant/assistantResponseEngine"
 import { emotionToMood } from "@/lib/assistant/assistantEmotion"
+import { jsonWithCors, optionsWithCors } from "@/lib/runtime/api-cors"
 import type {
   AssistantChatApiRequest,
   AssistantChatApiResponse,
@@ -11,19 +11,25 @@ import type {
 } from "@/lib/assistant/providerTypes"
 import type { ChatMessage } from "@/lib/types"
 
+export async function OPTIONS(request: Request) {
+  return optionsWithCors(request)
+}
+
 export async function POST(request: Request) {
   let body: AssistantChatApiRequest
   try {
     body = (await request.json()) as AssistantChatApiRequest
   } catch {
-    return NextResponse.json(
+    return jsonWithCors(
+      request,
       { error: "Invalid assistant chat request JSON." },
       { status: 400 },
     )
   }
 
   if (!body.userMessage?.trim() || !body.personalityId || !body.conversationMode) {
-    return NextResponse.json(
+    return jsonWithCors(
+      request,
       { error: "Missing user message, personality, or conversation mode." },
       { status: 400 },
     )
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
   const status = provider.providerStatus()
 
   if (!status.providerConfigured) {
-    return NextResponse.json(localResponse(localDraft, status.providerConfigured))
+    return jsonWithCors(request, localResponse(localDraft, status.providerConfigured))
   }
 
   try {
@@ -54,7 +60,7 @@ export async function POST(request: Request) {
       })),
     })
 
-    return NextResponse.json({
+    return jsonWithCors(request, {
       text: completion.text,
       category: localDraft.category,
       provider: completion.provider,
@@ -70,7 +76,8 @@ export async function POST(request: Request) {
     const message =
       error instanceof Error ? error.message : "Assistant provider request failed."
 
-    return NextResponse.json(
+    return jsonWithCors(
+      request,
       {
         ...localResponse(localDraft, true),
         error: message,
@@ -80,8 +87,8 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
-  return NextResponse.json(createAssistantProvider().providerStatus())
+export async function GET(request: Request) {
+  return jsonWithCors(request, createAssistantProvider().providerStatus())
 }
 
 function normalizeRecentMessages(
