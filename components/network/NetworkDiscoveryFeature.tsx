@@ -964,7 +964,10 @@ export function NetworkDiscoveryFeature() {
       await networkAdapter.startNetworkScan(selectedMode);
       const status = await networkAdapter.getNetworkStatus();
       const currentAdapterStatus = await networkAdapter.getAdapterStatus();
-      setNetworkStatus(status);
+      setNetworkStatus({
+        ...status,
+        scanState: networkAdapter.getIsScanning() ? "scanning" : status.scanState,
+      });
       setAdapterStatus(currentAdapterStatus);
       setScanProgress(0);
     } catch (error) {

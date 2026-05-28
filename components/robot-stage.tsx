@@ -72,98 +72,41 @@ export function RobotStage({
       className="relative mx-auto flex items-end justify-center"
       style={{ width: size, height: size }}
     >
-      {/* Outer glow halo */}
+      {/* Ambient glow behind the robot, deliberately unframed. */}
       <div
-        className="pointer-events-none absolute inset-0 rounded-full opacity-70 blur-2xl"
+        className="pointer-events-none absolute inset-x-4 top-4 h-[72%] opacity-70 blur-2xl"
         style={{
-          background: `radial-gradient(circle, ${moodColor}55 0%, transparent 65%)`,
+          background: `radial-gradient(ellipse 46% 58% at 50% 46%, ${moodColor}44 0%, rgba(0,0,0,0) 72%)`,
           opacity: glowAlpha,
         }}
       />
 
-      {/* Reactor pedestal — concentric rings */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {/* slow rotating outer dashed ring */}
+      {/* Screen-integrated light field. No circular frame or portal rim. */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <motion.div
-          className="absolute rounded-full"
+          className="absolute left-1/2 top-[18%] h-[68%] w-[58%] -translate-x-1/2"
           style={{
-            width: size * 0.96,
-            height: size * 0.96,
-            border: `1px dashed ${moodColor}88`,
-            boxShadow: `0 0 30px ${moodColor}44, inset 0 0 30px ${moodColor}22`,
+            background: `linear-gradient(90deg, rgba(0,0,0,0), ${moodColor}18 22%, rgba(255,255,255,0.035) 50%, ${moodColor}18 78%, rgba(0,0,0,0))`,
+            filter: "blur(18px)",
           }}
-          animate={shouldAnimate ? { rotate: 360 } : { rotate: 0 }}
+          animate={shouldAnimate ? { opacity: [0.4, 0.72, 0.4] } : { opacity: 0.45 }}
           transition={{
-            duration: isAndroid ? 34 - intensity * 8 : 30 - intensity * 8,
-            ease: "linear",
+            duration: isAndroid ? 6 : 5,
+            ease: "easeInOut",
             repeat: shouldAnimate ? Infinity : 0,
           }}
         />
-        {/* counter ring */}
         <motion.div
-          className="absolute rounded-full"
+          className="absolute bottom-[12%] h-[14%] w-[76%]"
           style={{
-            width: size * 0.78,
-            height: size * 0.78,
-            border: `1px solid ${moodColor}44`,
-            boxShadow: `inset 0 0 24px ${moodColor}33`,
+            background: `radial-gradient(ellipse at center, ${moodColor}70 0%, ${moodColor}20 34%, rgba(0,0,0,0) 72%)`,
+            filter: "blur(7px)",
           }}
-          animate={shouldAnimate ? { rotate: -360 } : { rotate: 0 }}
+          animate={shouldAnimate ? { scaleX: [0.94, 1.04, 0.94], opacity: [0.62, 0.9, 0.62] } : { scaleX: 1, opacity: 0.68 }}
           transition={{
-            duration: isAndroid ? 48 - intensity * 10 : 42 - intensity * 8,
-            ease: "linear",
+            duration: isAndroid ? 5.5 : 4.8,
+            ease: "easeInOut",
             repeat: shouldAnimate ? Infinity : 0,
-          }}
-        />
-        {/* tick ring with marks */}
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            width: size * 0.88,
-            height: size * 0.88,
-          }}
-          animate={shouldAnimate ? { rotate: 360 } : { rotate: 0 }}
-          transition={{
-            duration: isAndroid ? 78 - intensity * 12 : 66 - intensity * 10,
-            ease: "linear",
-            repeat: shouldAnimate ? Infinity : 0,
-          }}
-        >
-          {Array.from({ length: 36 }).map((_, i) => (
-            <span
-              key={i}
-              className="absolute left-1/2 top-0 -translate-x-1/2"
-              style={{
-                width: 2,
-                height: i % 3 === 0 ? 10 : 5,
-                background: moodColor,
-                opacity: i % 3 === 0 ? 0.8 : 0.35,
-                transform: `translate(-50%, 0) rotate(${i * 10}deg) translateY(-${size * 0.44 - 10}px)`,
-                transformOrigin: "50% 50%",
-                boxShadow: `0 0 6px ${moodColor}`,
-              }}
-            />
-          ))}
-        </motion.div>
-
-        {/* Pedestal disc */}
-        <div
-          className="absolute bottom-2 rounded-full"
-          style={{
-            width: size * 0.78,
-            height: size * 0.18,
-            background:
-              "radial-gradient(ellipse at center, rgba(255,255,255,0.06), rgba(0,0,0,0) 70%)",
-            filter: "blur(6px)",
-          }}
-        />
-        <div
-          className="absolute bottom-3 rounded-full"
-          style={{
-            width: size * 0.5,
-            height: size * 0.06,
-            background: `radial-gradient(ellipse at center, ${moodColor}aa, transparent 70%)`,
-            filter: "blur(3px)",
           }}
         />
       </div>
@@ -179,31 +122,6 @@ export function RobotStage({
           ease: "easeInOut",
         }}
       >
-        {/*
-          Reactor portal backing — a deep dark oval that sits behind the
-          avatar video. The avatar itself (variant="stage") is `object-cover`
-          with a feathered edge mask, so its near-black background dissolves
-          into this chamber instead of reading as a pasted-on black rectangle.
-          The tint picks up the current mood color very subtly so it ties
-          into the rings.
-        */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[103%] w-[86%] -translate-x-1/2 -translate-y-1/2 rounded-[48%]"
-          style={{
-            background: `radial-gradient(ellipse 50% 62% at 50% 42%, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.96) 45%, ${moodColor}24 62%, rgba(0,0,0,0.72) 78%, rgba(0,0,0,0) 100%)`,
-            boxShadow: `inset 0 0 ${size * 0.12}px rgba(0,0,0,0.92), inset 0 0 ${size * 0.08}px ${moodColor}26, 0 0 ${size * 0.13}px ${moodColor}24`,
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-[49%] h-[94%] w-[77%] -translate-x-1/2 -translate-y-1/2 rounded-[50%]"
-          style={{
-            border: `1px solid ${moodColor}44`,
-            background: `radial-gradient(ellipse 60% 82% at 50% 48%, rgba(0,0,0,0) 52%, ${moodColor}18 74%, rgba(0,0,0,0.66) 100%)`,
-            filter: "blur(0.2px)",
-          }}
-        />
         <NeoAvatarVideo
           className="pointer-events-none relative h-full w-full select-none"
           reactionKey={avatarReaction?.key ?? null}

@@ -237,7 +237,7 @@ export function DeviceDetailPanel({
 
         {/* Content */}
         <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+          <div className="space-y-4 pb-28 lg:pb-20">
             {/* Status Row */}
             <div className="flex items-center gap-3">
               <span

@@ -29,12 +29,13 @@ export interface NeoAvatarVideoHandle {
  *   - `object-cover` so the robot fills the frame with no letterbox bars
  *   - tuned `object-position` + scale to frame the robot and crop the bright
  *     floor strip out of view
- *   - a feathered `mask-image` (CSS masks, `-webkit-mask-image` — reliable on
- *     Android WebView) that fades the rectangular video edge into transparency
- *   - `overflow-hidden` + surface-specific framing so the rectangle is
- *     physically clipped without leaving a hard chrome ring around the robot
- * The near-black video background then sits invisibly on the app's near-black
- * stage/surface backing, with no hard box edge.
+ *   - a broad edge feather that fades the clip into the dark app surface
+ *     without creating an oval/circular portal silhouette
+ *   - `overflow-hidden` + surface-specific framing so the reflective floor is
+ *     cropped while avoiding any hard chrome ring around the robot
+ * The near-black video background is screen-blended into the app surface so
+ * the underlying screen texture remains visible instead of becoming a framed
+ * black video block.
  */
 export type AvatarVariant = "stage" | "screen" | "bare"
 
@@ -55,15 +56,16 @@ interface NeoAvatarVideoProps {
   variant?: AvatarVariant
 }
 
-// Feathered elliptical mask for the large stage: fully opaque through the
-// robot, dissolving the rectangular MP4 edge into the surrounding reactor.
-const STAGE_MASK =
-  "radial-gradient(ellipse 74% 91% at 50% 43%, #000 0%, #000 54%, rgba(0,0,0,0.86) 66%, rgba(0,0,0,0.46) 79%, rgba(0,0,0,0.12) 90%, rgba(0,0,0,0) 100%)"
+// Broad top/bottom feathering avoids both failure modes from the previous
+// passes: no hard rectangular MP4 edge and no visible circular/oval frame.
+const STAGE_EDGE_MASK =
+  "linear-gradient(to bottom, rgba(0,0,0,0) 0%, #000 8%, #000 82%, rgba(0,0,0,0.58) 91%, rgba(0,0,0,0) 100%)"
 
-// Soft inner-edge mask for compact avatar surfaces. The fade is broad enough
-// to hide the rectangular clip while keeping the robot itself fully readable.
-const SCREEN_MASK =
-  "radial-gradient(ellipse 72% 88% at 50% 46%, #000 0%, #000 60%, rgba(0,0,0,0.88) 73%, rgba(0,0,0,0.46) 87%, rgba(0,0,0,0) 100%)"
+const SCREEN_EDGE_MASK =
+  "linear-gradient(to bottom, rgba(0,0,0,0) 0%, #000 12%, #000 78%, rgba(0,0,0,0.55) 90%, rgba(0,0,0,0) 100%)"
+
+const ROBOT_SURFACE_CLIP =
+  "polygon(21% 0%, 79% 0%, 94% 17%, 100% 56%, 88% 86%, 64% 100%, 36% 100%, 12% 86%, 0% 56%, 6% 17%)"
 
 interface VariantConfig {
   wrapper: string
@@ -74,25 +76,29 @@ interface VariantConfig {
 
 const VARIANT_CONFIG: Record<AvatarVariant, VariantConfig> = {
   stage: {
-    wrapper: "relative isolate overflow-hidden rounded-[48%_48%_44%_44%/52%_52%_46%_46%] bg-transparent",
+    wrapper: "relative overflow-hidden bg-transparent",
     wrapperStyle: {
-      clipPath: "ellipse(47% 50% at 50% 48%)",
-      maskImage: STAGE_MASK,
-      WebkitMaskImage: STAGE_MASK,
+      clipPath: ROBOT_SURFACE_CLIP,
+      maskImage: STAGE_EDGE_MASK,
+      WebkitMaskImage: STAGE_EDGE_MASK,
     },
     video: "h-full w-full object-cover",
     // Bias the crop upward so the head keeps headroom and the bright reflective
     // floor at the bottom of the clip is pushed out of frame, while still
     // showing the robot down past the glowing chest core.
-    videoStyle: { objectPosition: "50% 18%", transform: "scale(1.14)" },
+    videoStyle: { objectPosition: "50% 18%", transform: "scale(1.14)", mixBlendMode: "screen" },
   },
   screen: {
-    wrapper: "relative isolate overflow-hidden bg-transparent",
-    wrapperStyle: { maskImage: SCREEN_MASK, WebkitMaskImage: SCREEN_MASK },
+    wrapper: "relative overflow-hidden bg-transparent",
+    wrapperStyle: {
+      clipPath: ROBOT_SURFACE_CLIP,
+      maskImage: SCREEN_EDGE_MASK,
+      WebkitMaskImage: SCREEN_EDGE_MASK,
+    },
     video: "h-full w-full object-cover",
     // Frame the head + glowing chest core so the robot fills the compact
     // avatar cutout edge-to-edge with no inner gap.
-    videoStyle: { objectPosition: "50% 20%", transform: "scale(1.22)" },
+    videoStyle: { objectPosition: "50% 20%", transform: "scale(1.22)", mixBlendMode: "screen" },
   },
   bare: {
     wrapper: "",
@@ -235,10 +241,10 @@ export const NeoAvatarVideo = forwardRef<NeoAvatarVideoHandle, NeoAvatarVideoPro
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-10"
             style={{
-              // Premium edge depth: a soft dark vignette that sits above the
-              // video so the robot reads as recessed into the reactor chamber.
+              // A vertical wash hides the clip's bright floor without drawing
+              // a portal or circular frame around the avatar.
               background:
-                "radial-gradient(ellipse 54% 72% at 50% 42%, rgba(0,0,0,0) 48%, rgba(0,0,0,0.26) 68%, rgba(0,0,0,0.72) 91%, rgba(0,0,0,0.92) 100%)",
+                "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 62%, rgba(0,0,0,0.42) 84%, rgba(0,0,0,0.92) 100%)",
             }}
           />
         )}
