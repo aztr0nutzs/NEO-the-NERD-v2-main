@@ -138,6 +138,12 @@ const NetworkMap3D = dynamic(
   }
 );
 
+const UI_SCAN_WATCHDOG_MS: Record<ScanMode, number> = {
+  quick: 45_000,
+  balanced: 95_000,
+  deep: 195_000,
+};
+
 function isNetworkPermissionDeniedMessage(message: string | null | undefined): boolean {
   return typeof message === "string" && /wi-fi\/location permission denied|network permission denied|permission denied/i.test(message);
 }
@@ -390,6 +396,32 @@ export function NetworkDiscoveryFeature() {
     },
     [setNetworkDeviceIdentities]
   );
+
+  useEffect(() => {
+    if (!networkStatus || networkStatus.scanState === "scanning") return;
+    if (networkStatus.devicesFound <= 0 || devices.length === networkStatus.devicesFound) return;
+
+    let cancelled = false;
+    networkAdapter.getDiscoveredDevices().then((rawDevices) => {
+      if (cancelled || rawDevices.length === 0) return;
+      const syncedDevices = mergeIdentitiesForDevices(rawDevices);
+      if (cancelled) return;
+      previousDevicesRef.current = syncedDevices;
+      setDevices(syncedDevices);
+      setSelectedDevice((current) => {
+        if (!current) return current;
+        return syncedDevices.find((device) => device.id === current.id) ?? current;
+      });
+    }).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    devices.length,
+    mergeIdentitiesForDevices,
+    networkStatus,
+  ]);
 
   const commitIdentityUpdate = useCallback(
     (device: DiscoveredDevice, patch: DeviceIdentityUpdate) => {
@@ -710,8 +742,10 @@ export function NetworkDiscoveryFeature() {
         latestResult === null &&
         !networkAdapter.getIsScanning() &&
         progress >= 100;
+      const uiWatchdogExceeded =
+        Date.now() - new Date(scanStartedAt).getTime() > UI_SCAN_WATCHDOG_MS[selectedMode];
 
-      if (!nativeReported && !demoCompleted) return;
+      if (!nativeReported && !demoCompleted && !uiWatchdogExceeded) return;
 
       clearInterval(interval);
       if (cancelled) return;
@@ -719,6 +753,18 @@ export function NetworkDiscoveryFeature() {
       const resolvedResult: ScanCompletionResult =
         latestResult && nativeReported
           ? latestResult
+          : uiWatchdogExceeded
+            ? {
+                status: "failed",
+                scanMode: selectedMode,
+                startedAt: scanStartedAt,
+                finishedAt: new Date().toISOString(),
+                durationMs: Date.now() - new Date(scanStartedAt).getTime(),
+                coverage: null,
+                failureReason:
+                  "Native scan reached the UI watchdog timeout before returning a result. The scan was stopped so the Network screen does not stay in SCANNING state.",
+                generation: -1,
+              }
           : {
               status: "complete",
               scanMode: selectedMode,
@@ -734,6 +780,9 @@ export function NetworkDiscoveryFeature() {
       const status = resolvedResult.status;
       const latestResultForBranches = resolvedResult;
       setLastScanCompletion(resolvedResult);
+      if (uiWatchdogExceeded) {
+        networkAdapter.stopNetworkScan().catch(() => undefined);
+      }
 
       // CANCELLED — silent; do not generate a failure event, do not touch
       // device lists, do not write scan history. The user asked to stop.

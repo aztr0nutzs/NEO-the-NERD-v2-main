@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   AlertTriangle,
   Clipboard,
@@ -197,8 +198,8 @@ export function NetworkReactorCore({
       />
       <div className="pointer-events-none absolute inset-0 ps-mesh-fine opacity-40" />
 
-      <div className="relative z-10 grid gap-3 xl:grid-cols-[minmax(260px,0.78fr)_minmax(300px,1fr)_minmax(260px,0.82fr)]">
-        <div className="space-y-2">
+      <div className="relative z-10 grid gap-3 xl:grid-cols-[minmax(260px,0.78fr)_minmax(340px,1.08fr)_minmax(260px,0.82fr)]">
+        <div className="order-2 space-y-2 xl:order-1">
           <PanelTitle icon={Router} label="NETWORK IDENTITY" color="#00f0ff" />
           <HudGrid>
             <Metric label="SSID" value={displayValue(ssid)} tone={ssid && ssid !== "Unavailable" ? "ok" : "warn"} />
@@ -251,68 +252,87 @@ export function NetworkReactorCore({
           </ControlGroup>
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-3">
+        <div className="order-1 flex flex-col items-center justify-center gap-3 xl:order-2">
           <div
-            className="relative grid aspect-square w-full max-w-[360px] place-items-center rounded-full"
+            className="relative grid aspect-square w-full max-w-[520px] place-items-center overflow-visible rounded-full"
             aria-label={`Network reactor core state: ${STATE_THEME[reactorState].label}`}
           >
-            <CoreRing size="100%" color="#00f0ff" active={!reducedMotion && isScanning} reverse={false} />
-            <CoreRing size="84%" color="#39ff14" active={!reducedMotion && status.devicesFound > 0} reverse />
-            <CoreRing size="68%" color={needsReviewCount > 0 ? "#ff7a00" : "#b829ff"} active={!reducedMotion && !isDemoMode} reverse={false} />
             <div
-              className={`absolute h-[78%] w-[78%] rounded-full border ${!reducedMotion && isScanning ? "animate-ps-spin-slow" : ""}`}
+              className="absolute inset-[4%] rounded-full"
+              style={{
+                background: `radial-gradient(circle, ${theme.glow} 0%, rgba(0,0,0,0) 62%)`,
+                filter: "blur(16px)",
+              }}
+            />
+            <Image
+              src="/images/neo_reactor.png"
+              alt=""
+              width={1600}
+              height={1200}
+              priority
+              draggable={false}
+              className={`relative z-10 h-full w-full select-none object-contain drop-shadow-[0_0_28px_rgba(0,240,255,0.32)] ${!reducedMotion && isScanning ? "animate-ps-pulse-ring" : ""}`}
+            />
+            <CoreRing size="84%" color={theme.color} active={!reducedMotion && isScanning} reverse={false} />
+            <CoreRing size="68%" color={needsReviewCount > 0 ? "#ff7a00" : "#b829ff"} active={!reducedMotion && reactorState === "error"} reverse />
+            <div
+              className={`absolute z-20 h-[60%] w-[60%] rounded-full border ${!reducedMotion && isScanning ? "animate-ps-spin-slow" : ""}`}
               style={{
                 borderColor: `${theme.color}22`,
-                background: `conic-gradient(from 0deg, transparent 0deg, ${theme.color}77 24deg, transparent 52deg, rgba(255,45,156,0.34) 102deg, transparent 130deg, rgba(57,255,20,0.32) 220deg, transparent 256deg)`,
+                background: `conic-gradient(from 0deg, transparent 0deg, ${theme.color}55 24deg, transparent 52deg, rgba(255,45,156,0.24) 102deg, transparent 130deg, rgba(57,255,20,0.22) 220deg, transparent 256deg)`,
                 filter: `drop-shadow(0 0 12px ${theme.color})`,
                 maskImage: "radial-gradient(circle, transparent 51%, #000 52%)",
               }}
             />
             <div
-              className={`absolute h-[56%] w-[56%] rounded-full ${!reducedMotion && (isScanning || reactorState === "error") ? "animate-ps-pulse-ring" : ""}`}
+              className={`absolute z-20 h-[34%] w-[34%] rounded-full ${!reducedMotion && (isScanning || reactorState === "error") ? "animate-ps-pulse-ring" : ""}`}
               style={{
-                background: `radial-gradient(circle, ${theme.color} 0%, ${theme.color}66 24%, rgba(0,0,0,0.88) 58%, transparent 72%)`,
+                background: `radial-gradient(circle, ${theme.color}55 0%, ${theme.color}22 32%, rgba(0,0,0,0.2) 64%, transparent 72%)`,
                 boxShadow: `0 0 32px ${theme.glow}, inset 0 0 22px ${theme.color}66`,
               }}
             />
             <div
-              className={`absolute h-[92%] w-[92%] rounded-full ${!reducedMotion && isScanning ? "animate-ps-spin-rev" : ""}`}
+              className={`absolute z-20 h-[92%] w-[92%] rounded-full ${!reducedMotion && isScanning ? "animate-ps-spin-rev" : ""}`}
               style={{
                 background: `conic-gradient(from 45deg, transparent 0deg, transparent 16deg, ${theme.color} 17deg, transparent 19deg, transparent 58deg, #ff2d9c 60deg, transparent 62deg, transparent 118deg, #39ff14 120deg, transparent 123deg)`,
-                opacity: 0.72,
+                opacity: 0.42,
                 maskImage: "radial-gradient(circle, transparent 62%, #000 63%)",
               }}
             />
             {[0, 1, 2, 3, 4, 5].map((index) => (
               <span
                 key={index}
-                className="absolute h-1.5 w-1.5 rounded-full"
+                className="absolute z-20 h-1.5 w-1.5 rounded-full"
                 style={{
                   background: index % 2 ? "#ff2d9c" : "#00f0ff",
                   boxShadow: `0 0 10px ${index % 2 ? "#ff2d9c" : "#00f0ff"}`,
-                  transform: `rotate(${index * 60}deg) translateY(-${128 + (index % 2) * 14}px)`,
+                  transform: `rotate(${index * 60}deg) translateY(-${150 + (index % 2) * 18}px)`,
                   opacity: reducedMotion ? 0.45 : 0.85,
                 }}
               />
             ))}
-            <div className="relative z-10 grid h-[42%] w-[42%] place-items-center rounded-full border border-white/10 bg-black/80 text-center">
+            <div className="absolute left-1/2 top-[52%] z-30 grid h-[18%] w-[28%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-cyan-200/20 bg-black/30 text-center shadow-[0_0_22px_rgba(0,240,255,0.35)] backdrop-blur-[1px]">
+              <button
+                type="button"
+                onClick={onOpenDevices}
+                className="font-mono text-4xl font-black italic leading-none text-cyan-100 drop-shadow-[0_0_12px_rgba(0,240,255,0.85)] sm:text-5xl"
+                title="Open device list"
+              >
+                {status.devicesFound}
+              </button>
+            </div>
+            <div className="absolute bottom-[14%] left-1/2 z-30 min-w-[46%] -translate-x-1/2 rounded-xl border border-cyan-300/45 bg-black/70 px-3 py-2 text-center shadow-[0_0_18px_rgba(0,240,255,0.28)] backdrop-blur-sm">
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-[0.26em]" style={{ color: theme.color }}>
+                <p className="font-mono text-[9px] uppercase tracking-[0.26em]" style={{ color: theme.color }}>
                   {theme.label}
                 </p>
-                <button
-                  type="button"
-                  onClick={onOpenDevices}
-                  className="mt-1 font-mono text-4xl font-black leading-none text-white sm:text-5xl"
-                  title="Open device list"
-                >
-                  {status.devicesFound}
-                </button>
-                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55">devices</p>
+                <p className="mt-0.5 font-mono text-[8px] uppercase tracking-[0.18em] text-cyan-100/80">
+                  Network Launcher: {adapterStatus.mode === "native-android" ? "Live" : isDemoMode ? "Demo" : "Limited"}
+                </p>
               </div>
             </div>
             {isScanning && (
-              <div className="absolute bottom-7 left-1/2 h-2 w-1/2 -translate-x-1/2 overflow-hidden rounded-full bg-white/10">
+              <div className="absolute bottom-[9%] left-1/2 z-30 h-2 w-[42%] -translate-x-1/2 overflow-hidden rounded-full bg-white/10">
                 <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-lime-300 to-pink-400 transition-all duration-300" style={{ width: `${Math.max(5, scanProgress)}%` }} />
               </div>
             )}
@@ -328,7 +348,7 @@ export function NetworkReactorCore({
           </p>
         </div>
 
-        <div className="space-y-2">
+        <div className="order-3 space-y-2">
           <PanelTitle icon={AlertTriangle} label="SCAN HEALTH / RISK" color="#ff7a00" />
           <HudGrid>
             <Metric label="Scanned" value={coverage ? String(coverage.scannedHosts) : "Not scanned"} tone={coverage ? "ok" : "muted"} />
