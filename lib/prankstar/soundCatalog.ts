@@ -1,4 +1,4 @@
-import rawCatalog from "./soundCatalog.source.json"
+import rawCatalog from "./soundCatalog.playable.generated.json"
 import playableManifest from "./playableSoundIds.generated.json"
 import type { PrankCategory, PrankSound } from "./types"
 

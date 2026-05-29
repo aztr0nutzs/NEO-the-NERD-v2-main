@@ -81,6 +81,17 @@ export function AppShell() {
   }, [playAvatarReaction, settings.reducedMotion])
 
   useEffect(() => {
+    if (!bootMounted) return
+    const timer = window.setTimeout(() => {
+      logBootEvent("boot_parent_failsafe_unmount", {
+        reason: "boot overlay did not complete within parent failsafe",
+      })
+      setBootMounted(false)
+    }, 15_500)
+    return () => window.clearTimeout(timer)
+  }, [bootMounted])
+
+  useEffect(() => {
     if (bootMounted) {
       setInteractiveReady(false)
       setMediaReady(false)

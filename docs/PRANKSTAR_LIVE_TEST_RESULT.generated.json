@@ -1,0 +1,93 @@
+{
+  "base": "http://localhost:3001",
+  "backend": {
+    "ttsHealth": {
+      "status": 200,
+      "ok": true,
+      "body": {
+        "provider": "openai",
+        "providerConfigured": true,
+        "model": "gpt-4o-mini-tts",
+        "message": "OpenAI TTS provider configured server-side."
+      }
+    },
+    "assistantHealth": {
+      "status": 200,
+      "ok": true,
+      "body": {
+        "provider": "openai",
+        "providerConfigured": true,
+        "model": "gpt-4.1-mini",
+        "supportsStreaming": false,
+        "message": "OpenAI provider configured server-side."
+      }
+    },
+    "speedLatency": {
+      "status": 200,
+      "ok": true,
+      "body": {
+        "ok": true,
+        "service": "neo-speedtest-latency",
+        "timestamp": "2026-05-29T02:19:40.644Z"
+      }
+    },
+    "speedDownload": {
+      "status": 200,
+      "ok": true,
+      "bytes": 4096
+    },
+    "speedUpload": {
+      "status": 200,
+      "ok": true,
+      "body": {
+        "ok": true,
+        "service": "neo-speedtest-upload",
+        "bytesReceived": 2048,
+        "timestamp": "2026-05-29T02:19:40.747Z"
+      }
+    }
+  },
+  "prank": {
+    "expectedCount": 44,
+    "hasDeferredCopy": false,
+    "libraryHasPlayableCount": true,
+    "libraryHasMissingCopy": false,
+    "randomSafeVisible": true,
+    "messagesScreenLoaded": true,
+    "trapHasArm": true,
+    "chaosHasGenerate": true
+  },
+  "reactor": {
+    "src": "/images/neo_reactor.png",
+    "currentSrc": "http://localhost:3001/images/neo_reactor.png",
+    "naturalWidth": 1664,
+    "naturalHeight": 1635,
+    "renderedWidth": 340,
+    "renderedHeight": 340
+  },
+  "networkControls": {
+    "quick": true,
+    "balanced": true,
+    "deep": true,
+    "devices": true,
+    "map": true,
+    "diagnostics": true,
+    "filters": true,
+    "scanButton": true
+  },
+  "assetResults": {
+    "checked": 44,
+    "decoded": 44,
+    "failures": []
+  },
+  "consoleFindings": [
+    {
+      "type": "info",
+      "text": "[NeoNetworkBridge] plugin_unavailable_web_mode {platform: web}"
+    },
+    {
+      "type": "info",
+      "text": "[NeoNetworkBridge] plugin_unavailable_web_mode {platform: web}"
+    }
+  ]
+}

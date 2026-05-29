@@ -19,7 +19,6 @@ import { useMemo } from "react"
 import { useApp } from "@/lib/store"
 import { NeonPanel } from "../neon-panel"
 import {
-  PRANKSTAR_CATALOG_DIAGNOSTICS,
   PRANKSTAR_SOUNDS,
   getFeaturedPreviewSounds,
 } from "@/lib/prankstar/soundCatalog"
@@ -32,7 +31,6 @@ export function PrankScreen() {
   const audio = usePrankAudio()
   const featured = useMemo(() => getFeaturedPreviewSounds(8), [])
   const totalPlayable = PRANKSTAR_SOUNDS.length
-  const totalDeferred = PRANKSTAR_CATALOG_DIAGNOSTICS.totalDeferred
 
   const onPlay = (sound: PrankSound) => {
     if (audio.currentSoundId === sound.id && audio.status === "playing") {
@@ -70,24 +68,17 @@ export function PrankScreen() {
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           <Stat label="PLAYABLE" value={String(totalPlayable)} accent="#ff2d9c" />
-          <Stat label="CATALOG" value={String(PRANKSTAR_CATALOG_DIAGNOSTICS.totalNormalized)} accent="#ff7a00" />
           <Stat
             label="PREVIEW"
             value={String(featured.length)}
             accent="#00f0ff"
           />
+          <Stat
+            label="MODULES"
+            value="04"
+            accent="#39ff14"
+          />
         </div>
-        {totalDeferred > 0 && (
-          <div className="mt-3 rounded-lg border border-[#ff7a00]/45 bg-[#ff7a00]/10 p-2.5">
-            <p className="ps-mono text-[9px] tracking-[0.22em] ps-text-orange">
-              AUDIO ASSET GAP · {totalDeferred} SOURCE FILES MISSING
-            </p>
-            <p className="mt-1 text-xs leading-snug text-white/70">
-              The protocol is only showing sounds that have real audio on disk.
-              Missing catalog entries are deferred instead of using fake or silent placeholders.
-            </p>
-          </div>
-        )}
       </NeonPanel>
 
       <div className="grid grid-cols-2 gap-2">
@@ -223,18 +214,6 @@ export function PrankScreen() {
           <ChevronRight className="h-4 w-4" />
         </button>
       </NeonPanel>
-
-      {PRANKSTAR_CATALOG_DIAGNOSTICS.duplicateIds.length > 0 && (
-        <NeonPanel accent="orange" glow="soft" className="p-3">
-          <p className="ps-mono text-[10px] tracking-[0.25em] ps-text-orange">
-            CATALOG_WARNINGS
-          </p>
-          <p className="mt-1 ps-mono text-[10px] text-white/70">
-            {PRANKSTAR_CATALOG_DIAGNOSTICS.duplicateIds.length} duplicate IDs
-            dropped during import.
-          </p>
-        </NeonPanel>
-      )}
 
       <NeonPanel accent="purple" glow="soft" className="p-3">
         <div className="flex items-center gap-2 ps-mono text-[10px] tracking-[0.25em] text-white/70">

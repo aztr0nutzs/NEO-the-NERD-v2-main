@@ -1,0 +1,838 @@
+[
+  {
+    "id": "sounds_voice_female_1_ogg",
+    "name": "1",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/1.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_10_ogg",
+    "name": "10",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/10.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_2_ogg",
+    "name": "2",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/2.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_3_ogg",
+    "name": "3",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/3.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_4_ogg",
+    "name": "4",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/4.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_5_ogg",
+    "name": "5",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/5.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_6_ogg",
+    "name": "6",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/6.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_7_ogg",
+    "name": "7",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/7.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_8_ogg",
+    "name": "8",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/8.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_9_ogg",
+    "name": "9",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/9.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_congratulations_ogg",
+    "name": "Congratulations",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/congratulations.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_correct_ogg",
+    "name": "Correct",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/correct.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_final_round_ogg",
+    "name": "Final Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/final_round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_game_over_ogg",
+    "name": "Game Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/game_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_go_ogg",
+    "name": "Go",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/go.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_hurry_up_ogg",
+    "name": "Hurry Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/hurry_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_its_a_tie_ogg",
+    "name": "Its A Tie",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/its_a_tie.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_level_ogg",
+    "name": "Level",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/level.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_level_up_ogg",
+    "name": "Level Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/level_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_mission_completed_ogg",
+    "name": "Mission Completed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/mission_completed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_mission_failed_ogg",
+    "name": "Mission Failed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/mission_failed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_new_highscore_ogg",
+    "name": "New Highscore",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/new_highscore.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_objective_achieved_ogg",
+    "name": "Objective Achieved",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/objective_achieved.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_power_up_ogg",
+    "name": "Power Up",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/power_up.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_ready_ogg",
+    "name": "Ready",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/ready.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_round_ogg",
+    "name": "Round",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/round.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_set_ogg",
+    "name": "Set",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/set.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_time_over_ogg",
+    "name": "Time Over",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/time_over.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_call_for_backup_ogg",
+    "name": "War Call For Backup",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_call_for_backup.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_cover_me_ogg",
+    "name": "War Cover Me",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_cover_me.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_fire_in_the_hole_ogg",
+    "name": "War Fire In The Hole",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_fire_in_the_hole.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_get_down_ogg",
+    "name": "War Get Down",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_get_down.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_go_go_go_ogg",
+    "name": "War Go Go Go",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_go_go_go.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_look_out_ogg",
+    "name": "War Look Out",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_look_out.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_medic_ogg",
+    "name": "War Medic",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_medic.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_reloading_ogg",
+    "name": "War Reloading",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_reloading.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_rpg_ogg",
+    "name": "War Rpg",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_rpg.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_sniper_ogg",
+    "name": "War Sniper",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_sniper.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_target_destroyed_ogg",
+    "name": "War Target Destroyed",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_target_destroyed.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_target_engaged_ogg",
+    "name": "War Target Engaged",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_target_engaged.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_war_watch_my_back_ogg",
+    "name": "War Watch My Back",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/war_watch_my_back.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_male_wrong_ogg",
+    "name": "Wrong",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Male/wrong.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_you_lose_ogg",
+    "name": "You Lose",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/you_lose.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  },
+  {
+    "id": "sounds_voice_female_you_win_ogg",
+    "name": "You Win",
+    "category": "VOICE",
+    "packId": "voice_pack",
+    "assetPath": "sounds/voice/Female/you_win.ogg",
+    "durationMs": 0,
+    "tags": [
+      "voice",
+      "voices"
+    ],
+    "loopable": false,
+    "intensityLevel": 2,
+    "isSafeForRandomMode": true,
+    "description": "Voice prank sound.",
+    "recommendedUse": "Prank your friends",
+    "prankStyle": "funny",
+    "previewLabel": "Tap to play"
+  }
+]

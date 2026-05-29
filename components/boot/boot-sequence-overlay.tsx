@@ -30,6 +30,7 @@ export function BootSequenceOverlay({
   const completedRef = useRef(false)
   const failsafeRef = useRef<number | null>(null)
   const stallRef = useRef<number | null>(null)
+  const exitFallbackRef = useRef<number | null>(null)
   const lastTimeRef = useRef(0)
   const [visible, setVisible] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -38,6 +39,20 @@ export function BootSequenceOverlay({
   // the parent uses this signal to unmount the entire overlay, including the
   // <video> element, so no detached decoder lingers in memory.
   const completionStatusRef = useRef<"none" | "success" | "fail">("none")
+
+  const handleExitComplete = useCallback(() => {
+    if (exitFallbackRef.current !== null) {
+      window.clearTimeout(exitFallbackRef.current)
+      exitFallbackRef.current = null
+    }
+    if (completionStatusRef.current !== "none") {
+      logBootEvent("boot_overlay_dismissed", {
+        status: completionStatusRef.current,
+      })
+      onBootComplete?.()
+    }
+    completionStatusRef.current = "none"
+  }, [onBootComplete])
 
   const finishBoot = useCallback((completedSuccessfully: boolean, reason = "complete") => {
     if (completedRef.current) return
@@ -56,6 +71,10 @@ export function BootSequenceOverlay({
       window.clearInterval(stallRef.current)
       stallRef.current = null
     }
+    if (exitFallbackRef.current !== null) {
+      window.clearTimeout(exitFallbackRef.current)
+      exitFallbackRef.current = null
+    }
     const video = videoRef.current
     if (video) {
       // Detach source proactively so the decoder buffers release before
@@ -65,17 +84,10 @@ export function BootSequenceOverlay({
       video.load()
     }
     setVisible(false)
-  }, [])
-
-  const handleExitComplete = useCallback(() => {
-    if (completionStatusRef.current !== "none") {
-      logBootEvent("boot_overlay_dismissed", {
-        status: completionStatusRef.current,
-      })
-      onBootComplete?.()
-    }
-    completionStatusRef.current = "none"
-  }, [onBootComplete])
+    exitFallbackRef.current = window.setTimeout(() => {
+      handleExitComplete()
+    }, 700)
+  }, [handleExitComplete])
 
   useEffect(() => {
     logBootEvent("BootSeq mounted", { reducedMotion })
@@ -90,6 +102,9 @@ export function BootSequenceOverlay({
       document.removeEventListener("visibilitychange", updateVisibility)
       if (failsafeRef.current !== null) {
         window.clearTimeout(failsafeRef.current)
+      }
+      if (exitFallbackRef.current !== null) {
+        window.clearTimeout(exitFallbackRef.current)
       }
     }
   }, [finishBoot, reducedMotion])
