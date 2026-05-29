@@ -32,6 +32,7 @@ import {
   runStreamingSpeedTest,
   type SpeedTestRunStatus,
 } from "@/lib/network/speedTestRunner"
+import { getBackendConfig, resolveBackendUrl } from "@/lib/runtime/backend-config"
 import {
   inferUploadState,
   isFullSpeedTest,
@@ -95,6 +96,12 @@ interface TelemetryLine {
   color: TelemetryColor
 }
 
+interface BackendSpeedProbeConfig {
+  config: SpeedTestConfig
+  uploadUrl: string
+  reason: string
+}
+
 const STATUS_COLOR: Record<SpeedTestRunStatus, TelemetryColor> = {
   idle: "pink",
   preparing: "cyan",
@@ -141,6 +148,8 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
   const [uploadUrlInput, setUploadUrlInput] = useState<string>("")
   const [uploadUrlSaved, setUploadUrlSaved] = useState<string | null>(null)
   const [uploadConfigOpen, setUploadConfigOpen] = useState(false)
+  const [backendSpeedProbe, setBackendSpeedProbe] = useState<BackendSpeedProbeConfig | null>(null)
+  const [backendSpeedProbeError, setBackendSpeedProbeError] = useState<string | null>(null)
   // Latest completed result — drives the verdict banner and delta badges.
   const [lastResult, setLastResult] = useState<SpeedTestResult | null>(null)
 
@@ -183,11 +192,62 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    async function resolveSpeedBackend() {
+      try {
+        const backend = await getBackendConfig()
+        const latencyUrl = resolveBackendUrl(backend, "/api/speedtest/latency")
+        const downloadUrl = resolveBackendUrl(
+          backend,
+          `/api/speedtest/download?bytes=${safeMode ? 6_000_000 : 12_000_000}`,
+        )
+        const uploadUrl = resolveBackendUrl(backend, "/api/speedtest/upload")
+        if (!latencyUrl || !downloadUrl || !uploadUrl) {
+          if (!cancelled) {
+            setBackendSpeedProbe(null)
+            setBackendSpeedProbeError(backend.reason)
+          }
+          return
+        }
+        if (!cancelled) {
+          setBackendSpeedProbe({
+            uploadUrl,
+            reason: backend.reason,
+            config: {
+              mode: backend.mode === "remote" ? "custom-endpoint" : "internet",
+              provider: backend.mode === "remote" ? "NEO backend speed probe" : "NEO same-origin speed probe",
+              latencyUrl,
+              downloadUrl,
+              uploadUrl,
+              timeoutMs: 10_000,
+              downloadDurationMs: safeMode ? 3500 : 5500,
+              uploadBytes: safeMode ? 256 * 1024 : 512 * 1024,
+              latencySampleCount: 5,
+              environmentNotes: backend.reason,
+            },
+          })
+          setBackendSpeedProbeError(null)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setBackendSpeedProbe(null)
+          setBackendSpeedProbeError(error instanceof Error ? error.message : "Speedtest backend configuration could not be resolved.")
+        }
+      }
+    }
+
+    void resolveSpeedBackend()
+    return () => {
+      cancelled = true
+    }
+  }, [safeMode])
+
   // True only when an upload endpoint is wired in either via prop override
   // or via the user-configured saved URL. Drives all upload-related copy.
   const uploadConfigured = useMemo(
-    () => Boolean(configOverride?.uploadUrl ?? uploadUrlSaved),
-    [configOverride?.uploadUrl, uploadUrlSaved],
+    () => Boolean(configOverride?.uploadUrl ?? uploadUrlSaved ?? backendSpeedProbe?.uploadUrl),
+    [backendSpeedProbe?.uploadUrl, configOverride?.uploadUrl, uploadUrlSaved],
   )
 
   // Per-phase progress is what the arc around the gauge consumes. We derive
@@ -363,8 +423,9 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     const ctrl = new AbortController()
     abortRef.current = ctrl
 
-    const baseConfig = defaultCloudflarePreset(safeMode)
-    const effectiveUploadUrl = configOverride?.uploadUrl ?? uploadUrlSaved ?? undefined
+    const baseConfig = backendSpeedProbe?.config ?? defaultCloudflarePreset(safeMode)
+    const effectiveUploadUrl =
+      configOverride?.uploadUrl ?? uploadUrlSaved ?? backendSpeedProbe?.uploadUrl ?? undefined
     const config: SpeedTestConfig = {
       ...baseConfig,
       ...configOverride,
@@ -388,6 +449,14 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     setProbeStatus("RUNNING")
     setProbeColor("green")
     setStatusLabel("PREPARING")
+    pushLog(
+      backendSpeedProbe?.uploadUrl && !uploadUrlSaved && !configOverride?.uploadUrl
+        ? "UL_ENDPOINT_BACKEND_CONFIGURED"
+        : config.uploadUrl
+          ? "UL_ENDPOINT_CUSTOM_CONFIGURED"
+          : "UL_ENDPOINT_NOT_CONFIGURED",
+      config.uploadUrl ? "green" : "yellow",
+    )
     downloadStartedAtRef.current = 0
     downloadDurationRef.current = config.downloadDurationMs
 
@@ -473,6 +542,7 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
     recordSpeedTestResult(result)
   }, [
     configOverride,
+    backendSpeedProbe,
     pushLog,
     recordSpeedTestResult,
     recordSpeedTestStarted,
@@ -927,6 +997,8 @@ export function SpeedTestScreen({ configOverride }: SpeedTestScreenProps = {}) {
             When unset we say so explicitly; when set we show the host
             and let the user clear or change it. */}
         <UploadEndpointConfig
+          backendUploadUrl={backendSpeedProbe?.uploadUrl ?? null}
+          backendReason={backendSpeedProbe?.reason ?? backendSpeedProbeError}
           uploadUrlSaved={uploadUrlSaved}
           uploadUrlInput={uploadUrlInput}
           onChangeInput={setUploadUrlInput}
@@ -1927,6 +1999,8 @@ function computeVerdict(result: SpeedTestResult): {
    persisted to localStorage; the runner picks it up on the next run.
 ===================================================================== */
 function UploadEndpointConfig({
+  backendUploadUrl,
+  backendReason,
   uploadUrlSaved,
   uploadUrlInput,
   onChangeInput,
@@ -1935,6 +2009,8 @@ function UploadEndpointConfig({
   onSave,
   onClear,
 }: {
+  backendUploadUrl: string | null
+  backendReason: string | null
   uploadUrlSaved: string | null
   uploadUrlInput: string
   onChangeInput: (value: string) => void
@@ -1943,7 +2019,9 @@ function UploadEndpointConfig({
   onSave: () => void
   onClear: () => void
 }) {
-  const configured = uploadUrlSaved !== null
+  const configured = uploadUrlSaved !== null || backendUploadUrl !== null
+  const configuredUrl = uploadUrlSaved ?? backendUploadUrl
+  const usesBackend = uploadUrlSaved === null && backendUploadUrl !== null
   const accentColor = configured ? NEO.green : NEO.yellow
   return (
     <div
@@ -1992,7 +2070,7 @@ function UploadEndpointConfig({
           className="hud-mono text-[9px] font-black opacity-90"
           style={{ color: NEO.cyan, letterSpacing: "0.12em" }}
         >
-          {open ? "CLOSE" : configured ? "EDIT" : "UNLOCK"}
+          {open ? "CLOSE" : uploadUrlSaved ? "EDIT" : "OVERRIDE"}
         </button>
       </div>
       <p
@@ -2001,17 +2079,27 @@ function UploadEndpointConfig({
       >
         {configured ? (
           <>
-            <span style={{ color: NEO.green }}>CONFIGURED · </span>
-            {safeUrlHost(uploadUrlSaved!)}
+            <span style={{ color: NEO.green }}>
+              {usesBackend ? "BACKEND CONFIGURED · " : "CONFIGURED · "}
+            </span>
+            {safeUrlHost(configuredUrl!)}
           </>
         ) : (
           <>
             <span style={{ color: NEO.yellow }}>UL_ENDPOINT_NOT_CONFIGURED · </span>
-            Upload reads NOT CONFIGURED until a POST endpoint is wired in. Download,
-            latency, and jitter are unaffected — they remain fully measured.
+            Upload reads NOT CONFIGURED until a POST endpoint is wired in. Android APKs need
+            NEXT_PUBLIC_NEO_BACKEND_BASE_URL pointing at a running backend.
           </>
         )}
       </p>
+      {backendReason && (
+        <p
+          className="hud-mono mt-1 text-[8px] font-bold opacity-70"
+          style={{ color: "rgba(255,255,255,0.68)", letterSpacing: "0.08em" }}
+        >
+          BACKEND: {backendReason}
+        </p>
+      )}
       {open && (
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
@@ -2064,7 +2152,7 @@ function UploadEndpointConfig({
           </div>
         </div>
       )}
-      {uploadConfiguredHasUrlAndIsOpen(uploadUrlSaved, open) && (
+      {uploadConfiguredHasUrlAndIsOpen(configuredUrl, open) && (
         <p
           className="hud-mono mt-2 text-[9px] font-bold opacity-75"
           style={{ color: "rgba(255,255,255,0.7)", letterSpacing: "0.08em" }}

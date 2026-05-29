@@ -83,6 +83,14 @@ Copy `.env.example` to `.env.local` and populate any keys you need (TTS provider
 If you build an APK without `NEXT_PUBLIC_NEO_BACKEND_BASE_URL`, the app cannot call server `/api/tts` routes from the packaged WebView and will run Android device TTS fallback mode (profiles may sound identical).
 After changing any `NEXT_PUBLIC_*` value, rebuild the web bundle and resync Android (`npm run build && npx cap sync android`) so the APK contains the new URL.
 
+#### Speed Test backend for Android APKs
+The Speed Test screen uses real transferred bytes. This repo now exposes:
+- `GET /api/speedtest/latency`
+- `GET /api/speedtest/download?bytes=6000000`
+- `POST /api/speedtest/upload`
+
+In a hosted Next.js web session those routes work same-origin. In an Android APK, set `NEXT_PUBLIC_NEO_BACKEND_BASE_URL` to the hosted backend before building, then rebuild and sync Android. If that URL is missing or unreachable, upload remains explicitly `NOT CONFIGURED`; the app must not fabricate upload Mbps.
+
 #### Provider voice diagnostics helper
 Use this to verify provider-backed voice IDs differ:
 ```bash

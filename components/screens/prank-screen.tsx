@@ -70,21 +70,23 @@ export function PrankScreen() {
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2">
           <Stat label="PLAYABLE" value={String(totalPlayable)} accent="#ff2d9c" />
+          <Stat label="CATALOG" value={String(PRANKSTAR_CATALOG_DIAGNOSTICS.totalNormalized)} accent="#ff7a00" />
           <Stat
             label="PREVIEW"
             value={String(featured.length)}
             accent="#00f0ff"
           />
-          <Stat
-            label="MODULES"
-            value="04"
-            accent="#39ff14"
-          />
         </div>
         {totalDeferred > 0 && (
-          <p className="mt-2 ps-mono text-[9px] tracking-[0.22em] text-white/40">
-            +{totalDeferred} CATALOG ENTRIES DEFERRED · ASSETS PENDING
-          </p>
+          <div className="mt-3 rounded-lg border border-[#ff7a00]/45 bg-[#ff7a00]/10 p-2.5">
+            <p className="ps-mono text-[9px] tracking-[0.22em] ps-text-orange">
+              AUDIO ASSET GAP · {totalDeferred} SOURCE FILES MISSING
+            </p>
+            <p className="mt-1 text-xs leading-snug text-white/70">
+              The protocol is only showing sounds that have real audio on disk.
+              Missing catalog entries are deferred instead of using fake or silent placeholders.
+            </p>
+          </div>
         )}
       </NeonPanel>
 

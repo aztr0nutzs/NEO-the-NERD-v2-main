@@ -28,9 +28,24 @@ const neoNetwork = registerPlugin<NeoNetworkPlugin>("NeoNetwork");
 const DEBUG_NATIVE_NETWORK = process.env.NEXT_PUBLIC_NEO_NETWORK_DIAGNOSTICS !== "false";
 let networkPermissionsRequested = false;
 
+const NATIVE_SCAN_BRIDGE_TIMEOUT_MS: Record<NativeScanOptions["scanMode"], number> = {
+  quick: 45_000,
+  balanced: 95_000,
+  deep: 195_000,
+};
+
 function logNativeDiagnostic(event: string, details?: Record<string, unknown>): void {
   if (!DEBUG_NATIVE_NETWORK) return;
   console.info(`[NeoNetworkBridge] ${event}`, details ?? {});
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), timeoutMs);
+    promise
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timer));
+  });
 }
 
 export function isAndroidNativeNetworkAvailable(): boolean {
@@ -127,7 +142,12 @@ export async function scanLocalSubnet(options: NativeScanOptions): Promise<Nativ
   }
   logNativeDiagnostic("scan_started", { scanMode: options.scanMode });
   try {
-    const result = await neoNetwork.scanLocalSubnet(options);
+    const timeoutMs = NATIVE_SCAN_BRIDGE_TIMEOUT_MS[options.scanMode] ?? NATIVE_SCAN_BRIDGE_TIMEOUT_MS.balanced;
+    const result = await withTimeout(
+      neoNetwork.scanLocalSubnet(options),
+      timeoutMs,
+      `Native ${options.scanMode} scan did not return within ${Math.round(timeoutMs / 1000)}s. Check Wi-Fi/LAN state, Android permissions, VPN/hotspot mode, and native plugin logs.`,
+    );
     logNativeDiagnostic("scan_completed", {
       scanMode: result.scanMode,
       scannedHosts: result.scannedHosts,

@@ -228,6 +228,53 @@ function getReadinessState({
   };
 }
 
+function getLocalScanBlockReason({
+  adapterStatus,
+  settings,
+  networkStatus,
+  localContext,
+  permissionStatus,
+  permissionDenied,
+}: {
+  adapterStatus: NetworkAdapterStatus | null;
+  settings: NetworkSettings | null;
+  networkStatus: NetworkStatus | null;
+  localContext: NativeLocalNetworkContext | null;
+  permissionStatus: NativeNetworkPermissionStatus | null;
+  permissionDenied: boolean;
+}): string | null {
+  if (settings?.demoMode || adapterStatus?.isDemo) return null;
+  if (adapterStatus?.mode === "native-unavailable") {
+    return adapterStatus.message || "Native network scanner is unavailable in this runtime.";
+  }
+  if (permissionDenied || permissionStatus?.location === "denied" || permissionStatus?.wifi === "denied") {
+    return "Android network scan blocked by permission state. Grant Location and Nearby Wi-Fi permission, then retry.";
+  }
+
+  const contextLocalIp = localContext?.localIp ?? null;
+  const contextGateway = localContext?.gatewayIp ?? null;
+  const prefixLength = localContext?.prefixLength ?? null;
+  const statusLocalIp = networkStatus?.localIp ?? "Unavailable";
+  const statusGateway = networkStatus?.gatewayIp ?? "Unavailable";
+  const localIp = contextLocalIp ?? (statusLocalIp !== "Unavailable" ? statusLocalIp : null);
+  const gatewayIp = contextGateway ?? (statusGateway !== "Unavailable" ? statusGateway : null);
+
+  if (!localIp || localIp === "0.0.0.0") {
+    return "Android network scan blocked because this device has no usable local LAN IP. Connect to Wi-Fi and refresh diagnostics.";
+  }
+  if (!gatewayIp || gatewayIp === "0.0.0.0") {
+    return `Android network scan blocked because no LAN gateway is visible for ${localIp}. Disable VPN/hotspot/cellular-only routing or reconnect to Wi-Fi.`;
+  }
+  if (prefixLength !== null && (prefixLength < 16 || prefixLength > 30)) {
+    return `Android network scan blocked because the current subnet is /${prefixLength}. Native discovery only scans normal LAN subnets from /16 through /30. Local IP: ${localIp}; gateway: ${gatewayIp}.`;
+  }
+  if (localContext?.adapterStatus === "unavailable") {
+    return "Android network scan blocked because the native adapter reports the local network interface is unavailable.";
+  }
+
+  return null;
+}
+
 function StatusCell({
   icon: Icon,
   label,
@@ -1006,9 +1053,58 @@ export function NetworkDiscoveryFeature() {
 
   // Handlers
   const handleStartScan = useCallback(async () => {
+    const blockReason = getLocalScanBlockReason({
+      adapterStatus,
+      settings,
+      networkStatus,
+      localContext: diagnosticLocalContext,
+      permissionStatus: diagnosticPermissionStatus,
+      permissionDenied: networkPermissionDenied,
+    });
+    if (blockReason) {
+      const scanId = `scan-${Date.now()}`;
+      currentScanIdRef.current = scanId;
+      setNetworkPermissionDenied(isNetworkPermissionDeniedMessage(blockReason));
+      setNetworkStatus((current) => current ? { ...current, scanState: "failed" } : current);
+      setLastScanCompletion({
+        status: "failed",
+        scanMode: selectedMode,
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        durationMs: 0,
+        coverage: null,
+        failureReason: blockReason,
+        generation: -1,
+      });
+      const failedEvent = createScanFailedEvent(scanId, selectedMode, blockReason);
+      appendEvents([failedEvent]);
+      appendAlerts([
+        {
+          id: `alert-${failedEvent.id}`,
+          eventId: failedEvent.id,
+          timestamp: failedEvent.timestamp,
+          title: "Network scan blocked",
+          message: blockReason,
+          severity: "high",
+          status: "unread",
+        },
+      ]).catch(() => undefined);
+      setNetworkMonitorState((current) => ({
+        ...current,
+        schedulerStatus: "error",
+        lastIssue: blockReason,
+      }));
+      setRobotMessage(blockReason);
+      setTimeout(() => setRobotMessage(null), 6500);
+      playAvatarReaction("angry");
+      return;
+    }
+
     try {
       setNetworkPermissionDenied(false);
       playAvatarReaction("thinking");
+      setRobotMessage(`Starting ${selectedMode} LAN scan...`);
+      setTimeout(() => setRobotMessage(null), 2500);
       const scanId = `scan-${Date.now()}`;
       currentScanIdRef.current = scanId;
       // Clear any prior completion record so the panel reflects the new scan's lifecycle.
@@ -1082,7 +1178,19 @@ export function NetworkDiscoveryFeature() {
       });
       playAvatarReaction("angry");
     }
-  }, [appendAlerts, appendEvents, playAvatarReaction, selectedMode, setNetworkMonitorState]);
+  }, [
+    adapterStatus,
+    appendAlerts,
+    appendEvents,
+    diagnosticLocalContext,
+    diagnosticPermissionStatus,
+    networkPermissionDenied,
+    networkStatus,
+    playAvatarReaction,
+    selectedMode,
+    setNetworkMonitorState,
+    settings,
+  ]);
 
   const handleRequestNetworkPermissions = useCallback(async () => {
     setRequestingNetworkPermissions(true);
